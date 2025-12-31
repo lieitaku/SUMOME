@@ -1,0 +1,32 @@
+/* 容器样式：将分页器定位到下方 */
+.customPagination {
+  position: relative !important;
+  bottom: 0 !important;
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  z-index: 20;
+}
+
+/* 覆盖 Swiper 第三方样式 
+   使用 :global 语法，告诉 Next.js 不要编译括号里的类名，
+   这样才能匹配到 Swiper 生成的 DOM 结构。
+*/
+.customPagination :global(.swiper-pagination-bullet) {
+  width: 8px;
+  height: 8px;
+  background-color: #d1d5db;
+  opacity: 1;
+  border-radius: 9999px;
+  margin: 0 !important;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+}
+
+.customPagination :global(.swiper-pagination-bullet-active) {
+  width: 40px !important;
+  background-color: #c39b4f !important;
+  border-radius: 9999px;
+}

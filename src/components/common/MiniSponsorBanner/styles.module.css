@@ -1,0 +1,48 @@
+/* src/components/common/MiniSponsorBanner/styles.module.css */
+
+/* 1. 摇摆动画 (banner-sway) */
+@keyframes bannerSway {
+  0% {
+    transform: rotate(1deg);
+  }
+  100% {
+    transform: rotate(-1deg);
+  }
+}
+
+.swayAnimation {
+  animation: bannerSway 3s ease-in-out infinite alternate;
+}
+
+/* 2. 滚动动画 (scroll-mini) */
+@keyframes scrollMini {
+  0% {
+    transform: translateX(-20%);
+  } /* 起始位置根据你的需求调整 */
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.scrollAnimation {
+  animation: scrollMini 40s linear infinite;
+  width: max-content; /* 确保宽度足够，防止换行 */
+}
+
+/* 3. 两端淡出遮罩 (mask-image-gradient) */
+.maskGradient {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}

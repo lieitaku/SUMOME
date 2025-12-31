@@ -1,0 +1,161 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   1. 主题配置 (Design System)
+   ========================================================================== */
+@theme {
+  /* --- 🎨 颜色系统 --- */
+  --color-sumo-dark: #2a1f32;
+  --color-sumo-brand: #5d3f6a;
+  --color-sumo-gold: #c39b4f;
+  --color-sumo-red: #a82429;
+  --color-sumo-bg: #fcfaf7;
+  --color-sumo-text: #1b1c24;
+
+  /* --- 🔠 字体系统 --- */
+  --font-serif: "Noto Serif JP", "Cormorant Garamond", serif;
+  --font-sans: "Zen Kaku Gothic New", "Noto Sans JP", "Lato", sans-serif;
+
+  /* --- 🎬 动画配置 --- */
+  --animate-slow-scroll: slow-scroll 100s linear infinite;
+  --animate-marquee: marquee 40s linear infinite;
+}
+
+/* ==========================================================================
+   2. 关键帧动画 (Global Keyframes)
+   ========================================================================== */
+@keyframes slow-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* ==========================================================================
+   3. 基础样式重置 (Base Layer)
+   ========================================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-sumo-bg);
+    color: var(--color-sumo-text);
+    font-family: var(--font-sans);
+  }
+
+  /* --- 全局选中文本样式 --- */
+  ::selection {
+    @apply bg-sumo-red text-white;
+  }
+  ::-moz-selection {
+    @apply bg-sumo-red text-white;
+  }
+
+  /* --- 全局滚动条美化 --- */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-sumo-dark/20;
+    border-radius: 4px;
+    transition: all 0.3s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-sumo-red;
+  }
+
+  /* 隐藏滚动条工具 */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* ==========================================================================
+   4. 组件类 (Components Layer)
+   ========================================================================== */
+@layer components {
+  /* --- 导航栏链接 --- */
+  .nav-link {
+    @apply relative inline-block py-2.5;
+  }
+  .nav-link::after {
+    content: "";
+    @apply absolute w-0 h-[1px] bottom-[5px] left-1/2 bg-sumo-red transition-all duration-300 -translate-x-1/2 ease-out;
+  }
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+}
+
+/* ==========================================================================
+   5. 工具类 (Utilities Layer)
+   ========================================================================== */
+@layer utilities {
+  /* 竖排文字 */
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+  }
+
+  /* Ken Burns Effect (Hero 背景) */
+  .ken-burns-image {
+    @apply absolute inset-0 w-full h-full object-cover opacity-0 scale-100 transition-all;
+    transition-duration: 2500ms;
+  }
+  .ken-burns-image.active {
+    @apply opacity-100 scale-110;
+    transition:
+      opacity 2500ms ease-in-out,
+      transform 20000ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Reveal Up Animation (通用上浮动画) */
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(40px);
+    /* 合并了 transition 属性 */
+    transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal-up.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 动画延迟工具 */
+  .delay-100 {
+    transition-delay: 100ms;
+  }
+  .delay-200 {
+    transition-delay: 200ms;
+  }
+  .delay-300 {
+    transition-delay: 300ms;
+  }
+  .delay-400 {
+    transition-delay: 400ms;
+  }
+  .delay-500 {
+    transition-delay: 500ms;
+  }
+}
