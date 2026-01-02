@@ -6,7 +6,7 @@ export const kanagawa: PrefectureInfo = {
   introTitle: "神奈川県の相撲事情",
   introText:
     "第33代横綱・武蔵山の出身地であり、横浜などの港町文化と相撲が融合した歴史があります。近年では湘南乃海など、恵まれた体格を生かした力士が登場しています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-kanagawa.jpg",
   rikishiList: [
     {
       name: "高原",

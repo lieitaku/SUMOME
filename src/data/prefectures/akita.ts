@@ -6,7 +6,7 @@ export const akita: PrefectureInfo = {
   introTitle: "秋田県の相撲事情",
   introText:
     "かつて佐竹藩が相撲を奨励した歴史があり、元大関・清國などの名力士を生みました。県南地方を中心に相撲場が多く残されており、雪深い冬の鍛錬が粘り強い力士を育てます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-akita.jpg",
   rikishiList: [
     {
       name: "風凰花",

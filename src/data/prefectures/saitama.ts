@@ -6,7 +6,7 @@ export const saitama: PrefectureInfo = {
   introTitle: "埼玉県の相撲事情",
   introText:
     "近年の大相撲を支える「新・相撲王国」です。名門・埼玉栄高校相撲部があり、大関・貴景勝や琴櫻（現大関）など、現在の角界を牽引するトップ力士の多くがこの地で青春時代を過ごし、技を磨きました。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-saitama.jpg",
   rikishiList: [
     {
       name: "魁玉聖",

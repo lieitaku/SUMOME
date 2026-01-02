@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import { ArrowRight, Calendar } from "lucide-react";
+import Image from "next/image"; // 引入 Next.js 图像优化
 
-// 定义 props 类型，让代码更健壮
+// 定义 props 类型
 type ActivityCardProps = {
   img: string;
   title: string;
@@ -13,11 +16,13 @@ const ActivityCard = ({ img, title, location, date }: ActivityCardProps) => {
   return (
     <article className="group cursor-pointer flex flex-col h-full bg-white border border-gray-100 rounded-sm overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)]">
       {/* 图片区域 */}
-      <div className="overflow-hidden relative aspect-[4/5]">
-        <img
+      <div className="overflow-hidden relative aspect-[4/5] bg-gray-100">
+        <Image
           src={img}
           alt={title}
-          className="w-full h-full object-cover transition-all duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] transform group-hover:scale-110"
+          fill
+          className="object-cover transition-all duration-1000 ease-[cubic-bezier(0.25,1,0.5,1)] transform group-hover:scale-110"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // 响应式尺寸建议
         />
         <div className="absolute top-0 left-0 bg-sumo-gold text-white text-[10px] font-bold px-3 py-2 tracking-widest z-10 shadow-sm">
           {location}

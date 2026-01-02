@@ -6,7 +6,7 @@ export const nara: PrefectureInfo = {
   introTitle: "奈良県の相撲事情",
   introText:
     "相撲の開祖「野見宿禰（のみのすくね）」と「当麻蹶速（たいまのけはや）」が力比べをしたとされる「相撲発祥の地」です。近年、徳勝龍が幕尻優勝を果たし、神話の地の底力を見せつけました。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-nara.jpg",
   rikishiList: [
     {
       name: "是安",

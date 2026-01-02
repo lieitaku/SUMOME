@@ -6,7 +6,7 @@ export const miyagi: PrefectureInfo = {
   introTitle: "宮城県の相撲事情",
   introText:
     "江戸時代に「実力日本一」と謳われた第4代横綱・谷風梶之助の出身地です。仙台には谷風の像があり、古くから相撲熱の高い土地柄。現在も郷土力士への応援は非常に熱烈です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-miyagi.jpg",
   rikishiList: [
     {
       name: "佐藤",

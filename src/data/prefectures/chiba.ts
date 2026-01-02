@@ -6,7 +6,7 @@ export const chiba: PrefectureInfo = {
   introTitle: "千葉県の相撲事情",
   introText:
     "名門・佐渡ヶ嶽部屋が松戸市に拠点を構え、地域と相撲の結びつきが非常に強い県です。先代琴櫻（第53代横綱）の教えを受けた力士たちが、地域住民との交流を通じて強く育っています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-chiba.jpg",
   rikishiList: [
     {
       name: "兎富士",

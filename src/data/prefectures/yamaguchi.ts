@@ -6,7 +6,7 @@ export const yamaguchi: PrefectureInfo = {
   introTitle: "山口県の相撲事情",
   introText:
     "「クリーン魁傑」として知られ、日本相撲協会理事長も務めた元大関・魁傑の故郷です。真面目で誠実な県民性が相撲道にも表れており、精神的な強さを持つ力士が育ちます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-yamaguchi.jpg",
   rikishiList: [
     {
       name: "末冨",

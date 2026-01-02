@@ -6,7 +6,7 @@ export const fukui: PrefectureInfo = {
   introTitle: "福井県の相撲事情",
   introText:
     "北陸の相撲ベルト地帯の一角として、古くから相撲が盛んです。小柄ながら技能派の力士が多く、粘り強い県民性が土俵上のファイトスタイルにも表れています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-fukui.jpg",
   rikishiList: [
     {
       name: "北乃庄",

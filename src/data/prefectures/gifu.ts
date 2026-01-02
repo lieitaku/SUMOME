@@ -6,7 +6,7 @@ export const gifu: PrefectureInfo = {
   introTitle: "岐阜県の相撲事情",
   introText:
     "農村部を中心に「奉納相撲」や「地歌舞伎」といった伝統文化が色濃く残る地で、地域コミュニティの中心に相撲があります。素朴ながら力強い郷土力士への温かい眼差しが特徴です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-gifu.jpg",
   rikishiList: [
     {
       name: "大馬翔",

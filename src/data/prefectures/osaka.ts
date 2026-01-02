@@ -6,7 +6,7 @@ export const osaka: PrefectureInfo = {
   introTitle: "大阪府の相撲事情",
   introText:
     "毎年3月の「春場所（大阪場所）」開催地であり、商都らしく「勝負」にシビアかつ情熱的です。地元出身の宇良や豪栄道（現・武隈親方）への声援は、地響きが起きるほどの熱量です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-osaka.jpg",
   rikishiList: [
     {
       name: "朝平井",

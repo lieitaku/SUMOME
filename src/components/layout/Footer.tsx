@@ -86,7 +86,7 @@ const Footer = () => {
                   <FooterLink href="/about">SUMOMEについて</FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/activities">活動レポート</FooterLink>
+                  <FooterLink href="/activities">イベント一覧</FooterLink>
                 </li>
               </ul>
             </div>
@@ -98,13 +98,17 @@ const Footer = () => {
               </h4>
               <ul className="space-y-4 text-gray-600">
                 <li>
-                  <FooterLink href="/manager">新規掲載登録（無料）</FooterLink>
+                  <FooterLink href="/manager/entry">
+                    新規掲載登録（無料）
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/login">管理画面ログイン</FooterLink>
+                  <FooterLink href="/manager/login">
+                    管理画面ログイン
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/photobook">
+                  <FooterLink href="/magazines">
                     フォトブックについて
                   </FooterLink>
                 </li>

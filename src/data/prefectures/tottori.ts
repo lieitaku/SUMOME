@@ -6,7 +6,7 @@ export const tottori: PrefectureInfo = {
   introTitle: "鳥取県の相撲事情",
   introText:
     "名門・鳥取城北高校があり、照ノ富士や石浦、落合（伯桜鵬）など、国籍を問わず多くの強豪力士がこの地で鍛え上げられました。現代大相撲における最大級の「人材供給基地」です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-tottori.jpg",
   rikishiList: [
     {
       name: "松田",

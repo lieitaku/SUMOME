@@ -11,21 +11,31 @@ const Header = () => {
 
   // 核心逻辑：定义哪些页面需要 "dark" (白字) 主题
   // 比如：关于页、活动页的头部背景是深色的，所以 Header 文字要是白色的
-  const darkThemePaths = ["/about", "/photo", "/activities", "/clubs"];
+  const darkThemePaths = [
+    "/about",
+    "/activities",
+    "/clubs",
+    "/magazines",
+    "/contact",
+  ];
 
   // 判断逻辑：
   // 1. 如果当前路径在名单里 -> dark
   // 2. 或者当前路径是以 /clubs 开头的 (比如 /clubs/tokyo) -> 也可以设为 dark (视设计而定)
   const isDarkTheme =
-    darkThemePaths.includes(pathname) || pathname.startsWith("/clubs/");
+    darkThemePaths.includes(pathname) ||
+    pathname.startsWith("/clubs/") ||
+    pathname.startsWith("/activities/") ||
+    pathname.startsWith("/manager/") ||
+    pathname.startsWith("/magazines/");
 
   // 最终主题：如果滚动了，强制变回 light (黑字白底)；否则使用路径判断的主题
   const currentTheme = isScrolled ? "light" : isDarkTheme ? "dark" : "light";
 
   const navItems = [
     { name: "SUMOMEについて", href: "/about" },
-    { name: "冊子一覧", href: "/blog" },
-    { name: "イベント", href: "/photo" },
+    { name: "冊子一覧", href: "/magazines" },
+    { name: "イベント", href: "/activities" },
     { name: "お問い合わせ", href: "/contact" },
   ];
 
@@ -79,6 +89,13 @@ const Header = () => {
   const navTextColor = getTextColor();
   const borderColor = getBorderColor();
 
+  // 定义需要隐藏 Header 的页面
+  const hideHeaderPaths = ["/manager/login"];
+
+  // 如果当前路径在“隐藏名单”里，直接返回 null，不渲染 Header
+  if (hideHeaderPaths.includes(pathname)) {
+    return null;
+  }
   return (
     <>
       <header

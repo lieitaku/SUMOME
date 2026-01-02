@@ -1,4 +1,8 @@
+"use client";
+
 import React from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 const Introduction = () => {
@@ -32,7 +36,9 @@ const Introduction = () => {
           <br />
           100年後の土俵を守り抜くために
         </p>
-        <a
+
+        {/* 使用 Next.js Link 进行路由跳转 */}
+        <Link
           href="/about"
           className="group inline-flex items-center justify-end gap-3 mt-8 text-sumo-gold hover:text-white transition-colors duration-300"
         >
@@ -44,7 +50,7 @@ const Introduction = () => {
             size={16}
             className="transform group-hover:translate-x-2 transition-transform duration-300"
           />
-        </a>
+        </Link>
       </div>
 
       {/* 图片展示 */}
@@ -52,12 +58,14 @@ const Introduction = () => {
         <div className="relative w-[300px] h-[400px] md:w-[320px] md:h-[420px]">
           <div className="absolute top-4 right-4 w-full h-full border border-sumo-gold/50 rounded-sm z-0"></div>
           <div className="absolute inset-0 overflow-hidden shadow-2xl z-10 bg-sumo-brand">
-            <img
-              src="https://restless-frost-36397932.stg-s.snapup.jp/wp-content/uploads/2025/12/homepage-1-scaled.jpeg"
+            <Image
+              src="/images/bg/about-intro.jpg"
               alt="About Sumome"
-              className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-[2s] grayscale mix-blend-luminosity"
+              fill
+              className="object-cover opacity-90 hover:scale-105 transition-transform duration-[2s] grayscale mix-blend-luminosity"
+              sizes="(max-width: 768px) 100vw, 320px"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-sumo-dark/80 to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-sumo-dark/80 to-transparent pointer-events-none"></div>
           </div>
         </div>
       </div>

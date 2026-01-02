@@ -6,7 +6,7 @@ export const fukushima: PrefectureInfo = {
   introTitle: "福島県の相撲事情",
   introText:
     "「相撲の里」としての歴史を持ち、近年は若隆景・若元春の「大波三兄弟」の活躍で沸いています。祖父の若葉山から続く相撲一家の物語は、震災復興のシンボルとして地元を勇気づけています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-fukushima.jpg",
   rikishiList: [
     {
       name: "西勢郷",

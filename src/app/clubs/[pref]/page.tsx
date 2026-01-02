@@ -1,43 +1,65 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import WaveDivider from "@/components/home/WaveDivider";
 import { useParams } from "next/navigation";
-import { clubsData } from "@/data/mockData"; // 俱乐部列表数据
+import { clubsData } from "@/data/mockData";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
-import { MapPin, ArrowRight, Camera, User } from "lucide-react"; // 引入 Camera 图标
+import {
+  MapPin,
+  ArrowRight,
+  Camera,
+  User,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import Link from "next/link";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import MiniSponsorBanner from "@/components/common/MiniSponsorBanner";
+import { cn } from "@/lib/utils";
 
 const PrefecturePage = () => {
   const params = useParams();
   const prefSlug = params.pref as string;
 
-  // 1. 从我们的“数据库”中查找当前县的数据
-  const prefData = PREFECTURE_DATABASE[prefSlug];
+  // 1. 强制滚动置顶
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+  }, []);
 
-  // 如果数据库里没有这个县的数据（比如还没有填），给一个默认值防止报错
+  const prefData = PREFECTURE_DATABASE[prefSlug];
   const displayData = prefData || {
-    name: prefSlug.toUpperCase(), // 默认显示 slug
+    name: prefSlug.toUpperCase(),
     introTitle: `${prefSlug}の相撲事情`,
     introText: "現在、この地域の詳細情報は準備中です。",
-    bannerImg: "", // 空图片
+    bannerImg: "",
     rikishiList: [],
   };
 
-  // 2. 筛选俱乐部 (逻辑不变)
   const filteredClubs = clubsData.filter((club) =>
     club.area.includes(displayData.name),
   );
 
+  // 长列表折叠状态
+  const [isRikishiExpanded, setIsRikishiExpanded] = useState(false);
+  const INITIAL_COUNT = 10;
+
+  const visibleRikishiList = isRikishiExpanded
+    ? displayData.rikishiList
+    : displayData.rikishiList.slice(0, INITIAL_COUNT);
+
+  const showExpandButton = displayData.rikishiList.length > INITIAL_COUNT;
+
   return (
     <div className="antialiased bg-sumo-bg min-h-screen flex flex-col">
       <main className="flex-grow">
-        {/* ==================== 1. Hero Area ==================== */}
+        {/* ==================== 1. Hero Area (保持不变) ==================== */}
         <section className="relative bg-sumo-dark text-white pt-40 pb-24 px-6 overflow-hidden">
           <div
-            className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay"
+            className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay"
             style={{
               backgroundImage: `url("https://www.transparenttextures.com/patterns/washi.png")`,
             }}
@@ -65,14 +87,17 @@ const PrefecturePage = () => {
 
         {/* ==================== 2. Main Content ==================== */}
         <section className="relative py-40 px-6">
-          <WaveDivider fill="fill-sumo-dark" isRotated={false} />
+          <WaveDivider
+            fill="fill-sumo-dark"
+            isRotated={false}
+            withTexture={true}
+          />
 
           <div className="container mx-auto max-w-6xl relative z-10 -mt-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-              {/* --- Left Column: Info (Sticky) --- */}
+              {/* --- Left Column (保持不变) --- */}
               <div className="lg:col-span-4">
                 <div className="sticky top-24 flex flex-col gap-8">
-                  {/* 介绍卡片 (数据来自 Database) */}
                   <div className="bg-white p-8 rounded-sm shadow-lg border-t-4 border-sumo-gold">
                     <h3 className="text-lg font-bold text-sumo-dark mb-4 pb-4 border-b border-gray-100 flex items-center gap-2">
                       <MapPin size={18} className="text-sumo-gold" />
@@ -83,17 +108,13 @@ const PrefecturePage = () => {
                     </p>
                   </div>
 
-                  {/* ✨ 2. 修改赞助商 Banner 区域 */}
-                  {/* 移除了 bg-gray-100 和 p-4，让 Banner 填满宽度，视觉更高级 */}
                   <div className="bg-white rounded-sm text-center shadow-md overflow-hidden border border-gray-100">
                     <p className="text-[10px] text-gray-400 py-2 tracking-widest bg-gray-50 border-b border-gray-100">
                       OFFICIAL SPONSORS
                     </p>
-                    {/* 插入迷你跑马灯 */}
                     <div className="bg-gray-100/50 pt-2 pb-4">
                       <MiniSponsorBanner />
                     </div>
-                    {/* 底部招商链接 (可选，增加交互性) */}
                     <div className="py-2 bg-white border-t border-gray-100">
                       <Link
                         href="/contact"
@@ -108,15 +129,14 @@ const PrefecturePage = () => {
 
               {/* --- Right Column --- */}
               <div className="lg:col-span-8">
-                {/* ✨ 新增区域：当地照片横幅 (只在有图片时显示) */}
+                {/* Banner Img (保持不变) */}
                 {displayData.bannerImg && (
-                  <div className="mb-12 group relative overflow-hidden rounded-sm shadow-md aspect-[3/1]">
+                  <div className="mb-12 group relative overflow-hidden rounded-sm shadow-md aspect-[3/2]">
                     <img
                       src={displayData.bannerImg}
                       alt={`${displayData.name}の風景`}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    {/* 遮罩和文字 */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
                       <div className="text-white">
                         <p className="text-[10px] font-bold tracking-widest mb-1 flex items-center gap-2 opacity-80">
@@ -124,14 +144,14 @@ const PrefecturePage = () => {
                           LOCAL SCENE
                         </p>
                         <p className="font-serif font-bold text-lg tracking-wide">
-                          {displayData.name}の相撲風景
+                          {displayData.name}の相撲クラブ
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* 1. 俱乐部列表 */}
+                {/* 1. Club List (保持不变) */}
                 <div className="mb-20">
                   <h2 className="text-2xl font-serif font-bold text-sumo-dark mb-8 flex items-center gap-3">
                     <span className="w-1.5 h-8 bg-sumo-red"></span>
@@ -182,19 +202,19 @@ const PrefecturePage = () => {
                   )}
                 </div>
 
-                {/* 2. 出身力士一覧 (Table) - 数据来自 Database */}
+                {/* 2. Rikishi Table (重点修复区域) */}
                 <div>
                   <h2 className="text-2xl font-serif font-bold text-sumo-dark mb-8 flex items-center gap-3">
                     <span className="w-1.5 h-8 bg-sumo-red"></span>
                     {displayData.name}出身力士一覧
+                    <span className="text-sm font-normal text-gray-400 ml-2">
+                      (全{displayData.rikishiList.length}名)
+                    </span>
                   </h2>
-                  {/* --- 力士数据展示区域 --- */}
+
                   {displayData.rikishiList.length > 0 ? (
-                    <div className="bg-transparent md:bg-white md:rounded-sm md:shadow-sm md:border md:border-gray-200 overflow-hidden">
-                      {/* =========================================================
-        A. 电脑端视图 (Desktop): 传统的高级表格
-        hidden md:table -> 手机隐藏，中屏以上显示为表格
-    ========================================================= */}
+                    <div className="bg-transparent md:bg-white md:rounded-sm md:shadow-sm md:border md:border-gray-200 relative">
+                      {/* --- A. Desktop Table --- */}
                       <table className="hidden md:table w-full text-sm text-left whitespace-nowrap">
                         <thead className="text-xs text-white uppercase bg-sumo-red">
                           <tr>
@@ -215,11 +235,16 @@ const PrefecturePage = () => {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {displayData.rikishiList.map((rikishi, idx) => (
+
+                        <tbody className="">
+                          {visibleRikishiList.map((rikishi, idx) => (
                             <tr
                               key={idx}
-                              className={`hover:bg-gray-50 transition-colors ${rikishi.active ? "bg-red-50/30" : ""}`}
+                              className={`
+                                border-b border-gray-100 last:border-none 
+                                hover:bg-gray-50 transition-colors 
+                                ${rikishi.active ? "bg-red-50/30" : ""}
+                              `}
                             >
                               <td className="px-6 py-4 font-bold text-sumo-dark flex items-center gap-2">
                                 {rikishi.name}
@@ -247,24 +272,17 @@ const PrefecturePage = () => {
                         </tbody>
                       </table>
 
-                      {/* =========================================================
-        B. 手机端视图 (Mobile): 卡片式列表
-        block md:hidden -> 手机显示，中屏以上隐藏
-    ========================================================= */}
+                      {/* --- B. Mobile List (保持不变，因为是 flex gap，没有边框问题) --- */}
                       <div className="block md:hidden flex flex-col gap-4">
-                        {displayData.rikishiList.map((rikishi, idx) => (
+                        {visibleRikishiList.map((rikishi, idx) => (
                           <div
                             key={idx}
-                            className={`
-            relative p-5 rounded-sm border 
-            ${
-              rikishi.active
-                ? "bg-white border-sumo-red/30 shadow-[0_2px_8px_rgba(211,50,62,0.08)]"
-                : "bg-white border-gray-200 shadow-sm"
-            }
-          `}
+                            className={`relative p-5 rounded-sm border ${
+                              rikishi.active
+                                ? "bg-white border-sumo-red/30 shadow-[0_2px_8px_rgba(211,50,62,0.08)]"
+                                : "bg-white border-gray-200 shadow-sm"
+                            }`}
                           >
-                            {/* 1. 顶部：名字与现役状态 */}
                             <div className="flex justify-between items-start mb-3">
                               <div className="flex flex-col">
                                 <span className="text-lg font-serif font-bold text-sumo-dark flex items-center gap-2">
@@ -279,7 +297,6 @@ const PrefecturePage = () => {
                                   {rikishi.stable}部屋
                                 </span>
                               </div>
-                              {/* 最高位放在右上角，醒目 */}
                               <div className="text-right">
                                 <span className="block text-[10px] text-gray-400 tracking-wider">
                                   最高位
@@ -289,11 +306,7 @@ const PrefecturePage = () => {
                                 </span>
                               </div>
                             </div>
-
-                            {/* 分割线 */}
                             <div className="h-px w-full bg-gray-100 mb-3"></div>
-
-                            {/* 2. 底部：时间数据 */}
                             <div className="grid grid-cols-2 gap-4 text-xs">
                               <div>
                                 <span className="block text-gray-400 mb-1 text-[10px]">
@@ -312,8 +325,6 @@ const PrefecturePage = () => {
                                 </span>
                               </div>
                             </div>
-
-                            {/* 装饰：如果是现役，右下角加个淡水印 */}
                             {rikishi.active && (
                               <div className="absolute -bottom-2 -right-2 text-sumo-red opacity-5">
                                 <User size={64} />
@@ -323,11 +334,37 @@ const PrefecturePage = () => {
                         ))}
                       </div>
 
-                      {/* 底部版权信息 (共用) */}
+                      {/* 渐变遮罩 (保持高级感) */}
+                      {!isRikishiExpanded && showExpandButton && (
+                        <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10"></div>
+                      )}
+
+                      {/* 展开/收起按钮 */}
+                      {showExpandButton && (
+                        <div className="relative z-20 p-4 bg-gray-50 text-center shadow-[0_-1px_0_#f3f4f6]">
+                          <button
+                            onClick={() =>
+                              setIsRikishiExpanded(!isRikishiExpanded)
+                            }
+                            className="inline-flex items-center gap-2 text-xs font-bold text-sumo-dark hover:text-sumo-red transition-colors tracking-widest px-6 py-2 border border-gray-300 rounded-full hover:border-sumo-red bg-white hover:bg-red-50 outline-none focus:outline-none focus:ring-0"
+                          >
+                            {isRikishiExpanded ? (
+                              <>
+                                <ChevronUp size={14} /> 閉じる
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown size={14} /> もっと見る (全
+                                {displayData.rikishiList.length}名)
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
+
                       <div className="hidden md:block bg-gray-50 px-6 py-3 text-right text-[10px] text-gray-400 border-t border-gray-100">
                         出典：相撲レファレンス
                       </div>
-                      {/* 手机端的版权信息单独显示 */}
                       <div className="md:hidden mt-4 text-center text-[10px] text-gray-400">
                         出典：相撲レファレンス
                       </div>

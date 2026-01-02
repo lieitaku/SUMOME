@@ -6,7 +6,7 @@ export const hyogo: PrefectureInfo = {
   introTitle: "兵庫県の相撲事情",
   introText:
     "大関・貴景勝（芦屋市出身）を筆頭に、妙義龍など闘志あふれる力士を多数輩出しています。阪神淡路大震災を乗り越えた不屈の精神が、土俵上の激しい突き押しに通じています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-hyogo.jpg",
   rikishiList: [
     {
       name: "藪ヶ崎",

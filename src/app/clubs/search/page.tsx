@@ -154,7 +154,11 @@ const ClubsPage = () => {
 
         {/* ==================== 2. Filter & Search Section ==================== */}
         <section className="relative">
-          <WaveDivider fill="fill-sumo-dark" isRotated={false} />
+          <WaveDivider
+            fill="fill-sumo-dark"
+            isRotated={false}
+            withTexture={true}
+          />
 
           <div className="container mx-auto px-6 pt-16 pb-20 relative z-20">
             {/* --- 悬浮搜索框 --- */}

@@ -6,7 +6,7 @@ export const ishikawa: PrefectureInfo = {
   introTitle: "石川県の相撲事情",
   introText:
     "「北陸の相撲王国」として知られ、第54代横綱・輪島をはじめ、遠藤、輝など人気・実力を兼ね備えた力士が多数輩出されています。高校相撲の強豪校もあり、技術の高さは全国屈指です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-ishikawa.jpg",
   rikishiList: [
     {
       name: "可貴",

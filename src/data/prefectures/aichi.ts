@@ -6,7 +6,7 @@ export const aichi: PrefectureInfo = {
   introTitle: "愛知県の相撲事情",
   introText:
     "毎年7月に「名古屋場所」が開催される、夏相撲の舞台です。蒸し暑い名古屋の夏を制する者は強く、荒れる場所として知られます。地元ファンは目が肥えており、激しい熱戦を好みます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-aichi.jpg",
   rikishiList: [
     {
       name: "中家",

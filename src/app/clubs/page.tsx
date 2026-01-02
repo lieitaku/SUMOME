@@ -12,7 +12,7 @@ const ClubsPage = () => {
       <main className="flex-grow">
         <section className="relative bg-sumo-dark text-white pt-40 pb-20 px-6 overflow-hidden">
           <div
-            className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay"
+            className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay"
             style={{
               backgroundImage: `url("https://www.transparenttextures.com/patterns/washi.png")`,
             }}
@@ -63,7 +63,11 @@ const ClubsPage = () => {
           </div>
         </section>
         <div className="relative bg-sumo-dark">
-          <WaveDivider fill="fill-sumo-dark" isRotated={false} />
+          <WaveDivider
+            fill="fill-sumo-dark"
+            isRotated={false}
+            withTexture={true}
+          />
         </div>
       </main>
     </div>

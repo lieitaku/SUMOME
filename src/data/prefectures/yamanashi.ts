@@ -6,7 +6,7 @@ export const yamanashi: PrefectureInfo = {
   introTitle: "山梨県の相撲事情",
   introText:
     "不屈の闘志で知られる竜電の出身地です。甲府盆地の厳しい寒暖差の中で培われた忍耐力が持ち味で、地元の熱烈な後援会が郷土力士を支え続けています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-yamanashi.jpg",
   rikishiList: [
     {
       name: "都留樹富士",

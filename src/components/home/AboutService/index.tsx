@@ -1,9 +1,11 @@
+"use client";
+
 import React from "react";
-import WaveDivider from "@/components/home/WaveDivider"; // 注意路径可能需要调整，或者依然用绝对路径
+import WaveDivider from "@/components/home/WaveDivider";
 import Introduction from "./Introduction";
 import ServiceCard from "./ServiceCard";
 
-// 数据定义
+// 数据定义 (如果数据将来变多，可以移到 src/data/mockData.ts)
 const SERVICE_DATA = [
   {
     id: "01",
@@ -42,14 +44,15 @@ const AboutService = () => {
         }}
       ></div>
 
+      {/* 这里的 withTexture={true} 确保波浪也有纹理，过渡更自然 */}
       <WaveDivider fill="fill-sumo-bg" isRotated={false} withTexture={true} />
 
-      {/* 第一部分：介绍 */}
+      {/* 第一部分：介绍 (About) */}
       <div className="container mx-auto px-6 pt-40 pb-32 relative z-10">
         <Introduction />
       </div>
 
-      {/* 第二部分：三本柱 */}
+      {/* 第二部分：三本柱 (Service) */}
       <div className="container mx-auto px-6 relative z-10 mt-10">
         <div className="text-center mb-24 reveal-up">
           <p className="text-sumo-gold text-xs font-bold tracking-[0.2em] mb-4 uppercase">
@@ -67,7 +70,7 @@ const AboutService = () => {
               key={item.id}
               {...item}
               delayClass={item.delay}
-              isStaggered={idx === 1} // 中间那个(索引1)错位显示
+              isStaggered={idx === 1} // 中间那个(索引1)错位显示，增加视觉韵律
             />
           ))}
         </div>

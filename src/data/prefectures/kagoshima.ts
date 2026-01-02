@@ -6,7 +6,7 @@ export const kagoshima: PrefectureInfo = {
   introTitle: "鹿児島県の相撲事情",
   introText:
     "「九州の相撲王国」です。霧島をはじめ、数多くの関取を輩出し続けています。奄美大島などの離島部では相撲が生活の一部であり、廻しをつけた子供たちの姿が日常風景です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-kagoshima.jpg",
   rikishiList: [
     {
       name: "澤崎",

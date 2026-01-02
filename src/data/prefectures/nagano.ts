@@ -6,7 +6,7 @@ export const nagano: PrefectureInfo = {
   introTitle: "長野県の相撲事情",
   introText:
     "江戸時代に「無双」と謳われた伝説の力士・雷電為右衛門の生誕地です。その伝説は今も語り継がれ、近年では大関・御嶽海が郷土の新たな英雄として土俵を沸かせています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-nagano.jpg",
   rikishiList: [
     {
       name: "鶴翔",

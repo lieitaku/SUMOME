@@ -6,7 +6,7 @@ export const kagawa: PrefectureInfo = {
   introTitle: "香川県の相撲事情",
   introText:
     "琴勇輝など、突き押しを得意とする気迫あふれる力士の出身地です。「讃岐うどん」で鍛えたコシの強さ（？）のように、粘り強く決して諦めない相撲が持ち味です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-kagawa.jpg",
   rikishiList: [
     {
       name: "讃岐竜",

@@ -6,7 +6,7 @@ export const tokushima: PrefectureInfo = {
   introTitle: "徳島県の相撲事情",
   introText:
     "小柄ながらも「阿波の怪童」と呼ばれた力士や、アマチュア相撲の指導者が熱心な土地柄です。阿波踊りのリズム感にも通じるような、小よく大を制する技巧派を愛する土壌があります。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-tokushima.jpg",
   rikishiList: [
     {
       name: "谷野",

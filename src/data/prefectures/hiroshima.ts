@@ -6,7 +6,7 @@ export const hiroshima: PrefectureInfo = {
   introTitle: "広島県の相撲事情",
   introText:
     "双葉山の連勝を69で止めた第37代横綱・安芸ノ海の出身地です。平和記念都市としての顔を持ちつつ、土俵上では決して引かない勝負度胸のある力士を尊びます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-hiroshima.jpg",
   rikishiList: [
     {
       name: "古田",

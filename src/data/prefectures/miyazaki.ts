@@ -6,7 +6,7 @@ export const miyazaki: PrefectureInfo = {
   introTitle: "宮崎県の相撲事情",
   introText:
     "琴恵光など、地元の熱い支援を受ける力士が多い県です。温暖な気候の中で育まれた、明るくも芯の強い力士が多く、県全体が「家族」のように郷土力士を応援します。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-miyazaki.jpg",
   rikishiList: [
     {
       name: "白竜",

@@ -6,7 +6,7 @@ export const saga: PrefectureInfo = {
   introTitle: "佐賀県の相撲事情",
   introText:
     "「飛燕の出足」と称された元大関・佐賀ノ花の出身地です。玄界灘の荒波のように、鋭い立ち合いと前に出る相撲を身上とする力士が多く、質実剛健な気風が漂います。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-saga.jpg",
   rikishiList: [
     {
       name: "康誠",

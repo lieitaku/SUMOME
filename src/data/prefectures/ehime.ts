@@ -6,7 +6,7 @@ export const ehime: PrefectureInfo = {
   introTitle: "愛媛県の相撲事情",
   introText:
     "西予市野村町で江戸時代から続く「乙亥（おとい）大相撲」があり、プロ顔負けの盛り上がりを見せます。相撲が地域の一大イベントとして定着しており、相撲愛の深さは四国随一です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-ehime.jpg",
   rikishiList: [
     {
       name: "城戸",

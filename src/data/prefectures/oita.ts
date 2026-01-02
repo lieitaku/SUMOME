@@ -6,7 +6,7 @@ export const oita: PrefectureInfo = {
   introTitle: "大分県の相撲事情",
   introText:
     "「相撲の神様」と称される不世出の大横綱・双葉山の出身地です。宇佐市には「双葉の里」があり、後の大関・千代大海も輩出するなど、偉大な歴史が脈々と受け継がれています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-oita.jpg",
   rikishiList: [
     {
       name: "武田",

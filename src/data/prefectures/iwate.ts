@@ -6,7 +6,7 @@ export const iwate: PrefectureInfo = {
   introTitle: "岩手県の相撲事情",
   introText:
     "宮城野親方（元横綱・吉葉山）など名力士の系譜がありますが、近年は錦木などの活躍で知られます。八幡平市などでは相撲大会が盛んで、実直で粘り強い「南部相撲」の気風が育まれています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-iwate.jpg",
   rikishiList: [
     {
       name: "風光希",

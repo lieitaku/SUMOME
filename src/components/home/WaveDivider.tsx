@@ -12,20 +12,18 @@ type Props = {
  * WaveDivider Component
  * ------------------------------------------------------------------
  * 波浪分割线组件。
- * 核心功能：
- * 1. 使用 SVG path 绘制波浪形状。
- * 2. 支持旋转 (isRotated) 以适应顶部/底部。
- * 3. 支持叠加和纸纹理 (withTexture)，并通过 textureDensityX 修正拉伸。
+ * 修改说明：
+ * 1. 默认启用和纸纹理 (withTexture = true)。
+ * 2. 纹理叠加采用 mix-blend-overlay + opacity 0.4。
  */
 const WaveDivider = ({
   fill,
   isRotated = true,
-  withTexture = false,
+  withTexture = true,
   textureSize = 120,
   textureDensityX = 1.5,
 }: Props) => {
-  // 建议改为本地纹理: /images/patterns/washi.png
-  const TEXTURE_URL = "https://www.transparenttextures.com/patterns/washi.png";
+  const TEXTURE_URL = "/images/bg/washi.png";
 
   // 计算调整后的纹理宽度
   const adjustedTextureWidth = textureSize / textureDensityX;
@@ -90,7 +88,7 @@ const WaveDivider = ({
             href="#wave-paths"
             fill="url(#washi-pattern)"
             style={{ mixBlendMode: "overlay" }}
-            opacity="0.5"
+            opacity="0.4"
           />
         )}
       </svg>

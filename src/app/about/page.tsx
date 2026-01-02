@@ -12,9 +12,9 @@ const AboutPage = () => {
         <section className="relative bg-sumo-dark text-white pt-40 pb-32 px-6 overflow-hidden">
           {/* 背景纹理 */}
           <div
-            className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay"
+            className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay"
             style={{
-              backgroundImage: `url("https://www.transparenttextures.com/patterns/washi.png")`,
+              backgroundImage: `url("'/images/bg/washi.png'")`,
             }}
           ></div>
 
@@ -47,7 +47,7 @@ const AboutPage = () => {
         </section>
 
         {/* ==================== 2. 正文内容区 (悬浮卡片) ==================== */}
-        <section className="relative px-6 pb-24">
+        <section className="relative px-6 pb-24 z-10">
           {/* 这里的 -mt-20 是核心，让白色卡片向上“浮”到深色背景上 */}
           <div className="container mx-auto max-w-5xl bg-white relative z-20 -mt-20 shadow-2xl rounded-sm overflow-hidden reveal-up delay-100">
             {/* 卡片顶部的金色装饰条 */}
@@ -106,8 +106,12 @@ const AboutPage = () => {
         {/* ==================== 3. 杂志轮播板块 ==================== */}
         {/* 加上波浪分割线，保持节奏感 */}
         <div className="relative">
-          <WaveDivider fill="fill-sumo-bg" isRotated={false} />
-          <div className="bg-sumo-dark pt-32 pb-20">
+          <WaveDivider
+            fill="fill-sumo-bg"
+            isRotated={false}
+            withTexture={false}
+          />
+          <div className="bg-sumo-dark ">
             <MagazineCarousel />
           </div>
         </div>

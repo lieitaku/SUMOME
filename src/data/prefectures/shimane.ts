@@ -6,7 +6,7 @@ export const shimane: PrefectureInfo = {
   introTitle: "島根県の相撲事情",
   introText:
     "「松江藩の抱え力士」だった雷電のゆかりの地であり、第12代横綱・陣幕久五郎の出身地です。出雲大社での奉納土俵入りなど、神話と相撲が今も密接に関わっています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-shimane.jpg",
   rikishiList: [
     {
       name: "岡田",

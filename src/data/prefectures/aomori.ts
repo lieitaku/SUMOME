@@ -6,7 +6,7 @@ export const aomori: PrefectureInfo = {
   introTitle: "青森県の相撲事情",
   introText:
     "北海道に並ぶ「北の相撲大国」です。初代若乃花、舞の海、高見盛など個性派や名力士を多数輩出。相撲が生活に根付いており、廻しをつけた小学生が日常的に稽古するほど競技人口の裾野が広いのが特徴です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-aomori.jpg",
   rikishiList: [
     {
       name: "安寿真",

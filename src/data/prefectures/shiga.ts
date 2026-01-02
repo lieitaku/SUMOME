@@ -6,7 +6,7 @@ export const shiga: PrefectureInfo = {
   introTitle: "滋賀県の相撲事情",
   introText:
     "江戸時代に谷風と人気を二分した第5代横綱・小野川喜三郎の出身地です。琵琶湖の水神信仰とも結びつき、古くから力自慢が集まる文化がありました。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-shiga.jpg",
   rikishiList: [
     {
       name: "豪ノ湖",

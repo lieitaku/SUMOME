@@ -6,7 +6,7 @@ export const kumamoto: PrefectureInfo = {
   introTitle: "熊本県の相撲事情",
   introText:
     "元大関・正代など、恵まれた体格と柔らかさを併せ持つ力士の産地です。「肥後もっこす」と呼ばれる頑固で一本気な性格が、土俵上での真っ向勝負に表れています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-kumamoto.jpg",
   rikishiList: [
     {
       name: "竜翔",

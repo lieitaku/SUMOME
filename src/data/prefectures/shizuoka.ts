@@ -6,7 +6,7 @@ export const shizuoka: PrefectureInfo = {
   introTitle: "静岡県の相撲事情",
   introText:
     "現在、熱海富士や翠富士といった若手人気力士が台頭し、空前の相撲ブームが起きています。温暖な気候で育った大らかな力士が多く、富士山のようなスケールの大きさが魅力です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-shizuoka.jpg",
   rikishiList: [
     {
       name: "宮富士",

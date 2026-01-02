@@ -6,7 +6,7 @@ export const niigata: PrefectureInfo = {
   introTitle: "新潟県の相撲事情",
   introText:
     "戦中戦後の大相撲を支えた「不滅の69連勝」双葉山のライバル、第36代横綱・羽黒山の故郷です。米どころらしく、粘り腰と馬力のある力士を多く輩出する土壌があります。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-niigata.jpg",
   rikishiList: [
     {
       name: "狩野",

@@ -6,7 +6,7 @@ export const kyoto: PrefectureInfo = {
   introTitle: "京都府の相撲事情",
   introText:
     "相撲の起源ともいわれる宮中行事「相撲節会（すまいのせちえ）」が行われた古都です。歴史的背景から相撲への敬意が深く、近年は若手力士の台頭も著しいエリアです。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-kyoto.jpg",
   rikishiList: [
     {
       name: "竜鳳",

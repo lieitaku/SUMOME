@@ -6,7 +6,7 @@ export const yamagata: PrefectureInfo = {
   introTitle: "山形県の相撲事情",
   introText:
     "「柏鵬時代」を築いた第47代横綱・柏戸の故郷です。果敢な攻めの相撲は県民の誇りであり、現在は北の若など若手力士がその闘志を受け継いでいます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-yamagata.jpg",
   rikishiList: [
     {
       name: "米沢龍",

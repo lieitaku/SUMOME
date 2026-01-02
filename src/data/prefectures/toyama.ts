@@ -6,7 +6,7 @@ export const toyama: PrefectureInfo = {
   introTitle: "富山県の相撲事情",
   introText:
     "大関・朝乃山の活躍により相撲熱が最高潮に達しています。第22代横綱・太刀山を生んだ地でもあり、立山連峰のような雄大なスケールの相撲が好まれます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-toyama.jpg",
   rikishiList: [
     {
       name: "鶴英山",

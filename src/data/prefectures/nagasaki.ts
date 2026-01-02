@@ -6,7 +6,7 @@ export const nagasaki: PrefectureInfo = {
   introTitle: "長崎県の相撲事情",
   introText:
     "「一途な押し」で一時代を築いた第50代横綱・佐田の山の故郷です。異国情緒あふれる港町ですが、相撲に関しては古風で厳格な「武士道」のような精神性が尊重されます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-nagasaki.jpg",
   rikishiList: [
     {
       name: "下釜",

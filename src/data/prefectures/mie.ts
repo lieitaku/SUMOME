@@ -6,7 +6,7 @@ export const mie: PrefectureInfo = {
   introTitle: "三重県の相撲事情",
   introText:
     "第57代横綱・三重ノ海の出身地です。伊勢神宮での奉納相撲など、神事としての相撲文化が深く根付いており、志摩ノ海など実直な力士を送り出しています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-mie.jpg",
   rikishiList: [
     {
       name: "安氣乃山",

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import WaveDivider from "@/components/home/WaveDivider";
 import { clubsData } from "@/data/mockData";
-import ClubCard from "@/components/clubs/ClubCard"; // ✨ 引入新组件
+import ClubCard from "@/components/clubs/ClubCard";
 
 const PickupClubs = () => {
   return (
@@ -37,7 +37,7 @@ const PickupClubs = () => {
         {/* 卡片网格 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {clubsData.map((club, idx) => (
-            // ✨ 使用封装好的组件，并传入 reveal-up 动画类
+            // 使用封装好的组件，并传入 reveal-up 动画类
             <div
               key={club.id}
               className={`reveal-up ${idx === 1 ? "delay-100" : idx === 2 ? "delay-200" : ""}`}

@@ -6,7 +6,7 @@ export const wakayama: PrefectureInfo = {
   introTitle: "和歌山県の相撲事情",
   introText:
     "かつてのアマチュア相撲の怪物・久島海を生んだ地です。県内の商業高校などが相撲の名門として知られ、温暖な気候とは裏腹に、土俵上では激しいぶつかり合いを好む風土があります。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-wakayama.jpg",
   rikishiList: [
     {
       name: "野田",

@@ -6,7 +6,7 @@ export const gunma: PrefectureInfo = {
   introTitle: "群馬県の相撲事情",
   introText:
     "昭和の個性派関脇・栃赤城の出身地です。空っ風で鍛えられた身体能力の高い力士が多く、古くから草相撲や奉納相撲が盛んな土地柄として知られています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-gunma.jpg",
   rikishiList: [
     {
       name: "梅山",

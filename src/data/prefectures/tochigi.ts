@@ -6,7 +6,7 @@ export const tochigi: PrefectureInfo = {
   introTitle: "栃木県の相撲事情",
   introText:
     "大正の名横綱・栃木山をはじめ、県名を四股名に冠する力士が多い「相撲どころ」です。質実剛健な取り口を好む県民性が、多くの実力派関取を後押ししてきました。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-tochigi.jpg",
   rikishiList: [
     {
       name: "駿太",

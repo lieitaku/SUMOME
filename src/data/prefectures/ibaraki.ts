@@ -6,7 +6,7 @@ export const ibaraki: PrefectureInfo = {
   introTitle: "茨城県の相撲事情",
   introText:
     "19年ぶりの日本出身横綱となった第72代横綱・稀勢の里（現・二所ノ関親方）の出身地です。牛久大仏の足元にはゆかりの品が展示され、県を挙げての応援ムードは今も健在です。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-ibaraki.jpg",
   rikishiList: [
     {
       name: "阿見大心",

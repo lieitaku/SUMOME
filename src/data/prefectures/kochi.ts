@@ -6,7 +6,7 @@ export const kochi: PrefectureInfo = {
   introTitle: "高知県の相撲事情",
   introText:
     "「四国の相撲王国」であり、豊ノ島や栃ノ心（明徳義塾高出身）など、多くの関取とゆかりがあります。土佐犬の闘犬文化と同様に、闘争心むき出しの激しい相撲が県民に愛されます。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-kochi.jpg",
   rikishiList: [
     {
       name: "豪清丸",

@@ -6,7 +6,7 @@ export const fukuoka: PrefectureInfo = {
   introTitle: "福岡県の相撲事情",
   introText:
     "毎年11月の「九州場所」開催地であり、地元が生んだ怪力大関・魁皇（現・浅香山親方）は英雄です。炭坑節の太鼓が響くような力強い相撲文化があり、九州各地から猛者が集まります。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-fukuoka.jpg",
   rikishiList: [
     {
       name: "関",

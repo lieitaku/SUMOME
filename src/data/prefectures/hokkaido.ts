@@ -6,7 +6,7 @@ export const hokkaido: PrefectureInfo = {
   introTitle: "北海道の相撲事情",
   introText:
     "史上最多8人の横綱を輩出した「相撲王国」です。雄大な北の大地が生んだ大鵬、北の湖、千代の富士ら昭和の大横綱たちは、雪国で鍛えた強靭な足腰と精神力で角界の歴史を塗り替えました。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-hokkaido.jpg",
   rikishiList: [
     {
       name: "北斗洋",

@@ -6,8 +6,7 @@ export const tokyo: PrefectureInfo = {
   introTitle: "東京都の相撲事情",
   introText:
     "両国国技館を擁する「相撲の聖地」です。数多くの相撲部屋が下町を中心に点在し、朝稽古の音が日常に溶け込んでいます。江戸っ子力士の代表格・元横綱栃錦の出身地でもあります。",
-  bannerImg:
-    "https://cdn.pixabay.com/photo/2016/12/12/01/32/tokyo-1900649_1280.jpg",
+  bannerImg: "/images/banner/banner-tokyo.jpg",
   rikishiList: [
     {
       name: "行徳",

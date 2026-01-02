@@ -6,7 +6,7 @@ export const okinawa: PrefectureInfo = {
   introTitle: "沖縄県の相撲事情",
   introText:
     "日本相撲とはルールの異なる独自の「沖縄角力（かくりき）」の文化を持ちます。その特有の足腰の強さとバランス感覚を生かし、近年は大相撲でも個性的な沖縄出身力士が存在感を放っています。",
-  bannerImg: "",
+  bannerImg: "/images/banner/banner-okinawa.jpg",
   rikishiList: [
     {
       name: "内間",

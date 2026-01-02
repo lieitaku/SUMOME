@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type ServiceProps = {
   id: string;
@@ -8,7 +11,7 @@ type ServiceProps = {
   desc: string;
   img: string;
   delayClass?: string;
-  isStaggered?: boolean; // 是否错位显示 (第二张卡片下沉)
+  isStaggered?: boolean; // 是否错位显示
 };
 
 const ServiceCard = ({
@@ -21,18 +24,22 @@ const ServiceCard = ({
 }: ServiceProps) => {
   return (
     <div
-      className={`
-        group relative transition-all duration-500 reveal-up ${delayClass}
-        ${isStaggered ? "mt-0 md:mt-24" : "mt-0"} 
-      `}
+      className={cn(
+        "group relative transition-all duration-500 reveal-up h-full",
+        delayClass,
+        isStaggered ? "mt-0 md:mt-24" : "mt-0",
+      )}
     >
       {/* 边框装饰 */}
       <div className="absolute inset-0 border-2 border-sumo-gold transform translate-x-3 translate-y-3 transition-transform group-hover:translate-x-2 group-hover:translate-y-2 pointer-events-none"></div>
 
       {/* 卡片主体 */}
-      <div className="bg-white relative p-8 flex flex-col items-center text-center shadow-lg hover:shadow-2xl overflow-hidden cursor-pointer h-full">
+      <div className="bg-white relative p-8 flex flex-col items-center text-center shadow-lg hover:shadow-2xl overflow-hidden cursor-pointer h-full transition-shadow duration-300">
         {/* 背景图隐现 */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-700 pointer-events-none">
+          {/* Smart Money Tip: 这里暂时用 img 标签，方便直接引用 Unsplash 外链。
+            如果是本地图片，请务必换成 <Image fill /> 
+          */}
           <img
             src={img}
             className="w-full h-full object-cover grayscale"
