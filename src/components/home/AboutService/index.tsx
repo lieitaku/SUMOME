@@ -1,81 +1,81 @@
 "use client";
 
 import React from "react";
-import WaveDivider from "@/components/home/WaveDivider";
+import Section from "@/components/ui/Section";
 import Introduction from "./Introduction";
 import ServiceCard from "./ServiceCard";
 
-// 数据定义 (如果数据将来变多，可以移到 src/data/mockData.ts)
 const SERVICE_DATA = [
   {
     id: "01",
     kanji: "探",
     title: "SEARCH",
     desc: "全国のクラブを\n地域・条件から検索",
-    img: "https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=2670&auto=format&fit=crop",
+    img: "https://cdn.pixabay.com/photo/2017/05/08/16/49/tokyo-tower-2295850_1280.jpg",
     delay: "",
+    href: "/clubs",
   },
   {
     id: "02",
     kanji: "結",
     title: "CONNECT",
     desc: "見学・体験申し込みで\n新しい一歩を",
-    img: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=2670&auto=format&fit=crop",
+    img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.jpg",
     delay: "delay-100",
+    href: "/manager/entry",
   },
   {
     id: "03",
     kanji: "録",
     title: "ARCHIVE",
     desc: "活動の記録を\n美しいフォトブックに",
-    img: "https://images.unsplash.com/photo-1544365558-35aa4afcf11f?q=80&w=1000&auto=format&fit=crop",
+    img: "https://cdn.pixabay.com/photo/2014/08/22/18/46/photographer-424620_1280.jpg",
     delay: "delay-200",
+    href: "/magazines",
   },
 ];
 
 const AboutService = () => {
   return (
-    <section className="relative bg-sumo-dark text-white overflow-hidden pb-32">
-      {/* 背景纹理 */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-80 mix-blend-overlay"
-        style={{
-          backgroundImage: `url("https://www.transparenttextures.com/patterns/washi.png")`,
-        }}
-      ></div>
-
-      {/* 这里的 withTexture={true} 确保波浪也有纹理，过渡更自然 */}
-      <WaveDivider fill="fill-sumo-bg" isRotated={false} withTexture={true} />
-
-      {/* 第一部分：介绍 (About) */}
-      <div className="container mx-auto px-6 pt-40 pb-32 relative z-10">
+    // 1. 使用 Section 组件，背景设为 white (纯白)
+    <Section background="white" id="service">
+      {/* 2. 第一部分：Introduction (上层理念) */}
+      <div className="mb-32">
         <Introduction />
       </div>
 
-      {/* 第二部分：三本柱 (Service) */}
-      <div className="container mx-auto px-6 relative z-10 mt-10">
-        <div className="text-center mb-24 reveal-up">
-          <p className="text-sumo-gold text-xs font-bold tracking-[0.2em] mb-4 uppercase">
-            OUR SERVICE
+      {/* 3. 第二部分：三本柱 (下层功能) */}
+      <div className="relative z-10">
+        {/* 标题区：瑞士风格排版 - 左对齐或严格居中 */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 reveal-up border-b border-gray-200 pb-8">
+          <div>
+            <p className="text-sumo-brand font-bold text-xs tracking-[0.3em] mb-2 uppercase font-sans">
+              Our Core Services
+            </p>
+            <h2 className="text-4xl md:text-5xl font-black text-sumo-text font-serif">
+              SUMOMEの<span className="text-sumo-red">三</span>本柱
+            </h2>
+          </div>
+          <p className="hidden md:block text-gray-400 text-sm font-medium tracking-wider text-right">
+            Providing value through <br /> Search, Connection, and Archive.
           </p>
-          <h2 className="text-4xl md:text-5xl font-serif font-bold text-white">
-            SUMOMEの<span className="text-sumo-red">三</span>本柱
-          </h2>
-          <div className="w-24 h-1 bg-sumo-gold mx-auto mt-8"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
+        {/* 卡片网格 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
           {SERVICE_DATA.map((item, idx) => (
             <ServiceCard
               key={item.id}
               {...item}
               delayClass={item.delay}
-              isStaggered={idx === 1} // 中间那个(索引1)错位显示，增加视觉韵律
+              // 瑞士风格通常喜欢整齐的Grid，不需要交错(staggered)，
+              // 但如果你喜欢韵律感，可以保留，或者改为 false 让它整齐划一
+              isStaggered={idx === 1}
             />
           ))}
         </div>
       </div>
-    </section>
+    </Section>
   );
 };
 

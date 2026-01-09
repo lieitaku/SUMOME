@@ -1,12 +1,9 @@
 "use client";
 
 import React from "react";
-import WaveDivider from "@/components/home/WaveDivider";
-import { activitiesData } from "@/data/mockData";
+import { activitiesData } from "@/data/activities";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
-
-// 引入样式和子组件
 import styles from "./styles.module.css";
 import ActivityCard from "./ActivityCard";
 
@@ -15,30 +12,38 @@ import "swiper/css/autoplay";
 import "swiper/css/pagination";
 
 const ActivityReport = () => {
-  // 取前3条数据并复制一份，确保 Swiper loop 模式在数据量少时也能正常工作
-  // 如果真实数据 > 5条，其实就不需要手动 [...data, ...data] 了
   const originalData = activitiesData.slice(0, 3);
   const loopData = [...originalData, ...originalData];
 
   return (
-    <section className="py-32 bg-sumo-bg relative overflow-hidden">
-      {/* 这里的 withTexture 确保波浪风格统一 */}
-      <WaveDivider fill="fill-sumo-dark" isRotated={false} withTexture={true} />
+    <section
+      className="py-32 bg-sumo-dark text-white relative overflow-hidden"
+      id="activity-report"
+    >
+      {/* 背景大水印*/}
+      <div className="absolute top-4 md:top-10 left-[-5%] md:left-[-2%] text-[5rem] md:text-[12rem] font-serif font-bold text-white opacity-[0.03] pointer-events-none select-none whitespace-nowrap leading-none">
+        Activity
+      </div>
 
-      <div className="container mx-auto px-6 relative z-10 pt-12">
-        {/* 标题区域 */}
-        <div className="text-center mb-12 reveal-up">
-          <span className="text-sumo-gold text-xs font-bold tracking-[0.2em] mb-4 block uppercase">
-            ACTIVITY REPORT
-          </span>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-sumo-dark">
-            普及・広報活動
-          </h2>
-          <div className="w-12 h-[2px] bg-sumo-gold mx-auto mt-6"></div>
+      <div className="container mx-auto px-6 relative z-10 pt-0">
+        {/* --- 标题区域 --- */}
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 border-b border-white/10 pb-8 reveal-up">
+          <div>
+            <span className="text-white/50 text-xs font-bold tracking-[0.2em] mb-4 block uppercase font-sans">
+              Activity Report
+            </span>
+            <h2 className="text-3xl md:text-5xl font-serif font-black text-white">
+              普及・広報活動
+            </h2>
+          </div>
+
+          <div className="hidden md:block text-white/60 text-sm font-medium tracking-wide">
+            The latest movements of SUMOME.
+          </div>
         </div>
 
         {/* Swiper 区域 */}
-        <div className="reveal-up delay-100 md:px-8 lg:px-16">
+        <div className="reveal-up delay-100">
           <Swiper
             modules={[Autoplay, Pagination]}
             spaceBetween={24}
@@ -47,27 +52,24 @@ const ActivityReport = () => {
             autoplay={{
               delay: 3000,
               disableOnInteraction: false,
-              pauseOnMouseEnter: true, // 鼠标悬停暂停，提升用户体验
+              pauseOnMouseEnter: true,
             }}
             pagination={{
-              el: `.${styles.customPagination}`, // 引用 CSS Module 类名
+              el: `.${styles.customPagination}`,
               clickable: true,
               type: "bullets",
             }}
             breakpoints={{
-              0: { slidesPerView: 1.2, spaceBetween: 16 }, // 手机端露出一点下一张，提示可滑动
+              0: { slidesPerView: 1.2, spaceBetween: 16 },
               768: { slidesPerView: 2.2, spaceBetween: 24 },
               1024: { slidesPerView: 3, spaceBetween: 36 },
             }}
-            className="!pb-4"
+            className="!pb-12"
           >
             {loopData.map((activity, index) => (
-              // key 必须唯一，加上 index 防止 loop 数据重复 id 报错
-              <SwiperSlide
-                key={`${activity.id}-${index}`}
-                className="h-auto py-4" // py-4 是为了给 hover 浮起的阴影留出空间，防止被 overflow 切掉
-              >
+              <SwiperSlide key={`${activity.id}-${index}`} className="h-auto">
                 <ActivityCard
+                  id={activity.id}
                   img={activity.img}
                   title={activity.title}
                   location={activity.location}
@@ -77,7 +79,6 @@ const ActivityReport = () => {
             ))}
           </Swiper>
 
-          {/* 分页器容器 */}
           <div className={styles.customPagination}></div>
         </div>
       </div>

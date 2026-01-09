@@ -2,101 +2,97 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-type ButtonProps = {
+interface ButtonProps {
   children: React.ReactNode;
   href?: string;
-  variant?: "ios" | "gold" | "navy" | "primary";
-  withShine?: boolean;
+  // 新增 "ceramic" 变体
+  variant?: "primary" | "outline" | "ghost" | "red" | "ceramic";
   className?: string;
   onClick?: () => void;
-  type?: "button" | "submit" | "reset";
-} & React.ComponentProps<"button"> &
-  React.ComponentProps<typeof Link>;
+  // 是否处于激活状态 (用于筛选器按钮)
+  isActive?: boolean;
+  // 是否显示箭头 (默认 true，陶瓷按钮通常设为 false)
+  showArrow?: boolean;
+}
 
-const Button = ({
+const Button: React.FC<ButtonProps> = ({
   children,
   href,
-  variant = "ios",
-  withShine = false,
+  variant = "primary",
   className = "",
-  ...props
-}: ButtonProps) => {
-  // 1. 基础样式
+  onClick,
+  isActive = false,
+  showArrow, // 不设置默认值，在下面逻辑中判断
+}) => {
+  // 1. 智能判断是否显示箭头
+  // 如果用户没传 showArrow：ceramic 默认不显示，其他默认显示
+  const shouldShowArrow =
+    showArrow !== undefined ? showArrow : variant !== "ceramic";
+
+  // 2. 基础样式 (所有按钮共有)
   const baseStyles =
-    "relative overflow-hidden rounded-full inline-flex items-center justify-center transition-all duration-300 group";
+    "inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 transform group relative";
 
-  // 2. 变体样式
+  // 3. 尺寸样式 (为了方便覆盖，把尺寸分离出来，ceramic 使用自己的尺寸)
+  const sizeStyles =
+    variant === "ceramic"
+      ? "px-6 py-3 rounded-xl text-sm"
+      : "px-8 py-4 rounded-sm text-base";
+
+  // 4. 变体样式定义
   const variants = {
-    // [红色 iOS 风格] (默认: 透明 -> 红)
-    ios: `
-      bg-transparent text-sumo-dark border border-gray-200
-      hover:text-white hover:border-sumo-red
-      before:absolute before:inset-0 before:bg-sumo-red 
-      before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-[cubic-bezier(0.22,1,0.36,1)] before:-z-10
-      hover:before:scale-x-100
-    `,
+    primary: "bg-sumo-brand text-white hover:bg-black hover:shadow-lg",
+    red: "bg-sumo-red border-2 border-sumo-red text-white hover:bg-white hover:text-sumo-red hover:shadow-lg",
+    outline:
+      "border-2 border-sumo-brand text-sumo-brand hover:bg-sumo-brand hover:text-white",
+    ghost: "text-sumo-text hover:text-sumo-brand bg-transparent",
 
-    // [金色 VIP 风格] (透明 -> 金)
-    gold: `
-      text-sumo-gold border border-sumo-gold
-      hover:text-white
-      before:absolute before:inset-0 before:bg-sumo-gold
-      before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-[cubic-bezier(0.22,1,0.36,1)] before:-z-10
-      hover:before:scale-x-100
-    `,
-
-    // [深紫 风格] (白底 -> 紫)
-    navy: `
-      bg-white text-sumo-dark border border-gray-200
-      hover:text-white hover:border-sumo-dark
-      before:absolute before:inset-0 before:bg-sumo-dark
-      before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-[cubic-bezier(0.22,1,0.36,1)] before:-z-10
-      hover:before:scale-x-100
-    `,
-
-    // [新增：实心主色风格] (红底 -> 白底 + 红字)
-    // 这种风格用于 CTA 区域，非常醒目且高级
-    primary: `
-      bg-sumo-red text-white border border-sumo-red
-      hover:text-sumo-red hover:border-white
-      /* 注意：这里没有 -z-10，因为我们需要白色层盖住原本的红色背景 */
-      before:absolute before:inset-0 before:bg-white
-      before:origin-left before:scale-x-0 before:transition-transform before:duration-500 before:ease-[cubic-bezier(0.22,1,0.36,1)]
-      hover:before:scale-x-100
-    `,
+    // 触感陶瓷变体 (Tactile Ceramic)
+    ceramic: cn(
+      "border-t border-x border-gray-50 ease-[cubic-bezier(0.34,1.56,0.64,1)] bg-white",
+      isActive
+        ? // 选中状态：浮起 + 蓝底座 + 蓝字 + 强投影
+          "-translate-y-1 border-b-4 border-b-sumo-brand text-sumo-brand shadow-[0_10px_20px_rgba(36,84,164,0.15)] z-10"
+        : // 未选中状态：沉底 + 灰底座 + 灰字
+          "border-b-4 border-b-gray-100 text-gray-400 hover:-translate-y-0.5 hover:border-b-gray-200",
+    ),
   };
 
-  // 3. 扫光特效
-  const shineStyles = withShine
-    ? `
-    after:absolute after:top-0 after:-left-[100%] after:w-1/2 after:h-full 
-    after:bg-gradient-to-r after:from-transparent after:via-white/30 after:to-transparent
-    after:-skew-x-[20deg] hover:after:left-[200%] hover:after:transition-[left] hover:after:duration-1000 after:transition-none
-  `
-    : "";
-
-  const combinedClassName = cn(
+  const combinedClasses = cn(
     baseStyles,
+    sizeStyles,
     variants[variant],
-    shineStyles,
     className,
   );
 
-  // 渲染逻辑
+  // 陶瓷高光效果 (仅在 ceramic 且 active 时显示)
+  const ceramicHighlight = variant === "ceramic" && isActive && (
+    <div className="absolute inset-0 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] pointer-events-none" />
+  );
+
+  const content = (
+    <>
+      {ceramicHighlight}
+      {children}
+      {shouldShowArrow && (
+        <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">
+          →
+        </span>
+      )}
+    </>
+  );
+
   if (href) {
     return (
-      <Link href={href} className={combinedClassName} {...props}>
-        {/* 关键：z-10 确保文字永远浮在动画层(before)之上 */}
-        <span className="relative z-10 flex items-center gap-2">
-          {children}
-        </span>
+      <Link href={href} className={combinedClasses}>
+        {content}
       </Link>
     );
   }
 
   return (
-    <button className={combinedClassName} {...props}>
-      <span className="relative z-10 flex items-center gap-2">{children}</span>
+    <button onClick={onClick} className={combinedClasses}>
+      {content}
     </button>
   );
 };

@@ -1,29 +1,45 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   1. 主题配置 (Design System)
+   1. 主题配置 (Design System - Swiss Style / International)
    ========================================================================== */
 @theme {
   /* --- 🎨 颜色系统 --- */
-  --color-sumo-dark: #2a1f32;
-  --color-sumo-brand: #5d3f6a;
-  --color-sumo-gold: #c39b4f;
-  --color-sumo-red: #a82429;
-  --color-sumo-bg: #fcfaf7;
-  --color-sumo-text: #1b1c24;
+
+  /* 深色基调：深钴蓝 (用于深色背景块) */
+  --color-sumo-dark: #003380;
+
+  /* 品牌主色：克莱因蓝/钴蓝 (高饱和，极简风格的核心) */
+  --color-sumo-brand: #0047ab;
+
+  /* 强调色：由“金色”替换为“墨黑” (用于强对比边框或强调块) */
+  --color-sumo-black: #111111;
+
+  /* 警示/强调红：瑞士红 (保持纯正，无杂色) */
+  --color-sumo-red: #de350b;
+
+  /* 背景色：纯白 (极致留白) */
+  --color-sumo-bg: #ffffff;
+
+  /* 文字色：近乎纯黑 (高对比度，提升阅读清晰度) */
+  --color-sumo-text: #111111;
 
   /* --- 🔠 字体系统 --- */
   --font-serif: "Noto Serif JP", "Cormorant Garamond", serif;
-  --font-sans: "Zen Kaku Gothic New", "Noto Sans JP", "Lato", sans-serif;
+  --font-sans:
+    "Zen Kaku Gothic New", "Noto Sans JP", "Helvetica Neue", "Arial", sans-serif;
 
   /* --- 🎬 动画配置 --- */
   --animate-slow-scroll: slow-scroll 100s linear infinite;
   --animate-marquee: marquee 40s linear infinite;
+  --animate-vertical-scroll: vertical-scroll 60s linear infinite;
+  --animate-infinite-scroll: infinite-scroll 150s linear infinite;
 }
 
 /* ==========================================================================
    2. 关键帧动画 (Global Keyframes)
    ========================================================================== */
+
 @keyframes slow-scroll {
   0% {
     transform: translateX(0);
@@ -42,6 +58,24 @@
   }
 }
 
+@keyframes vertical-scroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes infinite-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
 /* ==========================================================================
    3. 基础样式重置 (Base Layer)
    ========================================================================== */
@@ -54,33 +88,38 @@
     background-color: var(--color-sumo-bg);
     color: var(--color-sumo-text);
     font-family: var(--font-sans);
+    /* 瑞士风格通常字体更紧凑锐利 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  /* --- 全局选中文本样式 --- */
+  /* 选中文本：蓝底白字 */
   ::selection {
-    @apply bg-sumo-red text-white;
-  }
-  ::-moz-selection {
-    @apply bg-sumo-red text-white;
+    background-color: var(--color-sumo-brand);
+    color: #ffffff;
   }
 
-  /* --- 全局滚动条美化 --- */
+  ::-moz-selection {
+    background-color: var(--color-sumo-brand);
+    color: #ffffff;
+  }
+
+  /* 滚动条：极简黑白风格 */
   ::-webkit-scrollbar {
     width: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: #ffffff;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-sumo-dark/20;
-    border-radius: 4px;
+    @apply bg-gray-300;
+    border-radius: 0; /* 瑞士风格通常用直角，若喜欢圆角可改回 4px */
     transition: all 0.3s;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-sumo-red;
+    background-color: var(--color-sumo-brand);
   }
 
-  /* 隐藏滚动条工具 */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -94,13 +133,13 @@
    4. 组件类 (Components Layer)
    ========================================================================== */
 @layer components {
-  /* --- 导航栏链接 --- */
+  /* 导航栏链接：下划线动画改为黑色或品牌蓝 */
   .nav-link {
     @apply relative inline-block py-2.5;
   }
   .nav-link::after {
     content: "";
-    @apply absolute w-0 h-[1px] bottom-[5px] left-1/2 bg-sumo-red transition-all duration-300 -translate-x-1/2 ease-out;
+    @apply absolute w-0 h-[2px] bottom-[5px] left-1/2 bg-sumo-brand transition-all duration-300 -translate-x-1/2 ease-out;
   }
   .nav-link:hover::after {
     @apply w-full;
@@ -111,13 +150,12 @@
    5. 工具类 (Utilities Layer)
    ========================================================================== */
 @layer utilities {
-  /* 竖排文字 */
   .writing-vertical {
     writing-mode: vertical-rl;
     text-orientation: upright;
   }
 
-  /* Ken Burns Effect (Hero 背景) */
+  /* Ken Burns Effect */
   .ken-burns-image {
     @apply absolute inset-0 w-full h-full object-cover opacity-0 scale-100 transition-all;
     transition-duration: 2500ms;
@@ -129,17 +167,22 @@
       transform 20000ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
-  /* 鼠标悬停暂停动画 */
+  /* 删除了 .bg-vivid-sky */
+
+  /* 文字阴影减淡，瑞士风格追求扁平 */
+  .text-shadow-sm {
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  }
+
   .paused-on-hover:hover {
     animation-play-state: paused;
   }
 
-  /* Reveal Up Animation (通用上浮动画) */
+  /* Reveal Up Animation */
   .reveal-up {
     opacity: 0;
-    transform: translateY(40px);
-    /* 合并了 transition 属性 */
-    transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(30px); /* 稍微减小位移距离，更干脆 */
+    transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
     will-change: opacity, transform;
   }
   .reveal-up.is-visible {
@@ -147,7 +190,7 @@
     transform: translateY(0);
   }
 
-  /* 动画延迟工具 */
+  /* Delays */
   .delay-100 {
     transition-delay: 100ms;
   }

@@ -1,154 +1,227 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, ArrowRight, Clock } from "lucide-react";
-import { activitiesData } from "@/data/mockData";
-import WaveDivider from "@/components/home/WaveDivider";
+import {
+  MapPin,
+  ArrowRight,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
+import { activitiesData } from "@/data/activities";
+import Ceramic from "@/components/ui/Ceramic";
+import { cn } from "@/lib/utils";
+
+const ITEMS_PER_PAGE = 6; // 每页显示 6 个 (2x3布局)
 
 const ActivitiesPage = () => {
-  const displayData = activitiesData;
+  // --- 状态管理 ---
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // --- 分页逻辑 ---
+  // 1. 计算总页数
+  const totalPages = Math.ceil(activitiesData.length / ITEMS_PER_PAGE);
+
+  // 2. 切割当前页需要显示的数据
+  const currentData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return activitiesData.slice(start, end);
+  }, [currentPage]);
+
+  // 3. 翻页处理函数 (带平滑滚动)
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // 翻页后平滑滚动到列表顶部
+    const listElement = document.getElementById("activity-list-top");
+    if (listElement) {
+      listElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
-    <div className="bg-sumo-bg min-h-screen flex flex-col">
+    <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
-        {/* ==================== 1. Page Header (Hero) ==================== */}
-        <section className="relative pt-40 pb-20 bg-sumo-dark text-white overflow-hidden">
-          {/* 背景纹理 */}
+        {/* ==================== 1. Hero Section (保持不变) ==================== */}
+        <section className="relative pt-40 pb-32 overflow-hidden bg-sumo-brand text-white shadow-xl">
+          <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
           <div
-            className="absolute inset-0 pointer-events-none opacity-40 mix-blend-overlay z-0"
+            className="absolute inset-0 pointer-events-none opacity-20"
             style={{
-              backgroundImage: "url('/images/bg/washi.png')",
-              backgroundRepeat: "repeat",
+              backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+              backgroundSize: "40px 40px",
             }}
-          ></div>
+          />
+          <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 text-[18vw] font-black text-white opacity-[0.04] select-none pointer-events-none leading-none z-0 mix-blend-overlay tracking-tighter font-sans">
+            EVENTS
+          </div>
 
-          {/* 装饰光晕 */}
-          <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-sumo-gold/10 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="container mx-auto px-6 relative z-10 text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up">
+              <Calendar size={12} className="text-white" />
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
+                Activity Report
+              </span>
+            </div>
 
-          <div className="container mx-auto px-6 text-center relative z-10 reveal-up">
-            <p className="text-sumo-gold text-xs font-bold tracking-[0.3em] mb-4 uppercase">
-              ACTIVITY REPORT
-            </p>
-            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6">
-              イベント・活動記録
+            <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
+              活動記録
             </h1>
-            <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto leading-loose font-medium">
+
+            <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200">
               SUMOMEが主催・参加したイベントの様子をお届けします。
+              <br className="hidden md:inline" />
+              相撲を通じた交流と感動の瞬間をアーカイブ。
             </p>
           </div>
         </section>
 
-        {/* ==================== 2. 列表内容区 ==================== */}
-        <section className="relative py-28 px-6">
-          {/* 顶部波浪 */}
-          <div className="absolute top-0 w-full left-0">
-            <WaveDivider
-              fill="fill-sumo-dark"
-              isRotated={false}
-              withTexture={true}
-            />
-          </div>
-
-          <div className="container mx-auto max-w-6xl relative z-10">
-            {/* 网格布局 */}
+        {/* ==================== 2. Activity Grid ==================== */}
+        <section className="relative py-24 px-6 z-20" id="activity-list-top">
+          <div className="container mx-auto max-w-6xl">
+            {/* 列表渲染 */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {displayData.map((act, index) => (
-                <Link
-                  // 链接到详情页，使用 act.id
-                  href={`/activities/${act.id}`}
-                  key={`${act.id}-${index}`}
-                  className="group flex flex-col h-full bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2"
+              {currentData.map((act, index) => {
+                const [year, month, day] = act.date.split(".");
+
+                return (
+                  <div
+                    key={`${act.id}-${index}`}
+                    className="reveal-up h-full"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* 整体陶瓷卡片 */}
+                    <Ceramic
+                      as={Link}
+                      href={`/activities/${act.id}`}
+                      interactive={true}
+                      className={cn(
+                        "flex flex-col h-full overflow-hidden p-0 bg-white",
+                        "border-b-sumo-brand",
+                        "md:border-b-gray-200 md:hover:border-b-sumo-brand",
+                      )}
+                    >
+                      {/* 封面区域 (竖排比例 3:4) */}
+                      <div className="relative aspect-[3/4] bg-gray-100 group">
+                        <Image
+                          src={act.img}
+                          alt={act.title}
+                          fill
+                          className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
+
+                        {/* 日期贴片 */}
+                        <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-2 text-center shadow-lg rounded-sm border-t-2 border-sumo-brand z-10 group-hover:-translate-y-1 transition-transform duration-300">
+                          <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
+                            {month}月
+                          </span>
+                          <span className="block text-xl font-serif font-black text-sumo-dark leading-none">
+                            {day}
+                          </span>
+                        </div>
+
+                        {/* 状态标签 */}
+                        <div className="absolute bottom-0 right-0 bg-sumo-dark text-white text-[10px] font-bold px-3 py-1.5 tracking-widest uppercase">
+                          EVENT REPORT
+                        </div>
+                      </div>
+
+                      {/* 信息区域 */}
+                      <div className="flex flex-col flex-grow p-6 group">
+                        <h3 className="text-xl font-serif font-bold text-gray-900 mb-4 leading-relaxed group-hover:text-sumo-brand transition-colors line-clamp-2">
+                          {act.title}
+                        </h3>
+
+                        <div className="flex items-center gap-4 text-xs text-gray-500 font-medium mb-6 mt-auto">
+                          <div className="flex items-center gap-1.5">
+                            <MapPin size={14} className="text-sumo-brand" />
+                            <span className="line-clamp-1 max-w-[150px]">
+                              {act.location}
+                            </span>
+                          </div>
+                          <span className="text-gray-300">|</span>
+                          <span>
+                            {year}.{month}.{day}
+                          </span>
+                        </div>
+
+                        <div className="w-full h-px bg-gray-100 mb-4"></div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold tracking-[0.1em] text-gray-400 group-hover:text-sumo-brand transition-colors uppercase">
+                            View Details
+                          </span>
+                          <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-brand group-hover:bg-sumo-brand transition-all duration-300">
+                            <ArrowRight
+                              size={14}
+                              className="text-gray-400 group-hover:text-white transition-colors"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </Ceramic>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ==================== 3. Dynamic Pagination (动态分页) ==================== */}
+            {/* 只有当总页数大于 1 时才显示分页栏，否则完全隐藏，保持极简 */}
+            {totalPages > 1 && (
+              <div className="mt-24 flex justify-center items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={cn(
+                    "w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300",
+                    currentPage === 1
+                      ? "text-gray-200 cursor-not-allowed" // 禁用状态
+                      : "text-gray-500 hover:bg-white hover:shadow-md hover:text-sumo-brand cursor-pointer", // 启用状态
+                  )}
                 >
-                  {/* A. 图片区域 */}
-                  <div className="relative overflow-hidden aspect-[4/3] w-full">
-                    {/* 日期徽章 */}
-                    <div className="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-2 text-center shadow-lg rounded-sm border-t-2 border-sumo-gold group-hover:bg-sumo-gold group-hover:text-white transition-colors duration-300">
-                      <span className="block text-xs font-bold uppercase tracking-wider mb-0.5">
-                        {act.date.split(".")[1]}月
-                      </span>
-                      <span className="block text-xl font-serif font-bold leading-none">
-                        {act.date.split(".")[2]}
-                      </span>
-                    </div>
+                  <ChevronLeft size={16} />
+                </button>
 
-                    {/* 图片本体 */}
-                    <Image
-                      src={act.img}
-                      alt={act.title}
-                      fill
-                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] group-hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
+                {/* Page Numbers */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={cn(
+                        "w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold font-serif transition-all duration-300",
+                        currentPage === page
+                          ? "bg-sumo-dark text-white shadow-lg scale-110" // 当前页
+                          : "text-gray-500 hover:bg-white hover:text-sumo-brand", // 其他页
+                      )}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500"></div>
-
-                    <div className="absolute bottom-4 right-4 bg-sumo-dark text-white text-[10px] font-bold px-2 py-1 tracking-widest uppercase">
-                      EVENT
-                    </div>
-                  </div>
-
-                  {/* B. 内容区域 */}
-                  <div className="p-8 flex flex-col flex-grow relative">
-                    <div className="absolute left-0 top-8 bottom-8 w-[3px] bg-sumo-gold/20 group-hover:bg-sumo-gold transition-colors duration-500"></div>
-
-                    <h3 className="text-xl font-serif font-bold text-sumo-dark leading-relaxed mb-4 group-hover:text-sumo-red transition-colors line-clamp-2 pl-4">
-                      {act.title}
-                    </h3>
-
-                    <div className="pl-4 mt-auto space-y-3">
-                      <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} className="text-sumo-gold" />
-                          <span>{act.date}</span>
-                        </div>
-                        <span className="text-gray-300">|</span>
-                        <div className="flex items-center gap-1">
-                          <MapPin size={14} className="text-sumo-gold" />
-                          <span className="line-clamp-1">{act.location}</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-gray-100 flex items-center justify-between group/btn">
-                        <span className="text-xs font-bold tracking-[0.1em] text-gray-400 group-hover:text-sumo-dark transition-colors">
-                          VIEW REPORT
-                        </span>
-                        <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-red group-hover:bg-sumo-red transition-all duration-300">
-                          <ArrowRight
-                            size={14}
-                            className="text-gray-400 group-hover:text-white transition-colors"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-
-            <div className="mt-24 flex justify-center items-center gap-4">
-              {/* Disable Prev */}
-              <button
-                disabled
-                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-300 cursor-not-allowed"
-              >
-                &lt;
-              </button>
-
-              {/* Active Page 1 */}
-              <button className="w-12 h-12 flex items-center justify-center rounded-full text-sm font-bold font-serif bg-sumo-dark text-white shadow-lg scale-110">
-                1
-              </button>
-
-              {/* Disable Next */}
-              <button
-                disabled
-                className="w-10 h-10 flex items-center justify-center rounded-full text-gray-300 cursor-not-allowed"
-              >
-                &gt;
-              </button>
-            </div>
+                {/* Next Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={cn(
+                    "w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300",
+                    currentPage === totalPages
+                      ? "text-gray-200 cursor-not-allowed"
+                      : "text-gray-500 hover:bg-white hover:shadow-md hover:text-sumo-brand cursor-pointer",
+                  )}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+            {/* 如果只有一页，什么都不显示，留白到底部 */}
           </div>
         </section>
       </main>

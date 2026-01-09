@@ -1,7 +1,11 @@
 "use client";
+
 import React from "react";
 import Link from "next/link";
+import Ceramic from "@/components/ui/Ceramic";
+import { cn } from "@/lib/utils";
 
+// --- Types ---
 type PrefData = {
   id: string;
   label: string;
@@ -11,8 +15,8 @@ type PrefData = {
   h: number;
 };
 
+// --- Data Constants ---
 const PREF_DATA: PrefData[] = [
-  // 北海道・東北
   { id: "hokkaido", label: "北海道", x: 14, y: 0, w: 3, h: 2 },
   { id: "aomori", label: "青森", x: 14, y: 2, w: 2, h: 1 },
   { id: "akita", label: "秋田", x: 14, y: 3, w: 1, h: 1 },
@@ -20,7 +24,6 @@ const PREF_DATA: PrefData[] = [
   { id: "yamagata", label: "山形", x: 14, y: 4, w: 1, h: 1 },
   { id: "miyagi", label: "宮城", x: 15, y: 4, w: 1, h: 1 },
   { id: "fukushima", label: "福島", x: 15, y: 5, w: 1, h: 1 },
-  // 関東
   { id: "gunma", label: "群馬", x: 13, y: 6, w: 1, h: 1 },
   { id: "tochigi", label: "栃木", x: 14, y: 6, w: 1, h: 1 },
   { id: "ibaraki", label: "茨城", x: 15, y: 6, w: 1, h: 2 },
@@ -28,7 +31,6 @@ const PREF_DATA: PrefData[] = [
   { id: "tokyo", label: "東京", x: 13, y: 8, w: 2, h: 1 },
   { id: "chiba", label: "千葉", x: 15, y: 8, w: 1, h: 2 },
   { id: "kanagawa", label: "神奈川", x: 13, y: 9, w: 2, h: 1 },
-  // 中部
   { id: "niigata", label: "新潟", x: 13, y: 5, w: 2, h: 1 },
   { id: "toyama", label: "富山", x: 12, y: 5, w: 1, h: 1 },
   { id: "ishikawa", label: "石川", x: 11, y: 5, w: 1, h: 1 },
@@ -38,7 +40,6 @@ const PREF_DATA: PrefData[] = [
   { id: "yamanashi", label: "山梨", x: 12, y: 8, w: 1, h: 1 },
   { id: "aichi", label: "愛知", x: 11, y: 8, w: 1, h: 1 },
   { id: "shizuoka", label: "静岡", x: 12, y: 9, w: 1, h: 1 },
-  // 近畿
   { id: "shiga", label: "滋賀", x: 10, y: 6, w: 1, h: 1 },
   { id: "kyoto", label: "京都", x: 9, y: 5, w: 1, h: 2 },
   { id: "mie", label: "三重", x: 10, y: 7, w: 1, h: 2 },
@@ -46,18 +47,15 @@ const PREF_DATA: PrefData[] = [
   { id: "osaka", label: "大阪", x: 8, y: 7, w: 1, h: 2 },
   { id: "wakayama", label: "和歌山", x: 8, y: 9, w: 2, h: 1 },
   { id: "hyogo", label: "兵庫", x: 7, y: 5, w: 1, h: 2 },
-  // 中国
   { id: "tottori", label: "鳥取", x: 6, y: 5, w: 1, h: 1 },
   { id: "okayama", label: "岡山", x: 6, y: 6, w: 1, h: 1 },
   { id: "shimane", label: "島根", x: 5, y: 5, w: 1, h: 1 },
   { id: "hiroshima", label: "広島", x: 5, y: 6, w: 1, h: 1 },
   { id: "yamaguchi", label: "山口", x: 4, y: 5, w: 1, h: 2 },
-  // 四国
   { id: "kagawa", label: "香川", x: 6, y: 8, w: 1, h: 1 },
   { id: "ehime", label: "愛媛", x: 5, y: 8, w: 1, h: 1 },
   { id: "tokushima", label: "徳島", x: 6, y: 9, w: 1, h: 1 },
   { id: "kochi", label: "高知", x: 5, y: 9, w: 1, h: 1 },
-  // 九州・沖縄
   { id: "fukuoka", label: "福岡", x: 2, y: 5, w: 1, h: 1 },
   { id: "saga", label: "佐賀", x: 1, y: 5, w: 1, h: 1 },
   { id: "nagasaki", label: "長崎", x: 0, y: 5, w: 1, h: 1 },
@@ -136,7 +134,7 @@ const JapanMap = () => {
   const getStyle = (x: number, y: number, w: number, h: number) => {
     const unitX = 100 / 17;
     const unitY = 100 / 10;
-    const gap = 0.4;
+    const gap = 0.3;
     return {
       left: `${x * unitX + gap / 2}%`,
       top: `${y * unitY + gap / 2}%`,
@@ -150,52 +148,59 @@ const JapanMap = () => {
 
   return (
     <div className="w-full">
-      {/* A. 手机端视图 (Mobile: Block Layout) */}
-      <div className="md:hidden flex flex-col gap-8">
+      {/* === A. 手机端视图 (Mobile) === */}
+      <div className="md:hidden flex flex-col gap-10">
         {MOBILE_GROUPS.map((group) => (
           <div key={group.region}>
-            <h3 className="text-sumo-gold text-sm font-bold tracking-widest mb-3 border-l-2 border-sumo-gold pl-3">
-              {group.region}
+            <h3 className="flex items-center gap-2 mb-4 pl-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-sumo-brand shadow-sm"></div>
+              <span className="text-sumo-dark font-serif font-bold tracking-widest text-sm">
+                {group.region}
+              </span>
             </h3>
+
             <div className="grid grid-cols-4 gap-2">
               {group.ids.map((id) => (
-                <Link
+                <Ceramic
                   key={id}
+                  as={Link}
                   href={`/clubs/${id}`}
-                  className="flex items-center justify-center py-3
-                             bg-white/5 border border-white/10 rounded-sm
-                             text-white text-xs font-bold
-                             hover:bg-sumo-red hover:border-sumo-red transition-colors"
+                  className="flex items-center justify-center py-3 text-xs font-bold text-gray-500 rounded-xl hover:text-sumo-brand"
                 >
                   {getLabel(id)}
-                </Link>
+                </Ceramic>
               ))}
             </div>
           </div>
         ))}
       </div>
 
-      {/* B. 电脑端视图 (Desktop: Grid Map) */}
-      {/* ✨ 修复点：max-w 改回 900px，让地图不那么巨大 */}
+      {/* === B. 电脑端视图 (Desktop) === */}
       <div className="hidden md:block relative w-full max-w-[900px] aspect-[17/10] mx-auto select-none">
-        {/* 背景层已移除，完全无框 */}
-
         {PREF_DATA.map((pref) => (
-          <Link
+          <Ceramic
             key={pref.id}
+            as={Link}
             href={`/clubs/${pref.id}`}
             style={getStyle(pref.x, pref.y, pref.w, pref.h)}
-            className="absolute flex items-center justify-center
-                       border border-white/20 bg-white/5 
-                       backdrop-blur-[4px] rounded-[3px] shadow-sm
-                       text-white/90 font-serif text-sm font-bold tracking-widest
-                       transition-all duration-300 ease-out
-                       hover:bg-sumo-red hover:border-sumo-red hover:text-white 
-                       hover:z-50 hover:scale-110 hover:shadow-[0_0_20px_rgba(211,50,62,0.6)]"
+            className={cn(
+              "absolute flex items-center justify-center text-sm font-bold text-gray-500 tracking-widest",
+              // 圆角加大到 rounded-md (6px)，让釉面感更强
+              // Hover 效果：保持白色背景，只改变文字颜色和层级 (陶瓷组件会自动处理底座变蓝)
+              "rounded-md hover:text-sumo-brand hover:z-10",
+            )}
           >
             {pref.label}
-          </Link>
+          </Ceramic>
         ))}
+
+        {/* 装饰图例 */}
+        <div className="absolute -bottom-8 right-0 flex flex-col items-end opacity-40 pointer-events-none">
+          <span className="text-[10px] font-sans font-bold tracking-[0.3em] text-sumo-dark flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-sumo-brand"></span>
+            JPN / MAP
+          </span>
+        </div>
       </div>
     </div>
   );

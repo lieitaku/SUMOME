@@ -1,13 +1,19 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import WaveDivider from "@/components/home/WaveDivider";
-import { Search, X } from "lucide-react";
-import { clubsData } from "@/data/mockData";
-import ClubCard from "@/components/clubs/ClubCard"; // ✨ 复用卡片
+import {
+  Search,
+  X,
+  Filter,
+  ChevronDown,
+  SlidersHorizontal,
+  MapPin,
+} from "lucide-react";
+import { clubsData } from "@/data/clubs";
+import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
-
-// 定义区域类型
+import Button from "@/components/ui/Button";
+// --- 类型定义 ---
 type RegionKey =
   | "hokkaido_tohoku"
   | "kanto"
@@ -17,7 +23,7 @@ type RegionKey =
   | "shikoku"
   | "kyushu_okinawa";
 
-// ✨ 移到底部定义的常量数据
+// --- 常量数据 ---
 const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
   {
     id: "hokkaido_tohoku",
@@ -76,46 +82,43 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
   },
 ];
 
-const ClubsPage = () => {
-  // 状态管理
+const SearchPage = () => {
+  // --- State Management ---
   const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all");
   const [activePref, setActivePref] = useState<string | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true);
 
-  // 获取当前选中区域下的都道府县列表
+  // --- Derived State: Current Prefectures ---
   const currentPrefectures = useMemo(() => {
     if (activeRegion === "all") return [];
     return REGIONS.find((r) => r.id === activeRegion)?.prefectures || [];
   }, [activeRegion]);
 
-  // 筛选逻辑
+  // --- Filtering Logic ---
   const filteredClubs = useMemo(() => {
     return clubsData.filter((club) => {
-      // 1. 文本搜索
+      // 1. Text Search
       const matchQuery =
         searchQuery === "" ||
-        club.name.includes(searchQuery) ||
+        club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         club.area.includes(searchQuery);
 
-      // 2. 区域/都道府县筛选
+      // 2. Region/Prefecture Filter
       let matchLocation = true;
       if (activeRegion !== "all") {
         if (activePref !== "all") {
-          // 精确匹配都道府县
           matchLocation = club.area.includes(activePref);
         } else {
-          // 匹配大区域
           const regionPrefs =
             REGIONS.find((r) => r.id === activeRegion)?.prefectures || [];
           matchLocation = regionPrefs.some((pref) => club.area.includes(pref));
         }
       }
-
       return matchQuery && matchLocation;
     });
   }, [searchQuery, activeRegion, activePref]);
 
-  // 重置函数
   const handleReset = () => {
     setActiveRegion("all");
     setActivePref("all");
@@ -123,186 +126,276 @@ const ClubsPage = () => {
   };
 
   return (
-    <div className="antialiased bg-sumo-bg min-h-screen flex flex-col">
-      <main className="flex-grow">
-        {/* ==================== 1. Hero Area ==================== */}
-        <section className="relative bg-sumo-dark text-white pt-40 pb-28 px-6 overflow-hidden">
-          {/* 背景纹理 (使用本地图片) */}
-          <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/washi.png')]"></div>
+    <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
+      {/* Global Styles for Keyframes Animation 
+        用于解决新元素挂载时 intersection observer 无法触发的问题
+      */}
+      <style jsx global>{`
+        @keyframes fadeInUpPhysical {
+          0% {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+          }
+          60% {
+            opacity: 1;
+            transform: translateY(-2px) scale(1.005);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .card-enter-active {
+          animation: fadeInUpPhysical 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+            forwards;
+        }
+      `}</style>
 
-          {/* 巨大的 CLUBS 背景字 */}
-          <div className="absolute top-1/2 right-0 -translate-y-1/2 text-[15vw] font-serif font-bold text-white opacity-[0.03] select-none whitespace-nowrap pointer-events-none">
-            CLUBS
-          </div>
+      <main className="flex-grow pt-32 pb-20">
+        {/* Background Grid Pattern */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0 fixed"
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(36, 84, 164, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(36, 84, 164, 0.03) 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
+            height: "100vh",
+          }}
+        />
 
-          <div className="container mx-auto relative z-10 text-center reveal-up">
-            <p className="text-sumo-gold text-xs font-bold tracking-[0.3em] mb-6 uppercase flex items-center justify-center gap-4">
-              <span className="w-8 h-[1px] bg-sumo-gold"></span>
-              Find Your Dojo
-              <span className="w-8 h-[1px] bg-sumo-gold"></span>
-            </p>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-wide mb-6">
-              全国の相撲クラブ検索
-            </h1>
-            <p className="text-gray-400 font-medium max-w-xl mx-auto leading-loose text-sm md:text-base">
-              あなたの近くの道場が、きっと見つかる。
-              <br />
-              見学・体験のお申し込みもこちらから。
-            </p>
-          </div>
-        </section>
-
-        {/* ==================== 2. Filter & Search Section ==================== */}
-        <section className="relative">
-          <WaveDivider
-            fill="fill-sumo-dark"
-            isRotated={false}
-            withTexture={true}
-          />
-
-          <div className="container mx-auto px-6 pt-16 pb-20 relative z-20">
-            {/* --- 悬浮搜索框 --- */}
-            <div className="bg-white p-6 rounded-sm shadow-xl -mt-24 mb-16 border-t-4 border-sumo-gold max-w-4xl mx-auto reveal-up">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="relative w-full">
-                  <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
-                  <input
-                    type="text"
-                    placeholder="クラブ名、地域名で検索..."
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 focus:outline-none focus:border-sumo-gold transition-colors text-sumo-dark placeholder-gray-400 rounded-sm"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <button className="w-full md:w-auto bg-sumo-dark text-white px-10 py-3 font-bold tracking-wider hover:bg-sumo-red transition-colors whitespace-nowrap rounded-sm shadow-md">
-                  検索
-                </button>
+        <div className="container mx-auto px-6 relative z-10">
+          {/* ==================== 1. The Command Center (Search Header) ==================== */}
+          <div className="max-w-5xl mx-auto mb-16">
+            <div className="flex justify-center mb-8 reveal-up">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
+                <SlidersHorizontal size={12} className="text-sumo-brand" />
+                <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
+                  Club Finder
+                </span>
               </div>
             </div>
 
-            {/* --- 筛选区域 --- */}
-            <div className="mb-16 reveal-up delay-100">
-              {/* 1. 大区域 Tabs */}
-              <div className="flex flex-wrap justify-center gap-3 md:gap-4 mb-8">
-                <button
-                  onClick={() => {
-                    setActiveRegion("all");
-                    setActivePref("all");
-                  }}
-                  className={cn(
-                    "px-6 py-2 rounded-full text-sm font-bold tracking-wider transition-all duration-300 border",
-                    activeRegion === "all"
-                      ? "bg-sumo-dark text-white border-sumo-dark shadow-lg"
-                      : "bg-white text-gray-500 border-gray-200 hover:border-sumo-gold hover:text-sumo-gold",
-                  )}
-                >
-                  全国
-                </button>
-                {REGIONS.map((region) => (
+            <h1 className="text-center text-4xl md:text-5xl font-serif font-black text-gray-900 mb-10 tracking-tight reveal-up delay-100">
+              相撲クラブを検索
+            </h1>
+
+            {/* Ceramic Search Bar */}
+            <div className="relative group max-w-2xl mx-auto reveal-up delay-200">
+              <div
+                className={cn(
+                  "relative flex items-center w-full h-16 md:h-20 rounded-2xl overflow-hidden",
+                  "bg-white transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+                  // Ceramic Base
+                  "border-b-4 border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)]",
+                  // Focus Interaction
+                  "group-focus-within:border-b-sumo-brand group-focus-within:shadow-[0_20px_40px_rgba(36,84,164,0.15)] group-focus-within:-translate-y-1",
+                )}
+              >
+                <div className="pl-6 md:pl-8 text-gray-400 group-focus-within:text-sumo-brand transition-colors">
+                  <Search size={24} />
+                </div>
+                <input
+                  type="text"
+                  placeholder="クラブ名、地域名で検索..."
+                  className="w-full h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
                   <button
-                    key={region.id}
-                    onClick={() => {
-                      setActiveRegion(region.id);
-                      setActivePref("all");
-                    }}
-                    className={cn(
-                      "px-6 py-2 rounded-full text-sm font-bold tracking-wider transition-all duration-300 border",
-                      activeRegion === region.id
-                        ? "bg-sumo-dark text-white border-sumo-dark shadow-lg"
-                        : "bg-white text-gray-500 border-gray-200 hover:border-sumo-gold hover:text-sumo-gold",
-                    )}
+                    onClick={() => setSearchQuery("")}
+                    className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
                   >
-                    {region.label}
+                    <X size={18} />
                   </button>
-                ))}
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ==================== 2. The Ceramic Filter Dashboard ==================== */}
+          <div className="max-w-6xl mx-auto mb-16 reveal-up delay-300">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              {/* Dashboard Header */}
+              <div
+                className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+              >
+                <div className="flex items-center gap-3">
+                  <Filter size={16} className="text-sumo-brand" />
+                  <span className="text-sm font-bold text-gray-700 tracking-wide">
+                    エリアフィルター
+                  </span>
+                  {activeRegion !== "all" && (
+                    <span className="ml-2 px-2 py-0.5 bg-sumo-brand/10 text-sumo-brand text-[10px] font-bold rounded-full">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <ChevronDown
+                  size={16}
+                  className={cn(
+                    "text-gray-400 transition-transform duration-300",
+                    isFilterExpanded ? "rotate-180" : "",
+                  )}
+                />
               </div>
 
-              {/* 2. 都道府县 Sub-Tabs */}
-              {activeRegion !== "all" && (
-                <div className="bg-white/50 border border-sumo-gold/20 p-6 rounded-md max-w-4xl mx-auto animate-[fadeIn_0.3s_ease-out]">
-                  <div className="text-center mb-4 text-xs font-bold text-sumo-gold tracking-widest">
-                    エリアを選択してください
-                  </div>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    <button
-                      onClick={() => setActivePref("all")}
-                      className={cn(
-                        "px-4 py-1.5 text-xs font-bold transition-colors border-b-2",
-                        activePref === "all"
-                          ? "border-sumo-red text-sumo-red"
-                          : "border-transparent text-gray-500 hover:text-sumo-dark",
-                      )}
+              {/* Dashboard Content */}
+              <div
+                className={cn(
+                  "transition-all duration-500 ease-in-out overflow-hidden",
+                  isFilterExpanded
+                    ? "max-h-[600px] opacity-100"
+                    : "max-h-0 opacity-0",
+                )}
+              >
+                <div className="p-6 md:p-10">
+                  {/* --- Region Tabs (Using Ceramic Buttons) --- */}
+                  <div className="flex flex-wrap gap-3 md:gap-4 mb-10">
+                    <Button
+                      variant="ceramic"
+                      isActive={activeRegion === "all"}
+                      onClick={() => {
+                        setActiveRegion("all");
+                        setActivePref("all");
+                      }}
                     >
-                      全て
-                    </button>
-                    {currentPrefectures.map((pref) => (
-                      <button
-                        key={pref}
-                        onClick={() => setActivePref(pref)}
-                        className={cn(
-                          "px-4 py-1.5 text-xs font-bold transition-colors border-b-2",
-                          activePref === pref
-                            ? "border-sumo-red text-sumo-red"
-                            : "border-transparent text-gray-500 hover:text-sumo-dark",
-                        )}
+                      全国
+                    </Button>
+
+                    {REGIONS.map((region) => (
+                      <Button
+                        key={region.id}
+                        variant="ceramic"
+                        isActive={activeRegion === region.id}
+                        onClick={() => {
+                          setActiveRegion(region.id);
+                          setActivePref("all");
+                        }}
                       >
-                        {pref}
-                      </button>
+                        {region.label}
+                      </Button>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
 
-            {/* --- 结果统计 --- */}
-            <div className="text-center mb-12 reveal-up delay-200">
-              <div className="inline-block bg-white px-8 py-4 rounded-full shadow-sm border border-gray-100">
-                <span className="text-gray-500 text-xs font-bold tracking-widest mr-4">
-                  検索結果
-                </span>
-                <span className="text-3xl font-serif font-bold text-sumo-dark mr-1">
+                  {/* --- Prefecture List (Using Small Ceramic Buttons) --- */}
+                  {activeRegion !== "all" && (
+                    <div className="relative pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
+                        Select Prefecture
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          variant="ceramic"
+                          isActive={activePref === "all"}
+                          onClick={() => setActivePref("all")}
+                          className="px-4 py-2 text-xs rounded-lg border-b-[3px]"
+                        >
+                          全て
+                        </Button>
+
+                        {currentPrefectures.map((pref) => (
+                          <Button
+                            key={pref}
+                            variant="ceramic"
+                            isActive={activePref === pref}
+                            onClick={() => setActivePref(pref)}
+                            className="px-4 py-2 text-xs rounded-lg border-b-[3px]"
+                          >
+                            {pref}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ==================== 3. Results Section ==================== */}
+          <div className="max-w-6xl mx-auto">
+            {/* Results Header */}
+            <div className="flex items-end justify-between mb-8 pb-4 border-b border-gray-200">
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl font-serif font-black text-sumo-brand">
                   {filteredClubs.length}
                 </span>
-                <span className="text-xs text-gray-400">チーム</span>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                  Results Found
+                </span>
+              </div>
+
+              {/* Active Filters Display */}
+              <div className="hidden md:flex gap-2">
+                {searchQuery && (
+                  <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
+                    "{searchQuery}"
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="hover:text-sumo-red"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
+                {activeRegion !== "all" && (
+                  <span className="pl-3 pr-2 py-1 bg-sumo-brand text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-sm shadow-sumo-brand/20">
+                    <MapPin size={10} />
+                    {REGIONS.find((r) => r.id === activeRegion)?.label}
+                    <button
+                      onClick={() => {
+                        setActiveRegion("all");
+                        setActivePref("all");
+                      }}
+                      className="hover:text-white/70 ml-1"
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* ==================== 3. Results Grid ==================== */}
+            {/* Results Grid */}
             {filteredClubs.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredClubs.map((club) => (
-                  // ✨ 这里复用了我们刚刚提取的组件，代码瞬间清爽！
-                  <div key={club.id} className="reveal-up">
+                {filteredClubs.map((club, index) => (
+                  <div
+                    key={club.id}
+                    className="opacity-0 card-enter-active"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
                     <ClubCard club={club} />
                   </div>
                 ))}
               </div>
             ) : (
-              /* 空状态 */
-              <div className="text-center py-20 bg-white/50 rounded-sm border border-dashed border-gray-300 max-w-2xl mx-auto reveal-up">
-                <div className="mb-4 text-gray-300">
-                  <Search size={48} className="mx-auto" />
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
+                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                  <Search size={40} className="text-gray-300" />
                 </div>
-                <p className="text-gray-500 font-serif mb-6">
-                  該当するクラブが見つかりませんでした。
+                <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">
+                  No Clubs Found
+                </h3>
+                <p className="text-gray-500 text-sm max-w-xs mx-auto mb-8 leading-relaxed">
+                  条件に一致するクラブが見つかりませんでした。
                 </p>
                 <button
                   onClick={handleReset}
-                  className="inline-flex items-center gap-2 text-sumo-red text-sm font-bold border-b border-sumo-red pb-1 hover:opacity-70 transition-opacity"
+                  className="px-8 py-3 bg-sumo-dark text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-colors shadow-lg hover:-translate-y-1"
                 >
-                  <X size={14} />
-                  条件をクリアして全件表示
+                  Clear Filters
                 </button>
               </div>
             )}
           </div>
-        </section>
+        </div>
       </main>
     </div>
   );
 };
 
-export default ClubsPage;
+export default SearchPage;

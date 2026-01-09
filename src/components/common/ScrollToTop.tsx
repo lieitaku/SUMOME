@@ -2,21 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { ArrowUp } from "lucide-react";
-import { cn } from "@/lib/utils"; // 引入工具函数
+import { cn } from "@/lib/utils";
+import Ceramic from "@/components/ui/Ceramic";
 
-/**
- * ScrollToTop Component
- * ------------------------------------------------------------------
- * 全局回到顶部按钮。
- * 滚动超过 500px 后显示，点击平滑滚动至顶部。
- */
 const ScrollToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
 
-  // 监听滚动
   useEffect(() => {
     const toggleVisibility = () => {
-      // 滚动超过 500px 才显示，避免在 Hero 区域干扰视线
       if (window.scrollY > 500) {
         setIsVisible(true);
       } else {
@@ -28,7 +21,6 @@ const ScrollToTop = () => {
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
-  // 平滑滚动到顶部
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
@@ -37,36 +29,46 @@ const ScrollToTop = () => {
   };
 
   return (
-    <button
-      onClick={scrollToTop}
-      aria-label="Scroll to top"
-      // 使用 cn() 合并类名，逻辑更清晰
+    // 外层控制进出场动画
+    <div
       className={cn(
-        "fixed bottom-8 right-6 z-50",
-        "flex flex-col items-center justify-center",
-        "w-12 h-14 md:w-14 md:h-16",
-        "border border-sumo-gold/30 bg-sumo-dark/90 backdrop-blur-md",
-        "text-white shadow-xl rounded-sm",
-        "transition-all duration-500 ease-out group overflow-hidden",
+        "fixed bottom-8 right-6 z-50 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)",
         isVisible
           ? "translate-y-0 opacity-100"
-          : "translate-y-20 opacity-0 pointer-events-none",
+          : "translate-y-24 opacity-0 pointer-events-none",
       )}
     >
-      {/* 悬停背景填充动画 (红色) */}
-      <span className="absolute inset-0 bg-sumo-red translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></span>
+      {/* 内层 Ceramic 控制点击交互 */}
+      <Ceramic
+        as="button"
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        className={cn(
+          "flex flex-col items-center justify-center",
+          "w-12 h-12 md:w-14 md:h-14",
 
-      {/* 内容层 */}
-      <div className="relative z-10 flex flex-col items-center gap-1">
+          // === 颜色逻辑 (修改版) ===
+          // 始终保持白底蓝字，哪怕 hover 也不变黑或变实心蓝
+          "bg-white text-sumo-brand",
+
+          // 悬停效果：
+          // 1. 只有底座变蓝 (能量感)
+          // 2. 依然上浮
+          "hover:border-b-sumo-brand",
+          // 去掉了 hover:bg-sumo-brand 和 hover:text-white
+        )}
+      >
         <ArrowUp
-          size={18}
-          className="text-sumo-gold group-hover:text-white transition-colors duration-300 group-hover:-translate-y-1"
+          size={20}
+          strokeWidth={2.5}
+          // 图标单独加一个小动画
+          className="transition-transform duration-300 group-hover:-translate-y-1"
         />
-        <span className="font-serif text-[10px] tracking-widest text-gray-300 group-hover:text-white transition-colors duration-300">
+        <span className="text-[9px] font-black tracking-widest mt-0.5 font-sans">
           TOP
         </span>
-      </div>
-    </button>
+      </Ceramic>
+    </div>
   );
 };
 

@@ -1,245 +1,228 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
+import React, { useEffect } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
-import { activitiesData } from "@/data/mockData";
-import { ArrowLeft, MapPin, Calendar, Share2, Clock } from "lucide-react";
-import WaveDivider from "@/components/home/WaveDivider";
-import Button from "@/components/ui/Button";
+import Image from "next/image";
+import {
+  ArrowLeft,
+  Share2,
+  Printer,
+  MapPin,
+  Calendar,
+  Hash,
+  ImageIcon,
+} from "lucide-react";
+import { activitiesData } from "@/data/activities";
+import { getArticleContent } from "@/components/activities/ArticleRegistry";
+import ScrollToTop from "@/components/common/ScrollToTop";
+import Ceramic from "@/components/ui/Ceramic";
 
 const ActivityDetailPage = () => {
   const params = useParams();
-  const id = Number(params.id);
-  const currentIndex = activitiesData.findIndex((item) => item.id === id);
-  const activity = activitiesData[currentIndex];
+  // 获取 URL 中的 ID (例如: "act-01")
+  const id = params.id as string;
 
-  if (!activity) {
-    return notFound();
+  const metaData = activitiesData.find((item) => item.id === id);
+
+  // 获取对应的文章内容组件
+  const ContentComponent = getArticleContent(id);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  // 404 处理 (或者 Loading)
+  if (!metaData) {
+    return (
+      <div className="min-h-screen bg-[#F4F5F7] flex flex-col items-center justify-center text-gray-400 font-serif gap-4">
+        <div className="w-8 h-8 border-2 border-gray-200 border-t-sumo-brand rounded-full animate-spin"></div>
+        <p className="text-xs font-medium tracking-widest">LOADING...</p>
+      </div>
+    );
   }
 
-  // 如果当前是最后一篇 (index + 1 === length)，取模运算 % 会让它变回 0 (第一篇)
-  // 这样用户可以一直点“下一篇”浏览完所有内容
-  const nextIndex = (currentIndex + 1) % activitiesData.length;
-  const nextActivity = activitiesData[nextIndex];
+  const [year, month, day] = metaData.date.split(".");
+
   return (
-    <div className="bg-sumo-bg min-h-screen font-sans">
-      {/* ==================== 1. Immersive Hero Section (去色高级感处理) ==================== */}
-      {/* 设计逻辑：
-         1. 背景设为深紫黑 (bg-sumo-dark)。
-         2. 图片设为黑白 (grayscale) 并降低透明度，让底色透出来，形成“双色调”效果。
-         3. 这种处理完美掩盖低分辨率，且文字对比度极高。
-      */}
-      <section className="relative h-[60vh] md:h-[70vh] min-h-[500px] w-full overflow-hidden bg-sumo-dark">
-        {/* A. 背景图片 (低画质优化版) */}
-        <div className="absolute inset-0 opacity-60 mix-blend-overlay">
-          <Image
-            src={activity.img}
-            alt={activity.title}
-            fill
-            priority
-            // grayscale: 去色
-            // object-cover: 填满
-            // scale-105: 微微放大防止边缘露白
-            className="object-cover grayscale scale-105"
-          />
-        </div>
-
-        {/* B. 颜色滤镜层 (Color Wash) */}
-        {/* 使用 sum-brand 再次叠加，统一色调倾向 */}
-        <div className="absolute inset-0 bg-sumo-brand/30 mix-blend-multiply"></div>
-
-        {/* C. 深度渐变遮罩 (Deep Gradient) */}
-        {/* 从底部向上变黑，保证文字绝对清晰，同时营造深邃感 */}
-        <div className="absolute inset-0 bg-gradient-to-t from-sumo-dark via-sumo-dark/90 to-transparent"></div>
-
-        {/* D. 纹理叠加 (Texture) */}
-        {/* 和纸纹理增加纸质触感 */}
+    <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
+      {/* ... Header 部分 (保持不变) ... */}
+      <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+        <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
-          className="absolute inset-0 opacity-20 mix-blend-overlay"
+          className="absolute inset-0 pointer-events-none opacity-20"
           style={{
-            backgroundImage: "url('/images/bg/washi.png')",
-            backgroundRepeat: "repeat",
+            backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
           }}
-        ></div>
+        />
 
-        {/* Hero 内容 */}
-        <div className="absolute bottom-0 w-full pb-12 md:pb-20 pt-20 px-6 z-10">
-          <div className="container mx-auto max-w-4xl text-white reveal-up">
-            {/* 标签栏 */}
-            <div className="flex flex-wrap items-center gap-4 mb-6">
-              <span className="bg-sumo-red text-white text-xs font-bold px-3 py-1 tracking-widest uppercase rounded-sm shadow-lg">
-                EVENT REPORT
-              </span>
-              <span className="flex items-center gap-2 text-sm font-bold text-sumo-gold border border-sumo-gold/30 px-3 py-1 rounded-sm bg-black/20 backdrop-blur-sm">
-                <Calendar size={16} />
-                {activity.date}
-              </span>
-            </div>
-
-            {/* 标题 */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold leading-tight mb-6 drop-shadow-md text-white/95">
-              {activity.title}
-            </h1>
-
-            {/* 地点 */}
-            <div className="flex items-center gap-2 text-gray-300 font-medium text-sm md:text-base">
-              <MapPin size={18} className="text-sumo-gold" />
-              <span>{activity.location}</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== 2. Article Body ==================== */}
-      <section className="relative py-20 px-6">
-        {/* 顶部波浪 */}
-        <div className="absolute top-0 w-full left-0">
-          <WaveDivider
-            fill="fill-sumo-dark"
-            isRotated={false}
-            withTexture={true}
-          />
+        <div className="absolute top-1/2 right-10 -translate-y-1/2 text-[12vw] font-black text-white opacity-[0.03] select-none pointer-events-none leading-none mix-blend-overlay tracking-tighter font-sans">
+          OFFICIAL
         </div>
 
-        <div className="container mx-auto pt-20 max-w-4xl relative z-10 -mt-10">
-          <div className="bg-white p-8 md:p-16 rounded-sm shadow-2xl relative">
-            {/* 装饰：顶部金色横条 */}
-            <div className="absolute top-0 left-0 w-full h-2 bg-sumo-gold/20"></div>
-            <div className="absolute top-0 left-0 w-32 h-2 bg-sumo-gold"></div>
-
-            {/* 文章内容 */}
-            <div className="prose prose-lg max-w-none text-gray-700 font-medium leading-loose">
-              <h3 className="text-2xl font-serif font-bold text-sumo-dark mb-6 border-l-4 border-sumo-gold pl-4">
-                イベントのハイライト
-              </h3>
-              <p className="mb-8">
-                {activity.date}に{activity.location}で開催された「
-                {activity.title}」は、
-                多くの参加者と熱気に包まれ、大盛況のうちに幕を閉じました。
-                会場には子供たちの元気な声が響き渡り、相撲を通じて心身を鍛える
-                素晴らしい機会となりました。
-              </p>
-
-              <p className="mb-8">
-                当日は、基本的な四股（しこ）やすり足の稽古から始まり、
-                実際に土俵に上がっての取組体験も行われました。
-                初めてまわしを締める子供たちも多く、最初は緊張した面持ちでしたが、
-                すぐに笑顔で相撲を楽しんでいました。
-              </p>
-
-              {/* 模拟相册：这里也可以应用黑白+Hover彩色的效果，保持风格一致 */}
-              <div className="grid grid-cols-2 gap-4 my-10 not-prose">
-                <div className="aspect-video relative rounded-sm overflow-hidden bg-gray-100 group">
-                  <Image
-                    src={activity.img}
-                    alt="Scene 1"
-                    fill
-                    className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                  />
-                  {/* Hover 提示 */}
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors pointer-events-none"></div>
-                </div>
-                <div className="aspect-video relative rounded-sm overflow-hidden bg-gray-100 group">
-                  <Image
-                    src={activity.img}
-                    alt="Scene 2"
-                    fill
-                    className="object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors pointer-events-none"></div>
-                </div>
-              </div>
-
-              <h3 className="text-2xl font-serif font-bold text-sumo-dark mb-6 border-l-4 border-sumo-gold pl-4">
-                次回の開催に向けて
-              </h3>
-              <p>
-                今回のイベントを通じて、改めて「礼に始まり礼に終わる」相撲の精神の素晴らしさを
-                実感しました。次回はさらに規模を拡大し、より多くの方々に
-                相撲の魅力を伝えていきたいと考えています。
-              </p>
+        <div className="container mx-auto max-w-5xl relative z-10 px-6">
+          <Link
+            href="/activities"
+            className="inline-flex items-center gap-3 text-white/70 hover:text-white transition-colors group mb-12 reveal-up"
+          >
+            <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-sumo-brand transition-all">
+              <ArrowLeft size={14} />
             </div>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
+              Back to List
+            </span>
+          </Link>
 
-            {/* 分享与标签 */}
-            <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
-              <div className="flex gap-2">
-                <span className="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full hover:bg-sumo-gold hover:text-white transition-colors cursor-pointer">
-                  #相撲教室
-                </span>
-                <span className="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full hover:bg-sumo-gold hover:text-white transition-colors cursor-pointer">
-                  #子供向け
-                </span>
-              </div>
-
-              <button className="flex items-center gap-2 text-sumo-gold font-bold hover:text-sumo-red transition-colors text-sm tracking-widest group">
-                <Share2
-                  size={16}
-                  className="group-hover:scale-110 transition-transform"
-                />
-                SHARE THIS POST
-              </button>
+          <div className="flex flex-wrap items-center gap-6 mb-8 reveal-up delay-100 opacity-90">
+            <div className="flex items-center gap-2 text-xs font-mono tracking-wide">
+              <Calendar size={14} className="text-sumo-gold" />
+              <span>
+                {year}.{month}.{day}
+              </span>
+            </div>
+            <div className="w-px h-3 bg-white/30"></div>
+            <div className="flex items-center gap-2 text-xs font-medium tracking-wide">
+              <MapPin size={14} className="text-sumo-gold" />
+              <span>{metaData.location}</span>
             </div>
           </div>
 
-          {/* 3. 底部导航 */}
-          <div className="flex justify-between mt-12 px-4">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold leading-[1.2] tracking-wide mb-8 max-w-4xl drop-shadow-sm reveal-up delay-200">
+            {metaData.title}
+          </h1>
+        </div>
+      </header>
+
+      {/* ... Content 部分 (保持不变) ... */}
+      <section className="relative px-4 md:px-6 -mt-24 z-20 pb-32">
+        <div className="container mx-auto max-w-5xl">
+          <Ceramic
+            interactive={false}
+            className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-0"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-12 bg-white min-h-[600px]">
+              {/* --- Sidebar --- */}
+              <aside className="hidden lg:block lg:col-span-3 border-r border-gray-100 bg-white">
+                <div className="sticky top-0 px-8 py-12 flex flex-col gap-10">
+                  <div>
+                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">
+                      Actions
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <button className="flex items-center justify-between px-3 py-2 -ml-3 rounded hover:bg-gray-50 text-xs font-bold text-gray-500 hover:text-sumo-brand transition-colors group">
+                        <span className="flex items-center gap-3">
+                          <Share2
+                            size={14}
+                            className="text-gray-400 group-hover:text-sumo-brand"
+                          />
+                          Share
+                        </span>
+                      </button>
+                      <button className="flex items-center justify-between px-3 py-2 -ml-3 rounded hover:bg-gray-50 text-xs font-bold text-gray-500 hover:text-sumo-dark transition-colors group">
+                        <span className="flex items-center gap-3">
+                          <Printer
+                            size={14}
+                            className="text-gray-400 group-hover:text-sumo-dark"
+                          />
+                          Print
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">
+                      Keywords
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {["Event", "Report", "Sumo", "Community"].map((tag) => (
+                        <span
+                          key={tag}
+                          className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded"
+                        >
+                          <Hash size={9} className="opacity-50" /> {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </aside>
+
+              {/* --- Article Content --- */}
+              <article className="lg:col-span-9 p-8 md:p-16 lg:p-20">
+                {metaData.img && (
+                  <figure className="mb-16 relative group">
+                    <div className="relative aspect-video w-full overflow-hidden rounded-sm shadow-xl bg-gray-100 ring-1 ring-black/5">
+                      <Image
+                        src={metaData.img}
+                        alt={metaData.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105 grayscale-[0.2]"
+                        priority
+                      />
+                      <div
+                        className="absolute inset-0 opacity-[0.08] pointer-events-none mix-blend-overlay"
+                        style={{
+                          backgroundImage: `url('/images/bg/noise.png')`,
+                        }}
+                      ></div>
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none"></div>
+                    </div>
+                    <figcaption className="mt-3 flex items-center justify-end gap-2 text-[10px] text-gray-400 font-bold tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ImageIcon size={12} />
+                      Event Highlight
+                    </figcaption>
+                  </figure>
+                )}
+
+                <div
+                  className="prose prose-lg max-w-none 
+                            prose-headings:font-serif prose-headings:font-bold prose-headings:text-sumo-dark prose-headings:mt-12
+                            prose-p:text-gray-600 prose-p:leading-[2.2] prose-p:font-normal prose-p:text-justify prose-p:mb-8
+                            prose-blockquote:border-l-2 prose-blockquote:border-sumo-brand prose-blockquote:pl-6 prose-blockquote:italic prose-blockquote:text-gray-500
+                            prose-strong:font-bold prose-strong:text-gray-800
+                            prose-img:rounded-sm prose-img:shadow-lg prose-img:my-12
+                            marker:text-sumo-brand"
+                >
+                  {ContentComponent ? (
+                    <ContentComponent mainImage={metaData.img} />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-20 bg-gray-50 border border-dashed border-gray-200 rounded-sm">
+                      <p className="text-gray-400 text-sm font-medium tracking-wide">
+                        Content is being prepared...
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-20 pt-8 border-t border-gray-100 lg:hidden">
+                  <button className="w-full flex items-center justify-center gap-2 py-4 bg-gray-50 text-gray-600 text-xs font-bold uppercase tracking-widest hover:bg-sumo-brand hover:text-white transition-colors">
+                    <Share2 size={14} /> Share Report
+                  </button>
+                </div>
+              </article>
+            </div>
+          </Ceramic>
+
+          <div className="mt-16 text-center pb-20">
             <Link
               href="/activities"
-              className="group flex items-center gap-3 text-gray-500 hover:text-sumo-dark transition-colors"
+              className="group inline-flex flex-col items-center gap-2"
             >
-              <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-gold group-hover:bg-sumo-gold group-hover:text-white transition-all">
+              <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-sumo-brand group-hover:text-sumo-brand group-hover:-translate-x-1 transition-all">
                 <ArrowLeft size={16} />
               </div>
-              <span className="text-sm font-bold tracking-widest">
-                一覧に戻る
+              <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-brand uppercase tracking-widest transition-colors">
+                Back to List
               </span>
-            </Link>
-
-            <Link
-              href={`/activities/${nextActivity.id}`}
-              className="group flex items-center gap-3 text-gray-500 hover:text-sumo-dark transition-colors text-right"
-            >
-              <span className="text-sm font-bold tracking-widest">
-                次の記事
-              </span>
-              <span className="text-xs text-gray-400 line-clamp-1 max-w-[150px] group-hover:text-sumo-gold transition-colors">
-                {nextActivity.title}
-              </span>
-              <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-gold group-hover:bg-sumo-gold group-hover:text-white transition-all transform rotate-180">
-                <ArrowLeft size={16} />
-              </div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 4. CTA Section */}
-      <section className="bg-sumo-dark py-20 mt-12 relative overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-20 mix-blend-overlay"
-          style={{
-            backgroundImage: "url('/images/bg/washi.png')",
-            backgroundRepeat: "repeat",
-          }}
-        ></div>
-        <div className="container mx-auto text-center relative z-10 px-6">
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-white mb-6">
-            あなたも相撲を始めませんか？
-          </h2>
-          <p className="text-gray-400 mb-8">
-            お近くの相撲クラブを探して、見学・体験に行ってみましょう。
-          </p>
-          <Button
-            href="/clubs"
-            variant="primary"
-            className="shadow-xl py-4 px-10 text-lg font-bold"
-          >
-            クラブを探す
-          </Button>
-        </div>
-      </section>
+      <ScrollToTop />
     </div>
   );
 };

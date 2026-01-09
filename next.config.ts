@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
         hostname: "restless-frost-36397932.stg-s.snapup.jp",
         pathname: "/**",
       },
-      // 如果你也用了 unsplash 或其他图床，记得也加在这里
       {
         protocol: "https",
         hostname: "images.unsplash.com",
@@ -19,6 +18,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.transparenttextures.com",
         pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.pixabay.com",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
       },
     ],
   },

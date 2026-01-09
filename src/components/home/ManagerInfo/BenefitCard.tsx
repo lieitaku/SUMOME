@@ -21,35 +21,64 @@ const BenefitCard = ({
   return (
     <div
       className={cn(
-        "group relative border border-sumo-gold/10 bg-white/5 p-8 md:p-10",
-        "transition-all duration-500 reveal-up",
-        "border-l-4 border-l-sumo-gold/30",
-        // Hover 状态优化：红色左边框、淡红背景、上浮、投影
-        "hover:border-l-sumo-red hover:bg-sumo-red/5 hover:-translate-y-1",
-        "hover:shadow-[0_10px_30px_-10px_rgba(211,50,62,0.15)]",
+        // === 基础容器样式 ===
+        "group relative p-8 md:p-12 bg-white transition-all duration-500 reveal-up",
+
+        // ✨ Mobile (手机端优化):
+        // 1. border: 四周有极淡的边框，强调独立感
+        // 2. rounded-sm: 小圆角，像个卡片
+        // 3. shadow-sm: 极淡的阴影，增加层次
+        "border border-gray-100 rounded-sm shadow-sm",
+
+        // ✨ Desktop (电脑端样式):
+        // 1. md:border-0: 去掉四周边框
+        // 2. md:border-b: 只保留底边框 (列表风)
+        // 3. md:rounded-none: 直角
+        // 4. md:shadow-none: 去掉阴影
+        // 5. md:hover:bg-gray-50: 悬停变灰
+        "md:border-0 md:border-b md:border-gray-200 md:rounded-none md:shadow-none md:hover:bg-gray-50",
+
         delay,
         className,
       )}
     >
-      {/* 背景大数字 */}
-      <div className="absolute top-4 right-6 text-6xl md:text-8xl font-serif font-bold text-sumo-gold opacity-10 transition-all duration-700 ease-out select-none group-hover:text-sumo-red group-hover:opacity-20 group-hover:scale-110 group-hover:rotate-12">
-        {number}
+      <div className="flex flex-col md:flex-row gap-5 md:gap-10 items-start">
+        {/* 数字 */}
+        <div className="text-4xl md:text-5xl font-serif font-black text-sumo-brand/40 md:text-gray-200 md:group-hover:text-sumo-brand transition-colors duration-300 select-none flex-shrink-0">
+          {number}
+        </div>
+
+        <div className="flex-grow">
+          {/* 标题 */}
+          <h3 className="text-xl md:text-2xl font-bold mb-3 md:mb-4 text-sumo-brand md:text-sumo-text md:group-hover:text-sumo-brand transition-colors duration-300">
+            {title}
+          </h3>
+
+          {/* 描述 */}
+          <p className="text-gray-500 leading-loose text-sm md:text-base font-medium transition-colors duration-300">
+            {desc}
+          </p>
+        </div>
       </div>
 
-      {/* 标题 */}
-      <h3 className="text-xl md:text-2xl font-bold mb-4 flex items-center gap-4 relative z-10">
-        <span className="text-sumo-gold group-hover:text-sumo-red transition-colors duration-300 text-xs">
-          ●
-        </span>
-        <span className="group-hover:text-sumo-gold transition-colors duration-300">
-          {title}
-        </span>
-      </h3>
+      {/* === 装饰线优化 === */}
+      <div
+        className={cn(
+          "absolute left-0 w-[4px] bg-sumo-brand transition-transform duration-300 origin-top",
 
-      {/* 描述文字 */}
-      <p className="text-gray-400 leading-loose text-sm md:text-base relative z-10 group-hover:text-gray-300 transition-colors duration-300 font-medium">
-        {desc}
-      </p>
+          // ✨ Mobile:
+          // 1. top-4 bottom-4: 上下各留 16px 空白，不连在一起，有呼吸感
+          // 2. rounded-r: 红线本身加个小圆角
+          // 3. scale-y-100: 默认一直显示
+          "top-4 bottom-4 rounded-r scale-y-100",
+
+          // ✨ Desktop:
+          // 1. md:top-0 md:bottom-0: 顶天立地，变成连贯的线条
+          // 2. md:rounded-none: 直角
+          // 3. md:scale-y-0: 默认隐藏，hover时显示
+          "md:top-0 md:bottom-0 md:rounded-none md:scale-y-0 md:group-hover:scale-y-100",
+        )}
+      ></div>
     </div>
   );
 };
