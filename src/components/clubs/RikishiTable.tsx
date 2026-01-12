@@ -119,7 +119,6 @@ const RikishiTable = ({ rikishiList, prefectureName }: RikishiTableProps) => {
                 interactive={true} // 开启触摸回弹效果
                 className={cn(
                   "p-5", // 内部间距
-                  // ✨ 修复关键点：现役力士特殊标记
                   rikishi.active
                     ? // 如果是现役：左侧绿边 (border-l-green-500) 且 底部绿边 (border-b-green-500)
                       "border-l-4 border-l-green-500 border-b-green-500"

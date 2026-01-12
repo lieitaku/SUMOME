@@ -6,7 +6,7 @@ import Link from "next/link";
 
 type PageHeroProps = {
   title: string; // 显示的标题 (如: 北海道)
-  enTitle?: string; // ✨ 新增：背景水印用的罗马字 (如: HOKKAIDO)
+  enTitle?: string; // 背景水印用的罗马字 (如: HOKKAIDO)
   subtitle?: string; // 副标题
   backLink?: {
     href: string;
@@ -16,7 +16,7 @@ type PageHeroProps = {
 
 const PageHero = ({
   title,
-  enTitle, // ✨ 解构出新参数
+  enTitle,
   subtitle,
   backLink = { href: "/", label: "TOPに戻る" },
 }: PageHeroProps) => {
