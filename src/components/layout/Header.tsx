@@ -52,30 +52,22 @@ const Header = () => {
   ];
 
   // =================================================================
-  // 颜色状态逻辑 (Color Logic)
+  // 颜色状态逻辑 (Color Logic) - 用于控制除Logo外的文字颜色
   // =================================================================
 
-  // 1. 精确匹配列表 (Exact Match)
-  // 这些页面必须完全匹配才变色 (适合像 /clubs 这样父子页面风格不统一的情况)
   const exactLightPaths = ["/clubs"];
-
-  // 2. 前缀匹配列表 (Prefix Match) - 扩展性接口
-  // 如果以后有某个栏目(比如 /company)，它和它所有的子页面都是白底黑字，就加在这里
   const prefixLightPaths = ["/clubs/search"];
 
-  // 3. 判断逻辑
   const isLightPage =
-    // 情况 A: 精确匹配
     exactLightPaths.includes(pathname || "") ||
-    // 情况 B: 前缀匹配 (只要以这个开头就算)
     prefixLightPaths.some((path) => pathname?.startsWith(path));
 
-  // 4. 样式计算
+  // 基础文字颜色（用于副标题、导航菜单等）保持原样
   const baseTextClass = isScrolled
     ? "text-sumo-dark"
     : isLightPage
-      ? "text-sumo-brand" // 浅色页顶部：主题蓝
-      : "text-white"; // 深色页顶部：白色
+      ? "text-sumo-brand"
+      : "text-white";
 
   const headerContainerClass = isScrolled
     ? "bg-white/95 backdrop-blur-md shadow-sm py-3"
@@ -92,6 +84,16 @@ const Header = () => {
       ? "bg-sumo-brand/20"
       : "bg-white/30";
 
+  // 定义彩虹色数组 (提取到外面，保持整洁)
+  const rainbowColors = [
+    "#23ac47", // S
+    "#a35ea3", // U
+    "#2454a4", // M
+    "#df282f", // O
+    "#63bbe2", // M
+    "#f49e15", // E
+  ];
+
   return (
     <>
       <header
@@ -101,34 +103,19 @@ const Header = () => {
           {/* --- Logo Area --- */}
           <Link
             href="/"
+            // baseTextClass 依然保留在父级，确保副标题能继承正确的黑/白颜色
             className={`group z-[110] relative flex items-center gap-4 transition-colors duration-300 ${baseTextClass}`}
             onClick={() => setMenuOpen(false)}
           >
             <div className="flex items-baseline font-serif font-bold text-2xl tracking-widest leading-none">
               {["S", "U", "M", "O", "M", "E"].map((char, index) => {
-                const rainbowColors = [
-                  "#23ac47",
-                  "#a35ea3",
-                  "#2454a4",
-                  "#df282f",
-                  "#63bbe2",
-                  "#f49e15",
-                ];
-
-                let charColor;
-                if (isScrolled) {
-                  charColor = rainbowColors[index];
-                } else if (isLightPage) {
-                  charColor = "#2454a4"; // Sumo Brand Blue
-                } else {
-                  charColor = "#ffffff";
-                }
+                const charColor = rainbowColors[index % rainbowColors.length];
 
                 return (
                   <span
                     key={index}
                     className="transition-colors duration-500"
-                    style={{ color: charColor }}
+                    style={{ color: charColor }} // 强制应用彩虹色
                   >
                     {char}
                   </span>
@@ -136,11 +123,12 @@ const Header = () => {
               })}
             </div>
 
-            {/* 分割线 */}
+            {/* 分割线 (保持原有的动态颜色) */}
             <span
               className={`h-8 w-[1px] transition-colors duration-500 ${dividerClass}`}
             ></span>
 
+            {/* 副标题 (保持继承 baseTextClass，即白色/黑色自动切换) */}
             <div className="flex flex-col justify-center items-start h-full pt-0.5">
               <span
                 className={`text-[9px] font-sans font-bold tracking-[0.2em] leading-tight transition-colors duration-500 opacity-70`}
@@ -215,7 +203,7 @@ const Header = () => {
         </div>
       </header>
 
-      {/* Mobile Menu (省略，保持不变) */}
+      {/* Mobile Menu (保持不变) */}
       <div
         className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[140] transition-opacity duration-300 ease-in-out ${
           menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -227,7 +215,6 @@ const Header = () => {
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* ... Mobile Menu Content ... */}
         <div className="flex flex-col h-full p-6">
           <div className="flex justify-end mb-8">
             <button
