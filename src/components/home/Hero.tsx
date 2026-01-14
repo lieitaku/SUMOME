@@ -3,12 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import RabbitBanner from "@/components/home/RabbitBanner";
-import { cn } from "@/lib/utils";
 
 const Hero = () => {
   return (
     <section className="relative w-full h-screen flex flex-col items-center overflow-hidden bg-sumo-bg">
-      {/* 1. 背景层 (Background Layer) */}
+      {/* 1. 背景层 (不变) */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/images/bg/hero-bg-1.jpg"
@@ -21,103 +20,81 @@ const Hero = () => {
         <div className="absolute bottom-0 w-full h-[30vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/80 to-transparent" />
       </div>
 
-      {/* 2. 核心内容层 */}
-      <div className="relative z-10 w-full h-full container mx-auto px-6 flex flex-col justify-center pb-40 reveal-up">
-        {/* --- 高级感排版容器 --- */}
-        <div className="relative group max-w-2xl">
-          {/* 左上角标签：始创年份 */}
-          <div className="absolute -top-6 -left-6 md:-top-10 md:-left-10 w-16 h-16 md:w-20 md:h-20 bg-sumo-red z-20 flex flex-col items-center justify-center text-white shadow-lg">
-            <span className="font-sans font-bold text-[10px] md:text-xs tracking-widest opacity-80">
-              EST.
-            </span>
-            <span className="font-serif font-black text-lg md:text-2xl leading-none mt-0.5">
-              25
-            </span>
-          </div>
+      {/* 2. 核心内容层 (左上角) */}
+      {/* 调整：p-8 md:p-12 保持边距 */}
+      <div className="absolute top-20 left-20 z-10 p-8 md:p-12 reveal-up">
+        {/* --- 🆕 新设计：双层方块铭牌 (Stacked Block Plaque) --- */}
+        {/* Flex 布局：左侧红条 + 右侧内容区 */}
+        <div className="relative bg-white shadow-[0_25px_50px_rgba(0,0,0,0.15)] flex flex-row group overflow-hidden max-w-[380px]">
+          {/* 顶部装饰红线 (Hover动效) */}
+          <div className="absolute top-0 left-0 w-full h-[3px] bg-sumo-red scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-30"></div>
 
-          {/* 白色卡片容器 */}
-          <div className="relative bg-[#ffffff] p-8 md:p-12 shadow-[0_30px_60px_rgba(0,0,0,0.2)] overflow-hidden">
-            {/* 背景噪点纹理 */}
-            <div
-              className="absolute inset-0 pointer-events-none opacity-[0.05]"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-              }}
-            ></div>
-
-            {/* 极细的装饰线 */}
-            <div className="absolute top-0 left-8 md:left-12 w-[1px] h-full bg-gray-200 z-0" />
-
-            {/* 右上角装饰：星取表 (Win/Loss Record) */}
-            <div className="absolute top-6 right-6 md:top-8 md:right-8 flex flex-col items-end opacity-30">
-              <div className="flex gap-1.5 mb-1">
-                {/* 模拟相扑战绩：白星(胜)与黑星(负) */}
-                {/* 这是一个固定的数组，不会导致 hydration mismatch 报错 */}
-                {["win", "win", "loss", "win", "win", "loss"].map(
-                  (status, i) => (
-                    <div
-                      key={i}
-                      className={cn(
-                        "w-2 h-2 rounded-full border border-black",
-                        status === "loss" ? "bg-black" : "bg-transparent", // loss=黑星(实心), win=白星(空心)
-                      )}
-                    />
-                  ),
-                )}
-              </div>
-              <span className="text-[8px] font-mono tracking-widest text-black">
-                RECORD NO. 25-01
+          {/* Part A: 左侧红色脊柱 (Visual Spine) - 贯穿全高 */}
+          <div className="w-16 bg-sumo-red text-white flex flex-col justify-between items-center py-6 relative z-10 shrink-0">
+            {/* 顶部 EST */}
+            <div className="flex flex-col items-center">
+              <span className="text-[8px] font-bold tracking-widest opacity-80 mb-1">
+                EST.
+              </span>
+              <span className="font-serif text-xl font-black leading-none">
+                25
               </span>
             </div>
 
-            <div className="relative z-10 flex flex-col gap-8">
-              {/* Top Label */}
-              <div className="flex items-center gap-4">
-                <span className="h-[1px] w-8 bg-sumo-text"></span>
-                <span className="text-[10px] md:text-xs font-bold tracking-[0.4em] uppercase text-sumo-text/60 font-sans">
-                  The Philosophy
-                </span>
-              </div>
+            {/* 底部装饰线 */}
+            <div className="w-[1px] h-12 bg-white/30"></div>
+          </div>
 
-              {/* Main Title: 心技体 */}
-              <h1 className="flex items-center gap-4 md:gap-8 font-serif text-sumo-text leading-none select-none">
-                <span className="text-6xl md:text-8xl font-black tracking-tighter">
-                  心
-                </span>
-                {/* 几何圆点 */}
-                <span className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full bg-sumo-red opacity-80"></span>
-                <span className="text-6xl md:text-8xl font-black tracking-tighter">
-                  技
-                </span>
-                <span className="w-1.5 h-1.5 md:w-3 md:h-3 rounded-full bg-sumo-red opacity-80"></span>
-                <span className="text-6xl md:text-8xl font-black tracking-tighter">
-                  体
-                </span>
-              </h1>
+          {/* Part B & C: 右侧内容区 (上下堆叠) */}
+          <div className="flex flex-col bg-white relative">
+            {/* 纹理背景 */}
+            <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 pointer-events-none mix-blend-multiply z-0"></div>
 
-              {/* Description */}
-              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pt-6 border-t border-gray-200">
-                {/* 左侧 */}
-                <p className="font-serif text-lg md:text-xl font-bold text-sumo-text tracking-widest">
-                  伝統を、
-                  <br className="md:hidden" />
-                  未来へ繋ぐ。
-                </p>
-
-                {/* 右侧 */}
-                <div className="text-right">
-                  <p className="font-sans text-[10px] md:text-xs font-medium text-gray-400 tracking-[0.2em] uppercase leading-relaxed">
-                    Spirit • Technique • Body
-                    <br />
-                    The Essence of Sumo
-                  </p>
+            {/* B: 上半部分 - 核心视觉 (心技体) */}
+            {/* py-8 px-8: 增加留白 */}
+            <div className="relative z-10 px-8 pt-8 pb-4">
+              <h1 className="flex items-center gap-5 font-serif text-sumo-text leading-none select-none">
+                <div className="flex flex-col items-center gap-1 group/text cursor-default">
+                  <span className="text-5xl font-black tracking-tighter group-hover/text:text-sumo-red transition-colors duration-300">
+                    心
+                  </span>
                 </div>
-              </div>
+
+                <span className="w-1.5 h-1.5 bg-gray-200 rounded-full"></span>
+
+                <div className="flex flex-col items-center gap-1 group/text cursor-default">
+                  <span className="text-5xl font-black tracking-tighter group-hover/text:text-sumo-red transition-colors duration-300">
+                    技
+                  </span>
+                </div>
+
+                <span className="w-1.5 h-1.5 bg-gray-200 rounded-full"></span>
+
+                <div className="flex flex-col items-center gap-1 group/text cursor-default">
+                  <span className="text-5xl font-black tracking-tighter group-hover/text:text-sumo-red transition-colors duration-300">
+                    体
+                  </span>
+                </div>
+              </h1>
             </div>
 
-            {/* 背景水印 */}
-            <div className="absolute -left-5 -bottom-8 text-[8rem] font-serif font-black text-gray-900 opacity-[0.05] select-none pointer-events-none leading-none z-0">
-              SUMOME
+            {/* 分割线 */}
+            <div className="w-full h-[1px] bg-gray-100 px-8 box-content opacity-50"></div>
+
+            {/* C: 下半部分 - 理念文案 (放在下面，颜色低调) */}
+            <div className="relative z-10 px-8 py-5">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-1 h-1 bg-sumo-red rounded-full"></div>
+                <span className="text-[8px] font-bold tracking-[0.2em] text-gray-400 uppercase">
+                  Philosophy
+                </span>
+              </div>
+              <p className="font-serif text-base font-bold text-sumo-text tracking-widest leading-none mb-1">
+                伝統と未来の融合
+              </p>
+              <p className="font-sans text-[9px] text-gray-400 font-medium tracking-wider">
+                Bridging Tradition & Future
+              </p>
             </div>
           </div>
         </div>

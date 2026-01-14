@@ -1,6 +1,7 @@
 /**
  * ==============================================================================
  * 🛠️ 配置文件 (Config)
+ * 存放兔子变体数据和赞助商数据生成逻辑
  * ==============================================================================
  */
 
@@ -16,7 +17,7 @@ export type RabbitVariant = {
   };
 };
 
-// 🐰 兔子种类配置 (目前有 4 种形态)
+// 🐰 兔子种类配置 (4 种形态)
 export const RABBIT_VARIANTS: RabbitVariant[] = [
   // Type 1
   {
@@ -44,12 +45,11 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   },
 ];
 
-// 🏢 赞助商初始数据
-// 即使这里只有几个，主程序也会自动复制以填满屏幕
-export const RAW_SPONSORS = [
-  { id: 1, name: "SUMOME", color: "bg-[#1B1C37]" },
-  { id: 2, name: "Premium", color: "bg-[#A82429]" },
-  { id: 3, name: "Golden", color: "bg-[#C39B4F]" },
-  { id: 4, name: "Memory", color: "bg-[#5D3F6A]" },
-  { id: 5, name: "Future", color: "bg-[#2F4F4F]" },
-];
+// 🏢 赞助商数据生成 (Smart Logic)
+// 自动生成 id: 1~15，对应图片 /images/sponsors/1.png ~ 15.png
+export const RAW_SPONSORS = Array.from({ length: 15 }, (_, i) => ({
+  id: i + 1,
+  // 对应 public/images/sponsors/ 下的文件
+  image: `/images/sponsors/${i + 1}.png`,
+  alt: `Sponsor ${i + 1}`,
+}));

@@ -12,19 +12,15 @@ import { RABBIT_VARIANTS, RAW_SPONSORS } from "./config";
 export default function RabbitWalkingBanner() {
   // --- 1. 数据处理：确保数据足够长以支持无缝循环 ---
   // 复制 3 份：1份展示，1份用于无缝衔接，1份缓冲
+  // 即使有15个数据，复制3份也是标准做法，保证宽屏流畅
   let loopData = [...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS];
-
-  // 安全检查：如果赞助商特别少，再多复制一份防止宽屏空白
-  if (RAW_SPONSORS.length < 5) {
-    loopData = [...loopData, ...RAW_SPONSORS, ...RAW_SPONSORS];
-  }
 
   // --- 2. 物理参数配置 ---
   const UNIT_WIDTH = 320; // 每一组（兔子+旗帜）的宽度
   const GAP = 0; // 间距
   const SPEED_PX_PER_SEC = 50; // 移动速度：每秒 50px (走路速度)
 
-  // 核心计算：一次完整循环的总距离
+  // 核心计算：一次完整循环的总距离 (只计算一份数据的长度)
   const ONE_CYCLE_DISTANCE = (UNIT_WIDTH + GAP) * RAW_SPONSORS.length;
 
   // 核心计算：跑完一圈需要多少秒
@@ -48,7 +44,7 @@ export default function RabbitWalkingBanner() {
         .animate-scroll {
           animation: scrollRabbit var(--scroll-duration) linear infinite;
           width: max-content; /* 宽度由内容撑开 */
-          will-change: transform; /* 性能优化：告诉浏览器即将发生变换 */
+          will-change: transform; /* 性能优化 */
         }
 
         /* 鼠标悬停时暂停，方便用户看清赞助商 */
@@ -106,28 +102,45 @@ export default function RabbitWalkingBanner() {
                       className="origin-bottom"
                       style={{ transform: `scale(${scale})` }}
                     >
-                      {/* === 🚩 旗帜设计 Start === */}
-                      <div className="relative flex flex-col items-center">
-                        {/* 金色横杆 */}
+                      {/* === 🚩 旗帜设计 Start (海报贴图版) === */}
+                      <div className="relative flex flex-col items-center group">
+                        {/* 1. 金色横杆 */}
                         <div className="w-[180px] h-[8px] bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-20 shadow-lg border border-[#B8860B]"></div>
 
-                        {/* 旗面主体 */}
-                        <div
-                          className={`relative w-[170px] h-[280px] -mt-[6px] z-10 flex flex-col items-center justify-center shadow-2xl border-x border-black/10 ${item.color}`}
-                        >
+                        {/* 2. 旗面主体 */}
+                        <div className="relative w-[170px] h-[280px] -mt-[6px] z-10 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5">
                           {/* 顶部阴影 */}
-                          <div className="absolute top-0 left-0 w-full h-8 bg-gradient-to-b from-black/30 to-transparent z-10"></div>
+                          <div className="absolute top-0 left-0 w-full h-6 bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"></div>
 
-                          {/* 内部白纸区域 */}
-                          <div className="relative z-20 bg-[#FDFBF7] w-[150px] h-[250px] flex items-center justify-center shadow-inner">
-                            {/* 竖排文字 */}
-                            <span className="block writing-vertical text-center font-serif font-black text-slate-900 text-4xl tracking-[0.2em] h-full mx-auto py-6 leading-none opacity-90">
-                              {item.name}
-                            </span>
-                          </div>
+                          {/* 🖼️ 广告图片区域 */}
+                          <img
+                            src={item.image}
+                            alt={item.alt}
+                            // 控制区
+                            className={`
+                              relative z-10 shadow-sm rounded-sm
+                              
+                              /* 1. 宽度控制：w-full 是占满 170px，w-[90%] 是留一点边，w-[130px] 是固定像素 */
+                              w-[85%] 
+
+                              /* 2. 高度控制：h-auto (自动按比例)，h-full (强制拉满280px)，h-[200px] (固定高度) */
+                              h-auto
+
+                              /* 3. 填充模式 (最关键！)：
+                                 - object-contain : 保证图片完整显示 (可能会有留白)
+                                 - object-cover   : 强制填满区域 (可能会裁切掉图片边缘)
+                                 - object-fill    : 强制拉伸填满 (图片会变形，变扁或变瘦，但绝对没留白)
+                              */
+                              object-contain
+                            `}
+                          />
+
+                          {/* ✨ 纹理和光泽层 */}
+                          <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 mix-blend-multiply z-20 pointer-events-none"></div>
+                          <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-white/5 to-black/10 z-20 pointer-events-none"></div>
                         </div>
 
-                        {/* 底部流苏/装饰 */}
+                        {/* 3. 底部流苏 */}
                         <div className="w-[160px] h-[50px] bg-gradient-to-b from-transparent to-black/5 relative">
                           <div
                             className="w-full h-full"
