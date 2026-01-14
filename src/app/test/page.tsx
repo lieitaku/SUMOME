@@ -39,7 +39,7 @@ const RABBIT_VARIANTS: RabbitVariant[] = [
   },
 ];
 
-// 🐰 RabbitActor 组件保持不变
+// RabbitActor 组件保持不变
 interface RabbitProps {
   frames: string[];
   fps?: number;
@@ -94,7 +94,7 @@ const RAW_SPONSORS = [
 
 /**
  * ==============================================================================
- * 🚩 主组件: RabbitWalkingBanner
+ * 主组件: RabbitWalkingBanner
  * ==============================================================================
  */
 export default function RabbitWalkingBanner() {
@@ -108,7 +108,7 @@ export default function RabbitWalkingBanner() {
     loopData = [...loopData, ...RAW_SPONSORS, ...RAW_SPONSORS];
   }
 
-  // 📐 尺寸配置
+  // 尺寸配置
   const UNIT_WIDTH = 320;
   const GAP = 0;
 
