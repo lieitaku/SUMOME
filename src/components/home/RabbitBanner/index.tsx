@@ -116,10 +116,10 @@ export default function RabbitWalkingBanner() {
                       {/* === 🚩 旗帜设计 Start (海报贴图版) === */}
                       <div className="relative flex flex-col items-center group">
                         {/* 1. 金色横杆 */}
-                        <div className="w-[180px] h-[8px] bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-20 shadow-lg border border-[#B8860B]"></div>
+                        <div className="w-[190px] h-[8px] bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-20 shadow-lg border border-[#B8860B]"></div>
 
                         {/* 2. 旗面主体 */}
-                        <div className="relative w-[170px] h-[280px] -mt-[6px] z-10 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5">
+                        <div className="relative w-[170px] h-[220px] -mt-[6px] z-10 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5">
                           {/* 顶部阴影 */}
                           <div className="absolute top-0 left-0 w-full h-6 bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"></div>
 
@@ -152,7 +152,7 @@ export default function RabbitWalkingBanner() {
                         </div>
 
                         {/* 3. 底部流苏 */}
-                        <div className="w-[160px] h-[50px] bg-gradient-to-b from-transparent to-black/5 relative">
+                        <div className="w-[160px] h-[30px] bg-gradient-to-b from-transparent to-black/5 relative">
                           <div
                             className="w-full h-full"
                             style={{
@@ -167,7 +167,11 @@ export default function RabbitWalkingBanner() {
                   </div>
 
                   {/* Layer 3: 手部遮挡 (Z-Index: 20) */}
-                  <div className="absolute inset-0 z-20">
+                  <div
+                    className="absolute inset-0 z-20 transition-all duration-300" // 加个 transition 方便调试时看效果
+                    // 🆕 核心修改：应用配置文件里的手部位置
+                    style={variant.handStyle}
+                  >
                     <img
                       src={variant.hand}
                       alt="Hand"

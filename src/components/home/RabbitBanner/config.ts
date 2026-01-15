@@ -19,6 +19,8 @@ export type RabbitVariant = {
   };
   // 🆕 身体样式：用于特殊处理（如通过 CSS 裁剪掉耳朵）
   bodyStyle?: CSSProperties;
+  // 🆕 新增：手部微调配置 (支持 top, left, transform 等)
+  handStyle?: CSSProperties;
 };
 
 // 🐰 兔子种类配置库
@@ -54,10 +56,16 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   {
     frames: ["/rabbit/1-1.png", "/rabbit/1-2.png", "/rabbit/1-3.png"],
     hand: "/rabbit/hand-1.png",
-    flagStyle: { bottom: "20px", left: "3px", scale: 0.7 },
+    // 🆕 在这里微调手的位置 (支持 px 或 %)
+    handStyle: {
+      // translate(水平位移, 垂直位移)
+      // 比如：往右移 5px，往上移 15px
+      transform: "translate(0,-80px)",
+    },
+    flagStyle: { bottom: "40px", left: "3px", scale: 0.8 },
     bodyStyle: {
       // ✂️ 核心魔法：裁掉顶部 32% 的区域 (隐藏耳朵)
-      clipPath: "inset(32% 0 0 0)",
+      clipPath: "inset(30% 0 0 10%)",
     },
   },
 ];

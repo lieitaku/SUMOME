@@ -130,6 +130,59 @@ const MOBILE_GROUPS = [
   },
 ];
 
+// --- Config: Glaze Colors (Pure Hex) ---
+type ThemeColor = {
+  bg: string;
+  text: string;
+  shadow: string;
+  dot: string;
+};
+
+const REGION_THEMES: Record<string, ThemeColor> = {
+  "北海道・東北": {
+    bg: "#dbe9f0",
+    text: "#4a708b",
+    shadow: "#a8c2d1",
+    dot: "#a8c2d1",
+  },
+  関東: {
+    bg: "#e5dde6",
+    text: "#8a6a8a",
+    shadow: "#cbbccb",
+    dot: "#cbbccb",
+  },
+  中部: {
+    bg: "#dcede4",
+    text: "#5c8a70",
+    shadow: "#b8d6c5",
+    dot: "#b8d6c5",
+  },
+  近畿: {
+    bg: "#f2ece1",
+    text: "#8f7e5e",
+    shadow: "#d9cfbc",
+    dot: "#d9cfbc",
+  },
+  中国: {
+    bg: "#f7f1d5",
+    text: "#9c8c54",
+    shadow: "#e0d6a8",
+    dot: "#e0d6a8",
+  },
+  四国: {
+    bg: "#f7f1d5",
+    text: "#9c8c54",
+    shadow: "#e0d6a8",
+    dot: "#e0d6a8",
+  },
+  "九州・沖縄": {
+    bg: "#d6eeef",
+    text: "#4b8f94",
+    shadow: "#b0d8db",
+    dot: "#b0d8db",
+  },
+};
+
 const JapanMap = () => {
   const getStyle = (x: number, y: number, w: number, h: number) => {
     const unitX = 100 / 17;
@@ -146,53 +199,122 @@ const JapanMap = () => {
   const getLabel = (id: string) =>
     PREF_DATA.find((p) => p.id === id)?.label || id;
 
+  /**
+   * 核心修复：将所有厚度相关的 4px 改为 2px
+   */
+  const getRegionProps = (id: string, isMobile: boolean) => {
+    const group = MOBILE_GROUPS.find((g) => g.ids.includes(id));
+    if (!group) return { style: {}, className: "" };
+
+    const theme = REGION_THEMES[group.region];
+
+    // 1. 定义 CSS 变量
+    const customStyle = {
+      "--r-bg": theme.bg,
+      "--r-text": theme.text,
+      "--r-shadow": theme.shadow,
+    } as React.CSSProperties;
+
+    // 2. 基础类名
+    const baseClasses =
+      "bg-[var(--r-bg)] shadow-none border-0 ring-0 transition-all duration-300";
+
+    let stateClasses = "";
+
+    if (isMobile) {
+      // === Mobile Mode (常驻阴影) ===
+      // 修改点：将 4px 改为 2px，border-b-4 改为 border-b-2
+      stateClasses = cn(
+        "text-[var(--r-text)]",
+        "shadow-[0_2px_0_var(--r-shadow)]", // 4px -> 2px
+        "border-b-2 border-[var(--r-shadow)]", // b-4 -> b-2
+        // 按下效果：位移也同步改为 2px
+        "active:translate-y-[2px] active:shadow-none active:border-b-0",
+      );
+    } else {
+      // === Desktop Mode (Hover 阴影) ===
+      // 修改点：同上，将 4px 改为 2px，border-b-4 改为 border-b-2
+      stateClasses = cn(
+        "text-gray-500 hover:text-[var(--r-text)]",
+        "border-b-2 border-transparent hover:border-[var(--r-shadow)]", // b-4 -> b-2
+        "hover:shadow-[0_2px_0_var(--r-shadow)]", // 4px -> 2px
+        "hover:-translate-y-0.5",
+      );
+    }
+
+    return {
+      style: customStyle,
+      className: cn(baseClasses, stateClasses),
+    };
+  };
+
   return (
     <div className="w-full">
       {/* === A. 手机端视图 (Mobile) === */}
       <div className="md:hidden flex flex-col gap-10">
-        {MOBILE_GROUPS.map((group) => (
-          <div key={group.region}>
-            <h3 className="flex items-center gap-2 mb-4 pl-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-sumo-brand shadow-sm"></div>
-              <span className="text-sumo-dark font-serif font-bold tracking-widest text-sm">
-                {group.region}
-              </span>
-            </h3>
+        {MOBILE_GROUPS.map((group) => {
+          const theme = REGION_THEMES[group.region];
+          return (
+            <div key={group.region}>
+              <h3 className="flex items-center gap-2 mb-4 pl-1">
+                <div
+                  className="w-2 h-2 rounded-full shadow-sm"
+                  style={{ backgroundColor: theme.dot }}
+                ></div>
+                <span className="text-sumo-dark font-serif font-bold tracking-widest text-sm">
+                  {group.region}
+                </span>
+              </h3>
 
-            <div className="grid grid-cols-4 gap-2">
-              {group.ids.map((id) => (
-                <Ceramic
-                  key={id}
-                  as={Link}
-                  href={`/clubs/${id}`}
-                  className="flex items-center justify-center py-3 text-xs font-bold text-gray-500 rounded-xl hover:text-sumo-brand"
-                >
-                  {getLabel(id)}
-                </Ceramic>
-              ))}
+              <div className="grid grid-cols-4 gap-2">
+                {group.ids.map((id) => {
+                  const { style, className } = getRegionProps(id, true);
+                  return (
+                    <Ceramic
+                      key={id}
+                      as={Link}
+                      href={`/clubs/${id}`}
+                      style={style}
+                      className={cn(
+                        "flex items-center justify-center py-3 text-xs font-bold rounded-xl",
+                        className,
+                      )}
+                    >
+                      {getLabel(id)}
+                    </Ceramic>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* === B. 电脑端视图 (Desktop) === */}
       <div className="hidden md:block relative w-full max-w-[900px] aspect-[17/10] mx-auto select-none">
-        {PREF_DATA.map((pref) => (
-          <Ceramic
-            key={pref.id}
-            as={Link}
-            href={`/clubs/${pref.id}`}
-            style={getStyle(pref.x, pref.y, pref.w, pref.h)}
-            className={cn(
-              "absolute flex items-center justify-center text-sm font-bold text-gray-500 tracking-widest",
-              // 圆角加大到 rounded-md (6px)，让釉面感更强
-              // Hover 效果：保持白色背景，只改变文字颜色和层级 (陶瓷组件会自动处理底座变蓝)
-              "rounded-md hover:text-sumo-brand hover:z-10",
-            )}
-          >
-            {pref.label}
-          </Ceramic>
-        ))}
+        {PREF_DATA.map((pref) => {
+          const { style: regionStyle, className } = getRegionProps(
+            pref.id,
+            false,
+          );
+          const positionStyle = getStyle(pref.x, pref.y, pref.w, pref.h);
+
+          return (
+            <Ceramic
+              key={pref.id}
+              as={Link}
+              href={`/clubs/${pref.id}`}
+              style={{ ...positionStyle, ...regionStyle }}
+              className={cn(
+                "absolute flex items-center justify-center text-sm font-bold tracking-widest",
+                "rounded-md hover:z-10",
+                className,
+              )}
+            >
+              {pref.label}
+            </Ceramic>
+          );
+        })}
 
         {/* 装饰图例 */}
         <div className="absolute -bottom-8 right-0 flex flex-col items-end opacity-40 pointer-events-none">
