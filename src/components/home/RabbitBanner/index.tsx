@@ -2,7 +2,11 @@
 
 import React from "react";
 import RabbitActor from "./RabbitActor";
-import { RABBIT_VARIANTS, RAW_SPONSORS } from "./config";
+import {
+  RABBIT_VARIANTS,
+  RAW_SPONSORS,
+  RABBIT_PROBABILITY_POOL,
+} from "./config";
 
 /**
  * ==============================================================================
@@ -17,7 +21,7 @@ export default function RabbitWalkingBanner() {
 
   // --- 2. 物理参数配置 ---
   const UNIT_WIDTH = 320; // 每一组（兔子+旗帜）的宽度
-  const GAP = 0; // 间距
+  const GAP = -50; // 间距
   const SPEED_PX_PER_SEC = 50; // 移动速度：每秒 50px (走路速度)
 
   // 核心计算：一次完整循环的总距离 (只计算一份数据的长度)
@@ -69,10 +73,13 @@ export default function RabbitWalkingBanner() {
           }
         >
           {loopData.map((item, idx) => {
-            // 智能分配：根据索引循环使用 4 种兔子变体
-            const safeIndex =
-              (idx % RAW_SPONSORS.length) % RABBIT_VARIANTS.length;
-            const variant = RABBIT_VARIANTS[safeIndex];
+            // 使用当前的全局索引 (idx) 对概率池长度取余，得到在池中的位置
+            const poolIndex = idx % RABBIT_PROBABILITY_POOL.length;
+            // 从池中取出预设好的兔子变体索引 (0-4)
+            const variantIndex = RABBIT_PROBABILITY_POOL[poolIndex];
+
+            // 获取对应的兔子配置
+            const variant = RABBIT_VARIANTS[variantIndex];
             const { bottom, left, scale = 0.75 } = variant.flagStyle;
 
             return (
@@ -86,7 +93,11 @@ export default function RabbitWalkingBanner() {
                 }}
               >
                 {/* Layer 1: 兔子本体 (Z-Index: 0) */}
-                <div className="absolute inset-0 z-0">
+                <div
+                  className="absolute inset-0 z-0"
+                  // 🆕 注入裁剪样式
+                  style={variant.bodyStyle}
+                >
                   <RabbitActor frames={variant.frames} fps={2} />
                 </div>
 

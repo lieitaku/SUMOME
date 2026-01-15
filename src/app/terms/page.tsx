@@ -37,22 +37,6 @@ const TermsPage = () => {
         </div>
 
         <div className="container mx-auto max-w-4xl relative z-10 px-6 text-center">
-          {/* Back Button */}
-          <div className="absolute top-0 left-6">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
-            >
-              <ChevronLeft
-                size={16}
-                className="group-hover:-translate-x-1 transition-transform"
-              />
-              <span className="text-xs font-bold tracking-widest uppercase">
-                Home
-              </span>
-            </Link>
-          </div>
-
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up mt-8 md:mt-0">
             <Scale size={12} className="text-white" />
             <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">

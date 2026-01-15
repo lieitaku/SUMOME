@@ -40,11 +40,14 @@ const Hero = () => {
             {/* 电脑版内容 (手机版隐藏) */}
             <div className="hidden md:flex flex-col items-center py-6 h-full justify-between">
               <div className="flex flex-col items-center">
-                <span className="text-[8px] font-bold tracking-widest opacity-80 mb-1">
-                  EST.
+                <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1">
+                  令<br />和
                 </span>
                 <span className="font-serif text-xl font-black leading-none">
-                  25
+                  8
+                </span>
+                <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1 pt-1">
+                  年
                 </span>
               </div>
               <div className="w-[1px] h-12 bg-white/30"></div>
