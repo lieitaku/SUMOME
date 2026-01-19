@@ -1,62 +1,74 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-
-/**
- * ==============================================================================
- * 🐇 子组件: 兔子演员 (RabbitActor)
- * 负责播放帧动画，处理图片预加载
- * ==============================================================================
- */
+import React, { useRef, useState, useEffect } from "react";
+import { useRive, Layout, Fit, Alignment } from "@rive-app/react-canvas";
 
 interface RabbitProps {
-  frames: string[];
-  fps?: number; // 帧率，控制走路快慢
+  rivSrc: string;
+  className?: string;
 }
 
-const RabbitActor: React.FC<RabbitProps> = ({ frames, fps = 8 }) => {
-  const [stepIndex, setStepIndex] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
+const RabbitActor: React.FC<RabbitProps> = ({ rivSrc, className }) => {
+  // 1. 视野状态：默认看不见
+  const [isInView, setIsInView] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // 动画序列：0 -> 1 -> 2 -> 1 -> 0 ... (形成流畅的往返走路感)
-  const sequence = [0, 1, 2, 1];
-
-  // 1. 图片预加载逻辑 (防止动画开始时闪烁)
+  // 2. 监听元素是否进入屏幕 (Smart Money 策略：只在需要时消费算力)
   useEffect(() => {
-    setIsLoaded(false);
-    let loadedCount = 0;
-    frames.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      img.onload = () => {
-        loadedCount++;
-        if (loadedCount === frames.length) setIsLoaded(true);
-      };
-    });
-  }, [frames]);
+    const el = containerRef.current;
+    if (!el) return;
 
-  // 2. 动画定时器
-  useEffect(() => {
-    if (!isLoaded) return;
-    const timer = setInterval(() => {
-      setStepIndex((prev) => (prev + 1) % sequence.length);
-    }, 1000 / fps);
-    return () => clearInterval(timer);
-  }, [fps, isLoaded]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          // isIntersecting: 是否在视野内
+          setIsInView(entry.isIntersecting);
+        });
+      },
+      {
+        // 🛠️ 关键参数：rootMargin
+        // "200px" 意味着：在兔子还没进入屏幕、距离屏幕还有 200px 时，就提前开始渲染。
+        // 这样用户滚过去时，动画已经准备好了，不会闪烁。
+        rootMargin: "200px",
+        threshold: 0,
+      },
+    );
 
-  const currentFrameIndex = sequence[stepIndex];
+    observer.observe(el);
 
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  // 3. 只有在视野附近时，才初始化 Rive
+  // 这能把同时运行的 Rive 实例从 60 个降低到 5-6 个，彻底解决 ArrayBuffer 报错
   return (
-    <div className="w-full h-full">
-      {isLoaded && (
-        <img
-          src={frames[currentFrameIndex]}
-          alt="Rabbit"
-          className="w-full h-full object-contain pointer-events-none"
-        />
+    <div ref={containerRef} className={`w-full h-full ${className || ""}`}>
+      {isInView ? (
+        <RiveWrapper rivSrc={rivSrc} />
+      ) : (
+        // 占位符：保持布局不塌陷
+        <div className="w-full h-full" />
       )}
     </div>
   );
+};
+
+// 4. 将 Rive 逻辑拆分为子组件
+// 这样当父组件 isInView 变 false 时，React 会彻底卸载这个组件及其 Wasm 内存
+const RiveWrapper = ({ rivSrc }: { rivSrc: string }) => {
+  const { RiveComponent } = useRive({
+    src: rivSrc,
+    animations: "Timeline 1",
+    autoplay: true,
+    layout: new Layout({
+      fit: Fit.Cover,
+      alignment: Alignment.Center,
+    }),
+  });
+
+  return <RiveComponent />;
 };
 
 export default RabbitActor;

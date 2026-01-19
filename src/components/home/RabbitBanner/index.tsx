@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import RabbitActor from "./RabbitActor";
 import {
   RABBIT_VARIANTS,
@@ -8,63 +8,63 @@ import {
   RABBIT_PROBABILITY_POOL,
 } from "./config";
 
-/**
- * ==============================================================================
- * 🎬 主组件: RabbitWalkingBanner
- * ==============================================================================
- */
 export default function RabbitWalkingBanner() {
-  // --- 1. 数据处理：确保数据足够长以支持无缝循环 ---
-  // 复制 3 份：1份展示，1份用于无缝衔接，1份缓冲
-  // 即使有15个数据，复制3份也是标准做法，保证宽屏流畅
-  let loopData = [...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS];
+  // --- 1. 数据准备 (使用 4 组以增加离屏缓冲) ---
+  // 使用 useMemo 确保数据引用稳定，不会触发 React 重渲染
+  const loopData = useMemo(() => {
+    return [...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS];
+  }, []);
 
-  // --- 2. 物理参数配置 ---
-  const UNIT_WIDTH = 320; // 每一组（兔子+旗帜）的宽度
-  const GAP = -50; // 间距
-  const SPEED_PX_PER_SEC = 50; // 移动速度：每秒 50px (走路速度)
+  // --- 2. 物理参数 ---
+  const UNIT_WIDTH = 320;
+  const GAP = -50;
+  const SPEED_PX_PER_SEC = 50;
 
-  // 核心计算：一次完整循环的总距离 (只计算一份数据的长度)
+  // 计算滚动参数
+  // 💡 核心修改：我们只滚动 1 组的距离，但我们有 4 组数据支撑
   const ONE_CYCLE_DISTANCE = (UNIT_WIDTH + GAP) * RAW_SPONSORS.length;
-
-  // 核心计算：跑完一圈需要多少秒
   const DURATION = ONE_CYCLE_DISTANCE / SPEED_PX_PER_SEC;
 
   return (
     <>
-      {/* --- CSS-in-JS: 动态关键帧动画 --- */}
-      {/* 必须在这里写，因为 keyframes 依赖 JS 计算出的变量 */}
       <style jsx>{`
         @keyframes scrollRabbit {
           0% {
-            transform: translateX(0);
+            /* 从第 0 组开始 */
+            transform: translate3d(0, 0, 0);
           }
           100% {
-            /* 移动到这里时，刚好第一组数据走完，无缝切换回 0 */
-            transform: translateX(var(--scroll-dist));
+            /* 滚到第 1 组结束的位置 */
+            /* 使用 translate3d 强制开启 GPU 加速 */
+            transform: translate3d(var(--scroll-dist), 0, 0);
           }
         }
-
         .animate-scroll {
           animation: scrollRabbit var(--scroll-duration) linear infinite;
-          width: max-content; /* 宽度由内容撑开 */
-          will-change: transform; /* 性能优化 */
+          width: max-content;
+          /* 告诉浏览器这个属性会变，请提前准备 */
+          will-change: transform;
+          /* 确保子元素在 3D 空间中，减少重绘 */
+          transform-style: preserve-3d;
         }
-
-        /* 鼠标悬停时暂停，方便用户看清赞助商 */
         .animate-scroll:hover {
           animation-play-state: paused;
         }
       `}</style>
 
-      {/* --- Banner 容器 --- */}
+      {/* --- Banner 主容器 --- */}
       <div
         className="relative w-full overflow-hidden h-[500px] pointer-events-none z-20"
         aria-hidden="true"
+        style={{
+          // 强制这一块区域不参与浏览器的“内容可见性”优化
+          // 强迫浏览器渲染离屏内容
+          contentVisibility: "auto",
+          containIntrinsicSize: "5000px",
+        }}
       >
         <div
           className="flex absolute bottom-0 left-0 animate-scroll items-end"
-          // 注入动态计算出的 CSS 变量
           style={
             {
               "--scroll-dist": `-${ONE_CYCLE_DISTANCE}px`,
@@ -73,103 +73,88 @@ export default function RabbitWalkingBanner() {
           }
         >
           {loopData.map((item, idx) => {
-            // 使用当前的全局索引 (idx) 对概率池长度取余，得到在池中的位置
-            const poolIndex = idx % RABBIT_PROBABILITY_POOL.length;
-            // 从池中取出预设好的兔子变体索引 (0-4)
+            // 🛠️ 确保每一轮的兔子长得一模一样
+            const dataIndex = idx % RAW_SPONSORS.length;
+            const poolIndex = dataIndex % RABBIT_PROBABILITY_POOL.length;
             const variantIndex = RABBIT_PROBABILITY_POOL[poolIndex];
 
-            // 获取对应的兔子配置
-            const variant = RABBIT_VARIANTS[variantIndex];
-            const { bottom, left, scale = 0.75 } = variant.flagStyle;
+            // 安全获取配置
+            const variant = RABBIT_VARIANTS[variantIndex] || RABBIT_VARIANTS[0];
+
+            const { bottom, left, scale = 0.8, size } = variant.flagStyle;
+            const flagW = size?.width ?? 170;
+            const flagH = size?.height ?? 240;
+            const barW = flagW + 24;
+            const tasselW = flagW - 10;
 
             return (
               <div
-                key={`${item.id}-${idx}`}
+                key={`${item.id}-${idx}`} // Key 保持稳定
                 className="relative flex justify-center"
                 style={{
                   width: UNIT_WIDTH,
                   height: UNIT_WIDTH,
                   marginRight: GAP,
+                  // 强制每一个单元都在 GPU 层
+                  transform: "translateZ(0)",
                 }}
               >
-                {/* Layer 1: 兔子本体 (Z-Index: 0) */}
-                <div
-                  className="absolute inset-0 z-0"
-                  // 🆕 注入裁剪样式
-                  style={variant.bodyStyle}
-                >
-                  <RabbitActor frames={variant.frames} fps={2} />
+                {/* Rabbit Body */}
+                <div className="absolute inset-0 z-0" style={variant.bodyStyle}>
+                  <RabbitActor rivSrc={variant.rivSrc} />
                 </div>
 
-                {/* Layer 2: 旗帜 + 手 (Z-Index: 10) */}
+                {/* Flag + Hand */}
                 <div className="absolute inset-0 z-10">
-                  {/* 旗帜定位容器 */}
                   <div
                     className="absolute w-full flex justify-center transition-all"
                     style={{ bottom, left }}
                   >
-                    {/* 缩放容器 */}
                     <div
                       className="origin-bottom"
                       style={{ transform: `scale(${scale})` }}
                     >
-                      {/* === 🚩 旗帜设计 Start (海报贴图版) === */}
                       <div className="relative flex flex-col items-center group">
-                        {/* 1. 金色横杆 */}
-                        <div className="w-[190px] h-[8px] bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-20 shadow-lg border border-[#B8860B]"></div>
+                        {/* Bar */}
+                        <div
+                          className="h-[8px] bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-20 shadow-lg border border-[#B8860B]"
+                          style={{ width: `${barW}px` }}
+                        ></div>
 
-                        {/* 2. 旗面主体 */}
-                        <div className="relative w-[170px] h-[220px] -mt-[6px] z-10 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5">
-                          {/* 顶部阴影 */}
+                        {/* Flag Face */}
+                        <div
+                          className="relative -mt-[6px] z-10 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5"
+                          style={{ width: `${flagW}px`, height: `${flagH}px` }}
+                        >
                           <div className="absolute top-0 left-0 w-full h-6 bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"></div>
-
-                          {/* 🖼️ 广告图片区域 */}
                           <img
                             src={item.image}
                             alt={item.alt}
-                            // 控制区
-                            className={`
-                              relative z-10 shadow-sm rounded-sm
-                              
-                              /* 1. 宽度控制：w-full 是占满 170px，w-[90%] 是留一点边，w-[130px] 是固定像素 */
-                              w-[85%] 
-
-                              /* 2. 高度控制：h-auto (自动按比例)，h-full (强制拉满280px)，h-[200px] (固定高度) */
-                              h-auto
-
-                              /* 3. 填充模式 (最关键！)：
-                                 - object-contain : 保证图片完整显示 (可能会有留白)
-                                 - object-cover   : 强制填满区域 (可能会裁切掉图片边缘)
-                                 - object-fill    : 强制拉伸填满 (图片会变形，变扁或变瘦，但绝对没留白)
-                              */
-                              object-contain
-                            `}
+                            className="relative z-10 shadow-sm rounded-sm w-[85%] h-auto object-contain"
                           />
-
-                          {/* ✨ 纹理和光泽层 */}
-                          <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 mix-blend-multiply z-20 pointer-events-none"></div>
-                          <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-white/5 to-black/10 z-20 pointer-events-none"></div>
+                          <div className="absolute inset-0 bg-black/5 mix-blend-multiply z-20 pointer-events-none"></div>
                         </div>
 
-                        {/* 3. 底部流苏 */}
-                        <div className="w-[160px] h-[30px] bg-gradient-to-b from-transparent to-black/5 relative">
+                        {/* Tassel */}
+                        <div
+                          className="h-[30px] bg-gradient-to-b from-transparent to-black/5 relative z-10 -mt-[1px]"
+                          style={{ width: `${tasselW}px` }}
+                        >
                           <div
                             className="w-full h-full"
                             style={{
                               backgroundImage:
-                                "repeating-linear-gradient(90deg, #D4AF37, #F4C430 4px, transparent 4px, transparent 8px)",
+                                "repeating-linear-gradient(90deg, #D4AF37, #F4C430 2px, transparent 2px, transparent 4px)",
                             }}
                           ></div>
                         </div>
                       </div>
-                      {/* === 🚩 旗帜设计 End === */}
                     </div>
                   </div>
 
-                  {/* Layer 3: 手部遮挡 (Z-Index: 20) */}
+                  {/* Hand */}
                   <div
-                    className="absolute inset-0 z-20 transition-all duration-300" // 加个 transition 方便调试时看效果
-                    // 🆕 核心修改：应用配置文件里的手部位置
+                    className="absolute inset-0 z-20"
                     style={variant.handStyle}
                   >
                     <img
