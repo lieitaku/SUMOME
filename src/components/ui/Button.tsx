@@ -2,17 +2,14 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-interface ButtonProps {
+// 继承原生 Button 属性，支持 type="submit", disabled, style 等
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   href?: string;
-  // 新增 "ceramic" 变体
   variant?: "primary" | "outline" | "ghost" | "red" | "ceramic";
   className?: string;
-  onClick?: () => void;
-  // 是否处于激活状态 (用于筛选器按钮)
-  isActive?: boolean;
-  // 是否显示箭头 (默认 true，陶瓷按钮通常设为 false)
-  showArrow?: boolean;
+  isActive?: boolean; // 用于筛选器按钮
+  showArrow?: boolean; // 是否显示箭头
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -20,20 +17,22 @@ const Button: React.FC<ButtonProps> = ({
   href,
   variant = "primary",
   className = "",
-  onClick,
   isActive = false,
-  showArrow, // 不设置默认值，在下面逻辑中判断
+  showArrow,
+  // 提取出不需要传给 DOM 的自定义属性，剩下的 props (如 type, disabled) 传给 button
+  ...props
 }) => {
   // 1. 智能判断是否显示箭头
   // 如果用户没传 showArrow：ceramic 默认不显示，其他默认显示
   const shouldShowArrow =
     showArrow !== undefined ? showArrow : variant !== "ceramic";
 
-  // 2. 基础样式 (所有按钮共有)
+  // 2. 基础样式
+  // 新增 disabled:opacity-50 disabled:cursor-not-allowed 处理禁用状态
   const baseStyles =
-    "inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 transform group relative";
+    "inline-flex items-center justify-center font-bold tracking-widest transition-all duration-300 transform group relative disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none";
 
-  // 3. 尺寸样式 (为了方便覆盖，把尺寸分离出来，ceramic 使用自己的尺寸)
+  // 3. 尺寸样式
   const sizeStyles =
     variant === "ceramic"
       ? "px-6 py-3 rounded-xl text-sm"
@@ -47,13 +46,13 @@ const Button: React.FC<ButtonProps> = ({
       "border-2 border-sumo-brand text-sumo-brand hover:bg-sumo-brand hover:text-white",
     ghost: "text-sumo-text hover:text-sumo-brand bg-transparent",
 
-    // 触感陶瓷变体 (Tactile Ceramic)
+    // 触感陶瓷变体
     ceramic: cn(
       "border-t border-x border-gray-50 ease-[cubic-bezier(0.34,1.56,0.64,1)] bg-white",
       isActive
-        ? // 选中状态：浮起 + 蓝底座 + 蓝字 + 强投影
+        ? // 选中状态
           "-translate-y-1 border-b-4 border-b-sumo-brand text-sumo-brand shadow-[0_10px_20px_rgba(36,84,164,0.15)] z-10"
-        : // 未选中状态：沉底 + 灰底座 + 灰字
+        : // 未选中状态
           "border-b-4 border-b-gray-100 text-gray-400 hover:-translate-y-0.5 hover:border-b-gray-200",
     ),
   };
@@ -65,7 +64,7 @@ const Button: React.FC<ButtonProps> = ({
     className,
   );
 
-  // 陶瓷高光效果 (仅在 ceramic 且 active 时显示)
+  // 陶瓷高光效果
   const ceramicHighlight = variant === "ceramic" && isActive && (
     <div className="absolute inset-0 rounded-xl shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] pointer-events-none" />
   );
@@ -83,6 +82,7 @@ const Button: React.FC<ButtonProps> = ({
   );
 
   if (href) {
+    // Link 不接受 disabled 等 button 属性，所以这里只传必要的
     return (
       <Link href={href} className={combinedClasses}>
         {content}
@@ -91,7 +91,7 @@ const Button: React.FC<ButtonProps> = ({
   }
 
   return (
-    <button onClick={onClick} className={combinedClasses}>
+    <button className={combinedClasses} {...props}>
       {content}
     </button>
   );

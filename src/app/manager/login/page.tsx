@@ -12,6 +12,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
+import Button from "@/components/ui/Button"; // ✨ 引入通用 Button
 import { cn } from "@/lib/utils";
 
 const LoginPage = () => {
@@ -24,6 +25,7 @@ const LoginPage = () => {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    // 模拟登录请求
     setTimeout(() => {
       setIsLoading(false);
     }, 1500);
@@ -232,14 +234,14 @@ const LoginPage = () => {
 
                   {/* Submit Button */}
                   <div className="pt-6">
-                    <button
+                    {/* ✨ 替换为通用 Button */}
+                    <Button
                       type="submit"
                       disabled={isLoading}
+                      showArrow={false}
                       className={cn(
-                        "w-full group relative overflow-hidden py-4 bg-sumo-dark text-white text-xs font-bold uppercase tracking-[0.2em] rounded shadow-lg transition-all",
-                        isLoading
-                          ? "opacity-80 cursor-not-allowed"
-                          : "hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl",
+                        "w-full py-4 text-xs font-bold uppercase tracking-[0.2em] shadow-lg bg-sumo-dark text-white hover:bg-sumo-brand",
+                        isLoading ? "opacity-80" : "",
                       )}
                     >
                       <span className="relative z-10 flex items-center justify-center gap-3">
@@ -247,11 +249,11 @@ const LoginPage = () => {
                         {!isLoading && (
                           <ArrowRight
                             size={14}
-                            className="group-hover:translate-x-1 transition-transform"
+                            className="group-hover:translate-x-1 transition-transform duration-300"
                           />
                         )}
                       </span>
-                    </button>
+                    </Button>
                   </div>
                 </form>
 

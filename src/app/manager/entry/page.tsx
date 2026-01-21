@@ -13,6 +13,7 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
+import Button from "@/components/ui/Button"; // 引入我们修复后的通用组件
 import { cn } from "@/lib/utils";
 
 const RegistrationPage = () => {
@@ -22,6 +23,7 @@ const RegistrationPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    // 模拟 API 请求
     setTimeout(() => {
       setIsSubmitting(false);
     }, 1500);
@@ -29,7 +31,7 @@ const RegistrationPage = () => {
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
-      {/* ==================== 1. Header (碧空背景) ==================== */}
+      {/* ==================== 1. 页头区域 (碧空背景) ==================== */}
       <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
@@ -40,12 +42,13 @@ const RegistrationPage = () => {
             backgroundSize: "40px 40px",
           }}
         />
+        {/* 背景大字装饰 */}
         <div className="absolute top-1/2 right-10 -translate-y-1/2 text-[15vw] font-black text-white opacity-[0.03] select-none pointer-events-none leading-none mix-blend-overlay tracking-tighter font-sans">
           JOIN
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
-          {/* Back Button */}
+          {/* 返回按钮 */}
           <div className="absolute top-0 left-6">
             <Link
               href="/"
@@ -80,7 +83,7 @@ const RegistrationPage = () => {
         </div>
       </header>
 
-      {/* ==================== 2. Registration Card (纯白瓷) ==================== */}
+      {/* ==================== 2. 注册卡片区域 (纯白瓷风格) ==================== */}
       <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
         <div className="container mx-auto max-w-5xl">
           <Ceramic
@@ -88,7 +91,7 @@ const RegistrationPage = () => {
             className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden p-0"
           >
             <div className="flex flex-col lg:flex-row min-h-[700px]">
-              {/* --- A. Left Side: Invitation (淡雅灰白) --- */}
+              {/* --- A. 左侧: 邀请文案 (淡雅灰白) --- */}
               <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col">
                 {/* 纸张纹理 */}
                 <div
@@ -139,7 +142,7 @@ const RegistrationPage = () => {
                   </div>
                 </div>
 
-                {/* 底部信赖标识 */}
+                {/* 底部安全标识 */}
                 <div className="relative z-10 mt-12 pt-8 border-t border-gray-200">
                   <div className="flex items-center gap-3 opacity-60">
                     <ShieldCheck size={16} className="text-gray-400" />
@@ -150,7 +153,7 @@ const RegistrationPage = () => {
                 </div>
               </div>
 
-              {/* --- B. Right Side: The Form (纯白书写区) --- */}
+              {/* --- B. 右侧: 注册表单 (纯白书写区) --- */}
               <div className="lg:w-7/12 bg-white p-8 md:p-14 lg:p-16 relative">
                 <div className="flex justify-between items-end mb-10">
                   <div>
@@ -167,12 +170,12 @@ const RegistrationPage = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* Club Name */}
+                  {/* 输入框：俱乐部名称 */}
                   <div className="group relative">
                     <label
                       className={cn(
                         "absolute left-0 transition-all duration-300 pointer-events-none font-bold uppercase tracking-wider flex items-center gap-2",
-                        focusedField === "club" || true // 保持 Label 在上方比较稳妥，或者做成 Floating Label
+                        focusedField === "club" || true // 保持 Label 固定在上方
                           ? "-top-5 text-[10px] text-sumo-brand"
                           : "top-3 text-xs text-gray-400",
                       )}
@@ -190,7 +193,7 @@ const RegistrationPage = () => {
                     />
                   </div>
 
-                  {/* Representative Name */}
+                  {/* 输入框：代表者姓名 */}
                   <div className="group relative">
                     <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                       <User size={12} /> 代表者氏名{" "}
@@ -204,7 +207,7 @@ const RegistrationPage = () => {
                     />
                   </div>
 
-                  {/* Email */}
+                  {/* 输入框：邮箱 */}
                   <div className="group relative">
                     <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                       <Mail size={12} /> メールアドレス{" "}
@@ -218,7 +221,7 @@ const RegistrationPage = () => {
                     />
                   </div>
 
-                  {/* Password */}
+                  {/* 输入框：密码 */}
                   <div className="group relative">
                     <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                       <Lock size={12} /> パスワード{" "}
@@ -232,7 +235,7 @@ const RegistrationPage = () => {
                     />
                   </div>
 
-                  {/* Terms & Button */}
+                  {/* 条款与提交按钮 */}
                   <div className="pt-8">
                     <p className="text-[10px] text-gray-400 mb-6 leading-relaxed">
                       <span className="block mb-2">
@@ -254,30 +257,33 @@ const RegistrationPage = () => {
                       に同意したものとみなされます。
                     </p>
 
-                    <button
+                    {/* 使用通用 Button 组件 
+                      className 中使用 bg-sumo-dark 覆盖默认的 primary 蓝色，
+                      以匹配该页面的深色设计风格
+                    */}
+                    <Button
                       type="submit"
                       disabled={isSubmitting}
+                      showArrow={false} // 手动控制箭头，因为我们想在 Loading 时隐藏它
                       className={cn(
-                        "w-full group relative overflow-hidden py-4 bg-sumo-dark text-white text-xs font-bold uppercase tracking-[0.2em] rounded shadow-lg transition-all",
-                        isSubmitting
-                          ? "opacity-80 cursor-not-allowed"
-                          : "hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl",
+                        "w-full py-4 text-xs font-bold uppercase tracking-[0.2em] shadow-lg bg-sumo-dark text-white hover:bg-sumo-brand",
+                        isSubmitting ? "opacity-80" : "",
                       )}
                     >
-                      <span className="relative z-10 flex items-center justify-center gap-3">
+                      <span className="flex items-center justify-center gap-3">
                         {isSubmitting ? "Processing..." : "Create Account"}
                         {!isSubmitting && (
                           <ArrowRight
                             size={14}
-                            className="group-hover:translate-x-1 transition-transform"
+                            className="group-hover:translate-x-1 transition-transform duration-300"
                           />
                         )}
                       </span>
-                    </button>
+                    </Button>
                   </div>
                 </form>
 
-                {/* Login Link */}
+                {/* 登录链接 */}
                 <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                   <p className="text-xs font-medium text-gray-500">
                     アカウントをお持ちの方は

@@ -8,16 +8,13 @@ import { ArrowRight } from "lucide-react";
 const Introduction = () => {
   return (
     <div className="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-24">
-      {/* 左侧：视觉重心 (图片) 
-          改为：左图右文 (或者保持原样)，这里我根据瑞士风格调整为“图文强对比”
-      */}
+      {/* 左侧：视觉重心 (图片) */}
       <div className="relative w-full lg:w-1/2 h-[400px] lg:h-[500px] reveal-up group">
-        {/* 装饰框：极简黑线框，稍微错位 */}
+        {/* 装饰框：极简黑线框 */}
         <div className="absolute top-4 left-4 w-full h-full border-2 border-gray-100 z-0 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
 
         {/* 图片容器 */}
         <div className="relative w-full h-full z-10 overflow-hidden bg-gray-100">
-          {/* 建议换成一张高清的、有人文感的黑白或低饱和度照片 */}
           <Image
             src="/images/bg/about-intro.jpg"
             alt="About Sumome"
@@ -53,7 +50,7 @@ const Introduction = () => {
           </p>
         </div>
 
-        {/* 链接：简单的文字链 + 箭头 */}
+        {/* 链接 */}
         <Link
           href="/about"
           className="group inline-flex items-center gap-2 mt-10 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all"

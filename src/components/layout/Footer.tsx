@@ -3,30 +3,40 @@
 import React from "react";
 import { Star, Mail } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { useParams } from "next/navigation";
+import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
 
-/**
- * 内部组件：FooterLink
- * ------------------------------------------------------------------
- * 优化点：
- * 1. 悬停时文字变红 (sumo-red)。
- * 2. 增加微小的右移位移动画 (translate-x-1)，增加灵动感。
- * 3. 左侧的小红点保持，作为视觉引导。
- */
+// Component: FooterLink
+// Handles hover color transition dynamically based on the current theme
 const FooterLink = ({
   href,
   children,
+  themeColor,
 }: {
   href: string;
   children: React.ReactNode;
+  themeColor: string;
 }) => (
   <Link
     href={href}
-    className="relative group flex items-center hover:text-sumo-red transition-all duration-300"
+    className="relative group flex items-center transition-all duration-300"
+    style={
+      {
+        "--hover-color": themeColor,
+      } as React.CSSProperties
+    }
   >
-    {/* 装饰点：悬停时浮现 */}
-    <span className="absolute -left-3 w-1 h-1 bg-sumo-red rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-    {/* 文字：悬停时微右移 */}
+    <style jsx>{`
+      .group:hover {
+        color: var(--hover-color);
+      }
+    `}</style>
+    {/* Decorative dot on hover */}
+    <span
+      className="absolute -left-3 w-1 h-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      style={{ backgroundColor: themeColor }}
+    ></span>
+    {/* Slight movement on hover */}
     <span className="group-hover:translate-x-1 transition-transform duration-300">
       {children}
     </span>
@@ -34,10 +44,17 @@ const FooterLink = ({
 );
 
 const Footer = () => {
+  const params = useParams();
+  const prefSlug = params?.pref as string | undefined;
+
+  // Determine current theme color
+  // Defaults to brand blue if not on a specific prefecture page
+  const currentTheme = prefSlug ? getPrefectureTheme(prefSlug) : DEFAULT_THEME;
+  const themeColor = currentTheme.color;
+
   return (
-    // 背景色改为淡米色 (off-white)，更像纸张
     <footer className="bg-[#faf9f6] text-sumo-dark pt-24 pb-12 relative overflow-hidden border-t border-gray-100">
-      {/* 1. 背景纹理层 (CSS 模拟纸张质感) */}
+      {/* Background Texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
@@ -45,17 +62,24 @@ const Footer = () => {
         }}
       ></div>
 
-      {/* 装饰：顶部渐变阴影，增加层次感 */}
+      {/* Top Gradient Overlay */}
       <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white to-transparent opacity-60 pointer-events-none"></div>
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-start gap-16 mb-20">
-          {/* --- 左侧：品牌信息 --- */}
+          {/* --- Left Column: Brand Info --- */}
           <div className="md:w-1/3">
             <div className="flex items-center gap-4 mb-6">
-              {/* 品牌色竖线 (Blue) */}
-              <div className="w-1 h-8 bg-sumo-brand"></div>
-              <h2 className="text-3xl font-serif font-black tracking-[0.1em] text-sumo-dark">
+              {/* Vertical Brand Line: Dynamic Color */}
+              <div
+                className="w-1 h-8"
+                style={{ backgroundColor: themeColor }}
+              ></div>
+              {/* Logo Text: Dynamic Color */}
+              <h2
+                className="text-3xl font-serif font-black tracking-[0.1em]"
+                style={{ color: themeColor }}
+              >
                 SUMOME
               </h2>
             </div>
@@ -72,8 +96,20 @@ const Footer = () => {
               {[Star, Mail].map((Icon, idx) => (
                 <div
                   key={idx}
-                  className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 hover:bg-sumo-brand hover:border-sumo-brand hover:text-white transition-all duration-300 cursor-pointer group shadow-sm"
+                  className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 transition-all duration-300 cursor-pointer group shadow-sm"
+                  style={
+                    {
+                      "--hover-color": themeColor,
+                    } as React.CSSProperties
+                  }
                 >
+                  <style jsx>{`
+                    .group:hover {
+                      background-color: var(--hover-color);
+                      border-color: var(--hover-color);
+                      color: white;
+                    }
+                  `}</style>
                   <Icon
                     size={16}
                     className="group-hover:scale-110 transition-transform"
@@ -83,49 +119,67 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* --- 右侧：Sitemap (Grid Layout) --- */}
-          {/* 增加 font-serif 给标题，营造“目录”感 */}
+          {/* --- Right Column: Sitemap --- */}
           <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-12 text-sm">
             {/* Column 1 */}
             <div>
-              {/* 标题颜色更新为 Brand Blue，字体改为衬线体 */}
-              <h4 className="font-serif font-bold text-sumo-brand mb-6 tracking-widest text-xs uppercase border-b border-sumo-brand/10 pb-2 inline-block">
+              <h4
+                className="font-serif font-bold mb-6 tracking-widest text-xs uppercase border-b pb-2 inline-block"
+                style={{
+                  color: themeColor,
+                  borderColor: `${themeColor}1A`, // 10% opacity
+                }}
+              >
                 SITEMAP
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
-                  <FooterLink href="/">トップページ</FooterLink>
+                  <FooterLink href="/" themeColor={themeColor}>
+                    トップページ
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/clubs">クラブを探す</FooterLink>
+                  <FooterLink href="/clubs" themeColor={themeColor}>
+                    クラブを探す
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/about">SUMOMEについて</FooterLink>
+                  <FooterLink href="/about" themeColor={themeColor}>
+                    SUMOMEについて
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/activities">イベント一覧</FooterLink>
+                  <FooterLink href="/activities" themeColor={themeColor}>
+                    イベント一覧
+                  </FooterLink>
                 </li>
               </ul>
             </div>
 
             {/* Column 2 */}
             <div>
-              <h4 className="font-serif font-bold text-sumo-brand mb-6 tracking-widest text-xs uppercase border-b border-sumo-brand/10 pb-2 inline-block">
+              <h4
+                className="font-serif font-bold mb-6 tracking-widest text-xs uppercase border-b pb-2 inline-block"
+                style={{
+                  color: themeColor,
+                  borderColor: `${themeColor}1A`,
+                }}
+              >
                 FOR MANAGERS
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
-                  <FooterLink href="/manager/entry">
+                  <FooterLink href="/manager/entry" themeColor={themeColor}>
                     新規掲載登録（無料）
                   </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/manager/login">
+                  <FooterLink href="/manager/login" themeColor={themeColor}>
                     管理画面ログイン
                   </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/magazines">
+                  <FooterLink href="/magazines" themeColor={themeColor}>
                     フォトブックについて
                   </FooterLink>
                 </li>
@@ -134,31 +188,46 @@ const Footer = () => {
 
             {/* Column 3 */}
             <div>
-              <h4 className="font-serif font-bold text-sumo-brand mb-6 tracking-widest text-xs uppercase border-b border-sumo-brand/10 pb-2 inline-block">
+              <h4
+                className="font-serif font-bold mb-6 tracking-widest text-xs uppercase border-b pb-2 inline-block"
+                style={{
+                  color: themeColor,
+                  borderColor: `${themeColor}1A`,
+                }}
+              >
                 SUPPORT
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
-                  <FooterLink href="/contact">お問い合わせ</FooterLink>
+                  <FooterLink href="/contact" themeColor={themeColor}>
+                    お問い合わせ
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/terms">利用規約</FooterLink>
+                  <FooterLink href="/terms" themeColor={themeColor}>
+                    利用規約
+                  </FooterLink>
                 </li>
                 <li>
-                  <FooterLink href="/privacy">プライバシーポリシー</FooterLink>
+                  <FooterLink href="/privacy" themeColor={themeColor}>
+                    プライバシーポリシー
+                  </FooterLink>
                 </li>
               </ul>
             </div>
           </div>
         </div>
 
-        {/* --- 底部版权 (Copyright) --- */}
+        {/* --- Bottom Copyright --- */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest">
           <p className="font-sans">
             &copy; 2025 SUMOME INC. All Rights Reserved.
           </p>
           <div className="flex items-center gap-6 mt-4 md:mt-0">
-            <span className="font-serif italic text-sumo-brand/60 normal-case tracking-normal text-xs">
+            <span
+              className="font-serif italic normal-case tracking-normal text-xs"
+              style={{ color: `${themeColor}99` }} // 60% opacity for designer credit
+            >
               Designed by SUMOME Creative
             </span>
           </div>

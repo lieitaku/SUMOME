@@ -5,7 +5,20 @@ import Section from "@/components/ui/Section";
 import Introduction from "./Introduction";
 import ServiceCard from "./ServiceCard";
 
-const SERVICE_DATA = [
+// 定义服务数据的类型
+type ServiceItem = {
+  id: string;
+  kanji: string;
+  title: string;
+  desc: string;
+  img: string;
+  delay: string;
+  href: string;
+  themeGradient: string; // 背景渐变
+  shadowColor: string; // 投影颜色
+};
+
+const SERVICE_DATA: ServiceItem[] = [
   {
     id: "01",
     kanji: "探",
@@ -14,6 +27,9 @@ const SERVICE_DATA = [
     img: "https://cdn.pixabay.com/photo/2017/05/08/16/49/tokyo-tower-2295850_1280.jpg",
     delay: "",
     href: "/clubs",
+    // 🔵 智慧蓝渐变: 从品牌蓝到深蓝，保持稳重但明亮
+    themeGradient: "bg-gradient-to-br from-[#2454a4] to-[#1a3c78]",
+    shadowColor: "shadow-blue-900/30",
   },
   {
     id: "02",
@@ -23,6 +39,9 @@ const SERVICE_DATA = [
     img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.jpg",
     delay: "delay-100",
     href: "/manager/entry",
+    // 🔴 热情红渐变: 从品牌红到深红，非常吸睛
+    themeGradient: "bg-gradient-to-br from-[#df282f] to-[#b01c22]",
+    shadowColor: "shadow-red-900/30",
   },
   {
     id: "03",
@@ -32,21 +51,23 @@ const SERVICE_DATA = [
     img: "https://cdn.pixabay.com/photo/2014/08/22/18/46/photographer-424620_1280.jpg",
     delay: "delay-200",
     href: "/magazines",
+    // 🟡 辉煌金渐变: 这种颜色很难调，这里用一种偏橙的金，避免像土黄
+    themeGradient: "bg-gradient-to-br from-[#E6B422] to-[#B8860B]",
+    shadowColor: "shadow-yellow-900/30",
   },
 ];
 
 const AboutService = () => {
   return (
-    // 1. 使用 Section 组件，背景设为 white (纯白)
     <Section background="white" id="service">
-      {/* 2. 第一部分：Introduction (上层理念) */}
+      {/* 1. Introduction (保持不变) */}
       <div className="mb-32">
         <Introduction />
       </div>
 
-      {/* 3. 第二部分：三本柱 (下层功能) */}
+      {/* 2. 三本柱 (下层功能) */}
       <div className="relative z-10">
-        {/* 标题区：瑞士风格排版 - 左对齐或严格居中 */}
+        {/* 标题区 */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 reveal-up border-b border-gray-200 pb-8">
           <div>
             <p className="text-sumo-brand font-bold text-xs tracking-[0.3em] mb-2 uppercase font-sans">
@@ -62,14 +83,12 @@ const AboutService = () => {
         </div>
 
         {/* 卡片网格 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 items-stretch">
           {SERVICE_DATA.map((item, idx) => (
             <ServiceCard
               key={item.id}
               {...item}
               delayClass={item.delay}
-              // 瑞士风格通常喜欢整齐的Grid，不需要交错(staggered)，
-              // 但如果你喜欢韵律感，可以保留，或者改为 false 让它整齐划一
               isStaggered={idx === 1}
             />
           ))}
