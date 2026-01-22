@@ -13,14 +13,19 @@ import {
   ExternalLink,
 } from "lucide-react";
 
+// 数据源引用
 import { clubsData } from "@/data/clubs";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
-import { getSponsorsByPrefecture } from "@/data/sponsorsData";
+import { RAW_SPONSORS } from "@/components/home/RabbitBanner/config";
+
+// 组件引用
 import ScrollToTop from "@/components/common/ScrollToTop";
-import MiniSponsorBanner from "@/components/common/MiniSponsorBanner";
+import RabbitWalkingBanner from "@/components/home/RabbitBanner";
 import RikishiTable from "@/components/clubs/RikishiTable";
 import ClubCard from "@/components/clubs/ClubCard";
 import Ceramic from "@/components/ui/Ceramic";
+
+// 工具函数
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
 
@@ -28,12 +33,16 @@ const PrefecturePage = () => {
   const params = useParams();
   const prefSlug = params.pref as string;
 
+  // 1. 滚动恢复逻辑
+  // 确保进入页面时滚动条在顶部，避免 Next.js 的默认滚动保留行为影响体验
   useEffect(() => {
     window.scrollTo(0, 0);
     if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   }, []);
 
+  // 2. 数据获取与处理
   const prefData = PREFECTURE_DATABASE[prefSlug];
+  // 如果没有对应县的数据，提供默认兜底数据
   const displayData = prefData || {
     name: prefSlug.toUpperCase(),
     introTitle: `${prefSlug}の相撲事情`,
@@ -42,12 +51,15 @@ const PrefecturePage = () => {
     rikishiList: [],
   };
 
+  // 筛选属于当前区域的俱乐部
   const filteredClubs = clubsData.filter((club) =>
     club.area.includes(displayData.name),
   );
-  const localSponsors = getSponsorsByPrefecture(prefSlug);
+
+  // 获取当前区域的主题色配置
   const theme = getPrefectureTheme(prefSlug);
 
+  // 3. 特性内容逻辑 (用于 Banner 链接)
   const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;
   const bannerTitle = featuredClub
     ? `${featuredClub.name}の相撲風景`
@@ -55,6 +67,7 @@ const PrefecturePage = () => {
   const magazineLink = featuredClub ? `/magazines/${featuredClub.id}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.id}/recruit` : "#";
 
+  // 陶瓷卡片通用样式：底部保留主题色厚边框，其他边保持极细灰线
   const ceramicStyle = {
     borderBottomColor: theme.color,
     boxShadow: `0 4px 10px -2px ${theme.shadow}, 0 2px 4px -2px ${theme.shadow}`,
@@ -63,13 +76,20 @@ const PrefecturePage = () => {
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
+
+        {/* =========================================
+            SECTION 1: 顶部 Hero 区域 (含背景纹理与标题)
+            ========================================= */}
         <section className="relative pt-40 pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">
+          {/* 动态渐变背景 */}
           <div
             className={cn(
               "absolute inset-0 bg-gradient-to-b opacity-100",
               theme.gradient,
             )}
           ></div>
+
+          {/* 网格纹理装饰 */}
           <div
             className="absolute inset-0 pointer-events-none opacity-20"
             style={{
@@ -78,11 +98,14 @@ const PrefecturePage = () => {
               backgroundSize: "40px 40px",
             }}
           />
+
+          {/* 背景超大水印文字 */}
           <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 text-[18vw] font-black text-white opacity-[0.04] select-none pointer-events-none leading-none z-0 mix-blend-overlay uppercase tracking-tighter font-sans">
             {prefSlug}
           </div>
 
           <div className="container mx-auto px-6 relative z-10">
+            {/* 返回按钮 */}
             <div className="mb-8 reveal-up">
               <Link
                 href="/clubs"
@@ -98,6 +121,7 @@ const PrefecturePage = () => {
               </Link>
             </div>
 
+            {/* 标题信息 */}
             <div className="reveal-up delay-100">
               <div className="flex items-center gap-3 mb-4 opacity-80">
                 <span className="h-[1px] w-10 bg-white/50"></span>
@@ -117,14 +141,20 @@ const PrefecturePage = () => {
           </div>
         </section>
 
+        {/* =========================================
+            SECTION 2: 官方合作伙伴 (兔子 Banner)
+            ========================================= */}
         <section className="relative px-6 z-20">
           <div className="container mx-auto max-w-6xl relative -mt-20">
             <Ceramic
               interactive={false}
               className="border border-gray-100 border-b-[6px]"
-              style={ceramicStyle}
+              style={{
+                ...ceramicStyle,
+                marginTop: "-10px",
+              }}
             >
-              <div className="p-8 md:p-12 text-center">
+              <div className="px-2 md:px-4 pt-8 md:pt-12 pb-0 text-center">
                 <div className="mb-8 flex justify-center">
                   <span
                     className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase border"
@@ -141,18 +171,48 @@ const PrefecturePage = () => {
                     Official Top Partners
                   </span>
                 </div>
-                <div className="max-w-4xl mx-auto">
-                  <MiniSponsorBanner />
+
+                {/* 兔子行走动画容器 */}
+                <div
+                  className="w-full relative overflow-visible"
+                  style={{
+                    height: "270px",
+                    paddingBottom: "40px",
+                    maskImage:
+                      "linear-gradient(to right, transparent, black 10%, black 97%, transparent)",
+                    WebkitMaskImage:
+                      "linear-gradient(to right, transparent, black 10%, black 97%, transparent)",
+                  }}
+                >
+                  <div
+                    className="absolute overflow-visible"
+                    style={{
+                      top: "-200px",
+                      bottom: "-40px",
+                      left: "0",
+                      right: "0",
+                      zIndex: 30,
+                    }}
+                  >
+                    <RabbitWalkingBanner scale={1} containerHeight="500px" />
+                  </div>
                 </div>
               </div>
             </Ceramic>
           </div>
         </section>
 
+        {/* =========================================
+            SECTION 3: 主要内容网格 (左侧边栏 + 右侧内容)
+            ========================================= */}
         <section className="relative pb-24 px-6 pt-20">
           <div className="container mx-auto max-w-6xl relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+              {/* --- 左侧侧边栏 (Sticky) --- */}
               <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-8">
+
+                {/* 1. 简介卡片 */}
                 <Ceramic
                   interactive={false}
                   className="p-8 border border-gray-100 border-b-[6px]"
@@ -175,6 +235,7 @@ const PrefecturePage = () => {
                   </p>
                 </Ceramic>
 
+                {/* 2. 本地支持者卡片 (尺寸优化版) */}
                 <Ceramic
                   interactive={false}
                   className="p-0 border border-gray-100 border-b-[6px]"
@@ -188,24 +249,41 @@ const PrefecturePage = () => {
                       className="px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono font-bold shadow-sm"
                       style={{ color: theme.color }}
                     >
-                      {localSponsors.length}
+                      {RAW_SPONSORS.length}
                     </span>
                   </div>
-                  <div className="relative py-10 bg-white group overflow-hidden">
+
+                  {/* 滚动区域: 高度减小 (py-5) */}
+                  <div className="relative py-5 bg-white group overflow-hidden">
+                    <style jsx>{`
+                      @keyframes sponsors-scroll {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(-33.333%); }
+                      }
+                      .sponsors-scroll {
+                        animation: sponsors-scroll 60s linear infinite;
+                      }
+                      .sponsors-scroll:hover {
+                        animation-play-state: paused;
+                      }
+                    `}</style>
                     <div className="absolute top-0 left-0 h-full w-12 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
                     <div className="absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
-                    <div className="flex gap-6 animate-infinite-scroll hover:[animation-play-state:paused] w-max px-6">
-                      {[...localSponsors, ...localSponsors].map(
+
+                    {/* 滚动列表: 间距减小 (gap-4) */}
+                    <div className="flex gap-4 sponsors-scroll w-max px-4">
+                      {[...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS].map(
                         (sponsor, idx) => (
                           <div
                             key={`${sponsor.id}-${idx}`}
                             className="flex-shrink-0"
                           >
-                            <div className="w-40 aspect-[3/4] bg-white rounded-xl border border-gray-100 flex items-center justify-center p-2 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer relative group/item">
+                            {/* 图片容器: 尺寸减小 (w-28) */}
+                            <div className="w-28 aspect-[16/29] bg-white rounded-lg border border-gray-100 flex items-center justify-center p-2 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer relative group/item">
                               <img
-                                src={sponsor.img}
-                                alt={sponsor.name}
-                                className="w-full h-full rounded-lg object-cover opacity-80 grayscale group-hover/item:opacity-100 group-hover/item:grayscale-0 transition-all duration-500"
+                                src={sponsor.image}
+                                alt={sponsor.alt}
+                                className="w-full h-full rounded-lg object-contain opacity-100 transition-all duration-500"
                               />
                             </div>
                           </div>
@@ -213,6 +291,8 @@ const PrefecturePage = () => {
                       )}
                     </div>
                   </div>
+
+                  {/* 底部咨询链接 */}
                   <Link
                     href="/contact"
                     className="block py-4 bg-gray-50 text-center border-t border-gray-100 transition-colors group"
@@ -233,7 +313,10 @@ const PrefecturePage = () => {
                 </Ceramic>
               </div>
 
+              {/* --- 右侧主要内容区域 --- */}
               <div className="lg:col-span-8 flex flex-col gap-12">
+
+                {/* 1. 特性展示 Banner */}
                 {displayData.bannerImg && (
                   <div
                     className="group relative aspect-[21/9] rounded-2xl overflow-hidden shadow-lg block ceramic-3d-hover ring-1 ring-black/5"
@@ -295,6 +378,7 @@ const PrefecturePage = () => {
                   </div>
                 )}
 
+                {/* 2. 俱乐部列表 */}
                 <div>
                   <div className="flex items-end justify-between mb-8 pb-4 border-b border-gray-200/60">
                     <div>
@@ -355,6 +439,7 @@ const PrefecturePage = () => {
                   )}
                 </div>
 
+                {/* 3. 出身力士列表 */}
                 <div>
                   <Ceramic
                     interactive={false}
@@ -373,6 +458,9 @@ const PrefecturePage = () => {
           </div>
         </section>
 
+        {/* =========================================
+            SECTION 4: 底部引导与呼吁
+            ========================================= */}
         <section className="relative py-12 overflow-hidden">
           <div
             className={cn("absolute inset-0 bg-gradient-to-b", theme.gradient)}
@@ -384,7 +472,6 @@ const PrefecturePage = () => {
               <MapPin size={24} />
             </div>
 
-            {/* Updated Copy */}
             <h3 className="text-2xl md:text-3xl font-serif font-black mb-4 drop-shadow-md">
               {displayData.name}の相撲文化を深堀り
             </h3>
@@ -395,7 +482,6 @@ const PrefecturePage = () => {
               地域のイベントや活動にもぜひご注目ください。
             </p>
 
-            {/* Animated Button */}
             <Link
               href="/contact"
               className={cn(

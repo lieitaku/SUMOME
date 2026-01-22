@@ -21,6 +21,11 @@ export type RabbitVariant = {
       width: number; // 旗面宽度 (默认 170)
       height: number; // 旗面高度 (默认 240)
     };
+    // 🆕 新增：单独控制金色穗的尺寸
+    tassel?: {
+      width?: number; // 穗宽度 (默认 flagW - 5)
+      height?: number; // 穗高度 (默认 30)
+    };
   };
 
   // ✂️ 身体特殊样式 (如剪耳朵)
@@ -41,6 +46,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
       left: "-2px",
       scale: 0.7,
       size: { width: 170, height: 260 },
+      tassel: { width: 165, height: 30 },
     },
     handStyle: { transform: "translate(-5px,-5px)" },
   },
@@ -56,6 +62,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
       left: "-2px",
       scale: 0.8,
       size: { width: 164, height: 260 },
+      tassel: { width: 159, height: 30 },
     },
     bodyStyle: { clipPath: "inset(70% 0 0 10%)" },
   },
@@ -72,6 +79,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
       left: "34px",
       scale: 0.8,
       size: { width: 160, height: 280 },
+      tassel: { width: 155, height: 30 },
     },
   },
 ];
@@ -80,20 +88,20 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
  * 🎲 概率池 (Probability Pool)
  * ------------------------------------------------------------------------------
  * ⚠️ 修复闪烁的关键：
- * 池子长度必须和 RAW_SPONSORS.length (15) 保持一致，或者是它的倍数。
+ * 池子长度必须和 RAW_SPONSORS.length (12) 保持一致，或者是它的倍数。
  * 否则滚动一圈后，第一只兔子和接替它的兔子长得不一样，就会闪烁。
  *
- * 目标分布 (总数 15)：
- * - 80% 无耳 (Index 1): 12 个
- * - 20% 其他 (Index 0, 3): 3 个
+ * 目标分布 (总数 12)：
+ * - 75% 无耳 (Index 1): 9 个
+ * - 25% 其他 (Index 0, 2): 3 个
  */
 export const RABBIT_PROBABILITY_POOL = [
-  1, 1, 0, 1, 1, 1, 1, 2, 1, 1, 1, 0, 1, 1, 2,
+  1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1,
 ];
 
 // 🏢 赞助商数据生成
-export const RAW_SPONSORS = Array.from({ length: 15 }, (_, i) => ({
+export const RAW_SPONSORS = Array.from({ length: 12 }, (_, i) => ({
   id: i + 1,
-  image: `/images/sponsors/${i + 1}.png`,
+  image: `/images/sponsors/${i + 1}.jpg`,
   alt: `Sponsor ${i + 1}`,
 }));

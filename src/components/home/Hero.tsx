@@ -17,7 +17,7 @@ const Hero = () => {
           className="object-cover object-top"
           style={{ filter: "brightness(0.9) contrast(1.1)" }}
         />
-        <div className="absolute bottom-0 w-full h-[30vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/80 to-transparent" />
+        <div className="absolute bottom-0 w-full h-[20vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/50 to-transparent" />
       </div>
 
       {/* 2. 核心内容层 */}

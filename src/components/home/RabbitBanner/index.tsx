@@ -62,10 +62,11 @@ export default function RabbitWalkingBanner({
 
       {/* --- Banner 主容器 --- */}
       <div
-        className="relative w-full overflow-hidden pointer-events-none z-20"
+        className="relative w-full overflow-visible pointer-events-none"
         aria-hidden="true"
         style={{
           height: containerHeight,
+          zIndex: 30, // 提高层级，确保显示在其他元素上方
           // 强制这一块区域不参与浏览器的"内容可见性"优化
           // 强迫浏览器渲染离屏内容
           contentVisibility: "auto",
@@ -96,7 +97,7 @@ export default function RabbitWalkingBanner({
             const barW = flagW + 24 * scale;
             const tasselW = (tassel?.width ?? (size?.width ?? 170) - 1) * scale;
             const tasselH = (tassel?.height ?? 30) * scale;
-            
+
             // 调整位置以适应缩放
             const adjustedBottom = parseFloat(bottom) * scale;
             const adjustedLeft = parseFloat(left) * scale;
