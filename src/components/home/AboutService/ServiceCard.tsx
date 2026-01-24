@@ -91,7 +91,7 @@ const ServiceCard = ({
             {/* 2. 汉字 (新的前景层 Foreground Layer) */}
             <span
               className="relative z-10 font-serif font-black text-white drop-shadow-lg transition-transform duration-500 group-hover:-translate-y-2
-                         text-7xl md:text-8xl /* 清晰巨大的汉字 */"
+                         text-7xl md:text-8xl "
             >
               {kanji}
             </span>

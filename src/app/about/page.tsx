@@ -74,10 +74,8 @@ const AboutPage = () => {
                       <br />
                       繋がる。
                       <br />
-                      <span className="text-sumo-brand relative inline-block">
+                      <span className="text-sumo-red relative inline-block">
                         応援する。
-                        {/* 装饰红点 */}
-                        <span className="absolute -left-5 bottom-6 w-2 h-2 rounded-full bg-sumo-red"></span>
                       </span>
                     </h2>
 

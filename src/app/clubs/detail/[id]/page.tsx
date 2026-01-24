@@ -266,28 +266,20 @@ const ClubDetailPage = () => {
                                             </p>
                                         </div>
                                     </div>
-
-                                    {/* 3. 募集 CTA (悬浮感按钮) */}
-                                    <div className="relative group mt-auto">
-                                        <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-blue-400 rounded-lg opacity-30 group-hover:opacity-50 blur transition duration-500"></div>
-                                        <div className="relative bg-white rounded-lg p-1">
-                                            <Button
-                                                href={`/clubs/detail/${club.id}/recruit`}
-                                                className="w-full py-5 text-white shadow-xl hover:shadow-2xl transition-all"
-                                                style={{
-                                                    backgroundColor: BRAND_BLUE,
-                                                }}
-                                            >
-                                                <span className="flex items-center gap-3 text-base">
-                                                    <Users size={18} />
-                                                    体験・入会を申し込む
-                                                </span>
-                                                <ArrowRight
-                                                    size={18}
-                                                    className="ml-2 transition-transform group-hover:translate-x-1"
-                                                />
-                                            </Button>
-                                        </div>
+                                    {/* 3. 募集 CTA */}
+                                    <div className="mt-auto pt-2">
+                                        <Button
+                                            href={`/clubs/detail/${club.id}/recruit`}
+                                            className="w-full py-5 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+                                            style={{
+                                                backgroundColor: BRAND_BLUE,
+                                            }}
+                                        >
+                                            <span className="flex items-center gap-3 text-base">
+                                                <Users size={18} />
+                                                体験・入会を申し込む
+                                            </span>
+                                        </Button>
                                         <p className="text-[10px] text-center text-gray-400 mt-3 font-medium">
                                             まずは見学からでもOK！お気軽にお問い合わせください。
                                         </p>

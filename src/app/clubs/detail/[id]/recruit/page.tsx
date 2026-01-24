@@ -1,72 +1,95 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useParams } from "next/navigation";
-import Image from "next/image";
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
+  ChevronLeft,
   MapPin,
   Clock,
-  Phone,
-  Mail,
   Users,
-  ChevronLeft,
-  Trophy,
-  Calendar,
-  ExternalLink,
-  Star,
-  ArrowRight,
+  CheckCircle2,
+  Send,
+  User,
+  Mail,
+  Phone,
+  Sparkles,
+  Target,
+  CalendarDays,
+  ShieldCheck,
 } from "lucide-react";
 
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { clubsData } from "@/data/clubs";
 
-// 模拟获取单个俱乐部数据的函数
-// 实际项目中请替换为真实的 API 调用或数据查找
-const getClubData = (id: string) => {
-  return {
-    id: id,
-    name: "東京相撲クラブ",
-    enName: "TOKYO SUMO CLUB",
-    area: "東京都",
-    // 假设每个俱乐部都有一个主色调，如果没有则用默认蓝
-    themeColor: "#6D28D9",
-    heroImage:
-      "https://images.unsplash.com/photo-1599587427679-04473335029e?q=80&w=2000&auto=format&fit=crop", //
-    description:
-      "創立50年を迎える伝統ある相撲クラブです。礼儀作法から本格的な技術指導まで、一人ひとりのレベルに合わせて丁寧に指導します。国技館の近くで、相撲の魂を感じながら稽古に励みませんか？",
-    address: "東京都墨田区両国 1-2-3",
-    schedule: "毎週 土・日 9:00 - 12:00",
-    contact: "03-1234-5678",
-    email: "contact@tokyosumo.jp",
-    features: [
-      { label: "初心者歓迎", icon: Star },
-      { label: "全国大会出場", icon: Trophy },
-      { label: "体験無料", icon: Users },
-    ],
-    gallery: [
-      "https://images.unsplash.com/photo-1626683933478-433436d40085?q=80&w=800&auto=format&fit=crop", //
-      "https://images.unsplash.com/photo-1583995803273-199f36bc8ba5?q=80&w=800&auto=format&fit=crop", //
-      "https://images.unsplash.com/photo-1517923769976-59930cb9977f?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1517923769976-59930cb9977f?q=80&w=800&auto=format&fit=crop", //
-    ],
-  };
-};
+// 品牌主色调 (Sumo Blue)
+const BRAND_BLUE = "#2454a4";
 
-const ClubDetailPage = () => {
+const RecruitPage = () => {
   const params = useParams();
   const id = params.id as string;
-  const club = getClubData(id);
+  const router = useRouter();
 
+  // 1. 获取俱乐部数据
+  const club = clubsData.find((c) => c.id === id);
+
+  // 表单状态
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    experience: "beginner",
+    message: "",
+  });
+
+  // 滚动恢复
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // 模拟提交
+    setTimeout(() => {
+      setIsSubmitting(false);
+      alert("お申し込みありがとうございます！(Demo)");
+      // router.push(`/clubs/detail/${id}`); // 提交后可跳转回详情页
+    }, 1500);
+  };
+
+  if (!club) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F4F5F7]">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Club Not Found
+          </h1>
+          <Link href="/clubs" className="text-blue-600 hover:underline">
+            Back to List
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className="bg-[#F4F5F7] min-h-screen font-sans selection:text-white"
-      style={{ "--selection-bg": club.themeColor } as React.CSSProperties}
+      className="min-h-screen bg-[#F4F5F7] font-sans selection:text-white"
+      style={{ "--selection-bg": BRAND_BLUE } as React.CSSProperties}
     >
       <style jsx global>{`
         ::selection {
@@ -74,208 +97,388 @@ const ClubDetailPage = () => {
         }
       `}</style>
 
-      {/* ==================== 1. Cinematic Hero ==================== */}
-      <div className="relative h-[60vh] min-h-[500px] bg-gray-900 overflow-hidden">
-        <Image
-          src={club.heroImage}
-          alt={club.name}
-          fill
-          className="object-cover opacity-70"
-          priority
+      {/* ==================== 1. Header (统一碧空风格) ==================== */}
+      <section className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+        {/* 背景：深邃蓝天渐变 */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(to bottom, ${BRAND_BLUE}, #1a3a7a)`,
+          }}
+        ></div>
+
+        {/* 纹理：科技感网格 */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#F4F5F7] via-transparent to-black/40"></div>
 
-        {/* Navigation */}
-        <div className="absolute top-8 left-6 z-20">
-          <Link
-            href="/clubs"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors group"
-          >
-            <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-all">
-              <ChevronLeft size={16} />
-            </div>
-            <span className="text-xs font-bold tracking-widest uppercase">
-              Back to List
-            </span>
-          </Link>
+        {/* 装饰：超大水印文字 */}
+        <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 text-[18vw] font-black text-white opacity-[0.03] select-none pointer-events-none leading-none mix-blend-overlay tracking-tighter font-sans">
+          JOIN
         </div>
 
-        {/* Title Content */}
-        <div className="absolute bottom-0 left-0 w-full p-6 pb-12 z-10">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex flex-col md:flex-row items-end justify-between gap-6">
-              <div className="animate-fade-in-up">
-                <div
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-white mb-4 border border-white/20 backdrop-blur-md"
-                  style={{ backgroundColor: `${club.themeColor}99` }}
-                >
-                  <MapPin size={12} />
-                  {club.area}
-                </div>
-                <h1 className="text-4xl md:text-6xl font-serif font-black text-gray-900 mb-2 drop-shadow-sm leading-tight">
-                  {club.name}
-                </h1>
-                <p className="text-sm md:text-base font-bold text-gray-500 tracking-[0.2em] uppercase">
-                  {club.enName}
-                </p>
-              </div>
+        <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
+          {/* 顶部导航 */}
+          <div className="flex justify-center mb-8 reveal-up">
+            <Link
+              href={`/clubs/detail/${club.id}`}
+              className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white group"
+            >
+              <ChevronLeft
+                size={12}
+                className="group-hover:-translate-x-0.5 transition-transform"
+              />
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
+                Back to Detail
+              </span>
+            </Link>
+          </div>
+
+          {/* 页面标题 */}
+          <div className="reveal-up delay-100">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-white mb-6 border border-white/20 backdrop-blur-md bg-white/5">
+              <Sparkles size={12} />
+              Recruitment
             </div>
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm leading-tight">
+              体験・入会申し込み
+            </h1>
+            <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed">
+              <span className="font-bold border-b border-white/30 pb-0.5 mx-1">
+                {club.name}
+              </span>
+              への第一歩。
+              <br className="hidden md:inline" />
+              以下のフォームよりお気軽にご連絡ください。
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ==================== 2. Content Grid ==================== */}
-      <div className="container mx-auto max-w-6xl px-6 pb-24 -mt-8 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* --- Left Column: Story & Gallery --- */}
-          <div className="lg:col-span-8 flex flex-col gap-8">
-            {/* Description Card */}
-            <Ceramic
-              interactive={false}
-              className="p-8 md:p-10 bg-white border border-gray-100 border-b-[6px]"
-              style={{ borderBottomColor: club.themeColor }}
-            >
-              <h2 className="text-2xl font-serif font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <span
-                  className="w-2 h-8 rounded-full"
-                  style={{ backgroundColor: club.themeColor }}
-                ></span>
-                クラブについて
-              </h2>
-              <p className="text-gray-600 leading-loose text-justify font-medium">
-                {club.description}
-              </p>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-3 mt-8">
-                {club.features.map((feature, idx) => (
-                  <div
-                    key={idx}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-50 border border-gray-100 text-xs font-bold text-gray-600"
-                  >
-                    <feature.icon
-                      size={14}
-                      style={{ color: club.themeColor }}
-                    />
-                    {feature.label}
-                  </div>
-                ))}
-              </div>
-            </Ceramic>
-
-            {/* Gallery Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {club.gallery.map((img, idx) => (
-                <div
-                  key={idx}
-                  className={cn(
-                    "relative rounded-2xl overflow-hidden shadow-md group aspect-square",
-                    idx === 0 ? "col-span-2 aspect-[2/1]" : "",
-                  )}
-                >
-                  <Image
-                    src={img}
-                    alt={`Gallery ${idx}`}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* --- Right Column: Sticky Info Card --- */}
-          <div className="lg:col-span-4 lg:sticky lg:top-24 flex flex-col gap-6">
-            <Ceramic
-              interactive={false}
-              className="p-0 bg-white border border-gray-100 overflow-hidden shadow-xl"
-            >
-              <div className="bg-gray-900 p-6 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
-                <h3 className="text-lg font-bold tracking-wide relative z-10">
-                  Information
-                </h3>
-              </div>
-
-              <div className="p-6 flex flex-col gap-6">
-                <div className="flex gap-4">
-                  <div className="mt-1 w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 flex-shrink-0">
-                    <MapPin size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-                      Address
-                    </p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {club.address}
-                    </p>
-                    <a
-                      href="#"
-                      className="text-xs text-blue-500 font-bold mt-1 inline-flex items-center gap-1 hover:underline"
-                    >
-                      Google Maps <ExternalLink size={10} />
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="mt-1 w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 flex-shrink-0">
-                    <Clock size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-                      Schedule
-                    </p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {club.schedule}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 my-2"></div>
-
-                <div className="flex gap-4">
-                  <div className="mt-1 w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-400 flex-shrink-0">
-                    <Phone size={16} />
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
-                      Contact
-                    </p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {club.contact}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Call to Action Button */}
-              <div className="p-6 bg-gray-50 border-t border-gray-100">
-                <Button
-                  href={`/clubs/detail/${club.id}/recruit`} // ✨ 链接到募集页面
-                  className="w-full py-4 text-white shadow-lg group"
-                  style={{ backgroundColor: club.themeColor }}
-                >
-                  <span className="flex items-center gap-2">
-                    <Users size={16} />
-                    体験・入会を申し込む
+      {/* ==================== 2. Main Content (申请表单布局) ==================== */}
+      <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* --- 左侧栏：确认信息 (Info & Requirements) --- */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              {/* 1. 募集要项卡片 */}
+              <Ceramic
+                interactive={false}
+                className="bg-white border-b-[6px] shadow-lg overflow-hidden p-0"
+                style={{ borderBottomColor: BRAND_BLUE }}
+              >
+                <div className="bg-gray-50 px-8 py-5 border-b border-gray-100 flex items-center gap-3">
+                  <Target size={18} className="text-gray-400" />
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                    Entry Requirements
                   </span>
-                  <ArrowRight
-                    size={16}
-                    className="ml-2 transition-transform group-hover:translate-x-1"
-                  />
-                </Button>
-                <p className="text-[10px] text-gray-400 text-center mt-3">
-                  ※ 見学は無料です。お気軽にお越しください。
-                </p>
-              </div>
-            </Ceramic>
+                </div>
+
+                <div className="p-8 md:p-10">
+                  <div className="space-y-8">
+                    {/* 稽古时间 */}
+                    <div className="flex gap-4 items-start">
+                      <div className="mt-1 w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 border border-blue-100">
+                        <Clock size={18} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900 mb-1">
+                          稽古スケジュール
+                        </h4>
+                        <div className="space-y-1">
+                          {club.schedule.map((sch, idx) => (
+                            <p
+                              key={idx}
+                              className="text-sm text-gray-600 font-medium"
+                            >
+                              <span className="font-bold text-gray-800 mr-2">
+                                {sch.day}
+                              </span>
+                              {sch.time}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 对象年龄 */}
+                    <div className="flex gap-4 items-start">
+                      <div className="mt-1 w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100">
+                        <Users size={18} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900 mb-1">
+                          募集対象
+                        </h4>
+                        <p className="text-sm text-gray-600 font-medium">
+                          {club.targetAge}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 活动场所 */}
+                    <div className="flex gap-4 items-start">
+                      <div className="mt-1 w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 border border-emerald-100">
+                        <MapPin size={18} />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-900 mb-1">
+                          活動場所
+                        </h4>
+                        <p className="text-sm text-gray-600 font-medium leading-relaxed">
+                          {club.address}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-100 my-8"></div>
+
+                  <div className="bg-[#F8FAFC] rounded-lg p-4 border border-blue-50">
+                    <div className="flex gap-3">
+                      <ShieldCheck
+                        size={20}
+                        className="text-blue-500 mt-0.5 flex-shrink-0"
+                      />
+                      <div className="text-xs text-gray-500 leading-relaxed font-medium">
+                        <p className="mb-1 text-gray-900 font-bold">
+                          初心者の方へ
+                        </p>
+                        道具の貸し出しも行っています。運動しやすい服装で、タオルと飲み物を持参の上お越しください。
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Ceramic>
+            </div>
+
+            {/* --- 右侧栏：申请表单 (Application Form) --- */}
+            <div className="lg:col-span-7">
+              <Ceramic
+                interactive={false}
+                className="bg-white border-b-[6px] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] p-8 md:p-12 relative overflow-hidden"
+                style={{ borderBottomColor: BRAND_BLUE }}
+              >
+                {/* 装饰光晕 */}
+                <div
+                  className="absolute -top-20 -right-20 w-64 h-64 rounded-full opacity-5 blur-3xl pointer-events-none"
+                  style={{ backgroundColor: BRAND_BLUE }}
+                ></div>
+
+                <div className="relative z-10">
+                  <div className="mb-10">
+                    <h2 className="text-2xl font-serif font-black text-gray-900 mb-2 flex items-center gap-3">
+                      <CalendarDays size={24} className="text-gray-400" />
+                      お申し込みフォーム
+                    </h2>
+                    <p className="text-xs text-gray-500 font-bold uppercase tracking-wider pl-9">
+                      Application Form
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-8">
+                    {/* Name */}
+                    <div className="space-y-2 group">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 group-focus-within:text-[#2454a4] transition-colors">
+                        <User size={14} /> お名前{" "}
+                        <span className="text-red-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        required
+                        placeholder="例：山田 太郎"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-[#2454a4] transition-all"
+                      />
+                    </div>
+
+                    {/* Contact Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-2 group">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 group-focus-within:text-[#2454a4] transition-colors">
+                          <Mail size={14} /> Email{" "}
+                          <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          required
+                          placeholder="sample@email.com"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-[#2454a4] transition-all"
+                        />
+                      </div>
+                      <div className="space-y-2 group">
+                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 group-focus-within:text-[#2454a4] transition-colors">
+                          <Phone size={14} /> 電話番号
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          placeholder="090-1234-5678"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus:border-[#2454a4] transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Experience (Cards) */}
+                    <div className="space-y-3">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
+                        相撲経験
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <label
+                          className={cn(
+                            "cursor-pointer border rounded-xl p-4 text-center transition-all duration-200 flex flex-col items-center gap-2 group hover:border-[#2454a4]/30",
+                            formData.experience === "beginner"
+                              ? "bg-blue-50/50 border-[#2454a4] shadow-sm"
+                              : "bg-white border-gray-200",
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="experience"
+                            value="beginner"
+                            checked={formData.experience === "beginner"}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+                          <div
+                            className={cn(
+                              "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
+                              formData.experience === "beginner"
+                                ? "border-[#2454a4]"
+                                : "border-gray-300 group-hover:border-gray-400",
+                            )}
+                          >
+                            {formData.experience === "beginner" && (
+                              <div className="w-2 h-2 rounded-full bg-[#2454a4]" />
+                            )}
+                          </div>
+                          <span
+                            className={cn(
+                              "text-sm font-bold",
+                              formData.experience === "beginner"
+                                ? "text-[#2454a4]"
+                                : "text-gray-500",
+                            )}
+                          >
+                            未経験・初心者
+                          </span>
+                        </label>
+
+                        <label
+                          className={cn(
+                            "cursor-pointer border rounded-xl p-4 text-center transition-all duration-200 flex flex-col items-center gap-2 group hover:border-[#2454a4]/30",
+                            formData.experience === "experienced"
+                              ? "bg-blue-50/50 border-[#2454a4] shadow-sm"
+                              : "bg-white border-gray-200",
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            name="experience"
+                            value="experienced"
+                            checked={formData.experience === "experienced"}
+                            onChange={handleInputChange}
+                            className="sr-only"
+                          />
+                          <div
+                            className={cn(
+                              "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
+                              formData.experience === "experienced"
+                                ? "border-[#2454a4]"
+                                : "border-gray-300 group-hover:border-gray-400",
+                            )}
+                          >
+                            {formData.experience === "experienced" && (
+                              <div className="w-2 h-2 rounded-full bg-[#2454a4]" />
+                            )}
+                          </div>
+                          <span
+                            className={cn(
+                              "text-sm font-bold",
+                              formData.experience === "experienced"
+                                ? "text-[#2454a4]"
+                                : "text-gray-500",
+                            )}
+                          >
+                            経験者
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Message */}
+                    <div className="space-y-2 group">
+                      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 group-focus-within:text-[#2454a4] transition-colors">
+                        メッセージ・質問など
+                      </label>
+                      <textarea
+                        name="message"
+                        rows={4}
+                        placeholder="見学希望日や、現在の運動経験などがあればご記入ください。"
+                        value={formData.message}
+                        onChange={handleInputChange}
+                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#2454a4] focus:ring-4 focus:ring-blue-50 transition-all resize-none"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="pt-6">
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={cn(
+                          "w-full py-5 text-white shadow-xl transition-all",
+                          isSubmitting ? "opacity-80" : "hover:brightness-110",
+                        )}
+                        style={{
+                          backgroundColor: BRAND_BLUE,
+                          boxShadow: `0 10px 30px -5px ${BRAND_BLUE}66`,
+                        }}
+                      >
+                        <span className="flex items-center gap-3">
+                          {isSubmitting ? (
+                            "送信中..."
+                          ) : (
+                            <>
+                              <Send size={18} />
+                              メッセージを送信する
+                            </>
+                          )}
+                        </span>
+                      </Button>
+                      <p className="text-[10px] text-gray-400 text-center mt-4">
+                        ※ 送信することで、
+                        <Link
+                          href="/privacy"
+                          className="underline hover:text-gray-600 mx-1"
+                        >
+                          プライバシーポリシー
+                        </Link>
+                        に同意したものとみなされます。
+                      </p>
+                    </div>
+                  </form>
+                </div>
+              </Ceramic>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
 
-export default ClubDetailPage;
+export default RecruitPage;

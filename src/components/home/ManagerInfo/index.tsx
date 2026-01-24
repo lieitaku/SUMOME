@@ -41,7 +41,7 @@ const ManagerInfo = () => {
           </p>
 
           <Button
-            href="/manager/login"
+            href="/partners"
             variant="primary"
             className="px-10 py-5 shadow-sm"
           >

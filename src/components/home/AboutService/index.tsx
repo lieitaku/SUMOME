@@ -24,12 +24,13 @@ const SERVICE_DATA: ServiceItem[] = [
     kanji: "探",
     title: "SEARCH",
     desc: "全国のクラブを\n地域・条件から検索",
-    img: "https://cdn.pixabay.com/photo/2017/05/08/16/49/tokyo-tower-2295850_1280.jpg",
+    img: "/images/about/search.jpg",
     delay: "",
     href: "/clubs",
-    // 🔵 智慧蓝渐变: 从品牌蓝到深蓝，保持稳重但明亮
-    themeGradient: "bg-gradient-to-br from-[#2454a4] to-[#1a3c78]",
-    shadowColor: "shadow-blue-900/30",
+    // 🟢 优雅绿渐变: 从富有生机的翠绿到深邃的森林绿，清新且高雅
+    themeGradient: "bg-gradient-to-br from-[#2a9d6c] to-[#175036]",
+    // 使用深绿色系的阴影，保持整体感
+    shadowColor: "shadow-green-900/30",
   },
   {
     id: "02",

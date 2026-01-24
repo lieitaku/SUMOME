@@ -41,13 +41,10 @@ const Hero = () => {
             <div className="hidden md:flex flex-col items-center py-6 h-full justify-between">
               <div className="flex flex-col items-center">
                 <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1">
-                  令<br />和
-                </span>
-                <span className="font-serif text-xl font-black leading-none">
-                  8
+                  20<br />25
                 </span>
                 <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1 pt-1">
-                  年
+                  年<br />作<br />成
                 </span>
               </div>
               <div className="w-[1px] h-12 bg-white/30"></div>
@@ -62,7 +59,7 @@ const Hero = () => {
             {/* B1: 顶部信息 (手机版特供) */}
             <div className="md:hidden px-4 pt-3 flex justify-between items-center opacity-60 relative z-10">
               <span className="text-[8px] font-bold tracking-widest uppercase">
-                EST. 25
+                2025年作成
               </span>
               <span className="text-[8px] font-mono tracking-widest">JPN</span>
             </div>
@@ -118,7 +115,7 @@ const Hero = () => {
               <div className="md:hidden flex justify-between items-end">
                 <div>
                   <p className="font-serif text-[10px] font-bold text-sumo-text tracking-widest leading-none mb-1">
-                    伝統与未来
+                    伝統と未来
                   </p>
                   <p className="font-sans text-[7px] text-gray-400 tracking-wider">
                     Tradition & Future

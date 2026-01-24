@@ -3,11 +3,10 @@
 import React from "react";
 import { Star, Mail } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation"; // 引入 usePathname
 import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
 
 // Component: FooterLink
-// Handles hover color transition dynamically based on the current theme
 const FooterLink = ({
   href,
   children,
@@ -45,12 +44,25 @@ const FooterLink = ({
 
 const Footer = () => {
   const params = useParams();
+  const pathname = usePathname(); // 获取当前路径
   const prefSlug = params?.pref as string | undefined;
 
   // Determine current theme color
-  // Defaults to brand blue if not on a specific prefecture page
   const currentTheme = prefSlug ? getPrefectureTheme(prefSlug) : DEFAULT_THEME;
   const themeColor = currentTheme.color;
+
+  // 🌈 彩虹色配置 (与 Header 保持一致)
+  const rainbowColors = [
+    "#23ac47",
+    "#a35ea3",
+    "#2454a4",
+    "#df282f",
+    "#63bbe2",
+    "#f49e15",
+  ];
+
+  // 判断是否为主页
+  const isHomePage = pathname === "/";
 
   return (
     <footer className="bg-[#faf9f6] text-sumo-dark pt-24 pb-12 relative overflow-hidden border-t border-gray-100">
@@ -75,13 +87,27 @@ const Footer = () => {
                 className="w-1 h-8"
                 style={{ backgroundColor: themeColor }}
               ></div>
-              {/* Logo Text: Dynamic Color */}
-              <h2
-                className="text-3xl font-serif font-black tracking-[0.1em]"
-                style={{ color: themeColor }}
-              >
-                SUMOME
-              </h2>
+
+              {/* ✨ 彩色 Logo 实现 ✨ */}
+              <div className="flex items-baseline font-serif font-black text-3xl tracking-[0.1em] leading-none">
+                {["S", "U", "M", "O", "M", "E"].map((char, index) => {
+                  let finalColor;
+                  if (isHomePage) {
+                    finalColor = rainbowColors[index % rainbowColors.length];
+                  } else {
+                    finalColor = themeColor;
+                  }
+
+                  return (
+                    <span
+                      key={index}
+                      style={{ color: finalColor }}
+                    >
+                      {char}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
 
             <p className="text-sm text-gray-500 mb-8 leading-loose font-medium font-sans">
@@ -169,7 +195,7 @@ const Footer = () => {
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
-                  <FooterLink href="/manager/entry" themeColor={themeColor}>
+                  <FooterLink href="/partners" themeColor={themeColor}> {/* 修正链接到新的招募页 */}
                     新規掲載登録（無料）
                   </FooterLink>
                 </li>

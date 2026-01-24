@@ -40,7 +40,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   // 使用: rabbit1.riv
   {
     rivSrc: "/assets/rabbit1.riv",
-    hand: "/rabbit/hand-2.png",
+    hand: "images/rabbit/hand-2.png",
     flagStyle: {
       bottom: "60px",
       left: "-2px",
@@ -55,10 +55,10 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   // 使用: rabbit1.riv
   {
     rivSrc: "/assets/rabbit1.riv",
-    hand: "/rabbit/hand-1.png",
+    hand: "images/rabbit/hand-1.png",
     handStyle: { transform: "translate(-2px,-126px)" },
     flagStyle: {
-      bottom: "50px",
+      bottom: "60px",
       left: "-2px",
       scale: 0.8,
       size: { width: 164, height: 260 },
@@ -71,15 +71,15 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   // 🆕 使用: rabbit2.riv (第四种兔子用新文件)
   {
     rivSrc: "/assets/rabbit2.riv",
-    hand: "/rabbit/hand-4.png",
+    hand: "images/rabbit/hand-4.png",
     // 手部位置微调
     handStyle: { transform: "translate(0,0px)" },
     flagStyle: {
       bottom: "40px",
       left: "34px",
-      scale: 0.8,
-      size: { width: 160, height: 280 },
-      tassel: { width: 155, height: 30 },
+      scale: 0.7,
+      size: { width: 140, height: 280 },
+      tassel: { width: 145, height: 30 },
     },
   },
 ];

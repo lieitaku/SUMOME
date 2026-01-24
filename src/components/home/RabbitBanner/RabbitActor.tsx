@@ -6,59 +6,69 @@ import { useRive, Layout, Fit, Alignment } from "@rive-app/react-canvas";
 interface RabbitProps {
   rivSrc: string;
   className?: string;
+  playbackRate?: number;
+  priority?: boolean;
 }
 
-const RabbitActor: React.FC<RabbitProps> = ({ rivSrc, className }) => {
-  // 1. 视野状态：默认看不见
+const RabbitActor: React.FC<RabbitProps> = ({
+  rivSrc,
+  className,
+  playbackRate = 0.5,
+  priority = false
+}) => {
+  // 1. 状态只用于存储 Observer 的结果
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 2. 监听元素是否进入屏幕 (Smart Money 策略：只在需要时消费算力)
+  // 2. 最终决定是否渲染：如果是优先加载(priority)，或者在视野内(isInView)
+  // 这样如果 priority 为 true，我们甚至不需要去动 state，彻底避免报错
+  const shouldRender = priority || isInView;
+
   useEffect(() => {
+    // ✨ 修复：如果开启了保活(priority)，直接跳过 Observer 逻辑
+    // 不需要监听，不需要 setState，直接由上面的 shouldRender 控制渲染
+    if (priority) {
+      return;
+    }
+
     const el = containerRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // isIntersecting: 是否在视野内
           setIsInView(entry.isIntersecting);
         });
       },
       {
-        // 🛠️ 关键参数：rootMargin
-        // "200px" 意味着：在兔子还没进入屏幕、距离屏幕还有 200px 时，就提前开始渲染。
-        // 这样用户滚过去时，动画已经准备好了，不会闪烁。
-        rootMargin: "200px",
+        rootMargin: "800px",
         threshold: 0,
       },
     );
 
     observer.observe(el);
+    return () => observer.disconnect();
+  }, [priority]); // 依赖 priority：当它变化时重新决定是否启用 Observer
 
-    return () => {
-      observer.disconnect();
-    };
-  }, []);
-
-  // 3. 只有在视野附近时，才初始化 Rive
-  // 这能把同时运行的 Rive 实例从 60 个降低到 5-6 个，彻底解决 ArrayBuffer 报错
   return (
     <div ref={containerRef} className={`w-full h-full ${className || ""}`}>
-      {isInView ? (
-        <RiveWrapper rivSrc={rivSrc} />
+      {shouldRender ? (
+        <RiveWrapper rivSrc={rivSrc} playbackRate={playbackRate} />
       ) : (
-        // 占位符：保持布局不塌陷
         <div className="w-full h-full" />
       )}
     </div>
   );
 };
 
-// 4. 将 Rive 逻辑拆分为子组件
-// 这样当父组件 isInView 变 false 时，React 会彻底卸载这个组件及其 Wasm 内存
-const RiveWrapper = ({ rivSrc }: { rivSrc: string }) => {
-  const { RiveComponent } = useRive({
+const RiveWrapper = ({
+  rivSrc,
+  playbackRate
+}: {
+  rivSrc: string;
+  playbackRate: number;
+}) => {
+  const { rive, RiveComponent } = useRive({
     src: rivSrc,
     animations: "Timeline 1",
     autoplay: true,
@@ -67,6 +77,22 @@ const RiveWrapper = ({ rivSrc }: { rivSrc: string }) => {
       alignment: Alignment.Center,
     }),
   });
+
+  useEffect(() => {
+    if (rive) {
+      // 修复 Linter 报错
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      (rive as unknown as { playbackRate: number }).playbackRate = playbackRate;
+
+      // 强制时间同步
+      const animation = rive.animationNames[0];
+      if (animation) {
+        const syncTime = (Date.now() % 2000) / 1000;
+        rive.scrub(animation, syncTime);
+        rive.play();
+      }
+    }
+  }, [rive, playbackRate]);
 
   return <RiveComponent />;
 };

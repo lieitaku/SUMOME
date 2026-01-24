@@ -31,10 +31,6 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     if (menuOpen) {
       const scrollbarWidth =
         window.innerWidth - document.documentElement.clientWidth;
@@ -62,7 +58,7 @@ const Header = () => {
 
   // 逻辑：初始状态下需要彩色文本的页面
   const isHomePage = pathname === "/";
-  const exactLightPaths = ["/clubs", "/clubs/search"];
+  const exactLightPaths = ["/clubs", "/clubs/search", "/partners"];
   const isLightPage = exactLightPaths.includes(pathname || "");
   const isPrefecturePage = !!prefSlug;
 
@@ -249,17 +245,15 @@ const Header = () => {
 
       {/* 移动端菜单遮罩层 */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[140] transition-opacity duration-300 ease-in-out ${
-          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[140] transition-opacity duration-300 ease-in-out ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+          }`}
         onClick={() => setMenuOpen(false)}
       />
 
       {/* 移动端侧边栏 */}
       <div
-        className={`fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-white z-[150] shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-white z-[150] shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex flex-col h-full p-6">
           <div className="flex justify-end mb-8">
