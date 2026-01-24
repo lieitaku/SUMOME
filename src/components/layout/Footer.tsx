@@ -3,10 +3,11 @@
 import React from "react";
 import { Star, Mail } from "lucide-react";
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation"; // 引入 usePathname
+import { useParams, usePathname } from "next/navigation";
 import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
 
 // Component: FooterLink
+// 链接组件：保持原有逻辑，悬停时使用主题色
 const FooterLink = ({
   href,
   children,
@@ -44,14 +45,13 @@ const FooterLink = ({
 
 const Footer = () => {
   const params = useParams();
-  const pathname = usePathname(); // 获取当前路径
   const prefSlug = params?.pref as string | undefined;
 
-  // Determine current theme color
+  // 1. 确定当前页面的主题色 (用于图标、线条、链接等)
   const currentTheme = prefSlug ? getPrefectureTheme(prefSlug) : DEFAULT_THEME;
   const themeColor = currentTheme.color;
 
-  // 🌈 彩虹色配置 (与 Header 保持一致)
+  // 🌈 彩虹色配置 (用于 Logo)
   const rainbowColors = [
     "#23ac47",
     "#a35ea3",
@@ -60,9 +60,6 @@ const Footer = () => {
     "#63bbe2",
     "#f49e15",
   ];
-
-  // 判断是否为主页
-  const isHomePage = pathname === "/";
 
   return (
     <footer className="bg-[#faf9f6] text-sumo-dark pt-24 pb-12 relative overflow-hidden border-t border-gray-100">
@@ -82,31 +79,22 @@ const Footer = () => {
           {/* --- Left Column: Brand Info --- */}
           <div className="md:w-1/3">
             <div className="flex items-center gap-4 mb-6">
-              {/* Vertical Brand Line: Dynamic Color */}
+              {/* 竖线：保持跟随主题色，体现地区差异 */}
               <div
                 className="w-1 h-8"
                 style={{ backgroundColor: themeColor }}
               ></div>
 
-              {/* ✨ 彩色 Logo 实现 ✨ */}
+              {/* ✨ Logo：永远保持彩虹色 ✨ */}
               <div className="flex items-baseline font-serif font-black text-3xl tracking-[0.1em] leading-none">
-                {["S", "U", "M", "O", "M", "E"].map((char, index) => {
-                  let finalColor;
-                  if (isHomePage) {
-                    finalColor = rainbowColors[index % rainbowColors.length];
-                  } else {
-                    finalColor = themeColor;
-                  }
-
-                  return (
-                    <span
-                      key={index}
-                      style={{ color: finalColor }}
-                    >
-                      {char}
-                    </span>
-                  );
-                })}
+                {["S", "U", "M", "O", "M", "E"].map((char, index) => (
+                  <span
+                    key={index}
+                    style={{ color: rainbowColors[index % rainbowColors.length] }}
+                  >
+                    {char}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -118,6 +106,7 @@ const Footer = () => {
               </span>
             </p>
 
+            {/* 社交图标：跟随主题色 */}
             <div className="flex gap-3">
               {[Star, Mail].map((Icon, idx) => (
                 <div
@@ -195,7 +184,7 @@ const Footer = () => {
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
-                  <FooterLink href="/partners" themeColor={themeColor}> {/* 修正链接到新的招募页 */}
+                  <FooterLink href="/partners" themeColor={themeColor}>
                     新規掲載登録（無料）
                   </FooterLink>
                 </li>
