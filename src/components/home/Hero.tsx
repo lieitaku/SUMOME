@@ -41,7 +41,7 @@ const Hero = () => {
             <div className="hidden md:flex flex-col items-center py-6 h-full justify-between">
               <div className="flex flex-col items-center">
                 <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1">
-                  20<br />25
+                  20<br />26
                 </span>
                 <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1 pt-1">
                   年<br />作<br />成
@@ -59,7 +59,7 @@ const Hero = () => {
             {/* B1: 顶部信息 (手机版特供) */}
             <div className="md:hidden px-4 pt-3 flex justify-between items-center opacity-60 relative z-10">
               <span className="text-[8px] font-bold tracking-widest uppercase">
-                2025年作成
+                2026年作成
               </span>
               <span className="text-[8px] font-mono tracking-widest">JPN</span>
             </div>
