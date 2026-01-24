@@ -104,7 +104,7 @@ const Hero = () => {
                   </span>
                 </div>
                 <p className="font-serif text-base font-bold text-sumo-text tracking-widest leading-none mb-1">
-                  伝統と未来
+                  伝統を未来へ
                 </p>
                 <p className="font-sans text-[9px] text-gray-400 font-medium tracking-wider">
                   Bridging Tradition & Future
@@ -115,7 +115,7 @@ const Hero = () => {
               <div className="md:hidden flex justify-between items-end">
                 <div>
                   <p className="font-serif text-[10px] font-bold text-sumo-text tracking-widest leading-none mb-1">
-                    伝統と未来
+                    伝統を未来へ
                   </p>
                   <p className="font-sans text-[7px] text-gray-400 tracking-wider">
                     Tradition & Future
