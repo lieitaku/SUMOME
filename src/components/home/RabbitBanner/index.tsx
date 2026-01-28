@@ -28,6 +28,7 @@ export default function RabbitWalkingBanner({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // 生成循环数据 (48个)
   const loopData = useMemo(() => {
     return [...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS];
   }, []);
@@ -48,20 +49,29 @@ export default function RabbitWalkingBanner({
         .animate-scroll {
           animation: scrollRabbit var(--scroll-duration) linear infinite;
           width: max-content;
+          /* 💡 核心 CSS 优化：告诉浏览器这是一个独立的合成层 */
           will-change: transform;
+          /* 💡 修复 iOS 闪烁 */
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          perspective: 1000px;
           transform-style: preserve-3d;
         }
-        .animate-scroll:hover {
-          animation-play-state: paused;
+        /* 移动端不建议 hover 暂停，因为滚动惯性可能导致卡住 */
+        @media (min-width: 768px) {
+            .animate-scroll:hover {
+                animation-play-state: paused;
+            }
         }
       `}</style>
 
       <div
-        className="relative w-full overflow-visible pointer-events-none"
+        className="relative w-full overflow-hidden pointer-events-none select-none"
         aria-hidden="true"
         style={{
           height: containerHeight,
           zIndex: 30,
+          // 💡 优化：content-visibility 帮助浏览器跳过屏幕外渲染计算
           contentVisibility: "auto",
           containIntrinsicSize: `${5000 * scale}px`,
         }}
@@ -81,20 +91,12 @@ export default function RabbitWalkingBanner({
             const variantIndex = RABBIT_PROBABILITY_POOL[poolIndex];
             const variant = RABBIT_VARIANTS[variantIndex] || RABBIT_VARIANTS[0];
 
-            // 解构位置配置
             const { bottom, left, scale: flagScale = 0.8, size, tassel } = variant.flagStyle;
 
-            // --- 🛠️ 关键修改 1: 强制统一旗帜尺寸 ---
-            // 不再使用 variant.size.width，而是强制所有旗帜宽度为 180 (变粗)
             const UNIFORM_FLAG_WIDTH = 180;
-
             const flagW = UNIFORM_FLAG_WIDTH * scale;
             const flagH = (size?.height ?? 240) * scale;
-
-            // 横杆宽度随旗帜自动调整
             const barW = flagW + 24 * scale;
-
-            // 流苏宽度略小于旗帜，确保美观
             const tasselW = (flagW - 4 * scale);
             const tasselH = (tassel?.height ?? 45) * scale;
 
@@ -104,19 +106,19 @@ export default function RabbitWalkingBanner({
 
             const baseTransform = variant.bodyStyle?.transform || "";
             const finalBodyTransform = `${baseTransform} scale(${scale}) translateZ(0)`;
-
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { transform: _ignored, ...restBodyStyle } = variant.bodyStyle || {};
 
             return (
               <div
                 key={`${item.id}-${idx}`}
-                className="relative flex justify-center isolate"
+                className="relative flex justify-center"
                 style={{
                   width: UNIT_WIDTH,
                   height: UNIT_WIDTH,
                   marginRight: GAP,
-                  transformStyle: "preserve-3d",
+                  // 💡 优化：移除不必要的 transformStyle 传递，减少层级复杂度
+                  // transformStyle: "preserve-3d", 
                 }}
               >
                 {/* --- Rabbit Body (z-index: 0) --- */}
@@ -133,6 +135,9 @@ export default function RabbitWalkingBanner({
                 </div>
 
                 {/* --- Flag + Hand (z-index: 20) --- */}
+                {/* 💡 优化：将静态图片部分标记为 isolate，避免与 Rive 画布发生重绘干扰 
+                   但 transform: translateZ(1px) 必须保留以确保层级覆盖
+                */}
                 <div
                   className="absolute inset-0"
                   style={{
@@ -141,7 +146,7 @@ export default function RabbitWalkingBanner({
                   }}
                 >
                   <div
-                    className="absolute w-full flex justify-center transition-all"
+                    className="absolute w-full flex justify-center"
                     style={{
                       bottom: `${adjustedBottom}px`,
                       left: `${adjustedLeft}px`,
@@ -153,7 +158,7 @@ export default function RabbitWalkingBanner({
                     >
                       <div className="relative flex flex-col items-center group">
 
-                        {/* 1. Bar (Z-index: 30 - 最上层) */}
+                        {/* 1. Bar */}
                         <div
                           className="bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 shadow-lg border border-[#B8860B]"
                           style={{
@@ -162,13 +167,13 @@ export default function RabbitWalkingBanner({
                           }}
                         ></div>
 
-                        {/* 2. Flag Face (Z-index: 20 - 中间层) */}
+                        {/* 2. Flag Face */}
                         <div
                           className="relative z-20 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5"
                           style={{
                             width: `${flagW}px`,
                             height: `${flagH}px`,
-                            marginTop: `${-6 * scale}px`, // 稍微向上插入横杆
+                            marginTop: `${-6 * scale}px`,
                           }}
                         >
                           <div
@@ -178,38 +183,34 @@ export default function RabbitWalkingBanner({
                           <img
                             src={item.image}
                             alt={item.alt}
+                            loading="lazy"
                             className="relative z-10 shadow-sm rounded-sm w-[85%] h-auto object-contain"
                           />
                           <div className="absolute inset-0 bg-black/5 mix-blend-multiply z-20 pointer-events-none"></div>
                         </div>
 
-                        {/* 3. Tassel (Z-index: 10 - 最底层/后面) */}
-                        {/* 🛠️ 关键修改 2: z-index 设为 10，并使用负 margin 向上插入旗面背后 */}
+                        {/* 3. Tassel */}
                         <div
                           className="relative z-10"
                           style={{
                             width: `${tasselW}px`,
                             height: `${tasselH}px`,
-                            marginTop: `${-8 * scale}px` // 向上移动，藏在旗面后面
+                            marginTop: `${-8 * scale}px`
                           }}
                         >
-                          {/* 材质层 */}
                           <div
                             className="w-full h-full"
                             style={{
                               background: "linear-gradient(to bottom, #B8860B, #FFD700, #B8860B)",
-                              // 遮罩层实现透视缝隙
                               maskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
                               WebkitMaskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
                               clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)"
                             }}
                           ></div>
-
-                          {/* 阴影层 */}
                           <div
                             className="absolute inset-0 pointer-events-none"
                             style={{
-                              boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)", // 顶部内阴影，增加"被遮挡"的感觉
+                              boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
                               clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)"
                             }}
                           ></div>
@@ -233,6 +234,7 @@ export default function RabbitWalkingBanner({
                     <img
                       src={variant.hand}
                       alt="Hand"
+                      loading="lazy"
                       className="w-full h-full object-contain pointer-events-none"
                     />
                   </div>

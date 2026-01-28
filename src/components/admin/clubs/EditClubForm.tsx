@@ -3,18 +3,28 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ImageIcon, MapPin, Info, Phone } from "lucide-react";
+import { ImageIcon, MapPin, Info, Phone, Mail, UploadCloud, X, Loader2 } from "lucide-react";
 import { Club } from "@prisma/client";
+import { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import Image from "next/image";
 
-// ✨ 1. 引入我们的“三剑客”
+// ✨ 1. 引入 UI 组件和 Hooks
 import ImageUploader from "@/components/admin/ui/ImageUploader";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
+import ScheduleEditor from "./ScheduleEditor"; // <--- 引入日程编辑器组件
+import { supabase } from "@/lib/supabase/client"; // 用于副图上传
 
 // ✨ 2. 引入 Server Actions
 import { updateClub, deleteClub } from "@/lib/actions/clubs";
 
-// --- Zod Schema (保持不变) ---
+// ==============================================================================
+// 📜 Zod Schema 定义
+// ------------------------------------------------------------------------------
+// 这里定义了表单的数据结构和验证规则。
+// 特别注意 subImages 的 refine 规则：必须是 0, 2, 4 张。
+// ==============================================================================
 const formSchema = z.object({
     id: z.string(),
     name: z.string().min(1, "必須項目です"),
@@ -22,16 +32,26 @@ const formSchema = z.object({
     description: z.string().optional(),
     logo: z.string().optional(),
     mainImage: z.string().optional(),
+
+    // ✨ 副图验证规则
+    subImages: z.array(z.string())
+        .refine((files) => {
+            const len = files.length;
+            // 规则：0张 (不传)，或者 2张，或者 4张。不能是单数。
+            return len === 0 || len === 2 || len === 4;
+        }, { message: "サブ画像は「2枚」または「4枚」で登録してください（奇数は不可）。" }),
+
     zipCode: z.string().optional(),
     area: z.string().min(1, "必須項目です"),
     city: z.string().optional(),
     address: z.string().min(1, "必須項目です"),
     mapUrl: z.string().optional(),
     phone: z.string().optional(),
+    email: z.string().optional(), // ✨ 新增邮箱
     website: z.string().optional(),
     instagram: z.string().optional(),
     twitter: z.string().optional(),
-    schedule: z.string().optional(),
+    schedule: z.string().optional(), // 存的是 JSON 字符串
     target: z.string().optional(),
     representative: z.string().optional(),
 });
@@ -43,8 +63,10 @@ interface EditClubFormProps {
 }
 
 export default function EditClubForm({ initialData }: EditClubFormProps) {
+    // 用于控制副图上传时的 Loading 状态
+    const [isUploadingSub, setIsUploadingSub] = useState(false);
 
-    // 1. 初始化表单
+    // --- 1. 初始化 React Hook Form ---
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -54,12 +76,15 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
             description: initialData.description || "",
             logo: initialData.logo || "",
             mainImage: initialData.mainImage || "",
+            // ✨ 初始化副图数组 (如果是 null 则给 [])
+            subImages: initialData.subImages || [],
             zipCode: initialData.zipCode || "",
             area: initialData.area || "未設定",
             city: initialData.city || "",
             address: initialData.address || "",
             mapUrl: initialData.mapUrl || "",
             phone: initialData.phone || "",
+            email: initialData.email || "",
             website: initialData.website || "",
             instagram: initialData.instagram || "",
             twitter: initialData.twitter || "",
@@ -69,60 +94,118 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
         },
     });
 
-    // ✨ 2. 使用通用 Hook 处理保存逻辑
-    // 这一行代码自动搞定：Loading状态、Success Toast、Error Toast、跳转、刷新
+    // --- 2. 配置提交与删除逻辑 (使用自定义 Hook) ---
     const { isSubmitting, handleSubmit } = useFormAction({
         successMessage: "クラブ情報を保存しました",
         redirectUrl: "/admin/clubs"
     });
 
-    // ✨ 3. 使用通用 Hook 处理删除逻辑
     const { isSubmitting: isDeleting, handleSubmit: handleDeleteAction } = useFormAction({
         successMessage: "クラブを削除しました",
         redirectUrl: "/admin/clubs"
     });
 
-    // 包装保存函数
+    // --- 3. 多图上传逻辑 (Supabase) ---
+    const currentSubImages = form.watch("subImages");
+
+    const onDropSubImages = useCallback(async (acceptedFiles: File[]) => {
+        if (acceptedFiles.length === 0) return;
+
+        // 检查数量限制 (已有 + 新增 <= 4)
+        if (currentSubImages.length + acceptedFiles.length > 4) {
+            alert("サブ画像は最大4枚までです。");
+            return;
+        }
+
+        setIsUploadingSub(true);
+        try {
+            // 并发上传多张图片
+            const uploadedUrls = await Promise.all(acceptedFiles.map(async (file) => {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `clubs/sub-${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+
+                // 上传到 Supabase Storage
+                const { error } = await supabase.storage.from('images').upload(fileName, file);
+                if (error) throw error;
+
+                // 获取公开链接
+                const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
+                return publicUrl;
+            }));
+
+            // 更新表单状态 (追加新图片)
+            form.setValue("subImages", [...currentSubImages, ...uploadedUrls], { shouldValidate: true, shouldDirty: true });
+        } catch (error) {
+            console.error(error);
+            alert("画像のアップロードに失敗しました");
+        } finally {
+            setIsUploadingSub(false);
+        }
+    }, [currentSubImages, form]);
+
+    // Dropzone 配置
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop: onDropSubImages,
+        accept: { 'image/*': [] },
+        disabled: currentSubImages.length >= 4 // 满了就禁用
+    });
+
+    // 删除副图
+    const removeSubImage = (index: number) => {
+        const newImages = currentSubImages.filter((_, i) => i !== index);
+        form.setValue("subImages", newImages, { shouldValidate: true, shouldDirty: true });
+    };
+
+    // --- 4. 提交处理 ---
     const onSubmit = (data: FormValues) => {
         const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => formData.append(key, value || ""));
+
+        Object.entries(data).forEach(([key, value]) => {
+            // TypeScript 在这里会理解：如果进了这个 if，它是数组；否则它是字符串。
+            if (Array.isArray(value)) {
+                // 如果是数组 (如 subImages)，遍历添加
+                value.forEach((v) => formData.append(key, v));
+            } else {
+                // 如果不是数组，当作普通字符串处理
+                // value 可能是 null 或 undefined，所以加 || ""
+                formData.append(key, value || "");
+            }
+        });
+
         handleSubmit(updateClub, formData);
     };
 
-    // 包装删除函数
+    // --- 5. 删除处理 ---
     const onDelete = async () => {
         if (!confirm("本当にこのクラブを削除しますか？\nこの操作は取り消せません。")) return;
-        // 直接传入 deleteClub action 和参数 ID
         await handleDeleteAction(deleteClub, initialData.id);
     };
 
-    // 辅助样式类
+    // --- 6. 样式常量 ---
     const sectionHeading = "text-lg font-bold flex items-center gap-2 pb-3 border-b border-gray-100 mb-6 text-gray-800";
     const labelClass = "block text-xs font-bold mb-1.5 uppercase tracking-wide text-gray-400";
     const inputClass = "w-full px-4 py-2.5 rounded-xl border border-gray-200 outline-none transition-all text-sm focus:ring-2 focus:ring-sumo-brand focus:border-transparent disabled:bg-gray-50 disabled:text-gray-400";
 
     return (
         <form onSubmit={form.handleSubmit(onSubmit)}>
-            {/* ✨ 4. 使用通用布局外壳 */}
             <AdminFormLayout
                 title="クラブ編集"
                 subTitle={initialData.name}
                 backLink="/admin/clubs"
                 isSubmitting={isSubmitting}
                 isDeleting={isDeleting}
-                onDelete={onDelete} // 传入这个，底部就会自动显示红色的删除按钮
+                onDelete={onDelete}
             >
-
-                {/* Section 1: 基本情報 */}
+                {/* --- Section 1: 基本情報 & 画像 --- */}
                 <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <h2 className={sectionHeading}>
-                        <ImageIcon size={20} className="text-sumo-brand" /> 基本情報
+                        <ImageIcon size={20} className="text-sumo-brand" /> 基本情報 & 画像
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-6">
                             <div>
                                 <label className={labelClass}>クラブ名 <span className="text-red-500">*</span></label>
-                                <input {...form.register("name")} className={inputClass} placeholder="例：大阪相撲クラブ" />
+                                <input {...form.register("name")} className={inputClass} />
                                 {form.formState.errors.name && <p className="text-red-500 text-xs mt-1">{form.formState.errors.name.message}</p>}
                             </div>
                             <div>
@@ -131,28 +214,74 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                             </div>
                             <div>
                                 <label className={labelClass}>紹介文</label>
-                                <textarea {...form.register("description")} rows={6} className={inputClass} placeholder="クラブの歴史や特徴など..." />
+                                <textarea {...form.register("description")} rows={6} className={inputClass} />
                             </div>
                         </div>
+
                         <div className="space-y-6">
-                            {/* ✨ 使用新版 ImageUploader (支持拖拽) */}
-                            <ImageUploader
-                                label="クラブロゴ"
-                                value={form.watch("logo")}
-                                onChange={(url) => form.setValue("logo", url)}
-                                bucket="images"
-                            />
-                            <ImageUploader
-                                label="メイン画像 (カバー)"
-                                value={form.watch("mainImage")}
-                                onChange={(url) => form.setValue("mainImage", url)}
-                                bucket="images"
-                            />
+                            {/* 单图上传区域 */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <ImageUploader
+                                    label="クラブロゴ"
+                                    value={form.watch("logo")}
+                                    onChange={(url) => form.setValue("logo", url)}
+                                    bucket="images"
+                                />
+                                <ImageUploader
+                                    label="メイン画像"
+                                    value={form.watch("mainImage")}
+                                    onChange={(url) => form.setValue("mainImage", url)}
+                                    bucket="images"
+                                />
+                            </div>
+
+                            {/* ✨ 多图上传区域 (Sub Images) */}
+                            <div>
+                                <div className="flex justify-between items-center mb-1.5">
+                                    <label className={labelClass}>サブ画像 (ギャラリー用)</label>
+                                    {/* 数量提示：如果不是偶数，显示红色警告 */}
+                                    <span className={`text-[10px] font-bold ${currentSubImages.length % 2 !== 0 ? "text-red-500" : "text-gray-400"}`}>
+                                        {currentSubImages.length}枚 (2枚または4枚必須)
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-4 gap-2 mb-2">
+                                    {/* 渲染已上传的图片 */}
+                                    {currentSubImages.map((url, idx) => (
+                                        <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-gray-200 group">
+                                            <Image src={url} alt="sub" fill className="object-cover" />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSubImage(idx)}
+                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {/* 上传按钮 (没满4张时显示) */}
+                                    {currentSubImages.length < 4 && (
+                                        <div
+                                            {...getRootProps()}
+                                            className={`aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors ${isDragActive ? "border-sumo-brand bg-blue-50" : "border-gray-200 hover:border-sumo-brand"
+                                                }`}
+                                        >
+                                            <input {...getInputProps()} />
+                                            {isUploadingSub ? <Loader2 className="animate-spin text-gray-400" size={16} /> : <UploadCloud className="text-gray-300" size={20} />}
+                                        </div>
+                                    )}
+                                </div>
+                                {/* 错误提示 */}
+                                {form.formState.errors.subImages && (
+                                    <p className="text-red-500 text-xs font-bold">{form.formState.errors.subImages.message}</p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Section 2: 所在地 */}
+                {/* --- Section 2: 所在地情報 --- */}
                 <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <h2 className={sectionHeading}>
                         <MapPin size={20} className="text-sumo-brand" /> 所在地情報
@@ -189,37 +318,54 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                     </div>
                 </div>
 
-                {/* Section 3: 運営・連絡先 */}
+                {/* --- Section 3: 運営・連絡先 --- */}
                 <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
                     <h2 className={sectionHeading}>
                         <Info size={20} className="text-sumo-brand" /> 運営・連絡先
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className={labelClass}>稽古スケジュール</label>
-                            <input {...form.register("schedule")} className={inputClass} placeholder="毎週 月・水・金" />
+                            <label className={labelClass}>スケジュール</label>
+                            {/* ✨ 日程编辑器：生成 JSON 供前端渲染 */}
+                            <ScheduleEditor
+                                value={form.watch("schedule") || ""}
+                                onChange={(val) => form.setValue("schedule", val, { shouldDirty: true })}
+                            />
                         </div>
-                        <div>
-                            <label className={labelClass}>募集対象</label>
-                            <input {...form.register("target")} className={inputClass} placeholder="小学生 〜 大人" />
-                        </div>
-                        <div>
-                            <label className={labelClass}>代表者名</label>
-                            <input {...form.register("representative")} className={inputClass} />
-                        </div>
-                        <div>
-                            <label className={labelClass}><Phone size={12} className="inline mr-1" />電話番号</label>
-                            <input {...form.register("phone")} className={inputClass} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Webサイト</label>
-                            <input {...form.register("website")} className={inputClass} placeholder="https://..." />
-                        </div>
-                        <div>
-                            <label className={labelClass}>SNS (Instagram / X)</label>
-                            <div className="space-y-2">
-                                <input {...form.register("instagram")} className={inputClass} placeholder="Instagram ID" />
-                                <input {...form.register("twitter")} className={inputClass} placeholder="X (Twitter) ID" />
+
+                        <div className="space-y-6">
+                            <div>
+                                <label className={labelClass}>募集対象</label>
+                                <input {...form.register("target")} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>代表者名</label>
+                                <input {...form.register("representative")} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>電話番号</label>
+                                <input {...form.register("phone")} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>メールアドレス</label>
+                                <input {...form.register("email")} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Webサイト</label>
+                                <input {...form.register("website")} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>SNS ID (IDのみ)</label>
+                                <div className="space-y-3">
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">IG</span>
+                                        <input {...form.register("instagram")} className={`${inputClass} pl-10`} />
+                                    </div>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">X</span>
+                                        <input {...form.register("twitter")} className={`${inputClass} pl-10`} />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

@@ -16,20 +16,13 @@ const RabbitActor: React.FC<RabbitProps> = ({
   playbackRate = 0.5,
   priority = false
 }) => {
-  // 1. 状态只用于存储 Observer 的结果
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // 2. 最终决定是否渲染：如果是优先加载(priority)，或者在视野内(isInView)
-  // 这样如果 priority 为 true，我们甚至不需要去动 state，彻底避免报错
   const shouldRender = priority || isInView;
 
   useEffect(() => {
-    // ✨ 修复：如果开启了保活(priority)，直接跳过 Observer 逻辑
-    // 不需要监听，不需要 setState，直接由上面的 shouldRender 控制渲染
-    if (priority) {
-      return;
-    }
+    if (priority) return;
 
     const el = containerRef.current;
     if (!el) return;
@@ -37,31 +30,36 @@ const RabbitActor: React.FC<RabbitProps> = ({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
+          // 💡 核心修复：直接使用 isIntersecting
           setIsInView(entry.isIntersecting);
         });
       },
       {
-        rootMargin: "800px",
+        // 💡 核心修复：大幅减小缓冲区
+        // 800px -> 100px (手机) / 200px (电脑)
+        // 这样可以确保 iOS 上同时活跃的 WebGL 实例不超过 8-10 个
+        rootMargin: typeof window !== 'undefined' && window.innerWidth < 768 ? "100px" : "200px",
         threshold: 0,
-      },
+      }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [priority]); // 依赖 priority：当它变化时重新决定是否启用 Observer
+  }, [priority]);
 
   return (
     <div ref={containerRef} className={`w-full h-full ${className || ""}`}>
       {shouldRender ? (
         <RiveWrapper rivSrc={rivSrc} playbackRate={playbackRate} />
       ) : (
-        <div className="w-full h-full" />
+        // 占位符，保持布局不塌陷
+        <div className="w-full h-full invisible" />
       )}
     </div>
   );
 };
 
-const RiveWrapper = ({
+const RiveWrapper = React.memo(({
   rivSrc,
   playbackRate
 }: {
@@ -72,6 +70,8 @@ const RiveWrapper = ({
     src: rivSrc,
     animations: "Timeline 1",
     autoplay: true,
+    // 💡 优化：禁用鼠标/触摸监听器，纯展示用途可以节省 CPU
+    shouldDisableRiveListeners: true,
     layout: new Layout({
       fit: Fit.Cover,
       alignment: Alignment.Center,
@@ -80,11 +80,16 @@ const RiveWrapper = ({
 
   useEffect(() => {
     if (rive) {
-      // 修复 Linter 报错
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // 🛠️ 修复说明：
+      // 1. (rive as unknown as { playbackRate: number }):
+      //    先转为 unknown 再转为具体对象结构。这是绕过 TS 类型缺失且不使用 'any' 的标准做法。
+      // 2. eslint-disable-next-line react-hooks/immutability:
+      //    保留这个注释，因为 Rive 官方确实要求直接修改实例属性。
+
+      // eslint-disable-next-line react-hooks/immutability
       (rive as unknown as { playbackRate: number }).playbackRate = playbackRate;
 
-      // 强制时间同步
+      // 腿部动作同步逻辑
       const animation = rive.animationNames[0];
       if (animation) {
         const syncTime = (Date.now() % 2000) / 1000;
@@ -94,7 +99,9 @@ const RiveWrapper = ({
     }
   }, [rive, playbackRate]);
 
-  return <RiveComponent />;
-};
+  return <RiveComponent className="w-full h-full block" />;
+});
+
+RiveWrapper.displayName = "RiveWrapper";
 
 export default RabbitActor;

@@ -60,6 +60,7 @@ model Club {
   description    String?   @db.Text
   logo           String?
   mainImage      String?
+  subImages      String[]
 
   // 所在地信息
   zipCode        String?   // 郵便番号
@@ -70,6 +71,7 @@ model Club {
 
   // 联络信息
   phone          String?
+  email          String?
   website        String?
   instagram      String?
   twitter        String?

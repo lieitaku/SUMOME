@@ -1,13 +1,33 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import RabbitBanner from "@/components/home/RabbitBanner";
+import { ChevronRight } from "lucide-react";
+
+// 模拟新闻数据
+const NEWS_ITEMS = [
+  { id: 1, type: "INTERVIEW", date: "01.28", title: "横綱・照ノ富士：不屈の魂を語る", link: "#" },
+  { id: 2, type: "REPORT", date: "02.01", title: "2026年 春巡業の日程が決定", link: "#" },
+  { id: 3, type: "PICKUP", date: "02.14", title: "新世代の力士たち特集", link: "#" },
+];
 
 const Hero = () => {
+  // 新闻轮播逻辑
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentNewsIndex((prev) => (prev + 1) % NEWS_ITEMS.length);
+    }, 4000); // 4秒切换一次
+    return () => clearInterval(interval);
+  }, []);
+
+  const currentNews = NEWS_ITEMS[currentNewsIndex];
+
   return (
     <section className="relative w-full h-screen flex flex-col items-center overflow-hidden bg-sumo-bg">
-      {/* 1. 背景层 (不变) */}
+      {/* 1. 背景层 */}
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         <Image
           src="/images/bg/hero-bg-1.jpg"
@@ -15,127 +35,102 @@ const Hero = () => {
           fill
           priority
           className="object-cover object-top"
-          style={{ filter: "brightness(0.9) contrast(1.1)" }}
+          style={{ filter: "brightness(0.85) contrast(1.1)" }}
         />
-        <div className="absolute bottom-0 w-full h-[20vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/50 to-transparent" />
+        <div className="absolute bottom-0 w-full h-[40vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/60 to-transparent" />
       </div>
 
-      {/* 2. 核心内容层 */}
-      {/* - 手机版: top-24 left-4 (左侧悬浮)
-         - 电脑版: md:top-20 md:left-20 (保持原样)
-      */}
-      <div className="absolute z-10 reveal-up top-24 left-4 md:top-32 md:left-32">
-        {/* --- 容器设计 --- */}
-        {/* - w-[200px]: 手机版宽度锁定在 200px (精致矩形)
-           - md:w-auto: 电脑版自动宽度
-           - md:max-w-[380px]: 电脑版最大宽度
-        */}
-        <div className="relative bg-white shadow-[0_20px_40px_rgba(0,0,0,0.25)] flex flex-row group overflow-hidden rounded-sm w-[200px] md:w-auto md:max-w-[380px]">
-          {/* 装饰：顶部悬浮红线 (Hover动效) */}
-          <div className="absolute top-0 left-0 w-full h-[3px] bg-sumo-red scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left z-30"></div>
+      {/* 2. 核心宣传卡片层 (Ticket Style) */}
+      <div className="absolute z-10 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
+        <div className="relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex flex-row items-stretch rounded-sm overflow-hidden h-[80px] md:h-[90px] group transition-transform duration-500 hover:translate-y-[-2px]">
 
-          {/* Part A: 极简红色侧边条 (Slim Accent) */}
-          {/* 手机版只是一条细红线，电脑版是宽红块 */}
-          <div className="w-1.5 md:w-16 bg-sumo-red text-white flex flex-col justify-center items-center relative z-10 shrink-0 transition-all duration-300">
-            {/* 电脑版内容 (手机版隐藏) */}
-            <div className="hidden md:flex flex-col items-center py-6 h-full justify-between">
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1">
-                  20<br />26
-                </span>
-                <span className="text-[10px] font-bold tracking-widest opacity-80 mb-1 pt-1">
-                  年<br />作<br />成
-                </span>
-              </div>
-              <div className="w-[1px] h-12 bg-white/30"></div>
+          <div className="absolute top-0 left-0 h-[3px] bg-sumo-red w-full scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left z-20"></div>
+
+          {/* Part A: 左侧红色强调区 */}
+          <div className="bg-sumo-red text-white w-[60px] md:w-[80px] flex flex-col justify-center items-center shrink-0 relative overflow-hidden z-10">
+            <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
+            <span className="text-[10px] md:text-xs font-bold leading-none opacity-90 font-serif">20</span>
+            <span className="text-2xl md:text-3xl font-black tracking-tighter leading-none my-0.5 font-serif">26</span>
+            <div className="flex flex-col items-center border-t border-white/30 pt-1 mt-1 w-8">
+              <span className="text-[10px] md:text-xs font-bold leading-none">年</span>
+              <span className="text-[8px] md:text-[9px] tracking-widest opacity-90 mt-0.5 transform scale-90">始動</span>
             </div>
           </div>
 
-          {/* Part B: 内容区 */}
-          <div className="flex flex-col bg-white relative w-full">
-            {/* 纹理背景 */}
-            <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 pointer-events-none mix-blend-multiply z-0"></div>
-
-            {/* B1: 顶部信息 (手机版特供) */}
-            <div className="md:hidden px-4 pt-3 flex justify-between items-center opacity-60 relative z-10">
-              <span className="text-[8px] font-bold tracking-widest uppercase">
-                2026年作成
-              </span>
-              <span className="text-[8px] font-mono tracking-widest">JPN</span>
-            </div>
-
-            {/* B2: 核心视觉 (心技体) - 横向排列 */}
-            <div className="relative z-10 px-4 py-2 md:px-8 md:pt-8 md:pb-4">
-              <h1 className="flex items-center justify-between md:justify-start md:gap-5 font-serif text-sumo-text leading-none select-none">
-                <span className="text-3xl md:text-5xl font-black tracking-tighter group-hover:text-sumo-red transition-colors duration-300">
-                  心
-                </span>
-
-                {/* 装饰点 */}
-                <span className="w-1 h-1 bg-gray-200 rounded-full md:w-1.5 md:h-1.5"></span>
-
-                <span className="text-3xl md:text-5xl font-black tracking-tighter group-hover:text-sumo-red transition-colors duration-300">
-                  技
-                </span>
-
-                <span className="w-1 h-1 bg-gray-200 rounded-full md:w-1.5 md:h-1.5"></span>
-
-                <span className="text-3xl md:text-5xl font-black tracking-tighter group-hover:text-sumo-red transition-colors duration-300">
-                  体
-                </span>
-              </h1>
-            </div>
-
-            {/* 分割线 */}
-            <div className="w-full px-4 md:px-8 box-content opacity-50 relative z-10">
-              <div className="w-full h-[1px] bg-gray-100 hidden md:block"></div>
-              {/* 手机版虚线 */}
-              <div className="w-full h-[1px] border-t border-dashed border-gray-200 md:hidden"></div>
-            </div>
-
-            {/* B3: 底部信息区 */}
-            <div className="relative z-10 px-4 py-3 md:px-8 md:py-5">
-              {/* 电脑版文案 */}
-              <div className="hidden md:block">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-1 h-1 bg-sumo-red rounded-full"></div>
-                  <span className="text-[8px] font-bold tracking-[0.2em] text-gray-400 uppercase">
-                    Philosophy
-                  </span>
-                </div>
-                <p className="font-serif text-base font-bold text-sumo-text tracking-widest leading-none mb-1">
-                  伝統を未来へ
-                </p>
-                <p className="font-sans text-[9px] text-gray-400 font-medium tracking-wider">
-                  Bridging Tradition & Future
-                </p>
+          {/* Part B: 右侧内容 */}
+          <div className="flex-grow flex flex-col justify-center px-5 md:px-8 relative bg-white">
+            <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-20 pointer-events-none mix-blend-multiply"></div>
+            <div className="relative z-10 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3 md:gap-6">
+                <h1 className="flex items-center gap-2 md:gap-4 font-serif text-sumo-text leading-none select-none">
+                  <span className="text-3xl md:text-4xl font-black tracking-tighter group-hover:text-sumo-red transition-colors duration-300">心</span>
+                  <span className="w-[1px] h-3 bg-gray-300 rotate-12"></span>
+                  <span className="text-3xl md:text-4xl font-black tracking-tighter group-hover:text-sumo-red transition-colors duration-300">技</span>
+                  <span className="w-[1px] h-3 bg-gray-300 rotate-12"></span>
+                  <span className="text-3xl md:text-4xl font-black tracking-tighter group-hover:text-sumo-red transition-colors duration-300">体</span>
+                </h1>
               </div>
-
-              {/* 手机版特供：极简数据行 (Smart Money Style) */}
-              <div className="md:hidden flex justify-between items-end">
-                <div>
-                  <p className="font-serif text-[10px] font-bold text-sumo-text tracking-widest leading-none mb-1">
-                    伝統を未来へ
-                  </p>
-                  <p className="font-sans text-[7px] text-gray-400 tracking-wider">
-                    Tradition & Future
-                  </p>
-                </div>
-
-                {/* 呼吸灯状态 */}
-                <div className="flex items-center gap-1 bg-gray-50 px-1.5 py-0.5 rounded-[2px] border border-gray-100">
-                  <div className="relative flex h-1 w-1">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-1 w-1 bg-green-500"></span>
-                  </div>
-                  <span className="text-[6px] font-mono text-gray-400 tracking-tighter">
-                    LIVE
-                  </span>
-                </div>
+              <div className="flex flex-col items-end border-l border-gray-100 pl-4 md:pl-8 ml-2">
+                <p className="font-serif text-[10px] md:text-sm font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap">伝統を未来へ</p>
+                <p className="hidden md:block font-sans text-[8px] text-gray-400 font-medium tracking-wider uppercase text-right">Tradition & Future</p>
               </div>
+            </div>
+            {/* 星取表装饰 */}
+            <div className="absolute bottom-2 right-3 flex gap-1 opacity-20 pointer-events-none">
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-gray-800 bg-transparent"></span>
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gray-800"></span>
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-gray-800 bg-transparent"></span>
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-gray-800 bg-transparent"></span>
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-gray-800"></span>
+              <span className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-gray-800 bg-transparent"></span>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ✨ NEW: 高级感通知模块 (News Widget) - 居中版 */}
+      {/* - left-1/2 -translate-x-1/2: 水平绝对居中
+          - bottom-24 md:bottom-28: 距离底部留出空间，完全避开 RabbitBanner
+          - w-[90vw] max-w-[340px]: 稍微加宽，适配居中布局
+      */}
+      <div className="absolute z-20 top-60 md:top-60 left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
+        <a href={currentNews.link} className="block group/news">
+          <div className="flex items-stretch bg-black/20 backdrop-blur-lg border border-white/10 rounded-sm overflow-hidden transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-[1.02]">
+
+            {/* 1. 左侧：竖排标签 (Vertical Label) */}
+            <div className="w-[28px] md:w-[32px] bg-sumo-red/90 flex items-center justify-center py-2 shrink-0">
+              <span className="text-[9px] md:text-[10px] font-bold text-white tracking-widest opacity-90" style={{ writingMode: 'vertical-rl' }}>
+                最新情報
+              </span>
+            </div>
+
+            {/* 2. 右侧：内容区 (Content) */}
+            <div className="flex-grow py-3 px-4 flex flex-col justify-center relative min-h-[70px]">
+              {/* 装饰：顶部微光细线 */}
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="font-mono text-[9px] md:text-[10px] text-white/80 tracking-wider">
+                  {currentNews.date}
+                </span>
+                {/* 标签改为更低调的黑底白字或半透明，增加高级感 */}
+                <span className="text-[8px] md:text-[9px] font-bold text-white bg-white/10 border border-white/10 px-1.5 py-[1px] rounded-[1px]">
+                  {currentNews.type}
+                </span>
+              </div>
+
+              {/* 标题 */}
+              <h3 key={currentNewsIndex} className="text-xs md:text-sm font-medium text-white leading-snug line-clamp-2 animate-in fade-in slide-in-from-bottom-2 duration-500 drop-shadow-sm">
+                {currentNews.title}
+              </h3>
+
+              {/* Arrow Icon */}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 -translate-x-2 group-hover/news:opacity-100 group-hover/news:translate-x-0 transition-all duration-300 text-white/80">
+                <ChevronRight size={16} />
+              </div>
+            </div>
+          </div>
+        </a>
       </div>
 
       {/* 3. 底部横幅层 */}

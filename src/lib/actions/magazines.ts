@@ -1,111 +1,133 @@
 "use server";
 
 import { z } from "zod";
-import { prisma } from "@/lib/db";
+import { prisma } from "@/lib/db"; // 保持您原有的引用路径
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@prisma/client";
 
-// 定义验证规则
+// Zod Schema
 const MagazineSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
-  slug: z.string().min(1, "IDは必須です").regex(/^[a-z0-9-]+$/, "半角英数字のみ"),
-  region: z.string().min(1, "地域を選択してください"), 
-  issueDate: z.string().min(1, "発行日は必須です"),
-  coverImage: z.string().optional(),
-  // ✨ 验证图片数组
-  images: z.array(z.string()).optional(), 
-  pdfUrl: z.string().optional(),
-  readLink: z.string().optional(),
-  description: z.string().optional(),
-  published: z.boolean().default(true),
+  slug: z
+    .string()
+    .min(1, "IDは必須です")
+    .regex(/^[a-z0-9-]+$/, "半角英数字とハイフンのみ"),
+  region: z.string().min(1, "地域を選択してください"),
+  issueDate: z.string().transform((str) => new Date(str)),
+  coverImage: z.string().optional().nullable(),
+  pdfUrl: z.string().optional().nullable(),
+  readLink: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  published: z.boolean(),
+  images: z.array(z.string()),
 });
 
+// 解析 FormData 的辅助函数
+function parseFormData(formData: FormData) {
+  return {
+    title: formData.get("title") as string,
+    slug: formData.get("slug") as string,
+    region: formData.get("region") as string,
+    issueDate: formData.get("issueDate") as string,
+    coverImage: (formData.get("coverImage") as string) || null,
+    pdfUrl: (formData.get("pdfUrl") as string) || null,
+    readLink: (formData.get("readLink") as string) || null,
+    description: (formData.get("description") as string) || null,
+    published: formData.get("published") === "true",
+    images: formData.getAll("images") as string[],
+  };
+}
+
 /**
- * 创建杂志记录
+ * 创建杂志
  */
 export async function createMagazine(formData: FormData) {
-  const rawData = Object.fromEntries(formData.entries());
-  
-  // ✨ 关键：使用 getAll 获取同名的多个 "images" 字段
-  const images = formData.getAll("images") as string[];
-
-  const validated = MagazineSchema.safeParse({
-    ...rawData,
-    images, // 传入验证
-    published: rawData.published === "true",
-  });
-
-  if (!validated.success) return { error: "入力内容に誤りがあります。" };
-
   try {
+    const rawData = parseFormData(formData);
+    const validated = MagazineSchema.safeParse(rawData);
+
+    if (!validated.success) {
+      console.error("Validation Error:", validated.error);
+      return { success: false, message: "入力内容に誤りがあります。" };
+    }
+
     await prisma.magazine.create({
-      data: {
-        title: validated.data.title,
-        slug: validated.data.slug,
-        region: validated.data.region,
-        description: validated.data.description,
-        coverImage: validated.data.coverImage,
-        pdfUrl: validated.data.pdfUrl,
-        readLink: validated.data.readLink,
-        published: validated.data.published,
-        issueDate: new Date(validated.data.issueDate),
-        images: validated.data.images, // ✨ 保存图片数组
-      },
+      data: validated.data,
     });
-    
-    // 刷新管理后台和前台的缓存
+
     revalidatePath("/admin/magazines");
     revalidatePath("/magazines");
-    return { success: true };
+
+    // ✅ 关键修改：返回成功状态，把控制权交给前端（前端会弹窗并跳转）
+    return { success: true, message: "登録しました" };
   } catch (err) {
-    // 捕获数据库唯一性冲突 (Slug 重复)
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-      return { error: "このID（Slug）は既に使用されています。" };
+    console.error("Create Error:", err);
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      return {
+        success: false,
+        message: "このID（Slug）は既に使用されています。",
+      };
     }
-    return { error: "保存に失敗しました。" };
+    return { success: false, message: "保存に失敗しました。" };
   }
 }
 
 /**
- * 更新杂志记录
+ * 更新杂志
  */
 export async function updateMagazine(id: string, formData: FormData) {
-  const rawData = Object.fromEntries(formData.entries());
-  const validated = MagazineSchema.safeParse({
-    ...rawData,
-    published: rawData.published === "true",
-  });
-
-  if (!validated.success) return { error: "入力内容を確認してください。" };
-
   try {
-    const { slug, ...updateData } = validated.data;
+    const rawData = parseFormData(formData);
+    const validated = MagazineSchema.safeParse(rawData);
+
+    if (!validated.success) {
+      console.error("Validation Error:", validated.error);
+      return { success: false, message: "入力内容を確認してください。" };
+    }
+
+    const existing = await prisma.magazine.findFirst({
+      where: { slug: validated.data.slug, NOT: { id: id } },
+    });
+    if (existing)
+      return {
+        success: false,
+        message: "このID（Slug）は既に使用されています。",
+      };
+
     await prisma.magazine.update({
       where: { id },
-      data: {
-        ...updateData,
-        issueDate: new Date(validated.data.issueDate),
-      },
+      data: validated.data,
     });
 
+    // 刷新缓存
     revalidatePath("/admin/magazines");
+    revalidatePath(`/admin/magazines/${id}`); // 确保 Description 刷新
     revalidatePath("/magazines");
-    return { success: true };
+    revalidatePath(`/magazines/${validated.data.slug}`);
+
+    // ✅ 关键修改：返回成功状态
+    return { success: true, message: "保存しました" };
   } catch (err) {
-    return { error: "更新に失敗しました。" };
+    console.error("Update Error:", err);
+    return { success: false, message: "更新に失敗しました。" };
   }
 }
 
 /**
- * 删除杂志记录
+ * 删除杂志
  */
 export async function deleteMagazine(id: string) {
   try {
     await prisma.magazine.delete({ where: { id } });
     revalidatePath("/admin/magazines");
     revalidatePath("/magazines");
-    return { success: true };
+    // ✅ 保持一致，返回成功状态
+    return { success: true, message: "削除しました" };
   } catch (err) {
-    return { error: "削除に失敗しました。" };
+    console.error("Delete Error:", err);
+    return { success: false, message: "削除に失敗しました。" };
   }
 }
