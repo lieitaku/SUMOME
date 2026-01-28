@@ -4,6 +4,12 @@ const nextConfig = {
     // 允许 Next.js 优化来自以下域名的图片
     remotePatterns: [
       {
+        protocol: 'https',
+        hostname: 'cdn.pixabay.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
         protocol: "https",
         hostname: "*.supabase.co", // 授权给所有的 Supabase 存储桶
       },
