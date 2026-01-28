@@ -1,33 +1,40 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { clubsData } from "@/data/clubs";
-import ClubCard from "@/components/clubs/ClubCard";
-import Section from "@/components/ui/Section"; // 1. 引入通用区块
-import Button from "@/components/ui/Button"; // 2. 引入通用按钮
+import { type Club } from "@prisma/client";
 
-const PickupClubs = () => {
+import ClubCard from "@/components/clubs/ClubCard";
+import Section from "@/components/ui/Section";
+import Button from "@/components/ui/Button";
+
+interface PickupClubsProps {
+  clubs: Club[];
+}
+
+const PickupClubs = ({ clubs }: PickupClubsProps) => {
+  // --- ✨ 核心逻辑：过滤掉官方总部账号 ---
+  // 使用 useMemo 确保过滤逻辑只在 clubs 变化时运行，提高性能
+  const displayClubs = useMemo(() => {
+    return clubs.filter(club => club.slug !== "official-hq");
+  }, [clubs]);
+
   return (
-    // 使用 gray 背景，与上一区块的白色区分开，形成节奏感
     <Section background="gray" id="pickup-clubs">
       {/* 头部标题区 */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 border-b border-gray-200 pb-8 reveal-up">
         <div>
-          {/* 小标题：品牌蓝，全大写，加宽字间距 */}
           <span className="text-sumo-brand text-xs font-bold tracking-[0.3em] mb-3 block uppercase font-sans">
             Pick Up Clubs
           </span>
-          {/* 大标题：墨色，衬线体 */}
           <h2 className="text-3xl md:text-5xl font-black font-serif text-sumo-text">
             注目の相撲クラブ
           </h2>
         </div>
 
-        {/* 桌面端链接：简单的文字链 */}
         <Link
-          href="/clubs/search"
+          href="/clubs"
           className="hidden md:flex items-center gap-2 text-sm font-bold text-sumo-brand hover:text-sumo-red transition-colors group tracking-widest"
         >
           クラブ一覧を見る
@@ -38,27 +45,24 @@ const PickupClubs = () => {
         </Link>
       </div>
 
-      {/* 卡片网格 */}
+      {/* 卡片网格：使用过滤后的 displayClubs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {clubsData.map((club, idx) => (
+        {displayClubs.map((club, idx) => (
           <div
             key={club.id}
-            className={`reveal-up ${
-              idx === 1 ? "delay-100" : idx === 2 ? "delay-200" : ""
-            }`}
+            className={`reveal-up ${idx === 1 ? "delay-100" : idx === 2 ? "delay-200" : ""
+              }`}
           >
-            {/* 注意：如果 ClubCard 内部还有圆角(rounded-xl)或很深的阴影，
-               建议稍后也进去把它改成 rounded-sm 或无阴影的线框风格。
-            */}
+            {/* ClubCard 内部也已经有了 slug 判定，这里是双重保险 */}
             <ClubCard club={club} />
           </div>
         ))}
       </div>
 
-      {/* 移动端按钮：使用新的 Button 组件 (Outline 风格) */}
+      {/* 移动端按钮 */}
       <div className="mt-12 text-center md:hidden reveal-up delay-100">
         <Button
-          href="/clubs/search"
+          href="/clubs"
           variant="outline"
           className="w-full md:w-auto"
         >

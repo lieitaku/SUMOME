@@ -1,0 +1,192 @@
+// ==========================================
+// 🛠️ 系统配置 (Configuration)
+// ==========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ==========================================
+// 🔐 权限与角色 (Auth Enums)
+// ==========================================
+
+enum Role {
+  ADMIN // 总部管理员 (公司员工)
+  OWNER // 俱乐部负责人 (道场馆长)
+}
+
+enum ApplicationStatus {
+  pending   // 未处理
+  contacted // 已联系
+  joined    // 已入会
+  rejected  // 已取消/拒绝
+}
+
+// ==========================================
+// 👤 用户系统 (Users)
+// ==========================================
+
+model User {
+  id        String   @id // 建议对接 Auth 系统的 ID
+  email     String   @unique
+  name      String?
+  role      Role     @default(OWNER)
+
+  // 馆长关联的俱乐部
+  clubId    String?  @unique
+  club      Club?    @relation(fields: [clubId], references: [id])
+
+  // 发布记录
+  activities Activity[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// 🏛️ 俱乐部核心资产 (Clubs)
+// ==========================================
+
+model Club {
+  id             String    @id @default(cuid())
+  name           String
+  slug           String    @unique
+  description    String?   @db.Text
+  logo           String?
+  mainImage      String?
+
+  // 所在地信息
+  zipCode        String?   // 郵便番号
+  area           String    // 都道府県 (必须)
+  city           String?   // 市区町村
+  address        String    // 番地 (必须)
+  mapUrl         String?   @db.Text // Google Maps 链接
+
+  // 联络信息
+  phone          String?
+  website        String?
+  instagram      String?
+  twitter        String?
+
+  // 运营信息
+  schedule       String?   // 稽古时间
+  target         String?   // 募集对象
+  representative String?   // 代表者
+
+  // 关系链路
+  user           User?
+  activities     Activity[]
+  applications   Application[] // 关联的申请记录
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([area]) // 优化按地区查询的性能
+}
+
+// ==========================================
+// 📝 内容与活动 (Activities / News)
+// ==========================================
+
+model Activity {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  date         DateTime
+  location     String?
+  category     String   @default("Report")
+  mainImage    String?
+  published    Boolean  @default(true)
+
+  // 模版分发逻辑
+  templateType String   @default("news") // news, report, event, custom
+  contentData  Json?    // 结构化积木数据
+  content      String?  @db.Text // 纯文本备份 (SEO 优化)
+
+  // 归属信息
+  clubId       String
+  club         Club     @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  authorId     String
+  author       User     @relation(fields: [authorId], references: [id])
+
+  customRoute  String?  // 手写精装页面的路由 ID
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([clubId])
+  @@index([category])
+}
+
+// ==========================================
+// 📚 数字化资产 (Magazines & Banners)
+// ==========================================
+
+model Magazine {
+  id          String   @id @default(cuid())
+  title       String   // 杂志标题，如：相扑月刊 Vol.15
+  slug        String   @unique // 用于 URL 的唯一标识
+  description String?  @db.Text // 简短描述或本期看点
+  region      String   @default("All") // 用于地区筛选 (例如：全国, 関東, 関西)
+  coverImage  String?  // 封面图 URL
+  images      String[] //内页图片数组
+  pdfUrl      String?  // PDF 文件下载链接
+  readLink    String?  // 在线阅读链接（如果使用的是外部翻页工具）
+  
+  issueDate   DateTime @default(now()) // 杂志所属的期数日期
+  published   Boolean  @default(true)  // 发布状态开关
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([issueDate]) // 为日期添加索引，提高列表查询性能
+  @@index([region]) // 为筛选字段添加索引
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  name      String
+  image     String
+  alt       String?
+  link      String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==========================================
+// 📩 业务转化：入会申请 (Applications)
+// ==========================================
+
+model Application {
+  id         String            @id @default(cuid())
+  
+  // 关联道场
+  clubId     String
+  club       Club              @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  clubName   String            // 冗余存储，防止道场改名后找不到历史记录
+
+  // 申请人信息
+  name       String
+  email      String
+  phone      String?
+  experience String            // beginner, experienced
+  message    String?           @db.Text
+  
+  // 状态管理 (使用 Enum 确保类型安全)
+  status     ApplicationStatus @default(pending)
+
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  @@index([clubId])
+  @@index([status])
+}

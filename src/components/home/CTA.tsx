@@ -29,7 +29,7 @@ const CTA = () => {
         <div className="flex flex-col md:flex-row w-full gap-6 md:gap-0">
           {/* === 左侧：寻找道场 (Search) === */}
           <Link
-            href="/clubs"
+            href="/clubs/map"
             className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-500
             
             /* Mobile Style: 独立白卡片 */

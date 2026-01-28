@@ -194,7 +194,7 @@ const Header = () => {
 
             {/* 2. 搜索按钮 (修复：添加 search-btn-dynamic 类名) */}
             <Button
-              href="/clubs"
+              href="/clubs/map"
               className={cn(
                 "search-btn-dynamic", // ✨ 关键：应用强制背景色样式
                 "rounded-full px-5 py-2 text-sm font-bold text-white shadow-md",
@@ -263,7 +263,7 @@ const Header = () => {
 
           <div className="mt-auto mb-8 space-y-4">
             <Link
-              href="/clubs"
+              href="/clubs/map"
               onClick={() => setMenuOpen(false)}
               className="flex items-center justify-center gap-2 w-full text-white py-4 rounded-full font-bold shadow-lg hover:brightness-110 transition-all active:scale-[0.98]"
               style={{ backgroundColor: themeColor }}

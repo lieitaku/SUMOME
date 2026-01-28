@@ -287,7 +287,7 @@ const JapanMap = () => {
                     <Ceramic
                       key={id}
                       as={Link}
-                      href={`/clubs/${id}`}
+                      href={`/prefectures/${id}`}
                       style={style}
                       className={cn(
                         "flex items-center justify-center py-3 text-xs font-bold rounded-xl",
@@ -317,7 +317,7 @@ const JapanMap = () => {
             <Ceramic
               key={pref.id}
               as={Link}
-              href={`/clubs/${pref.id}`}
+              href={`/prefectures/${pref.id}`}
               style={{ ...positionStyle, ...regionStyle }}
               className={cn(
                 "absolute flex items-center justify-center text-sm tracking-widest",
