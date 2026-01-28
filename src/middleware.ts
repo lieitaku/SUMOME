@@ -2,12 +2,14 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // 1. 创建初始响应
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
+  // 2. 初始化 Supabase 客户端并同步 Cookie
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,6 +19,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // 同时更新请求和响应的 Cookie，防止状态不同步
           request.cookies.set({ name, value, ...options })
           response = NextResponse.next({
             request: {
@@ -38,21 +41,32 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
+  // 3. 获取当前会话（不要使用 getSession，新版推荐 getUser 保证安全性）
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // 1. 如果访问 /admin 且没登录 -> 去登录页
-  if (request.nextUrl.pathname.startsWith('/admin') && !session) {
+  const url = request.nextUrl.clone()
+
+  // 权限控制逻辑
+  // 1. 如果访问 /admin 且未登录 -> 重定向到登录页
+  if (url.pathname.startsWith('/admin') && !user) {
     return NextResponse.redirect(new URL('/manager/login', request.url))
   }
 
-  // 2. 如果已登录还想去登录页 -> 回后台
-  if (request.nextUrl.pathname.startsWith('/manager/login') && session) {
-    return NextResponse.redirect(new URL('/admin/clubs', request.url))
+  // 2. 如果已登录用户尝试访问登录页 -> 重定向到后台首页
+  if (url.pathname.startsWith('/manager/login') && user) {
+    return NextResponse.redirect(new URL('/admin/magazines', request.url))
   }
 
   return response
 }
 
+// ✨ Matcher 排除静态资源，提高性能
 export const config = {
-  matcher: ['/admin/:path*', '/manager/login'],
+  matcher: [
+    /*
+     * 匹配所有需要校验的路径
+     * 排除 _next/static, _next/image, favicon.ico 等静态文件
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
