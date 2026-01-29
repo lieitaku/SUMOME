@@ -142,7 +142,7 @@ const PartnersPage = () => {
                                         <div className="flex justify-between items-center mb-6">
                                             <div>
                                                 <h4 className="font-bold text-gray-800 text-lg">
-                                                    Dashboard
+                                                    管理画面
                                                 </h4>
                                                 <p className="text-[10px] text-gray-400">
                                                     Welcome back, Master

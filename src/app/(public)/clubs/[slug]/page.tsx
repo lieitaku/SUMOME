@@ -37,7 +37,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
     const displayTags = [
         club.area,
         club.city,
-        club.target ? club.target : "全年齢対象",
+        club.target,
     ].filter(Boolean);
 
     // 画廊逻辑：优先显示主图，其次是副图 (subImages)
@@ -183,7 +183,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
                                             )}
                                             {/* 邮箱 */}
                                             {club.email && (
-                                                <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
+                                                <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-cyan-600shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
                                                     <Mail size={20} />
                                                 </a>
                                             )}
@@ -330,7 +330,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
                                             <div className="bg-sumo-brand/5 p-5 rounded-xl border border-sumo-brand/10 flex items-center justify-between">
                                                 <div>
                                                     <p className="text-sm font-black text-sumo-brand">
-                                                        {club.target || "全年齢対象"}
+                                                        {club.target}
                                                     </p>
                                                     <p className="text-[10px] text-gray-500 mt-1 font-bold opacity-80">
                                                         ※ 初心者・見学大歓迎

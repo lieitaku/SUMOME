@@ -8,6 +8,7 @@ import { Club } from "@prisma/client";
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
+import { REGIONS } from "@/lib/constants"
 
 // ✨ 1. 引入 UI 组件和 Hooks
 import ImageUploader from "@/components/admin/ui/ImageUploader";
@@ -76,7 +77,6 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
             description: initialData.description || "",
             logo: initialData.logo || "",
             mainImage: initialData.mainImage || "",
-            // ✨ 初始化副图数组 (如果是 null 则给 [])
             subImages: initialData.subImages || [],
             zipCode: initialData.zipCode || "",
             area: initialData.area || "未設定",
@@ -295,12 +295,23 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                             <label className={labelClass}>都道府県 <span className="text-red-500">*</span></label>
                             <select {...form.register("area")} className={inputClass}>
                                 <option value="未設定">選択してください</option>
-                                <option value="東京都">東京都</option>
-                                <option value="大阪府">大阪府</option>
-                                <option value="愛知県">愛知県</option>
-                                <option value="北海道">北海道</option>
-                                <option value="福岡県">福岡県</option>
-                                <option value="その他">その他</option>
+
+                                {/* ✨ 核心修改：利用您的 REGIONS 对象自动生成分组列表 */}
+                                {Object.entries(REGIONS).map(([regionName, prefectures]) => (
+                                    <optgroup key={regionName} label={regionName}>
+                                        {prefectures.map((pref) => (
+                                            <option key={pref} value={pref}>
+                                                {pref}
+                                            </option>
+                                        ))}
+                                    </optgroup>
+                                ))}
+
+                                {/* 补充额外的选项 */}
+                                <optgroup label="その他">
+                                    <option value="海外">海外</option>
+                                    <option value="その他">その他</option>
+                                </optgroup>
                             </select>
                         </div>
                         <div>

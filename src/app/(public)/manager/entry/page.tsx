@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useActionState } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -11,27 +11,31 @@ import {
   Check,
   ShieldCheck,
   ChevronLeft,
+  Loader2,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
-import Button from "@/components/ui/Button"; // 引入我们修复后的通用组件
 import { cn } from "@/lib/utils";
 
-const RegistrationPage = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+// 引入后端 Action 和类型定义
+import { signUp, type SignUpState } from "@/lib/actions/auth-signup";
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    // 模拟 API 请求
-    setTimeout(() => {
-      setIsSubmitting(false);
-    }, 1500);
-  };
+const initialState: SignUpState = {
+  message: "",
+  error: {},
+  inputs: {
+    clubName: "",
+    name: "",
+    email: "",
+  }
+};
+
+const RegistrationPage = () => {
+  const [state, formAction, isPending] = useActionState(signUp, initialState);
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
-      {/* ==================== 1. 页头区域 (碧空背景) ==================== */}
+
+      {/* ==================== 1. 页头区域 (Header Area) ==================== */}
       <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
@@ -42,13 +46,11 @@ const RegistrationPage = () => {
             backgroundSize: "40px 40px",
           }}
         />
-        {/* 背景大字装饰 */}
         <div className="absolute top-1/2 right-10 -translate-y-1/2 text-[15vw] font-black text-white opacity-[0.03] select-none pointer-events-none leading-none mix-blend-overlay tracking-tighter font-sans">
           JOIN
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
-          {/* 返回按钮 */}
           <div className="absolute top-0 left-6">
             <Link
               href="/"
@@ -83,7 +85,7 @@ const RegistrationPage = () => {
         </div>
       </header>
 
-      {/* ==================== 2. 注册卡片区域 (纯白瓷风格) ==================== */}
+      {/* ==================== 2. 注册卡片区域 (Registration Card) ==================== */}
       <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
         <div className="container mx-auto max-w-5xl">
           <Ceramic
@@ -91,9 +93,9 @@ const RegistrationPage = () => {
             className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden p-0"
           >
             <div className="flex flex-col lg:flex-row min-h-[700px]">
-              {/* --- A. 左侧: 邀请文案 (淡雅灰白) --- */}
+
+              {/* --- A. 左侧区域 (保持不变) --- */}
               <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col">
-                {/* 纸张纹理 */}
                 <div
                   className="absolute inset-0 opacity-[0.03] mix-blend-multiply"
                   style={{ backgroundImage: "url('/images/bg/noise.png')" }}
@@ -142,7 +144,6 @@ const RegistrationPage = () => {
                   </div>
                 </div>
 
-                {/* 底部安全标识 */}
                 <div className="relative z-10 mt-12 pt-8 border-t border-gray-200">
                   <div className="flex items-center gap-3 opacity-60">
                     <ShieldCheck size={16} className="text-gray-400" />
@@ -153,7 +154,7 @@ const RegistrationPage = () => {
                 </div>
               </div>
 
-              {/* --- B. 右侧: 注册表单 (纯白书写区) --- */}
+              {/* --- B. 右侧区域: 注册表单 (Form) --- */}
               <div className="lg:w-7/12 bg-white p-8 md:p-14 lg:p-16 relative">
                 <div className="flex justify-between items-end mb-10">
                   <div>
@@ -169,73 +170,87 @@ const RegistrationPage = () => {
                   </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-8">
-                  {/* 输入框：俱乐部名称 */}
+                <form action={formAction} className="space-y-8">
+
+                  {state?.message && (
+                    <div className="p-4 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                      ⚠️ {state.message}
+                    </div>
+                  )}
+
+                  {/* 字段 1: 俱乐部名称 */}
                   <div className="group relative">
-                    <label
-                      className={cn(
-                        "absolute left-0 transition-all duration-300 pointer-events-none font-bold uppercase tracking-wider flex items-center gap-2",
-                        focusedField === "club" || true // 保持 Label 固定在上方
-                          ? "-top-5 text-[10px] text-sumo-brand"
-                          : "top-3 text-xs text-gray-400",
-                      )}
-                    >
-                      <Building2 size={12} /> クラブ名{" "}
-                      <span className="text-red-400">*</span>
+                    <label className="absolute -top-5 left-0 text-[10px] font-bold text-sumo-brand uppercase tracking-wider flex items-center gap-2">
+                      <Building2 size={12} /> クラブ名 <span className="text-red-400">*</span>
                     </label>
                     <input
+                      name="clubName"
                       type="text"
                       required
+                      defaultValue={state?.inputs?.clubName}
                       placeholder="例：東京相撲クラブ"
-                      onFocus={() => setFocusedField("club")}
-                      onBlur={() => setFocusedField(null)}
                       className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
                     />
+                    {state?.error?.clubName && (
+                      <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.clubName[0]}</p>
+                    )}
                   </div>
 
-                  {/* 输入框：代表者姓名 */}
+                  {/* 字段 2: 代表者姓名 */}
                   <div className="group relative">
                     <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                      <User size={12} /> 代表者氏名{" "}
-                      <span className="text-red-400">*</span>
+                      <User size={12} /> 代表者氏名 <span className="text-red-400">*</span>
                     </label>
                     <input
+                      name="name"
                       type="text"
                       required
+                      defaultValue={state?.inputs?.name}
                       placeholder="例：相撲 太郎"
                       className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
                     />
+                    {state?.error?.name && (
+                      <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.name[0]}</p>
+                    )}
                   </div>
 
-                  {/* 输入框：邮箱 */}
+                  {/* 字段 3: 邮箱 */}
                   <div className="group relative">
                     <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                      <Mail size={12} /> メールアドレス{" "}
-                      <span className="text-red-400">*</span>
+                      <Mail size={12} /> メールアドレス <span className="text-red-400">*</span>
                     </label>
                     <input
+                      name="email"
                       type="email"
                       required
+                      // ✨ 关键修复：设置 defaultValue 实现回显
+                      defaultValue={state?.inputs?.email}
                       placeholder="example@sumome.jp"
                       className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
                     />
+                    {state?.error?.email && (
+                      <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.email[0]}</p>
+                    )}
                   </div>
 
-                  {/* 输入框：密码 */}
+                  {/* 字段 4: 密码 (注意：密码字段不设置 defaultValue，这是安全标准) */}
                   <div className="group relative">
                     <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                      <Lock size={12} /> パスワード{" "}
-                      <span className="text-red-400">*</span>
+                      <Lock size={12} /> パスワード <span className="text-red-400">*</span>
                     </label>
                     <input
+                      name="password"
                       type="password"
                       required
                       placeholder="8文字以上の半角英数字"
                       className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
                     />
+                    {state?.error?.password && (
+                      <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.password[0]}</p>
+                    )}
                   </div>
 
-                  {/* 条款与提交按钮 */}
+                  {/* 条款与提交 */}
                   <div className="pt-8">
                     <p className="text-[10px] text-gray-400 mb-6 leading-relaxed">
                       <span className="block mb-2">
@@ -257,38 +272,37 @@ const RegistrationPage = () => {
                       に同意したものとみなされます。
                     </p>
 
-                    {/* 使用通用 Button 组件 
-                      className 中使用 bg-sumo-dark 覆盖默认的 primary 蓝色，
-                      以匹配该页面的深色设计风格
-                    */}
-                    <Button
+                    <button
                       type="submit"
-                      disabled={isSubmitting}
-                      showArrow={false} // 手动控制箭头，因为我们想在 Loading 时隐藏它
+                      disabled={isPending}
                       className={cn(
-                        "w-full py-4 text-xs font-bold uppercase tracking-[0.2em] shadow-lg bg-sumo-dark text-white hover:bg-sumo-brand",
-                        isSubmitting ? "opacity-80" : "",
+                        "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3",
+                        "bg-sumo-dark text-white hover:bg-sumo-brand active:scale-[0.98]",
+                        isPending ? "opacity-70 cursor-not-allowed" : ""
                       )}
                     >
-                      <span className="flex items-center justify-center gap-3">
-                        {isSubmitting ? "Processing..." : "Create Account"}
-                        {!isSubmitting && (
+                      {isPending ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" /> Processing...
+                        </>
+                      ) : (
+                        <>
+                          Create Account
                           <ArrowRight
                             size={14}
                             className="group-hover:translate-x-1 transition-transform duration-300"
                           />
-                        )}
-                      </span>
-                    </Button>
+                        </>
+                      )}
+                    </button>
                   </div>
                 </form>
 
-                {/* 登录链接 */}
                 <div className="mt-8 pt-6 border-t border-gray-100 text-center">
                   <p className="text-xs font-medium text-gray-500">
                     アカウントをお持ちの方は
                     <Link
-                      href="/manager/login"
+                      href="/login"
                       className="text-sumo-brand font-bold ml-2 hover:underline tracking-wide"
                     >
                       こちらからログイン

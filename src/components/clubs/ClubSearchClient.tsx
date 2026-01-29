@@ -14,7 +14,11 @@ import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
 
-// --- 类型定义 ---
+// ==============================================================================
+// 1. 类型定义与常量配置
+// ==============================================================================
+
+/** 地区键值类型定义 */
 type RegionKey =
     | "hokkaido_tohoku"
     | "kanto"
@@ -24,7 +28,10 @@ type RegionKey =
     | "shikoku"
     | "kyushu_okinawa";
 
-// --- 常量数据 (保持不变) ---
+/**
+ * 地区与县的映射数据
+ * 用于前端筛选器的 Tab 渲染
+ */
 const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
     {
         id: "hokkaido_tohoku",
@@ -83,49 +90,68 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
     },
 ];
 
-// 接收数据库数据作为 Props
+// ==============================================================================
+// 2. 组件定义
+// ==============================================================================
+
 interface ClubSearchClientProps {
+    /** 从服务端传入的初始俱乐部列表数据 */
     initialClubs: Club[];
 }
 
 const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
-    // --- State Management ---
-    const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all");
-    const [activePref, setActivePref] = useState<string | "all">("all");
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isFilterExpanded, setIsFilterExpanded] = useState(true);
+    // --- 状态管理 (State Management) ---
+    const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all"); // 当前选中的大区
+    const [activePref, setActivePref] = useState<string | "all">("all");        // 当前选中的县
+    const [searchQuery, setSearchQuery] = useState("");                         // 文本搜索关键词
+    const [isFilterExpanded, setIsFilterExpanded] = useState(true);             // 筛选面板展开状态
 
-    // --- Derived State: Current Prefectures ---
+    // --- 派生状态 (Derived State) ---
+
+    /**
+     * 根据当前选中的大区，动态计算需要显示的县列表
+     * 使用 useMemo 避免不必要的重计算
+     */
     const currentPrefectures = useMemo(() => {
         if (activeRegion === "all") return [];
         return REGIONS.find((r) => r.id === activeRegion)?.prefectures || [];
     }, [activeRegion]);
 
-    // --- Filtering Logic ---
+    /**
+     * 核心筛选逻辑 (Core Filtering Logic)
+     * 包含：文本模糊搜索 + 地区精确/前缀匹配
+     */
     const filteredClubs = useMemo(() => {
-        // 使用传入的 initialClubs 进行过滤
         return initialClubs.filter((club) => {
-            // 1. Text Search
+            // 1. 文本搜索逻辑 (不区分大小写)
+            // 匹配范围：俱乐部名称 或 地区字段
             const matchQuery =
                 searchQuery === "" ||
                 club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 club.area.includes(searchQuery);
 
-            // 2. Region/Prefecture Filter
+            // 2. 地区筛选逻辑
             let matchLocation = true;
             if (activeRegion !== "all") {
                 if (activePref !== "all") {
-                    matchLocation = club.area.includes(activePref);
+                    // [重要优化] 使用 startsWith 而非 includes
+                    // 原因：避免 "東京都" 被错误匹配到 "京都" 的搜索条件中
+                    // 数据库存的是 "東京都"，筛选条件是 "京都"，startsWith 返回 false (正确)
+                    matchLocation = club.area.startsWith(activePref);
                 } else {
+                    // 如果只选了大区没选县，匹配该大区下的任意一个县
                     const regionPrefs =
                         REGIONS.find((r) => r.id === activeRegion)?.prefectures || [];
-                    matchLocation = regionPrefs.some((pref) => club.area.includes(pref));
+                    matchLocation = regionPrefs.some((pref) => club.area.startsWith(pref));
                 }
             }
+
+            // 两个条件必须同时满足
             return matchQuery && matchLocation;
         });
     }, [searchQuery, activeRegion, activePref, initialClubs]);
 
+    // 重置所有筛选条件
     const handleReset = () => {
         setActiveRegion("all");
         setActivePref("all");
@@ -134,6 +160,9 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
+            {/* 全局样式：列表卡片的入场动画 
+        注意：在生产环境中建议移动到 global.css 或 module.css 中
+      */}
             <style jsx global>{`
         @keyframes fadeInUpPhysical {
           0% {
@@ -156,7 +185,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
       `}</style>
 
             <main className="flex-grow pt-32 pb-20">
-                {/* Background Grid Pattern */}
+                {/* 背景网格装饰 (Visual Decoration) */}
                 <div
                     className="absolute inset-0 pointer-events-none z-0 fixed"
                     style={{
@@ -168,8 +197,10 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                 />
 
                 <div className="container mx-auto px-6 relative z-10">
-                    {/* ==================== 1. The Command Center ==================== */}
+
+                    {/* ==================== 区域 1: 搜索控制中心 ==================== */}
                     <div className="max-w-5xl mx-auto mb-16">
+                        {/* 顶部标签 */}
                         <div className="flex justify-center mb-8 reveal-up">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
                                 <SlidersHorizontal size={12} className="text-sumo-brand" />
@@ -183,7 +214,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                             相撲クラブを検索
                         </h1>
 
-                        {/* Ceramic Search Bar */}
+                        {/* 搜索框组件 */}
                         <div className="relative group max-w-2xl mx-auto reveal-up delay-200">
                             <div
                                 className={cn(
@@ -203,6 +234,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
+                                {/* 清除按钮：仅在有输入时显示 */}
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery("")}
@@ -215,9 +247,10 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                         </div>
                     </div>
 
-                    {/* ==================== 2. The Filter Dashboard ==================== */}
+                    {/* ==================== 区域 2: 筛选仪表盘 (折叠面板) ==================== */}
                     <div className="max-w-6xl mx-auto mb-16 reveal-up delay-300">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            {/* 筛选器头部 (点击切换折叠) */}
                             <div
                                 className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
                                 onClick={() => setIsFilterExpanded(!isFilterExpanded)}
@@ -242,6 +275,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                 />
                             </div>
 
+                            {/* 筛选器内容区 (动画容器) */}
                             <div
                                 className={cn(
                                     "transition-all duration-500 ease-in-out overflow-hidden",
@@ -251,7 +285,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                 )}
                             >
                                 <div className="p-6 md:p-10">
-                                    {/* Region Tabs */}
+                                    {/* 第一级：大区选择 (Region Tabs) */}
                                     <div className="flex flex-wrap gap-3 md:gap-4 mb-10">
                                         <Button
                                             variant="ceramic"
@@ -279,7 +313,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                         ))}
                                     </div>
 
-                                    {/* Prefecture List */}
+                                    {/* 第二级：县选择 (Prefecture List) - 仅在选中大区时显示 */}
                                     {activeRegion !== "all" && (
                                         <div className="relative pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
@@ -314,9 +348,9 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                         </div>
                     </div>
 
-                    {/* ==================== 3. Results Section ==================== */}
+                    {/* ==================== 区域 3: 搜索结果展示 ==================== */}
                     <div className="max-w-6xl mx-auto">
-                        {/* Results Header */}
+                        {/* 结果统计与标签 */}
                         <div className="flex items-end justify-between mb-8 pb-4 border-b border-gray-200">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
@@ -327,7 +361,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                 </span>
                             </div>
 
-                            {/* Active Filters Display */}
+                            {/* 激活状态展示 (Breadcrumbs style) */}
                             <div className="hidden md:flex gap-2">
                                 {searchQuery && (
                                     <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
@@ -358,13 +392,14 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                             </div>
                         </div>
 
-                        {/* Results Grid */}
+                        {/* 结果列表 (Grid Layout) */}
                         {filteredClubs.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {filteredClubs.map((club, index) => (
                                     <div
                                         key={club.id}
                                         className="opacity-0 card-enter-active"
+                                        // 交错动画延迟
                                         style={{ animationDelay: `${index * 50}ms` }}
                                     >
                                         <ClubCard club={club} />
@@ -372,7 +407,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                 ))}
                             </div>
                         ) : (
-                            /* Empty State */
+                            /* 空状态展示 (Empty State) */
                             <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
                                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
                                     <Search size={40} className="text-gray-300" />

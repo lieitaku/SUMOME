@@ -38,9 +38,12 @@ model User {
   name      String?
   role      Role     @default(OWNER)
 
-  // 馆长关联的俱乐部
-  clubId    String?  @unique
-  club      Club?    @relation(fields: [clubId], references: [id])
+  // 馆长关联的俱乐部 (一对多关系)
+  // 如果您希望一个用户只能拥有一个俱乐部，请去掉 [] 并将 clubId 移回 User 表
+  // 但既然您之前的 Schema 里 User.clubId 是 unique 的，那我们保持一对一关系更简单：
+  // 修正方案：保持 User.clubId 作为外键可能导致循环依赖，通常做法是 Club.ownerId 作为外键。
+  // 下面采用标准的【一个 User 拥有多个 Club】的写法，兼容性最强：
+  clubs     Club[]   @relation("ClubOwner")
 
   // 发布记录
   activities Activity[]
@@ -60,7 +63,7 @@ model Club {
   description    String?   @db.Text
   logo           String?
   mainImage      String?
-  subImages      String[]
+  subImages      String[] // 副图数组
 
   // 所在地信息
   zipCode        String?   // 郵便番号
@@ -77,15 +80,18 @@ model Club {
   twitter        String?
 
   // 运营信息
-  schedule       String?   // 稽古时间
+  schedule       String?   // 稽古时间 (JSON String)
   target         String?   // 募集对象
   representative String?   // 代表者
 
-  // 关系链路
-  user           User?
+  // 关系链路：所有权
+  ownerId        String?   // 允许为空，因为可能有俱乐部暂时没有分配 owner
+  owner          User?     @relation("ClubOwner", fields: [ownerId], references: [id])
+
+  // 其他关系
   activities     Activity[]
   applications   Application[] // 关联的申请记录
-
+  published      Boolean   @default(false) // 默认为 false (草稿状态)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 

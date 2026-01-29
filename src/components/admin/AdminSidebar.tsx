@@ -1,14 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus
+    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2
 } from "lucide-react";
 
+// 引入刚才修复好的 Server Action
+import { signOut } from "@/lib/actions/auth";
+import { toast } from "sonner";
+
+// ==============================================================================
+// 类型定义
+// ==============================================================================
+
 interface AdminSidebarProps {
+    /** 当前用户的角色权限 */
     role: "ADMIN" | "OWNER";
+    /** 当前用户的邮箱地址 */
     email: string;
 }
 
@@ -24,16 +34,35 @@ interface SectionLabelProps {
     label: string;
 }
 
+// ==============================================================================
+// 主组件：管理后台侧边栏
+// ==============================================================================
 export default function AdminSidebar({ role, email }: AdminSidebarProps) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isPending, startTransition] = useTransition(); // 用于处理登出加载状态
     const pathname = usePathname();
 
+    // 切换移动端菜单显示状态
     const toggleMenu = () => setIsOpen(!isOpen);
     const closeMenu = () => setIsOpen(false);
 
+    // 处理登出逻辑
+    const handleSignOut = () => {
+        startTransition(async () => {
+            try {
+                await signOut();
+            } catch (error) {
+                console.error("Logout failed:", error);
+                toast.error("ログアウトに失敗しました"); // 可选
+            }
+        });
+    };
+
     return (
         <>
-            {/* Mobile Header */}
+            {/* -------------------------------------------------------------------------- */}
+            {/* 1. 移动端头部导航栏 (Mobile Header) */}
+            {/* -------------------------------------------------------------------------- */}
             <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-sumo-brand text-white z-50 flex items-center justify-between px-6 shadow-md">
                 <div className="flex items-center gap-2">
                     <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sumo-brand">
@@ -46,14 +75,17 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                 </button>
             </div>
 
-            {/* Mobile Overlay */}
+            {/* 移动端遮罩层 (Mobile Overlay) */}
             {isOpen && (
                 <div className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm" onClick={closeMenu} />
             )}
 
-            {/* Sidebar */}
+            {/* -------------------------------------------------------------------------- */}
+            {/* 2. 侧边栏主容器 (Sidebar Container) */}
+            {/* -------------------------------------------------------------------------- */}
             <aside className={`fixed top-0 left-0 z-50 h-full w-64 bg-sumo-brand text-white shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:fixed md:inset-y-0`}>
-                {/* Logo 区 */}
+
+                {/* 品牌标识区域 (Logo Area) */}
                 <div className="p-8 border-b border-white/10 mt-14 md:mt-0">
                     <div className="flex items-center gap-3 mb-2">
                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sumo-brand">
@@ -66,11 +98,14 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                     </p>
                 </div>
 
-                {/* 菜单列表 */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                {/* 导航菜单列表 (Navigation List) */}
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
+
+                    {/* 通用区域 */}
                     <SectionLabel label="Overview" />
                     <NavItem href="/admin" icon={<LayoutDashboard size={18} />} label="ダッシュボード" activePath={pathname} onClick={closeMenu} />
 
+                    {/* 管理员专属菜单 */}
                     {role === "ADMIN" && (
                         <>
                             <SectionLabel label="Content Management" />
@@ -82,6 +117,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         </>
                     )}
 
+                    {/* 俱乐部代表专属菜单 */}
                     {role === "OWNER" && (
                         <>
                             <SectionLabel label="My Club" />
@@ -89,6 +125,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         </>
                     )}
 
+                    {/* 系统设置 */}
                     {role === "ADMIN" && (
                         <>
                             <SectionLabel label="System" />
@@ -97,7 +134,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                     )}
                 </nav>
 
-                {/* 底部用户 */}
+                {/* 底部用户信息与登出区域 (Footer User Area) */}
                 <div className="p-4 border-t border-white/10 bg-black/20">
                     <div className="flex items-center gap-3 px-2 mb-4">
                         <div className={`w-8 h-8 rounded-full border-2 border-white/20 ${role === 'ADMIN' ? 'bg-gradient-to-tr from-yellow-400 to-orange-500' : 'bg-gradient-to-tr from-blue-400 to-cyan-500'}`}></div>
@@ -106,21 +143,36 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                             <p className="text-xs text-white/50 truncate">{email}</p>
                         </div>
                     </div>
-                    <form action="/auth/signout" method="post">
-                        <button className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10 rounded border border-white/10 transition-colors uppercase tracking-wider">
-                            <LogOut size={14} /> ログアウト
-                        </button>
-                    </form>
+
+                    {/* 登出按钮 (已集成 Server Action) */}
+                    <button
+                        onClick={handleSignOut}
+                        disabled={isPending}
+                        className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10 rounded border border-white/10 transition-colors uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isPending ? (
+                            <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                            <LogOut size={14} />
+                        )}
+                        {isPending ? "ログアウト中..." : "ログアウト"}
+                    </button>
                 </div>
             </aside>
         </>
     );
 }
 
+// ==============================================================================
+// 子组件：分区标题
+// ==============================================================================
 function SectionLabel({ label }: SectionLabelProps) {
     return <div className="px-4 py-2 mt-4 text-[10px] font-bold text-white/40 uppercase tracking-widest">{label}</div>;
 }
 
+// ==============================================================================
+// 子组件：导航单项
+// ==============================================================================
 function NavItem({ href, icon, label, activePath, onClick }: NavItemProps) {
     const isActive = activePath === href || (href !== "/admin" && activePath.startsWith(href));
     return (

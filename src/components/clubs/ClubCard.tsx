@@ -17,9 +17,7 @@ type ClubCardProps = {
 const DEFAULT_COLOR = "#2454a4";
 
 const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
-  // --- 1. Hooks 必须放在组件最顶部，不能在任何 return 之后 ---
-
-  // 📝 修正 Content 逻辑
+  // --- 1. Hooks ---
   const summaryText = useMemo(() => {
     if (club.description) {
       return club.description.length > 60
@@ -29,7 +27,6 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
     return "道場の詳細は現在準備中です。";
   }, [club.description]);
 
-  // 🏷️ 修正 Tags 逻辑 (利用已有字段生成动态标签)
   const dynamicTags = useMemo(() => {
     const tags: string[] = [];
     if (club.target) tags.push(club.target);
@@ -37,9 +34,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
     return tags.slice(0, 2);
   }, [club.target, club.representative]);
 
-  // --- 2. 所有的 Hooks 定义完后，再进行早退 (Early Return) ---
-
-  // 🛡️ 隐藏官方总部/假俱乐部
+  // --- 2. Early Return ---
   if (club.slug === "official-hq") return null;
 
   const themeColor = accentColor || DEFAULT_COLOR;
@@ -55,7 +50,8 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
         } as React.CSSProperties
       }
       className={cn(
-        "flex flex-col h-full overflow-hidden isolate group cursor-pointer",
+        // 添加 transform-gpu 强制开启 GPU 加速，平滑层级渲染
+        "flex flex-col h-full overflow-hidden isolate group cursor-pointer transform-gpu",
         "hover:border-b-[var(--theme-color)]",
         "hover:shadow-[var(--theme-shadow)]",
         className,
@@ -63,7 +59,16 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
     >
       <Link href={detailLink} className="flex flex-col h-full">
         {/* Visual Area */}
-        <div className="relative aspect-[16/10] block overflow-hidden z-0 bg-gray-100">
+        <div
+          className="relative aspect-[16/10] block overflow-hidden z-0 bg-gray-100 rounded-t-[inherit]"
+          style={{
+            // 这是一个 CSS Hack。
+            // 它强制浏览器在渲染此层时应用一个“全白到全黑”的遮罩。
+            // 这会迫使 Safari/Chrome 在做 transform 动画时，严格重新计算 overflow: hidden 的边界，
+            // 从而防止图片“刺破”圆角。
+            WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+          }}
+        >
           <Image
             src={displayImage}
             alt={club.name}

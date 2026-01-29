@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // ✨ 引入路由
+import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import {
   ArrowRight,
@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   KeyRound,
   HelpCircle,
-  Loader2, // 引入加载动画
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
@@ -26,32 +27,51 @@ const LoginPage = () => {
   );
 
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null); // ✨ 错误处理
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // 浮动标签需要的状态
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // ✨ 核心登录逻辑
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg(null);
 
+    // ✨ 修复 1: 提交前打印数据，用于调试 (F12 Console 可见)
+    console.log("Submitting login for:", email);
+
+    // ✨ 修复 2: 前端强制校验，防止空值传给 Supabase
+    if (!email || !password) {
+      setErrorMsg("メールアドレスとパスワードを入力してください。");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+        email: email.trim(), // 去除首尾空格
+        password: password,
       });
 
       if (error) {
-        setErrorMsg("メールアドレスまたはパスワードが正しくありません。");
+        console.error("Login Error:", error.message);
+
+        if (error.message.includes("Invalid login credentials")) {
+          setErrorMsg("メールアドレスまたはパスワードが正しくありません。");
+        } else if (error.message.includes("Email not confirmed")) {
+          setErrorMsg("メールアドレスの確認が完了していません。受信トレイを確認してください。");
+        } else if (error.message.includes("missing email")) {
+          // 捕获具体的 missing email 错误
+          setErrorMsg("メールアドレスが入力されていません。");
+        } else {
+          setErrorMsg(`ログインに失敗しました: ${error.message}`);
+        }
       } else {
-        // 登录成功，跳转至后台
-        router.push("/admin/clubs");
         router.refresh();
+        router.push("/admin/clubs"); // 登录成功跳转
       }
     } catch (err) {
+      console.error("Unexpected Error:", err);
       setErrorMsg("予期せぬエラーが発生しました。もう一度お試しください。");
     } finally {
       setIsLoading(false);
@@ -60,7 +80,7 @@ const LoginPage = () => {
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
-      {/* ==================== 1. Header (统一碧空风格) ==================== */}
+      {/* ==================== 1. Header ==================== */}
       <header className="relative bg-sumo-brand text-white pt-24 pb-40 md:pt-32 md:pb-48 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
@@ -100,7 +120,7 @@ const LoginPage = () => {
         </div>
       </header>
 
-      {/* ==================== 2. Login Card (白瓷悬浮) ==================== */}
+      {/* ==================== 2. Login Card ==================== */}
       <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
         <div className="container mx-auto max-w-4xl">
           <Ceramic
@@ -108,7 +128,7 @@ const LoginPage = () => {
             className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-0"
           >
             <div className="flex flex-col md:flex-row min-h-[550px]">
-              {/* --- A. Left Side: Welcome Panel --- */}
+              {/* --- A. Left Side --- */}
               <div className="md:w-[35%] bg-[#FAFAFA] border-r border-gray-100 p-8 md:p-10 relative overflow-hidden flex flex-col justify-between">
                 <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url('/images/bg/noise.png')" }}></div>
 
@@ -130,21 +150,24 @@ const LoginPage = () => {
                 </div>
               </div>
 
-              {/* --- B. Right Side: Login Form --- */}
+              {/* --- B. Right Side --- */}
               <div className="md:w-[65%] bg-white p-8 md:p-14 relative flex flex-col justify-center">
                 <form onSubmit={handleLogin} className="space-y-8 max-w-sm mx-auto w-full">
 
-                  {/* ✨ 错误信息提示框 */}
                   {errorMsg && (
-                    <div className="bg-red-50 border border-sumo-red/20 p-4 rounded text-xs text-sumo-red font-bold animate-shake">
-                      {errorMsg}
+                    <div className="bg-red-50 border border-red-100 p-4 rounded-xl flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+                      <AlertCircle size={16} className="text-red-600 mt-0.5 shrink-0" />
+                      <p className="text-xs text-red-600 font-bold leading-relaxed">{errorMsg}</p>
                     </div>
                   )}
 
                   <div className="relative group">
                     <input
+                      // ✨ 修复 3: 增加 name 和 autoComplete 属性，确保浏览器自动填充正常工作
                       type="email"
                       id="email"
+                      name="email"
+                      autoComplete="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
@@ -165,8 +188,11 @@ const LoginPage = () => {
 
                   <div className="relative group">
                     <input
+                      // ✨ 修复 3: 增加 name 和 autoComplete
                       type="password"
                       id="password"
+                      name="password"
+                      autoComplete="current-password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -220,7 +246,7 @@ const LoginPage = () => {
                 <div className="mt-12 text-center border-t border-gray-100 pt-6">
                   <p className="text-xs text-gray-500 font-medium">
                     アカウントをお持ちでない方は
-                    <Link href="/manager/entry" className="text-sumo-brand font-bold ml-2 hover:underline decoration-sumo-brand/30 underline-offset-4 transition-all">新規登録</Link>
+                    <Link href="/signup" className="text-sumo-brand font-bold ml-2 hover:underline decoration-sumo-brand/30 underline-offset-4 transition-all">新規登録</Link>
                   </p>
                 </div>
               </div>
