@@ -6,26 +6,75 @@ import { prisma } from "@/lib/db";
 import {
   ArrowLeft,
   BookOpen,
-  Share2,
-  Download,
   Calendar,
   Tag,
   Layers,
   ArrowRight,
-  Globe,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
+import { ShareButton, MagazineReader } from "@/components/magazine/MagazineClientComponents";
 
-// ✨ 1. 将组件改为异步 Server Component
+/**
+ * 3D 书封展示组件
+ * 用于在详情页左侧展示带有立体感和光影效果的杂志封面
+ */
+const MagazineCover3D = ({ src, title }: { src: string; title: string }) => {
+  return (
+    <div className="relative group perspective-1000">
+      <div
+        className="relative w-[280px] md:w-[340px] aspect-[3/4] transform rotate-y-[-5deg] rotate-x-[2deg]"
+        style={{ transformStyle: 'preserve-3d' }}
+      >
+        {/* 封面图层 */}
+        <div className="absolute inset-0 z-10 rounded-r-md overflow-hidden shadow-2xl">
+          {/* 左侧书脊高光 */}
+          <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-r from-white/40 to-transparent z-20 pointer-events-none"></div>
+          {/* 纹理叠加 */}
+          <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 z-20 mix-blend-overlay pointer-events-none"></div>
+          <Image
+            src={src}
+            alt={title}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, 340px"
+          />
+        </div>
+
+        {/* 书脊厚度 */}
+        <div
+          className="absolute left-0 top-1 bottom-1 w-[12px] bg-white z-0 -translate-x-[6px] translate-z-[-6px] rotate-y-[-90deg] shadow-inner"
+          style={{ background: 'linear-gradient(to right, #ddd, #fff 20%, #ddd)' }}
+        ></div>
+
+        {/* 书页厚度 (底部) */}
+        <div
+          className="absolute bottom-0 left-1 right-1 h-[12px] bg-white z-0 translate-y-[6px] rotate-x-[-90deg] shadow-sm"
+          style={{
+            background: 'linear-gradient(to bottom, #f5f5f5, #fff)',
+            backgroundImage: 'repeating-linear-gradient(to right, #f5f5f5 0px, #f5f5f5 1px, #fff 1px, #fff 2px)'
+          }}
+        ></div>
+
+        {/* 底部静态阴影 */}
+        <div className="absolute -bottom-8 left-4 right-4 h-4 bg-black/40 blur-xl rounded-[100%] translate-z-[-20px] opacity-60"></div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * 杂志详情主页面 (Server Component)
+ */
 export default async function MagazineDetailPage({
   params
 }: {
-  params: Promise<{ slug: string }> // ✨ 确保这里是 slug
+  params: Promise<{ slug: string }>
 }) {
   const { slug } = await params;
 
-  // ✨ 使用 findFirst 替代 findUnique，以支持多条件过滤
+  // 获取杂志数据
   const magazine = await prisma.magazine.findFirst({
     where: {
       slug: slug,
@@ -35,112 +84,176 @@ export default async function MagazineDetailPage({
 
   if (!magazine) return notFound();
 
-  // ✨ 3. 处理日期显示
+  // 日期格式化
   const publishDate = new Date(magazine.issueDate);
   const year = publishDate.getFullYear();
   const month = String(publishDate.getMonth() + 1).padStart(2, '0');
   const day = String(publishDate.getDate()).padStart(2, '0');
 
+  // 内页数据处理：将扁平图片数组转换为跨页结构 (Spread)
+  // 两个图片为一组，代表左右页
+  const images = magazine.images || [];
+  const spreads = [];
+  for (let i = 0; i < images.length; i += 2) {
+    spreads.push({
+      left: images[i],
+      right: images[i + 1] || undefined
+    });
+  }
+
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
-      {/* Header 部分 */}
-      <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+
+      {/* 头部区域 */}
+      <header className="relative bg-sumo-brand text-white pt-32 pb-64 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
+
+        {/* 背景网格纹理 */}
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        ></div>
+
+        {/* 封面模糊背景氛围 */}
+        {magazine.coverImage && (
+          <div className="absolute inset-0 opacity-20 scale-110 blur-3xl saturate-150 pointer-events-none mix-blend-overlay">
+            <Image src={magazine.coverImage} alt="bg" fill className="object-cover" />
+          </div>
+        )}
+
         <div className="container mx-auto max-w-6xl relative z-10 px-6">
-          <Link href="/magazines" className="inline-flex items-center gap-3 text-white/70 hover:text-white transition-colors group mb-12">
-            <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-sumo-brand transition-all">
+          {/* 返回导航 */}
+          <Link href="/magazines" className="inline-flex items-center gap-3 text-white/60 hover:text-white transition-colors group mb-12">
+            <div className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-sm flex items-center justify-center border border-white/10 group-hover:bg-white group-hover:text-sumo-brand transition-all">
               <ArrowLeft size={14} />
             </div>
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to Library</span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back</span>
           </Link>
 
-          <div className="flex flex-wrap items-center gap-6 mb-8 opacity-90">
-            <div className="flex items-center gap-2 text-xs font-mono tracking-wide">
-              <Calendar size={14} className="text-sumo-gold" />
-              <span>{year}.{month}.{day}</span>
-            </div>
-            <div className="w-px h-3 bg-white/30"></div>
-            <div className="flex items-center gap-2 text-xs font-medium tracking-wide">
-              <Tag size={14} className="text-sumo-gold" />
-              <span>{magazine.slug.toUpperCase()}</span>
+          {/* 标题与元数据 */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap items-center gap-6 mb-6 opacity-80">
+                <div className="flex items-center gap-2 text-xs font-mono tracking-wide px-3 py-1 bg-white/10 rounded-full border border-white/10">
+                  <Calendar size={12} className="text-sumo-gold" />
+                  <span>{year}.{month}.{day}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-medium tracking-wide">
+                  <Tag size={14} className="text-white/50" />
+                  <span className="uppercase tracking-widest">{magazine.region} Area</span>
+                </div>
+              </div>
+
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-[1.1] tracking-tight mb-4 drop-shadow-md text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/70">
+                {magazine.title}
+              </h1>
             </div>
           </div>
-
-          <h1 className="text-4xl md:text-6xl font-serif font-bold leading-[1.2] tracking-wide mb-4 max-w-4xl drop-shadow-sm">
-            {magazine.title}
-          </h1>
         </div>
       </header>
 
-      {/* 内容主体区域 */}
-      <section className="relative px-4 md:px-6 -mt-24 z-20 pb-32">
+      {/* 主体内容区域 */}
+      <section className="relative px-4 md:px-6 -mt-32 z-20 pb-32">
         <div className="container mx-auto max-w-6xl">
-          <Ceramic interactive={false} className="bg-white border-b-[6px] border-b-sumo-brand shadow-2xl overflow-hidden p-0">
-            <div className="grid grid-cols-1 lg:grid-cols-12 bg-white min-h-[600px]">
+          <Ceramic interactive={false} className="bg-white border-b-[6px] border-b-sumo-brand shadow-2xl overflow-hidden p-0 rounded-t-[2.5rem]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[800px]">
 
-              {/* 左侧：封面与下载 */}
-              <aside className="lg:col-span-5 border-r border-gray-100 bg-gray-50/40 p-8 md:p-12">
-                <div className="lg:sticky lg:top-12 flex flex-col items-center lg:items-start gap-8">
-                  <div className="relative w-[280px] md:w-[320px] aspect-[3/4] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.3)] rounded-sm group">
-                    <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-r from-gray-900/20 to-transparent z-20"></div>
-                    {magazine.coverImage && (
-                      <Image src={magazine.coverImage} alt={magazine.title} fill className="object-cover" priority />
-                    )}
-                  </div>
+              {/* 左侧边栏：封面与操作按钮 */}
+              <aside className="lg:col-span-5 border-r border-gray-100 bg-[#FAFAFA] p-8 md:p-16 flex flex-col items-center">
+                <div className="sticky top-12 flex flex-col items-center gap-10">
 
-                  <div className="w-full max-w-[320px] space-y-4">
-                    {/* 链接打通：在线阅读 */}
+                  {/* 3D 封面展示 */}
+                  {magazine.coverImage && (
+                    <MagazineCover3D src={magazine.coverImage} title={magazine.title} />
+                  )}
+
+                  {/* 操作按钮区 */}
+                  <div className="w-full max-w-[300px] space-y-4">
+                    {/* 在线阅读按钮：仅当存在外部链接时显示 */}
                     {magazine.readLink && (
-                      <a href={magazine.readLink} target="_blank" className="w-full flex items-center justify-center gap-3 py-4 bg-sumo-dark text-white text-sm font-bold tracking-widest uppercase rounded shadow-lg hover:bg-sumo-brand transition-all">
-                        <BookOpen size={18} /> Read Online
+                      <a
+                        href={magazine.readLink}
+                        target="_blank"
+                        className="group relative w-full flex items-center justify-between px-6 py-4 bg-gray-900 text-white overflow-hidden rounded-xl shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-sumo-brand to-sumo-dark opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div className="relative flex items-center gap-3">
+                          <BookOpen size={20} className="text-sumo-gold" />
+                          <div className="flex flex-col items-start">
+                            <span className="text-xs font-bold text-white/50 uppercase tracking-widest leading-none mb-1">Digital Edition</span>
+                            <span className="text-sm font-bold tracking-widest">READ NOW</span>
+                          </div>
+                        </div>
+                        <ArrowRight size={18} className="relative group-hover:translate-x-1 transition-transform" />
                       </a>
                     )}
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <button className="flex items-center justify-center gap-2 py-3 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded">
-                        <Share2 size={14} /> Share
-                      </button>
-
-                      {/* 链接打通：PDF 下载 */}
-                      {magazine.pdfUrl ? (
-                        <a href={magazine.pdfUrl} download className="flex items-center justify-center gap-2 py-3 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded hover:border-sumo-dark transition-colors">
-                          <Download size={14} /> PDF
-                        </a>
-                      ) : (
-                        <button disabled className="opacity-50 flex items-center justify-center gap-2 py-3 bg-gray-100 text-gray-400 text-xs font-bold rounded cursor-not-allowed">
-                          <Download size={14} /> No PDF
-                        </button>
-                      )}
+                    {/* 分享按钮 */}
+                    <div className="w-full">
+                      <ShareButton />
                     </div>
                   </div>
                 </div>
               </aside>
 
-              {/* 右侧：简介与预览 */}
-              <article className="lg:col-span-7 p-8 md:p-16 lg:p-20">
-                <div className="mb-16">
-                  <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <div className="w-8 h-[1px] bg-gray-300"></div> Editorial Note
-                  </h3>
-                  <p className="text-lg md:text-xl font-medium text-gray-800 leading-relaxed font-serif">
-                    {magazine.description || "No description available for this issue."}
+              {/* 右侧主内容：简介与内页预览 */}
+              <article className="lg:col-span-7 p-8 md:p-20 bg-white">
+
+                {/* 刊物简介 */}
+                <div className="mb-20 max-w-2xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-[2px] bg-sumo-brand"></div>
+                    <h3 className="text-xs font-black text-sumo-brand uppercase tracking-[0.25em]">Issue Highlight</h3>
+                  </div>
+                  <p className="text-lg md:text-xl font-medium text-gray-800 leading-relaxed font-serif text-justify">
+                    {magazine.description || "この号に関する詳細な説明はまだありません。"}
                   </p>
                 </div>
 
-                {/* 这里可以放一些固定的展示，或者根据需要扩展图片数组 */}
-                <div className="opacity-40 grayscale pointer-events-none">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Preview Pages Coming Soon</p>
-                  <div className="grid grid-cols-2 gap-4">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div key={i} className="aspect-square bg-gray-100 rounded border border-dashed border-gray-300"></div>
-                    ))}
+                {/* 内页预览与阅读器 */}
+                <div>
+                  <div className="flex items-end justify-between mb-8 border-b border-gray-100 pb-4">
+                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2">
+                      <Layers size={14} /> Inside Look
+                    </h3>
+                    <span className="text-[10px] font-mono text-gray-400">Preview {spreads.length} Spreads</span>
                   </div>
+
+                  {spreads.length > 0 ? (
+                    // 传入 coverImage 以在翻书效果中包含封面
+                    <MagazineReader
+                      spreads={spreads}
+                      coverImage={magazine.coverImage}
+                    />
+                  ) : (
+                    <div className="py-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <Layers size={32} className="mx-auto text-gray-300 mb-4" />
+                      <p className="text-sm font-bold text-gray-400">Preview pages are not available.</p>
+                      <p className="text-xs text-gray-400 mt-1">Please read the full version via the button on the left.</p>
+                    </div>
+                  )}
+
+                  {/* 底部引导链接 */}
+                  {spreads.length > 0 && magazine.readLink && (
+                    <div className="mt-16 text-center">
+                      <p className="text-xs font-medium text-gray-400 mb-4">You've reached the end of preview</p>
+                      <a href={magazine.readLink} target="_blank" className="inline-flex items-center gap-2 text-sumo-brand font-bold text-sm hover:underline underline-offset-4">
+                        Read Full Issue <ArrowRight size={14} />
+                      </a>
+                    </div>
+                  )}
                 </div>
+
               </article>
             </div>
           </Ceramic>
         </div>
       </section>
+
       <ScrollToTop />
     </div>
   );
