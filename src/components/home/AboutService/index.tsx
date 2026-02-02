@@ -23,10 +23,10 @@ const SERVICE_DATA: ServiceItem[] = [
     id: "01",
     kanji: "探",
     title: "SEARCH",
-    desc: "全国のクラブを\n地域・条件から検索",
+    desc: "全国のクラブを\n地域から検索",
     img: "/images/about/search.jpg",
     delay: "",
-    href: "/clubs",
+    href: "/clubs/map",
     // 🟢 优雅绿渐变: 从富有生机的翠绿到深邃的森林绿，清新且高雅
     themeGradient: "bg-gradient-to-br from-[#2a9d6c] to-[#175036]",
     // 使用深绿色系的阴影，保持整体感
