@@ -1,13 +1,29 @@
-"use client";
 
-import React from "react";
-import JapanMap from "@/components/clubs/JapanMap";
+import React, { Suspense } from "react";
+// 1. 引入动态导入工具
+import dynamicImport from "next/dynamic";
 import Link from "@/components/ui/TransitionLink";
-import { Search, MapPin, ArrowRight } from "lucide-react";
+import { Search, MapPin, ArrowRight, Loader2 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 
-// 不要尝试静态预渲染这个页面，而是每次访问时动态生成。
+// 2. 强制动态渲染：跳过静态生成，解决 prerender 报错
 export const dynamic = "force-dynamic";
+
+// 3. 动态引入地图组件，并彻底关闭 SSR (核心修复)
+// 这样构建时就不会去渲染 JapanMap，避免报错
+const JapanMap = dynamicImport(
+  () => import("@/components/clubs/JapanMap"), // 👈 指向你的组件路径
+  {
+    ssr: false, // 关掉服务端渲染
+    loading: () => (
+      // 加载时的占位符 (防止页面抖动)
+      <div className="w-full h-[600px] flex flex-col items-center justify-center text-gray-400 gap-3">
+        <Loader2 className="animate-spin w-8 h-8 text-sumo-brand" />
+        <span className="text-sm font-bold tracking-widest">MAP LOADING...</span>
+      </div>
+    ),
+  }
+);
 
 const ClubsPage = () => {
   return (
@@ -20,7 +36,7 @@ const ClubsPage = () => {
             className="absolute inset-0 pointer-events-none z-0"
             style={{
               backgroundImage: `linear-gradient(to right, rgba(36, 84, 164, 0.03) 1px, transparent 1px),
-                               linear-gradient(to bottom, rgba(36, 84, 164, 0.03) 1px, transparent 1px)`,
+                                linear-gradient(to bottom, rgba(36, 84, 164, 0.03) 1px, transparent 1px)`,
               backgroundSize: "40px 40px",
             }}
           />
@@ -48,8 +64,11 @@ const ClubsPage = () => {
             </div>
 
             {/* Map Section */}
+            {/* 4. 加一个 Suspense 边界作为双重保险 */}
             <div className="mb-24 reveal-up delay-100">
-              <JapanMap />
+              <Suspense fallback={<div className="h-[600px]" />}>
+                <JapanMap />
+              </Suspense>
             </div>
 
             {/* --- Advanced Search Button (Using Ceramic) --- */}
