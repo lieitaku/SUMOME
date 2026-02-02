@@ -13,7 +13,7 @@
   --color-sumo-brand: #0047ab;
 
   /* 强调色：香槟哑光金 */
-  --color-sumo-glod: #C1A14E;
+  --color-sumo-glod: #c1a14e;
 
   /* 警示/强调红：瑞士红 (保持纯正，无杂色) */
   --color-sumo-red: #de350b;
@@ -206,4 +206,29 @@
   .delay-500 {
     transition-delay: 500ms;
   }
+}
+
+/* globals.css */
+
+/* 定义一个 4 帧循环的动画关键帧 */
+@keyframes frame-cycle {
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  25% {
+    opacity: 0;
+    visibility: hidden;
+  } /* 4张图，每张显示 25% 的时间 */
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* 应用动画的类 */
+.animate-frame {
+  /* 2s infinite: 总时长2秒，无限循环 */
+  /* steps(1): 关键！表示瞬间切换，不要渐变，这样才有“定格动画”的力量感 */
+  animation: frame-cycle 2s infinite steps(1);
 }
