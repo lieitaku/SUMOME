@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import {
     MapPin, Users, ChevronLeft, Sparkles, CheckCircle2,
     CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation

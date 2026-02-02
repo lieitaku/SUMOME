@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { ArrowRight, BookOpen, Search, Filter, X } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { ArrowRight, Search, Plus } from "lucide-react";
 import Section from "@/components/ui/Section";
 import { cn } from "@/lib/utils";

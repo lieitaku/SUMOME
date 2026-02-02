@@ -3,7 +3,7 @@
 import React from "react";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 
 type ServiceProps = {

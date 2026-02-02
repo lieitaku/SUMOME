@@ -1,7 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/db";
 import { Plus, BookOpen, Calendar, Pencil, ExternalLink } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 
 export const dynamic = "force-dynamic";

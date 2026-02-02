@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 
 type PageHeroProps = {
   title: string; // 显示的标题 (如: 北海道)

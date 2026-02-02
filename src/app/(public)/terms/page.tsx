@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import Ceramic from "@/components/ui/Ceramic";
 import {
   Gavel,

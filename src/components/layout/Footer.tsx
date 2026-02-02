@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Star, Mail } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { useParams, usePathname } from "next/navigation";
 import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
 

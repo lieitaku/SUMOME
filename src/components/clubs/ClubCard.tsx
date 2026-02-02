@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { MapPin, Tag, Instagram, Twitter, ArrowUpRight, Users } from "lucide-react";
 import { cn } from "@/lib/utils";

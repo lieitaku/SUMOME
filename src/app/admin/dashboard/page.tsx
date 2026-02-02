@@ -1,7 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/db";
 import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 
 export default async function AdminDashboardPage() {
     // 1. ✨ 并行查询数据库中的数量（加入 Application 统计）

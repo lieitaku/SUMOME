@@ -2,7 +2,7 @@ import React from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { Search, Plus, MapPin, Pencil, Filter } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 import { REGIONS } from "@/lib/constants";
 

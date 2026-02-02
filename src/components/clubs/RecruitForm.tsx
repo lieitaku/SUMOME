@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import {
     ChevronLeft, MapPin, Clock, Users, CheckCircle2, Send,
     User, Mail, Phone, Sparkles, Target, CalendarDays, ShieldCheck,

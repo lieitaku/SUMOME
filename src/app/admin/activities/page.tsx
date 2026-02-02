@@ -7,7 +7,7 @@ import {
     Plus, Search, Pencil, Filter,
     Calendar, Tag, MapPin
 } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 import { REGIONS } from "@/lib/constants";
 

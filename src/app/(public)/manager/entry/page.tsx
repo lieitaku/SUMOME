@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useActionState } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import {
   Building2,
   User,

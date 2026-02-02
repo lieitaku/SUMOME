@@ -2,7 +2,7 @@
 
 import React from "react";
 import JapanMap from "@/components/clubs/JapanMap";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { Search, MapPin, ArrowRight } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 

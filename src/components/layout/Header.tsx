@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Menu, X, Search, Lock, ChevronRight } from "lucide-react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { usePathname, useParams } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";

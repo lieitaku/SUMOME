@@ -1,6 +1,6 @@
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import {

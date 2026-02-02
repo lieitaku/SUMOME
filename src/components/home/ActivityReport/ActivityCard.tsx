@@ -3,7 +3,7 @@
 import React from "react";
 import { ArrowRight, Calendar } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 
 type ActivityCardProps = {

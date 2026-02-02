@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import Link from "next/link";
+import Link from "@/components/ui/TransitionLink";
 import {
     CheckCircle2,
     TrendingUp,
