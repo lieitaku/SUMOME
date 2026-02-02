@@ -1,29 +1,12 @@
-
 import React, { Suspense } from "react";
-// 1. 引入动态导入工具
-import dynamicImport from "next/dynamic";
 import Link from "@/components/ui/TransitionLink";
-import { Search, MapPin, ArrowRight, Loader2 } from "lucide-react";
+import { Search, MapPin, ArrowRight } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
+// 引入我们刚才写的中间件
+import MapWrapper from "@/components/clubs/MapWrapper";
 
-// 2. 强制动态渲染：跳过静态生成，解决 prerender 报错
+// ✅ 强制动态渲染配置保留在 Server Component 中
 export const dynamic = "force-dynamic";
-
-// 3. 动态引入地图组件，并彻底关闭 SSR (核心修复)
-// 这样构建时就不会去渲染 JapanMap，避免报错
-const JapanMap = dynamicImport(
-  () => import("@/components/clubs/JapanMap"), // 👈 指向你的组件路径
-  {
-    ssr: false, // 关掉服务端渲染
-    loading: () => (
-      // 加载时的占位符 (防止页面抖动)
-      <div className="w-full h-[600px] flex flex-col items-center justify-center text-gray-400 gap-3">
-        <Loader2 className="animate-spin w-8 h-8 text-sumo-brand" />
-        <span className="text-sm font-bold tracking-widest">MAP LOADING...</span>
-      </div>
-    ),
-  }
-);
 
 const ClubsPage = () => {
   return (
@@ -64,14 +47,14 @@ const ClubsPage = () => {
             </div>
 
             {/* Map Section */}
-            {/* 4. 加一个 Suspense 边界作为双重保险 */}
             <div className="mb-24 reveal-up delay-100">
-              <Suspense fallback={<div className="h-[600px]" />}>
-                <JapanMap />
+              {/* 使用 MapWrapper 替代直接引入 JapanMap */}
+              <Suspense fallback={<div className="h-[600px] w-full bg-gray-100 rounded-xl animate-pulse" />}>
+                <MapWrapper />
               </Suspense>
             </div>
 
-            {/* --- Advanced Search Button (Using Ceramic) --- */}
+            {/* --- Advanced Search Button --- */}
             <div className="flex justify-center reveal-up delay-200">
               <Ceramic
                 as={Link}
