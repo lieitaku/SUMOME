@@ -1,34 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import Image from "next/image";
 import RabbitBanner from "@/components/home/RabbitBanner";
 import { ChevronRight } from "lucide-react";
 
-// ==========================================
-// 🎛️ 人物控制器
-// ==========================================
-const CHAR_CONFIG = {
-  // 1. 动画总时长 (秒)
-  // 数字越大，动作越慢。比如 3 代表“3秒做完一套左左右右的动作”
-  duration: 20,
-
-  // 2. 大小控制 (像控制一张图一样控制整体)
-  // w-[120vw]: 宽度占屏幕120% (手机端大一点霸气)
-  // md:w-[800px]: 电脑端限制宽度
-  size: "w-[40vw] md:w-[100px] lg:w-[150px]",
-
-  // 3. 位置控制
-  // horizontal: 水平位置 (left-1/2 -translate-x-1/2 是绝对居中)
-  // vertical: 垂直位置 (bottom-0 贴底)
-  // 你可以改成 right-[-50px] 让它靠右，或者 bottom-[-20px] 让它下沉
-  position: "left-1/2 -translate-x-1/2 bottom-[320px] md:bottom-[260px]",
-
-  // 4. 高度限制 (防止太高遮住标题)
-  heightLimit: "h-[85vh] md:h-[95vh]",
-};
-
-// 模拟新闻数据
+// 新闻数据
 const NEWS_ITEMS = [
   { id: 1, type: "INTERVIEW", date: "01.28", title: "横綱・照ノ富士：不屈の魂を語る", link: "#" },
   { id: 2, type: "REPORT", date: "02.01", title: "2026年 春巡業の日程が決定", link: "#" },
@@ -36,18 +12,41 @@ const NEWS_ITEMS = [
 ];
 
 const Hero = () => {
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  // ============================================================
+  // 🔧 调试区：请直接在这里修改数值，保存后画面一定会变
+  // ============================================================
 
-  // 自动计算每一帧的延迟时间
-  // 比如总时长 3秒，那么间隔就是 0s, 0.75s, 1.5s, 2.25s
-  const animStyles = useMemo(() => {
-    const step = CHAR_CONFIG.duration / 4;
-    return [
-      { animationDuration: `${CHAR_CONFIG.duration}s`, animationDelay: '0s' },
-      { animationDuration: `${CHAR_CONFIG.duration}s`, animationDelay: `${step}s` },
-      { animationDuration: `${CHAR_CONFIG.duration}s`, animationDelay: `${step * 2}s` },
-      { animationDuration: `${CHAR_CONFIG.duration}s`, animationDelay: `${step * 3}s` },
-    ];
+  // 1. 垂直位置 (Y)
+  // 背景图总高是 3136。
+  // 数值越大，人越往下；数值越小，人越往上。
+  // 试着改成 2000 (上浮) 或 2800 (下沉) 看看效果
+  const CHAR_Y = 1300;
+
+  // 2. 人物大小 (宽高像素值)
+  // 嫌小就改成 900，嫌大就改成 600
+  const CHAR_SIZE = 750;
+
+  // ============================================================
+
+  // 背景图真实尺寸 (不要改)
+  const WORLD_W = 5440;
+  const WORLD_H = 3136;
+
+  // 自动计算水平居中 X (不要改)
+  const CHAR_X = (WORLD_W - CHAR_SIZE) / 2;
+
+  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
+  const [frameIndex, setFrameIndex] = useState(0);
+
+  // 动画控制
+  const duration = 20; // 动画慢一点
+
+  useEffect(() => {
+    // 简单的 4 帧轮播
+    const interval = setInterval(() => {
+      setFrameIndex((prev) => (prev + 1) % 4);
+    }, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -60,61 +59,74 @@ const Hero = () => {
   const currentNews = NEWS_ITEMS[currentNewsIndex];
 
   return (
-    <section className="relative w-full h-screen flex flex-col items-center overflow-hidden bg-sumo-bg">
+    <section className="relative w-full h-screen overflow-hidden bg-sumo-bg">
 
-      {/* 1. 背景层 */}
-      <div className="absolute inset-0 z-0 select-none pointer-events-none">
-
-        {/* A. 纯场景背景 */}
-        <Image
-          src="/images/hero/bg.webp"
-          alt="Sumo Arena Background"
-          fill
-          priority
-          className="object-cover object-top"
-          style={{ filter: "brightness(0.85) contrast(1.1)" }}
+      {/* 1. SVG 场景层 */}
+      <svg
+        className="absolute inset-0 w-full h-full z-0 pointer-events-none"
+        viewBox={`0 0 ${WORLD_W} ${WORLD_H}`}
+        preserveAspectRatio="xMidYMid slice"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        {/* 背景图 */}
+        <image
+          href="/images/hero/bg.webp"
+          width={WORLD_W}
+          height={WORLD_H}
+          x="0"
+          y="0"
         />
 
-        {/* ========================================= */}
-        {/* B. 人物动画层 (统一容器) */}
-        {/* 这就是那个“框”，你控制这个框，里面的4张图就会乖乖听话 */}
-        {/* ========================================= */}
-        <div
-          className={`
-            absolute z-10 
-            ${CHAR_CONFIG.position} 
-            ${CHAR_CONFIG.size} 
-            ${CHAR_CONFIG.heightLimit}
-          `}
-        >
-          {/* 帧 1: 左1 */}
-          <div className="absolute inset-0 animate-frame" style={animStyles[0]}>
-            <Image src="/images/hero/l1.webp" alt="P1" fill className="object-contain object-bottom" priority />
-          </div>
+        {/* 人物层：直接使用 x/y 属性，不再使用 transform */}
 
-          {/* 帧 2: 左2 */}
-          <div className="absolute inset-0 animate-frame opacity-0" style={animStyles[1]}>
-            <Image src="/images/hero/l2.webp" alt="P2" fill className="object-contain object-bottom" priority />
-          </div>
+        {/* 帧 1 */}
+        <image
+          href="/images/hero/l1.webp"
+          x={CHAR_X}
+          y={CHAR_Y}
+          width={CHAR_SIZE}
+          height={CHAR_SIZE}
+          className={`transition-opacity duration-300 ${frameIndex === 0 ? "opacity-100" : "opacity-0"}`}
+        />
+        {/* 帧 2 */}
+        <image
+          href="/images/hero/l2.webp"
+          x={CHAR_X}
+          y={CHAR_Y}
+          width={CHAR_SIZE}
+          height={CHAR_SIZE}
+          className={`transition-opacity duration-300 ${frameIndex === 1 ? "opacity-100" : "opacity-0"}`}
+        />
+        {/* 帧 3 */}
+        <image
+          href="/images/hero/r1.webp"
+          x={CHAR_X}
+          y={CHAR_Y}
+          width={CHAR_SIZE}
+          height={CHAR_SIZE}
+          className={`transition-opacity duration-300 ${frameIndex === 2 ? "opacity-100" : "opacity-0"}`}
+        />
+        {/* 帧 4 */}
+        <image
+          href="/images/hero/r2.webp"
+          x={CHAR_X}
+          y={CHAR_Y}
+          width={CHAR_SIZE}
+          height={CHAR_SIZE}
+          className={`transition-opacity duration-300 ${frameIndex === 3 ? "opacity-100" : "opacity-0"}`}
+        />
 
-          {/* 帧 3: 右1 */}
-          <div className="absolute inset-0 animate-frame opacity-0" style={animStyles[2]}>
-            <Image src="/images/hero/r1.webp" alt="P3" fill className="object-contain object-bottom" priority />
-          </div>
+        {/* 🟥 红色参考线 (调试用) */}
+        {/* 这条线显示了 CHAR_Y 的位置。如果你改了数值，这条红线一定会动！ */}
+        {/* <line x1="0" y1={CHAR_Y} x2={WORLD_W} y2={CHAR_Y} stroke="red" strokeWidth="10" /> */}
+      </svg>
 
-          {/* 帧 4: 右2 */}
-          <div className="absolute inset-0 animate-frame opacity-0" style={animStyles[3]}>
-            <Image src="/images/hero/r2.webp" alt="P4" fill className="object-contain object-bottom" priority />
-          </div>
+      {/* 2. 底部渐变 */}
+      <div className="absolute bottom-0 left-0 w-full h-[15vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/80 to-transparent z-10 pointer-events-none" />
 
-        </div>
-        {/* --- 人物层结束 --- */}
-
-        <div className="absolute bottom-0 w-full h-[40vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/60 to-transparent z-20" />
-      </div>
-
-      {/* 2. 宣传卡片层 (保持不变) */}
-      <div className="absolute z-10 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
+      {/* 3. UI 层 (保持不变) */}
+      <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
+        {/* ... Card Content (复用之前的代码即可) ... */}
         <div className="relative bg-white shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] flex flex-row items-stretch rounded-sm overflow-hidden h-[80px] md:h-[90px] group transition-transform duration-500 hover:translate-y-[-2px]">
           <div className="absolute top-0 left-0 h-[3px] bg-sumo-red w-full scale-x-0 group-hover:scale-x-100 transition-transform duration-700 origin-left z-20"></div>
           <div className="bg-sumo-red text-white w-[60px] md:w-[80px] flex flex-col justify-center items-center shrink-0 relative overflow-hidden z-10">
@@ -155,8 +167,9 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* 3. 新闻轮播模块 (保持不变) */}
-      <div className="absolute z-20 top-60 md:top-60 left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
+      {/* 新闻轮播 */}
+      <div className="absolute z-30 top-60 md:top-60 left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
+        {/* ... News Content (复用之前的代码即可) ... */}
         <a href={currentNews.link} className="block group/news">
           <div className="flex items-stretch bg-black/20 backdrop-blur-lg border border-white/10 rounded-sm overflow-hidden transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-[1.02]">
             <div className="w-[28px] md:w-[32px] bg-sumo-red/90 flex items-center justify-center py-2 shrink-0">
@@ -185,7 +198,7 @@ const Hero = () => {
         </a>
       </div>
 
-      {/* 4. 底部横幅层 */}
+      {/* RabbitBanner */}
       <div className="absolute bottom-0 w-full z-30">
         <RabbitBanner />
       </div>
