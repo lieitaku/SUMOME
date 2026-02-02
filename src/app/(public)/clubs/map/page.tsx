@@ -6,6 +6,9 @@ import Link from "@/components/ui/TransitionLink";
 import { Search, MapPin, ArrowRight } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 
+// 不要尝试静态预渲染这个页面，而是每次访问时动态生成。
+export const dynamic = "force-dynamic";
+
 const ClubsPage = () => {
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">

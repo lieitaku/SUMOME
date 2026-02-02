@@ -5,7 +5,16 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "@/context/TransitionContext";
 import React from "react";
 
-// 定义组件属性：继承 Link 的属性 + 原生 a 标签属性 + children
+// ==============================================================================
+// 🚦 配置区域：只有跳转到以下路径（及其子路径）时，才触发“迷雾”加载动画
+// ==============================================================================
+const HEAVY_ROUTES = [
+    "/clubs/map",       // 地图页（加载地图组件很重）
+    "/prefectures",     // 都道府県列表/详情页（图片很多）
+];
+
+// ==============================================================================
+
 type TransitionLinkProps = LinkProps & React.ComponentProps<"a"> & {
     children: React.ReactNode;
 };
@@ -20,27 +29,28 @@ export default function TransitionLink({
     const { startLoading } = useTransition();
 
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-        // 1. 如果外部传入了 onClick，先执行
-        if (onClick) {
-            onClick(e);
-        }
+        if (onClick) onClick(e);
 
-        // 2. 排除特殊情况：新窗口打开、按住功能键点击等，走默认浏览器行为
+        // 排除新窗口打开等情况
         if (props.target === "_blank" || e.metaKey || e.ctrlKey) {
             return;
         }
 
-        // 3. 阻止默认跳转
         e.preventDefault();
 
-        // 4. 开启“迷雾”加载状态
-        startLoading();
+        // 获取目标 URL 字符串
+        const targetUrl = typeof href === 'string' ? href : (href as any).href || '';
 
-        // 5. 执行跳转 (修复核心：安全地获取 URL 字符串)
-        // 使用类型断言 (as any) 避免 TypeScript 对于 UrlObject 的类型推断错误
-        const targetUrl = typeof href === 'string' ? href : (href as any).href || (href as any).pathname || '';
+        // 🧠 核心智能判断逻辑
+        // 检查目标 URL 是否以 HEAVY_ROUTES 中的任意一个开头
+        const isHeavyPage = HEAVY_ROUTES.some((route) => targetUrl.startsWith(route));
 
-        if (targetUrl) {
+        if (isHeavyPage) {
+            //情况 A: 是重页面 -> 开启迷雾 -> 跳转
+            startLoading();
+            router.push(targetUrl);
+        } else {
+            // 情况 B: 是普通页面 -> 直接跳转 (无动画，保留原生极速体验)
             router.push(targetUrl);
         }
     };
