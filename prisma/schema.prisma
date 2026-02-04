@@ -198,3 +198,37 @@ model Application {
   @@index([clubId])
   @@index([status])
 }
+
+// ==========================================
+// 📬 通用询问 (Contact Form Inquiries)
+// ==========================================
+
+enum InquiryStatus {
+  unread    // 未読
+  read      // 確認済み
+  replied   // 返信済み
+  closed    // 対応完了
+}
+
+model Inquiry {
+  id           String        @id @default(cuid())
+  
+  // 询问人信息
+  name         String        // お名前
+  furigana     String?       // フリガナ
+  email        String        // メールアドレス
+  phone        String?       // 電話番号
+  
+  // 询问内容
+  inquiryType  String        // お問い合わせ種別
+  message      String        @db.Text // お問い合わせ内容
+  
+  // 状态管理
+  status       InquiryStatus @default(unread)
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

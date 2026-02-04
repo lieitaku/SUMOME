@@ -13,22 +13,57 @@ import {
   AtSign,
   Building2,
   Send,
+  AlertCircle,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
+import { createInquiry } from "@/lib/actions/inquiries";
 
 const ContactPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // 表单数据状态
+  const [formData, setFormData] = useState({
+    name: "",
+    furigana: "",
+    email: "",
+    phone: "",
+    inquiryType: "",
+    message: "",
+  });
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleRadioChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, inquiryType: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const result = await createInquiry(formData);
+
+      if (result.success) {
+        setIsSent(true);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        setError(result.error || "送信に失敗しました");
+      }
+    } catch {
+      setError("送信中にエラーが発生しました");
+    } finally {
       setIsSubmitting(false);
-      setIsSent(true);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 1500);
+    }
   };
 
   return (
@@ -194,6 +229,14 @@ const ContactPage = () => {
                       </p>
                     </div>
 
+                    {/* Error Message */}
+                    {error && (
+                      <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                        <AlertCircle size={16} />
+                        {error}
+                      </div>
+                    )}
+
                     {/* Name & Furigana */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3 group">
@@ -203,6 +246,9 @@ const ContactPage = () => {
                         </label>
                         <input
                           type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleInputChange}
                           required
                           placeholder="相撲 太郎"
                           className="w-full h-12 px-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300"
@@ -210,11 +256,13 @@ const ContactPage = () => {
                       </div>
                       <div className="space-y-3 group">
                         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                          フリガナ <span className="text-sumo-red">*</span>
+                          フリガナ
                         </label>
                         <input
                           type="text"
-                          required
+                          name="furigana"
+                          value={formData.furigana}
+                          onChange={handleInputChange}
                           placeholder="スモウ タロウ"
                           className="w-full h-12 px-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300"
                         />
@@ -230,6 +278,9 @@ const ContactPage = () => {
                         </label>
                         <input
                           type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
                           required
                           placeholder="example@sumome.jp"
                           className="w-full h-12 px-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300"
@@ -241,6 +292,9 @@ const ContactPage = () => {
                         </label>
                         <input
                           type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
                           placeholder="090-1234-5678"
                           className="w-full h-12 px-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300"
                         />
@@ -262,14 +316,26 @@ const ContactPage = () => {
                         ].map((type) => (
                           <label
                             key={type}
-                            className="relative flex items-center gap-3 p-4 border border-gray-200 rounded cursor-pointer hover:border-sumo-brand/50 hover:bg-gray-50 transition-all has-[:checked]:border-sumo-brand has-[:checked]:bg-sumo-brand/[0.04] has-[:checked]:shadow-sm group"
+                            className={cn(
+                              "relative flex items-center gap-3 p-4 border rounded cursor-pointer hover:border-sumo-brand/50 hover:bg-gray-50 transition-all group",
+                              formData.inquiryType === type
+                                ? "border-sumo-brand bg-sumo-brand/[0.04] shadow-sm"
+                                : "border-gray-200"
+                            )}
                           >
                             <input
                               type="radio"
-                              name="type"
+                              name="inquiryType"
+                              value={type}
+                              checked={formData.inquiryType === type}
+                              onChange={() => handleRadioChange(type)}
+                              required
                               className="w-4 h-4 accent-sumo-brand border-gray-300"
                             />
-                            <span className="text-sm font-bold text-gray-600 group-has-[:checked]:text-sumo-dark">
+                            <span className={cn(
+                              "text-sm font-bold",
+                              formData.inquiryType === type ? "text-sumo-dark" : "text-gray-600"
+                            )}>
                               {type}
                             </span>
                           </label>
@@ -284,6 +350,9 @@ const ContactPage = () => {
                         <span className="text-sumo-red">*</span>
                       </label>
                       <textarea
+                        name="message"
+                        value={formData.message}
+                        onChange={handleInputChange}
                         required
                         rows={5}
                         placeholder="ご質問やご相談内容をご記入ください"

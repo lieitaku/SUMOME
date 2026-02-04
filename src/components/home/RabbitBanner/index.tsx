@@ -28,14 +28,19 @@ export default function RabbitWalkingBanner({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // 生成循环数据 (48个)
+  // 生成循环数据 - 移动端减少数量以提高性能
   const loopData = useMemo(() => {
+    // 移动端：2次循环(24个)，桌面端：4次循环(48个)
+    if (isMobile) {
+      return [...RAW_SPONSORS, ...RAW_SPONSORS];
+    }
     return [...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS];
-  }, []);
+  }, [isMobile]);
 
   const UNIT_WIDTH = 320 * scale;
   const GAP = (isMobile ? -110 : -50) * scale;
-  const SPEED_PX_PER_SEC = 50 * scale;
+  // 移动端降低速度以减少 CPU 负担
+  const SPEED_PX_PER_SEC = (isMobile ? 35 : 50) * scale;
   const ONE_CYCLE_DISTANCE = (UNIT_WIDTH + GAP) * RAW_SPONSORS.length;
   const DURATION = ONE_CYCLE_DISTANCE / SPEED_PX_PER_SEC;
 
@@ -129,9 +134,12 @@ export default function RabbitWalkingBanner({
                     transformOrigin: "center bottom",
                     ...restBodyStyle,
                     transform: finalBodyTransform,
+                    // 移动端优化：使用 contain 隔离渲染
+                    contain: "layout style paint",
                   }}
                 >
-                  <RabbitActor rivSrc={variant.rivSrc} playbackRate={0.6} />
+                  {/* 移动端降低动画速率以减少 GPU 负担 */}
+                  <RabbitActor rivSrc={variant.rivSrc} playbackRate={isMobile ? 0.4 : 0.6} />
                 </div>
 
                 {/* --- Flag + Hand (z-index: 20) --- */}
@@ -158,18 +166,18 @@ export default function RabbitWalkingBanner({
                     >
                       <div className="relative flex flex-col items-center group">
 
-                        {/* 1. Bar */}
+                        {/* 1. Bar - 移动端简化阴影 */}
                         <div
-                          className="bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 shadow-lg border border-[#B8860B]"
+                          className={`bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 border border-[#B8860B] ${isMobile ? 'shadow-sm' : 'shadow-lg'}`}
                           style={{
                             width: `${barW}px`,
                             height: `${8 * scale}px`,
                           }}
                         ></div>
 
-                        {/* 2. Flag Face */}
+                        {/* 2. Flag Face - 移动端简化阴影 */}
                         <div
-                          className="relative z-20 shadow-2xl bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5"
+                          className={`relative z-20 bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5 ${isMobile ? 'shadow-lg' : 'shadow-2xl'}`}
                           style={{
                             width: `${flagW}px`,
                             height: `${flagH}px`,

@@ -18,6 +18,7 @@ const RabbitActor: React.FC<RabbitProps> = ({
 }) => {
   const [isInView, setIsInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isMobileRef = useRef(typeof window !== 'undefined' && window.innerWidth < 768);
 
   const shouldRender = priority || isInView;
 
@@ -30,15 +31,12 @@ const RabbitActor: React.FC<RabbitProps> = ({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // 💡 核心修复：直接使用 isIntersecting
           setIsInView(entry.isIntersecting);
         });
       },
       {
-        // 💡 核心修复：大幅减小缓冲区
-        // 800px -> 100px (手机) / 200px (电脑)
-        // 这样可以确保 iOS 上同时活跃的 WebGL 实例不超过 8-10 个
-        rootMargin: typeof window !== 'undefined' && window.innerWidth < 768 ? "100px" : "200px",
+        // 移动端进一步减小缓冲区，确保同时活跃的 WebGL 实例更少
+        rootMargin: isMobileRef.current ? "50px" : "200px",
         threshold: 0,
       }
     );

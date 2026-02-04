@@ -59,8 +59,12 @@ export default async function PrefecturePage({ params }: PageProps) {
   const bannerTitle = featuredClub
     ? `${featuredClub.name}の相撲風景`
     : `${displayData.name}の相撲風景`;
-  const magazineLink = featuredClub ? `/magazines/${featuredClub.slug}` : "#";
+  const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
+  // 构建俱乐部完整地址
+  const clubAddress = featuredClub
+    ? [featuredClub.area, featuredClub.city, featuredClub.address].filter(Boolean).join(" ")
+    : "";
 
   const ceramicStyle = {
     borderBottomColor: theme.color,
@@ -277,7 +281,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                       alt={bannerTitle}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <Link href={magazineLink} className="absolute inset-0 z-0" aria-label="View Magazine" />
+                    <Link href={clubDetailLink} className="absolute inset-0 z-0" aria-label="View Club" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 pointer-events-none">
                       <div className="text-white w-full flex justify-between items-end">
                         <div className="pointer-events-auto">
@@ -288,6 +292,13 @@ export default async function PrefecturePage({ params }: PageProps) {
                             {bannerTitle}
                             <ArrowRight size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                           </p>
+                          {/* 俱乐部具体地址 */}
+                          {clubAddress && (
+                            <p className="text-[11px] text-white/60 mt-2 flex items-center gap-1.5">
+                              <MapPin size={10} className="shrink-0" />
+                              {clubAddress}
+                            </p>
+                          )}
                         </div>
                         <div className="hidden md:block pointer-events-auto relative z-10">
                           <Link

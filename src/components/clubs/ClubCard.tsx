@@ -99,9 +99,19 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
 
         {/* Information Area */}
         <div className="p-6 flex flex-col flex-grow bg-white">
-          <h3 className="text-xl font-serif font-bold text-gray-900 leading-snug mb-3 transition-colors group-hover:text-[var(--theme-color)] line-clamp-1">
+          <h3 className="text-xl font-serif font-bold text-gray-900 leading-snug mb-2 transition-colors group-hover:text-[var(--theme-color)] line-clamp-1">
             {club.name}
           </h3>
+
+          {/* 具体地址 */}
+          {(club.city || club.address) && (
+            <p className="text-[11px] text-gray-400 mb-3 flex items-center gap-1 line-clamp-1">
+              <MapPin size={10} className="shrink-0" />
+              <span className="truncate">
+                {club.area}{club.city && ` ${club.city}`}{club.address && ` ${club.address}`}
+              </span>
+            </p>
+          )}
 
           <div className="flex flex-wrap items-center gap-2 mb-4">
             {dynamicTags.map((tag, index) => (

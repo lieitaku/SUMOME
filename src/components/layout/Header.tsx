@@ -142,10 +142,11 @@ const Header = () => {
           {/* --- A. Logo 区域 --- */}
           <Link
             href="/"
-            className="group relative flex items-center gap-4 select-none shrink-0"
+            className="group relative flex items-center gap-2 sm:gap-3 md:gap-4 select-none shrink-0"
             onClick={() => setMenuOpen(false)}
           >
-            <div className="flex items-baseline font-serif font-black text-3xl tracking-widest leading-none shrink-0">
+            {/* SUMOME 文字 - 响应式字号 */}
+            <div className="flex items-baseline font-serif font-black text-2xl sm:text-2xl md:text-3xl tracking-wider sm:tracking-widest leading-none shrink-0">
               {["S", "U", "M", "O", "M", "E"].map((char, index) => (
                 <span
                   key={index}
@@ -156,13 +157,15 @@ const Header = () => {
               ))}
             </div>
 
-            <span className="h-8 w-px bg-gray-200 shrink-0"></span>
+            {/* 分隔线 - 响应式高度 */}
+            <span className="h-6 sm:h-6 md:h-8 w-px bg-gray-200 shrink-0"></span>
 
+            {/* 日语副标题 - 响应式字号 */}
             <div className="flex flex-col justify-center items-start pt-0.5 shrink-0">
-              <span className="text-[12px] font-serif font-bold tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
+              <span className="text-[9px] sm:text-[10px] md:text-[12px] font-serif font-bold tracking-[0.12em] sm:tracking-[0.15em] md:tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
                 スモウメモリー
               </span>
-              <span className="text-[14px] font-serif font-medium tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
+              <span className="text-[10px] sm:text-[11px] md:text-[14px] font-serif font-medium tracking-normal sm:tracking-wider md:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
                 相撲の思い出
               </span>
             </div>
