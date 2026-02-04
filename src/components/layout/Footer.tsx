@@ -45,7 +45,9 @@ const FooterLink = ({
 
 const Footer = () => {
   const params = useParams();
+  const pathname = usePathname();
   const prefSlug = params?.pref as string | undefined;
+  const isHomePage = pathname === "/" || pathname === "";
 
   // 1. 确定当前页面的主题色 (用于图标、线条、链接等)
   const currentTheme = prefSlug ? getPrefectureTheme(prefSlug) : DEFAULT_THEME;
@@ -78,25 +80,50 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row justify-between items-start gap-16 mb-20">
           {/* --- Left Column: Brand Info --- */}
           <div className="md:w-1/3">
-            <div className="flex items-center gap-4 mb-6">
-              {/* 竖线：保持跟随主题色，体现地区差异 */}
-              <div
-                className="w-1 h-8"
-                style={{ backgroundColor: themeColor }}
-              ></div>
+            {isHomePage ? (
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                className="flex items-center gap-4 mb-6 group cursor-pointer"
+              >
+                {/* 竖线：保持跟随主题色，体现地区差异 */}
+                <div
+                  className="w-1 h-8 transition-transform duration-300 group-hover:scale-y-110"
+                  style={{ backgroundColor: themeColor }}
+                ></div>
 
-              {/* ✨ Logo：永远保持彩虹色 ✨ */}
-              <div className="flex items-baseline font-serif font-black text-3xl tracking-[0.1em] leading-none">
-                {["S", "U", "M", "O", "M", "E"].map((char, index) => (
-                  <span
-                    key={index}
-                    style={{ color: rainbowColors[index % rainbowColors.length] }}
-                  >
-                    {char}
-                  </span>
-                ))}
-              </div>
-            </div>
+                {/* ✨ Logo：永远保持彩虹色，在主页点击回到顶部 ✨ */}
+                <div className="flex items-baseline font-serif font-black text-3xl tracking-[0.1em] leading-none transition-transform duration-300 group-hover:translate-x-1">
+                  {["S", "U", "M", "O", "M", "E"].map((char, index) => (
+                    <span
+                      key={index}
+                      style={{ color: rainbowColors[index % rainbowColors.length] }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              </button>
+            ) : (
+              <Link href="/" className="flex items-center gap-4 mb-6 group">
+                {/* 竖线：保持跟随主题色，体现地区差异 */}
+                <div
+                  className="w-1 h-8 transition-transform duration-300 group-hover:scale-y-110"
+                  style={{ backgroundColor: themeColor }}
+                ></div>
+
+                {/* ✨ Logo：永远保持彩虹色，点击跳转首页 ✨ */}
+                <div className="flex items-baseline font-serif font-black text-3xl tracking-[0.1em] leading-none transition-transform duration-300 group-hover:translate-x-1">
+                  {["S", "U", "M", "O", "M", "E"].map((char, index) => (
+                    <span
+                      key={index}
+                      style={{ color: rainbowColors[index % rainbowColors.length] }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            )}
 
             <p className="text-sm text-gray-500 mb-8 leading-loose font-medium font-sans">
               相撲クラブ検索・応援プラットフォーム

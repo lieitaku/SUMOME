@@ -114,16 +114,17 @@ const Header = () => {
 
       {/* 外层定位容器 */}
       <header
-        className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+        className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none h-auto"
         style={dynamicStyle}
       >
-        {/* 内层胶囊容器 */}
+        {/* 内层胶囊容器 - 添加 min-h 和 max-h 防止安卓拉伸 */}
         <div
           className={cn(
-            "pointer-events-auto flex items-center justify-between",
+            "pointer-events-auto flex items-center justify-between flex-shrink-0",
             "bg-white/95 backdrop-blur-md border border-white/10",
             "transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]",
-            "shadow-sm"
+            "shadow-sm",
+            "min-h-[56px] max-h-[80px]"
           )}
           style={{
             width: isScrolled ? "100%" : "95%",
@@ -141,10 +142,10 @@ const Header = () => {
           {/* --- A. Logo 区域 --- */}
           <Link
             href="/"
-            className="group relative flex items-center gap-4 select-none"
+            className="group relative flex items-center gap-4 select-none shrink-0"
             onClick={() => setMenuOpen(false)}
           >
-            <div className="flex items-baseline font-serif font-black text-3xl tracking-widest leading-none">
+            <div className="flex items-baseline font-serif font-black text-3xl tracking-widest leading-none shrink-0">
               {["S", "U", "M", "O", "M", "E"].map((char, index) => (
                 <span
                   key={index}
@@ -155,13 +156,13 @@ const Header = () => {
               ))}
             </div>
 
-            <span className="h-8 w-[1px] bg-gray-200"></span>
+            <span className="h-8 w-px bg-gray-200 shrink-0"></span>
 
-            <div className="flex flex-col justify-center items-start h-full pt-0.5">
-              <span className="text-[12px] font-serif font-bold tracking-[0.2em] leading-tight text-gray-600">
+            <div className="flex flex-col justify-center items-start pt-0.5 shrink-0">
+              <span className="text-[12px] font-serif font-bold tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
                 スモウメモリー
               </span>
-              <span className="text-[14px] font-serif font-medium tracking-widest leading-tight mt-0.5 text-gray-600">
+              <span className="text-[14px] font-serif font-medium tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
                 相撲の思い出
               </span>
             </div>

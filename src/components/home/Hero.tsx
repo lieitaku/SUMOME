@@ -145,9 +145,6 @@ const Hero = ({ activities = [] }: HeroProps) => {
           className={`transition-opacity duration-300 ${frameIndex === 3 ? "opacity-100" : "opacity-0"}`}
         />
 
-        {/* 🟥 红色参考线 (调试用) */}
-        {/* 这条线显示了 CHAR_Y 的位置。如果你改了数值，这条红线一定会动！ */}
-        {/* <line x1="0" y1={CHAR_Y} x2={WORLD_W} y2={CHAR_Y} stroke="red" strokeWidth="10" /> */}
       </svg>
 
       {/* 2. 底部渐变 */}
@@ -155,8 +152,12 @@ const Hero = ({ activities = [] }: HeroProps) => {
 
       {/* 3. UI 层 (保持不变) */}
       <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
-        {/* ... Card Content (复用之前的代码即可) ... */}
-        <div className="relative bg-white/40 backdrop-blur-2xl backdrop-saturate-200 shadow-[0_8px_32px_rgba(0,0,0,0.08)] flex flex-row items-stretch rounded-xl overflow-hidden h-[80px] md:h-[90px]">
+        <div className="relative flex flex-row items-stretch rounded-2xl overflow-hidden h-[80px] md:h-[90px] shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
+          {/* 毛玻璃背景层 - 更模糊、更难透光 */}
+          <div className="absolute inset-0 bg-white/90 backdrop-blur-[60px] backdrop-saturate-[1.5]" />
+          {/* 玻璃光泽层 - 顶部微光 */}
+          <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+
           <div className="bg-sumo-red text-white w-[60px] md:w-[80px] flex flex-col justify-center items-center shrink-0 relative overflow-hidden z-10">
             <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
             <span className="text-[10px] md:text-xs font-bold leading-none opacity-90 font-serif">20</span>
@@ -195,39 +196,39 @@ const Hero = ({ activities = [] }: HeroProps) => {
         </div>
       </div>
 
-      {/* 新闻轮播 - 只有在有 activities 时才显示 */}
+      {/* 新闻轮播 - 使用 bottom 定位，与人物保持相对固定距离 */}
       {currentActivity && (
-        <div className="absolute z-30 top-60 md:top-60 left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
+        <div className="absolute z-30 bottom-[60%] left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
           {/* 漫画气泡风格 */}
           <Link href={`/activities/${currentActivity.id}`} className="block group/news relative">
-            <div className="relative bg-white border-2 border-gray-900 rounded-2xl p-4 shadow-lg transition-transform duration-300 hover:scale-[1.02]">
+            <div className="relative bg-white border-2 border-gray-900 rounded-xl px-3 py-2 shadow-lg transition-transform duration-300 hover:scale-[1.02]">
               {/* 气泡小尾巴 - 简单的三角形，跟随人物方向 */}
-              {/* l1(0)=中间50%, l2(1)=偏右65%, r1(2)=中间50%, r2(3)=偏左35% */}
+              {/* l1(0)=中间50%, l2(1)=偏右60%, r1(2)=中间50%, r2(3)=偏左40% */}
               <div
-                className="absolute -bottom-4 w-0 h-0 border-l-[10px] border-r-[10px] border-t-[16px] border-l-transparent border-r-transparent border-t-gray-900 transition-all duration-300 -translate-x-1/2"
-                style={{ left: frameIndex === 1 ? '65%' : frameIndex === 3 ? '35%' : '50%' }}
+                className="absolute -bottom-3 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[12px] border-l-transparent border-r-transparent border-t-gray-900 transition-all duration-300 -translate-x-1/2"
+                style={{ left: frameIndex === 1 ? '60%' : frameIndex === 3 ? '40%' : '50%' }}
               />
               <div
-                className="absolute -bottom-[13px] w-0 h-0 border-l-[8px] border-r-[8px] border-t-[13px] border-l-transparent border-r-transparent border-t-white transition-all duration-300 -translate-x-1/2"
-                style={{ left: frameIndex === 1 ? '65%' : frameIndex === 3 ? '35%' : '50%' }}
+                className="absolute -bottom-[10px] w-0 h-0 border-l-[6px] border-r-[6px] border-t-[10px] border-l-transparent border-r-transparent border-t-white transition-all duration-300 -translate-x-1/2"
+                style={{ left: frameIndex === 1 ? '60%' : frameIndex === 3 ? '40%' : '50%' }}
               />
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-2">
                 <div className="flex-grow">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-mono text-[10px] text-gray-500 font-bold">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <span className="font-mono text-[9px] text-gray-400 font-bold">
                       {formatDate(currentActivity.date)}
                     </span>
-                    <span className="text-[9px] font-black text-white bg-gray-900 px-1.5 py-0.5 rounded-sm">
+                    <span className="text-[8px] font-black text-white bg-gray-900 px-1 py-0.5 rounded-sm">
                       {getCategoryLabel(currentActivity.templateType)}
                     </span>
                   </div>
-                  <h3 key={currentNewsIndex} className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
+                  <h3 key={currentNewsIndex} className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
                     {currentActivity.title}
                   </h3>
                 </div>
-                <div className="text-gray-300 group-hover/news:text-sumo-red transition-colors pt-1">
-                  <ChevronRight size={20} />
+                <div className="text-gray-300 group-hover/news:text-sumo-red transition-colors">
+                  <ChevronRight size={18} />
                 </div>
               </div>
             </div>
