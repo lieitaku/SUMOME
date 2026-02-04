@@ -1,10 +1,11 @@
 import React from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { Search, Plus, MapPin, Pencil, Filter } from "lucide-react";
+import { Search, Plus, MapPin, Pencil } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 import { REGIONS } from "@/lib/constants";
+import RegionFilter from "@/components/admin/ui/RegionFilter";
 
 export const dynamic = "force-dynamic";
 
@@ -66,53 +67,13 @@ export default async function AdminClubsPage({
                     />
                 </form>
 
-                {/* 地方・都道府県フィルタ (分级筛选) */}
-                <div className="pt-4 border-t border-gray-100 space-y-4">
-                    <div className="flex flex-wrap gap-2 items-center">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2 flex items-center gap-1">
-                            <Filter size={12} /> Region
-                        </span>
-                        <Link
-                            href="/admin/clubs"
-                            className={cn(
-                                "px-3 py-1 rounded-full text-xs font-bold border",
-                                !region ? "bg-sumo-dark text-white border-sumo-dark" : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
-                            )}
-                        >
-                            全て
-                        </Link>
-                        {Object.keys(REGIONS).map((r) => (
-                            <Link
-                                key={r}
-                                href={`/admin/clubs?region=${r}${q ? `&q=${q}` : ""}`}
-                                className={cn(
-                                    "px-3 py-1 rounded-full text-xs font-bold border transition-all",
-                                    region === r ? "bg-sumo-brand text-white border-sumo-brand" : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
-                                )}
-                            >
-                                {r}
-                            </Link>
-                        ))}
-                    </div>
-
-                    {region && region in REGIONS && (
-                        <div className="flex flex-wrap gap-2 items-center md:pl-10 animate-in fade-in slide-in-from-left-2 duration-300">
-                            <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mr-2">┗ Pref</span>
-                            {REGIONS[region as keyof typeof REGIONS].map((p) => (
-                                <Link
-                                    key={p}
-                                    href={`/admin/clubs?region=${region}&pref=${p}${q ? `&q=${q}` : ""}`}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full text-[11px] font-bold border transition-all",
-                                        pref === p ? "bg-blue-50 text-sumo-brand border-sumo-brand" : "bg-white text-gray-400 border-gray-100 hover:border-gray-300"
-                                    )}
-                                >
-                                    {p}
-                                </Link>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                {/* 地方・都道府県フィルタ */}
+                <RegionFilter
+                    basePath="/admin/clubs"
+                    currentRegion={region}
+                    currentPref={pref}
+                    currentQuery={q}
+                />
             </div>
 
             {/* --- 1. モバイル表示 (Mobile Cards) --- */}
