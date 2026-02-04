@@ -58,7 +58,7 @@ export default async function AdminDashboardPage() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">ダッシュボード</h1>
                 <p className="text-gray-500 mt-2">
-                    SUMOME CMSへようこそ。現在のサイト運営状況の概要です。
+                    SUMOME管理画面へようこそ。現在のサイト運営状況の概要です。
                 </p>
             </div>
 

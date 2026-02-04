@@ -128,13 +128,9 @@ const AboutPage = () => {
 
                       <p className="text-sm text-gray-500 leading-loose mb-8">
                         登録クラブはPRとしてチームの魅力を外部に発信し、ファンやスポンサーの獲得に繋げます。さらに、毎月無料でフォトブック情報誌をお届しています。
-                        <strong className="text-sumo-brand border-b border-sumo-brand/20 mx-1 font-bold">
-                          「MEMORYスポーツ」
-                        </strong>
-                        をプレゼント。
                       </p>
 
-                      <Link href="/contact" className="inline-flex">
+                      <Link href="/partners" className="inline-flex">
                         <button className="flex items-center gap-3 px-8 py-4 bg-white border border-gray-300 rounded-lg text-xs font-bold uppercase tracking-widest text-sumo-dark hover:bg-sumo-brand hover:text-white hover:border-sumo-brand transition-all duration-300 shadow-sm hover:-translate-y-1">
                           <span>お問い合わせ・登録</span>
                           <ArrowRight size={14} />

@@ -68,7 +68,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                     <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sumo-brand">
                         <MapPin size={14} />
                     </div>
-                    <span className="font-serif font-bold text-lg tracking-widest">SUMO CMS</span>
+                    <span className="font-serif font-bold text-lg tracking-widest">管理画面</span>
                 </div>
                 <button onClick={toggleMenu} className="-mr-2 p-2 hover:bg-white/10 rounded-md transition-colors">
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -91,7 +91,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sumo-brand">
                             <MapPin size={18} />
                         </div>
-                        <span className="font-serif font-black text-xl tracking-widest">SUMO CMS</span>
+                        <span className="font-serif font-black text-xl tracking-widest">管理画面</span>
                     </div>
                     <p className="text-[10px] text-white/50 uppercase tracking-[0.2em] pl-11">
                         {role === "ADMIN" ? "Official Admin" : "Club Manager"}
