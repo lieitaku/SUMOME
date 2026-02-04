@@ -53,6 +53,8 @@ const formSchema = z.object({
     website: z.string().optional(),
     instagram: z.string().optional(),
     twitter: z.string().optional(),
+    tiktok: z.string().optional(),
+    facebook: z.string().optional(),
     schedule: z.string().optional(), // 存的是 JSON 字符串
     target: z.string().optional(),
     representative: z.string().optional(),
@@ -89,6 +91,8 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
             website: initialData.website || "",
             instagram: initialData.instagram || "",
             twitter: initialData.twitter || "",
+            tiktok: (initialData as Club & { tiktok?: string }).tiktok || "",
+            facebook: (initialData as Club & { facebook?: string }).facebook || "",
             schedule: initialData.schedule || "",
             target: initialData.target || "",
             representative: initialData.representative || "",
@@ -370,15 +374,23 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                                 <input {...form.register("website")} className={inputClass} />
                             </div>
                             <div>
-                                <label className={labelClass}>SNS ID (IDのみ)</label>
+                                <label className={labelClass}>SNS リンク (IDのみ)</label>
                                 <div className="space-y-3">
                                     <div className="relative">
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">IG</span>
-                                        <input {...form.register("instagram")} className={`${inputClass} pl-10`} />
+                                        <input {...form.register("instagram")} className={`${inputClass} pl-10`} placeholder="instagram_id" />
                                     </div>
                                     <div className="relative">
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">X</span>
-                                        <input {...form.register("twitter")} className={`${inputClass} pl-10`} />
+                                        <input {...form.register("twitter")} className={`${inputClass} pl-10`} placeholder="twitter_id" />
+                                    </div>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">TT</span>
+                                        <input {...form.register("tiktok")} className={`${inputClass} pl-10`} placeholder="tiktok_id" />
+                                    </div>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs font-bold">FB</span>
+                                        <input {...form.register("facebook")} className={`${inputClass} pl-10`} placeholder="facebook_id" />
                                     </div>
                                 </div>
                             </div>

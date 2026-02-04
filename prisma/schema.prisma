@@ -78,6 +78,8 @@ model Club {
   website        String?
   instagram      String?
   twitter        String?
+  tiktok         String?
+  facebook       String?
 
   // 运营信息
   schedule       String?   // 稽古时间 (JSON String)
