@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, X, Clock } from "lucide-react";
 
 /**
@@ -11,10 +11,46 @@ type ScheduleItem = {
     time: string; // 时间段 (例: "18:00 - 20:00")
 };
 
-// 预设的星期选项
+// 预设的星期选项（按顺序）
 const DAYS = [
     "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日", "日曜日", "祝日", "不定期"
 ];
+
+// 星期排序优先级
+const DAY_ORDER: Record<string, number> = {
+    "月曜日": 0, "火曜日": 1, "水曜日": 2, "木曜日": 3,
+    "金曜日": 4, "土曜日": 5, "日曜日": 6, "祝日": 7, "不定期": 8
+};
+
+/**
+ * 从时间字符串中提取开始时间用于排序
+ * 例如 "18:00 〜 20:00" -> 1800, "9:30-11:00" -> 930
+ */
+function extractStartTime(timeStr: string): number {
+    // 匹配开头的时间格式 (支持 HH:MM 或 H:MM)
+    const match = timeStr.match(/^(\d{1,2}):(\d{2})/);
+    if (match) {
+        return parseInt(match[1]) * 100 + parseInt(match[2]);
+    }
+    return 9999; // 无法解析时排到最后
+}
+
+/**
+ * 排序函数：按周一到周日顺序，同一天按时间从早到晚
+ */
+function sortScheduleItems(items: ScheduleItem[]): ScheduleItem[] {
+    return [...items].sort((a, b) => {
+        const dayOrderA = DAY_ORDER[a.day] ?? 99;
+        const dayOrderB = DAY_ORDER[b.day] ?? 99;
+
+        if (dayOrderA !== dayOrderB) {
+            return dayOrderA - dayOrderB;
+        }
+
+        // 同一天，按时间排序
+        return extractStartTime(a.time) - extractStartTime(b.time);
+    });
+}
 
 /**
  * Props 定义
@@ -27,47 +63,80 @@ interface ScheduleEditorProps {
 }
 
 export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps) {
+    // 使用 ref 存储 onChange 防止无限循环
+    const onChangeRef = useRef(onChange);
+    onChangeRef.current = onChange;
+
     // 1. 初始化状态：尝试解析传入的 JSON 字符串
-    // 如果解析失败（比如是旧数据的纯文本），则初始化为空数组，保证不报错
     const [items, setItems] = useState<ScheduleItem[]>(() => {
         try {
             const parsed = JSON.parse(value);
-            return Array.isArray(parsed) ? parsed : [];
+            return Array.isArray(parsed) ? sortScheduleItems(parsed) : [];
         } catch {
             return [];
         }
     });
 
-    // 临时输入状态
+    // 临时输入状态（新增用）
     const [currentDay, setCurrentDay] = useState(DAYS[0]);
     const [currentTime, setCurrentTime] = useState("");
 
-    // 2. 数据同步：当 items 数组变化时，序列化为 JSON 字符串并通知父组件
+    // 更新 items 并自动排序
+    const updateItems = useCallback((newItems: ScheduleItem[]) => {
+        const sorted = sortScheduleItems(newItems);
+        setItems(sorted);
+        onChangeRef.current(JSON.stringify(sorted));
+    }, []);
+
+    // 同步外部 value 变化（首次加载时）
     useEffect(() => {
-        // 只有当 items 确实变化时才调用 onChange，防止死循环
-        const jsonString = JSON.stringify(items);
-        // 这里做一个简单的对比，避免不必要的重渲染（可选）
-        if (jsonString !== value) {
-            onChange(jsonString);
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                const sorted = sortScheduleItems(parsed);
+                const currentJson = JSON.stringify(items);
+                const newJson = JSON.stringify(sorted);
+                if (currentJson !== newJson) {
+                    setItems(sorted);
+                }
+            }
+        } catch {
+            // 忽略解析错误
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [items]);
+    }, []);
 
     // 添加条目
     const addItem = () => {
-        if (!currentTime.trim()) return; // 防止添加空时间
-        setItems([...items, { day: currentDay, time: currentTime }]);
-        setCurrentTime(""); // 清空输入框，方便下一次输入
+        if (!currentTime.trim()) return;
+        updateItems([...items, { day: currentDay, time: currentTime }]);
+        setCurrentTime("");
     };
 
     // 删除条目
     const removeItem = (index: number) => {
-        setItems(items.filter((_, i) => i !== index));
+        updateItems(items.filter((_, i) => i !== index));
+    };
+
+    // 编辑条目的星期
+    const updateItemDay = (index: number, newDay: string) => {
+        const newItems = items.map((item, i) =>
+            i === index ? { ...item, day: newDay } : item
+        );
+        updateItems(newItems);
+    };
+
+    // 编辑条目的时间
+    const updateItemTime = (index: number, newTime: string) => {
+        const newItems = items.map((item, i) =>
+            i === index ? { ...item, time: newTime } : item
+        );
+        updateItems(newItems);
     };
 
     return (
         <div className="space-y-3">
-            {/* --- A. 输入区域 --- */}
+            {/* --- A. 输入区域（新增用） --- */}
             <div className="flex gap-2 items-center">
                 {/* 星期选择 */}
                 <div className="relative">
@@ -82,7 +151,6 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
                             </option>
                         ))}
                     </select>
-                    {/* 自定义下拉箭头 (可选) */}
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
                     </div>
@@ -98,7 +166,7 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
                         onChange={(e) => setCurrentTime(e.target.value)}
                         onKeyDown={(e) => {
                             if (e.key === "Enter") {
-                                e.preventDefault(); // 防止触发表单提交
+                                e.preventDefault();
                                 addItem();
                             }
                         }}
@@ -118,7 +186,7 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
                 </button>
             </div>
 
-            {/* --- B. 列表展示区域 --- */}
+            {/* --- B. 列表展示区域（可编辑） --- */}
             <div className="space-y-2">
                 {items.length === 0 && (
                     <p className="text-xs text-gray-400 py-2 text-center border border-dashed border-gray-200 rounded-lg bg-gray-50">
@@ -129,24 +197,35 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
                 {items.map((item, idx) => (
                     <div
                         key={idx}
-                        className="flex items-center justify-between bg-white px-3 py-2.5 rounded-lg border border-gray-100 text-sm shadow-sm group hover:border-gray-300 transition-colors"
+                        className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-100 text-sm shadow-sm group hover:border-gray-300 transition-colors"
                     >
-                        <div className="flex items-center gap-3">
-                            {/* 星期标签 */}
-                            <span className="font-bold text-white bg-gray-400 px-2 py-0.5 rounded text-[10px] shadow-sm tracking-wide">
-                                {item.day}
-                            </span>
-                            {/* 时间文本 */}
-                            <span className="font-mono text-gray-700 font-bold tracking-tight">
-                                {item.time}
-                            </span>
+                        {/* 星期选择（可编辑） */}
+                        <select
+                            value={item.day}
+                            onChange={(e) => updateItemDay(idx, e.target.value)}
+                            className="appearance-none px-2 py-1.5 pr-6 rounded-lg border border-gray-200 text-xs font-bold bg-gray-50 cursor-pointer focus:ring-2 focus:ring-sumo-brand outline-none min-w-[80px]"
+                        >
+                            {DAYS.map((d) => (
+                                <option key={d} value={d}>{d}</option>
+                            ))}
+                        </select>
+
+                        {/* 时间输入（可编辑） */}
+                        <div className="relative flex-grow">
+                            <input
+                                type="text"
+                                value={item.time}
+                                onChange={(e) => updateItemTime(idx, e.target.value)}
+                                className="w-full pl-7 pr-2 py-1.5 rounded-lg border border-gray-200 text-sm font-mono font-bold text-gray-700 focus:ring-2 focus:ring-sumo-brand outline-none bg-gray-50"
+                            />
+                            <Clock size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" />
                         </div>
 
                         {/* 删除按钮 */}
                         <button
                             type="button"
                             onClick={() => removeItem(idx)}
-                            className="text-gray-300 hover:text-red-500 p-1 rounded-full hover:bg-red-50 transition-all"
+                            className="text-gray-300 hover:text-red-500 p-1.5 rounded-full hover:bg-red-50 transition-all shrink-0"
                             title="削除"
                         >
                             <X size={14} />
@@ -154,6 +233,13 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
                     </div>
                 ))}
             </div>
+
+            {/* 提示文字 */}
+            {items.length > 0 && (
+                <p className="text-[10px] text-gray-400 text-right">
+                    ※ 自動で曜日順・時間順に並び替えられます
+                </p>
+            )}
         </div>
     );
 }
