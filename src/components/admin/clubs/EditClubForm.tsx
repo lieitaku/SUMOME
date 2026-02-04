@@ -15,6 +15,7 @@ import ImageUploader from "@/components/admin/ui/ImageUploader";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import ScheduleEditor from "./ScheduleEditor"; // <--- 引入日程编辑器组件
+import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
 import { supabase } from "@/lib/supabase/client"; // 用于副图上传
 
 // ✨ 2. 引入 Server Actions
@@ -347,7 +348,10 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                         <div className="space-y-6">
                             <div>
                                 <label className={labelClass}>募集対象</label>
-                                <input {...form.register("target")} className={inputClass} />
+                                <TargetEditor
+                                    value={form.watch("target") || ""}
+                                    onChange={(val) => form.setValue("target", val, { shouldDirty: true })}
+                                />
                             </div>
                             <div>
                                 <label className={labelClass}>代表者名</label>

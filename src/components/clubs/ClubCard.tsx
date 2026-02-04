@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
-import { MapPin, Tag, Instagram, Twitter, ArrowUpRight, Users } from "lucide-react";
+import { MapPin, Instagram, Twitter, ArrowUpRight, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
@@ -28,9 +28,13 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   }, [club.description]);
 
   const dynamicTags = useMemo(() => {
-    const tags: string[] = [];
-    if (club.target) tags.push(club.target);
-    return tags.slice(0, 2);
+    if (!club.target) return [];
+    // 支持逗号分隔的多个 target（最多4个）
+    return club.target
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean)
+      .slice(0, 4);
   }, [club.target]);
 
   // --- 2. Early Return ---
@@ -103,9 +107,9 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
             {dynamicTags.map((tag, index) => (
               <span
                 key={index}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-50 text-gray-500 text-[9px] font-black tracking-wider border border-gray-100 uppercase"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-50 text-gray-500 text-[9px] font-black tracking-wider border border-gray-100"
               >
-                {index === 0 ? <Users size={10} /> : <Tag size={10} />}
+                <Users size={10} />
                 {tag}
               </span>
             ))}
