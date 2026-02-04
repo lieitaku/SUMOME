@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { MapPin, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";

@@ -104,7 +104,7 @@ const Header = () => {
           color: white !important;
         }
         
-        /* ✨ 5. 核心修复：搜索按钮强制背景色 */
+        /* 5. 核心修复：搜索按钮强制背景色 */
         /* 使用 !important 覆盖 Button 组件内部的默认颜色 */
         .search-btn-dynamic {
           background-color: ${themeColor} !important;
@@ -158,10 +158,10 @@ const Header = () => {
             <span className="h-8 w-[1px] bg-gray-200"></span>
 
             <div className="flex flex-col justify-center items-start h-full pt-0.5">
-              <span className="text-[9px] font-sans font-bold tracking-[0.2em] leading-tight text-gray-400">
+              <span className="text-[12px] font-serif font-bold tracking-[0.2em] leading-tight text-gray-600">
                 スモウメモリー
               </span>
-              <span className="text-xs font-serif font-medium tracking-widest leading-tight mt-0.5 text-gray-600">
+              <span className="text-[14px] font-serif font-medium tracking-widest leading-tight mt-0.5 text-gray-600">
                 相撲の思い出
               </span>
             </div>

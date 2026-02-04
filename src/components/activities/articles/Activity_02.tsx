@@ -2,12 +2,10 @@
 import React from "react";
 import Image from "next/image";
 import { Calendar, MapPin, CloudSun, Quote } from "lucide-react";
+import type { CustomActivityProps } from "@/lib/article-registry";
 
-type ArticleProps = {
-  mainImage?: string;
-};
-
-const Activity_02 = ({ mainImage }: ArticleProps) => {
+// 自定义文章组件 - 内容为精心设计的硬编码排版
+const Activity_02 = ({ activity }: CustomActivityProps) => {
   // ✅ 应用你指定的真实图片路径
   const galleryImages = [
     "/images/activities/activity-2/act02-yokohama-scene-01.jpg",

@@ -1,13 +1,10 @@
 // src/components/activities/articles/Activity_01.tsx
 import React from "react";
 import { Quote, Info, Newspaper, Award, Gift } from "lucide-react";
+import type { CustomActivityProps } from "@/lib/article-registry";
 
-// 接收父组件可能传来的 props（保持接口一致性）
-type ArticleProps = {
-  mainImage?: string;
-};
-
-const Activity_01 = ({ mainImage }: ArticleProps) => {
+// 自定义文章组件 - 内容为精心设计的硬编码排版
+const Activity_01 = ({ activity }: CustomActivityProps) => {
   return (
     <div className="space-y-16">
       {/* --- 1. 导语区 (Lead Section) --- */}

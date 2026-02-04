@@ -1,18 +1,45 @@
 import React from "react";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { Plus, BookOpen, Calendar, Pencil, ExternalLink } from "lucide-react";
+import { Plus, BookOpen, Calendar, Pencil, ExternalLink, Filter, Search, MapPin } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
+import { REGIONS } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
-export default async function MagazineListPage() {
+export default async function MagazineListPage({
+    searchParams,
+}: {
+    searchParams: { q?: string; region?: string; pref?: string };
+}) {
+    const { q, region, pref } = await searchParams;
+
+    // 构建查询条件
+    const where: Prisma.MagazineWhereInput = {};
+
+    // 关键词搜索（标题）
+    if (q) {
+        where.title = { contains: q, mode: "insensitive" };
+    }
+
+    // 地区筛选（与俱乐部页面一致的分级逻辑）
+    if (pref) {
+        // 选择了具体的县
+        where.region = { equals: pref };
+    } else if (region && region in REGIONS) {
+        // 选择了大区域，匹配该区域下的所有县
+        where.region = { in: REGIONS[region as keyof typeof REGIONS] };
+    }
+
     const magazines = await prisma.magazine.findMany({
+        where,
         orderBy: { issueDate: "desc" },
     });
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6">
             {/* 头部标题 */}
             <div className="flex items-center justify-between">
                 <div>
@@ -25,6 +52,69 @@ export default async function MagazineListPage() {
                 >
                     <Plus size={18} /> 新規登録
                 </Link>
+            </div>
+
+            {/* 搜索 & 筛选区域 */}
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                {/* 关键词搜索 */}
+                <form className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                    <input
+                        name="q"
+                        defaultValue={q}
+                        placeholder="タイトルで検索..."
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
+                    />
+                </form>
+
+                {/* 地区筛选（与俱乐部页面一致的分级筛选） */}
+                <div className="pt-4 border-t border-gray-100 space-y-4">
+                    <div className="flex flex-wrap gap-2 items-center">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-2 flex items-center gap-1">
+                            <Filter size={12} /> Region
+                        </span>
+                        <Link
+                            href="/admin/magazines"
+                            className={cn(
+                                "px-3 py-1 rounded-full text-xs font-bold border",
+                                !region ? "bg-sumo-dark text-white border-sumo-dark" : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                            )}
+                        >
+                            全て
+                        </Link>
+                        {Object.keys(REGIONS).map((r) => (
+                            <Link
+                                key={r}
+                                href={`/admin/magazines?region=${r}${q ? `&q=${q}` : ""}`}
+                                className={cn(
+                                    "px-3 py-1 rounded-full text-xs font-bold border transition-all",
+                                    region === r ? "bg-sumo-brand text-white border-sumo-brand" : "bg-white text-gray-500 border-gray-200 hover:border-gray-400"
+                                )}
+                            >
+                                {r}
+                            </Link>
+                        ))}
+                    </div>
+
+                    {/* 二级县筛选 */}
+                    {region && region in REGIONS && (
+                        <div className="flex flex-wrap gap-2 items-center md:pl-10 animate-in fade-in slide-in-from-left-2 duration-300">
+                            <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mr-2">┗ Pref</span>
+                            {REGIONS[region as keyof typeof REGIONS].map((p) => (
+                                <Link
+                                    key={p}
+                                    href={`/admin/magazines?region=${region}&pref=${p}${q ? `&q=${q}` : ""}`}
+                                    className={cn(
+                                        "px-3 py-1 rounded-full text-[11px] font-bold border transition-all",
+                                        pref === p ? "bg-blue-50 text-sumo-brand border-sumo-brand" : "bg-white text-gray-400 border-gray-100 hover:border-gray-300"
+                                    )}
+                                >
+                                    {p}
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* 列表区域 */}
@@ -57,11 +147,17 @@ export default async function MagazineListPage() {
 
                         {/* 内容 */}
                         <div className="p-6">
-                            <div className="flex items-center gap-2 text-sumo-brand mb-2">
-                                <Calendar size={14} />
-                                <span className="text-xs font-bold font-mono">
-                                    {mag.issueDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' })}
-                                </span>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="flex items-center gap-1.5 text-sumo-brand">
+                                    <Calendar size={14} />
+                                    <span className="text-xs font-bold font-mono">
+                                        {mag.issueDate.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long' })}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1 text-gray-400">
+                                    <MapPin size={12} />
+                                    <span className="text-[10px] font-bold">{mag.region === "All" ? "全国" : mag.region}</span>
+                                </div>
                             </div>
                             <h3 className="text-lg font-black text-gray-900 line-clamp-1 mb-4">{mag.title}</h3>
 

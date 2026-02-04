@@ -62,9 +62,7 @@ const ContactPage = () => {
           </h1>
 
           <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200">
-            クラブへの参加希望、取材のご依頼、その他ご質問など。
-            <br className="hidden md:inline" />
-            私たちのチームが丁寧に対応させていただきます。
+            クラブへの参加希望、取材のご依頼、その他ご質問など、<br />担当者からご連絡いたします。
           </p>
         </div>
       </header>
@@ -97,11 +95,11 @@ const ContactPage = () => {
                             所在地
                           </h4>
                           <p className="text-gray-500 leading-relaxed text-sm font-medium">
-                            〒100-0001
+                            〒103-0016
                             <br />
-                            東京都千代田区千代田1-1
+                            東京都中央区日本橋小網町4-94-9
                             <br />
-                            SUMOMEビル 5F
+                            恵和ビル 3F
                           </p>
                         </div>
                       </div>
@@ -141,7 +139,7 @@ const ContactPage = () => {
                             href="tel:03-1234-5678"
                             className="text-gray-500 hover:text-sumo-brand transition-colors text-sm font-mono border-b border-transparent hover:border-sumo-brand pb-0.5"
                           >
-                            03-1234-5678
+                            000-1234-5678
                           </a>
                           <p className="text-[10px] text-gray-400 mt-1 font-bold">
                             平日 10:00 - 18:00

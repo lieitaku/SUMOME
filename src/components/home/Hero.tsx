@@ -1,17 +1,43 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import RabbitBanner from "@/components/home/RabbitBanner";
 import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 
-// 新闻数据
-const NEWS_ITEMS = [
-  { id: 1, type: "INTERVIEW", date: "01.28", title: "横綱・照ノ富士：不屈の魂を語る", link: "#" },
-  { id: 2, type: "REPORT", date: "02.01", title: "2026年 春巡業の日程が決定", link: "#" },
-  { id: 3, type: "PICKUP", date: "02.14", title: "新世代の力士たち特集", link: "#" },
-];
+// Activity 数据类型（与服务端同步）
+type ActivityItem = {
+  id: string;
+  title: string;
+  date: Date;
+  category: string;
+  templateType: string;
+};
 
-const Hero = () => {
+type HeroProps = {
+  activities?: ActivityItem[];
+};
+
+// 格式化日期为 MM.DD 格式
+function formatDate(date: Date): string {
+  const d = new Date(date);
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${month}.${day}`;
+}
+
+// 获取显示用的类型标签
+function getCategoryLabel(templateType: string): string {
+  const labels: Record<string, string> = {
+    news: "NEWS",
+    report: "REPORT",
+    event: "EVENT",
+    custom: "PICKUP",
+  };
+  return labels[templateType] || "INFO";
+}
+
+const Hero = ({ activities = [] }: HeroProps) => {
   // ============================================================
   // 🔧 调试区：请直接在这里修改数值，保存后画面一定会变
   // ============================================================
@@ -49,14 +75,17 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // 只有在有 activities 数据时才轮播
   useEffect(() => {
+    if (activities.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentNewsIndex((prev) => (prev + 1) % NEWS_ITEMS.length);
+      setCurrentNewsIndex((prev) => (prev + 1) % activities.length);
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activities.length]);
 
-  const currentNews = NEWS_ITEMS[currentNewsIndex];
+  // 当前显示的 activity
+  const currentActivity = activities[currentNewsIndex];
 
   return (
     <section className="relative w-full h-screen overflow-hidden bg-sumo-bg">
@@ -151,7 +180,7 @@ const Hero = () => {
                 </h1>
               </div>
               <div className="flex flex-col items-end border-l border-gray-100 pl-4 md:pl-8 ml-2">
-                <p className="font-serif text-[10px] md:text-sm font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap">伝統を未来へ</p>
+                <p className="font-serif text-[20px] md:text-[20px] font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap">伝統を未来へ</p>
                 <p className="hidden md:block font-sans text-[8px] text-gray-400 font-medium tracking-wider uppercase text-right">Tradition & Future</p>
               </div>
             </div>
@@ -167,36 +196,37 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* 新闻轮播 */}
-      <div className="absolute z-30 top-60 md:top-60 left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
-        {/* ... News Content (复用之前的代码即可) ... */}
-        <a href={currentNews.link} className="block group/news">
-          <div className="flex items-stretch bg-black/20 backdrop-blur-lg border border-white/10 rounded-sm overflow-hidden transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-[1.02]">
-            <div className="w-[28px] md:w-[32px] bg-sumo-red/90 flex items-center justify-center py-2 shrink-0">
-              <span className="text-[9px] md:text-[10px] font-bold text-white tracking-widest opacity-90" style={{ writingMode: 'vertical-rl' }}>
-                最新情報
-              </span>
-            </div>
-            <div className="flex-grow py-3 px-4 flex flex-col justify-center relative min-h-[70px]">
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="font-mono text-[9px] md:text-[10px] text-white/80 tracking-wider">
-                  {currentNews.date}
-                </span>
-                <span className="text-[8px] md:text-[9px] font-bold text-white bg-white/10 border border-white/10 px-1.5 py-[1px] rounded-[1px]">
-                  {currentNews.type}
+      {/* 新闻轮播 - 只有在有 activities 时才显示 */}
+      {currentActivity && (
+        <div className="absolute z-30 top-60 md:top-60 left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
+          <Link href={`/activities/${currentActivity.id}`} className="block group/news">
+            <div className="flex items-stretch bg-black/20 backdrop-blur-lg border border-white/10 rounded-sm overflow-hidden transition-all duration-300 hover:bg-black/30 hover:border-white/20 hover:scale-[1.02]">
+              <div className="w-[28px] md:w-[32px] bg-sumo-red/90 flex items-center justify-center py-2 shrink-0">
+                <span className="text-[9px] md:text-[10px] font-bold text-white tracking-widest opacity-90" style={{ writingMode: 'vertical-rl' }}>
+                  最新情報
                 </span>
               </div>
-              <h3 key={currentNewsIndex} className="text-xs md:text-sm font-medium text-white leading-snug line-clamp-2 animate-in fade-in slide-in-from-bottom-2 duration-500 drop-shadow-sm">
-                {currentNews.title}
-              </h3>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 -translate-x-2 group-hover/news:opacity-100 group-hover/news:translate-x-0 transition-all duration-300 text-white/80">
-                <ChevronRight size={16} />
+              <div className="flex-grow py-3 px-4 flex flex-col justify-center relative min-h-[70px]">
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="font-mono text-[9px] md:text-[10px] text-white/80 tracking-wider">
+                    {formatDate(currentActivity.date)}
+                  </span>
+                  <span className="text-[8px] md:text-[9px] font-bold text-white bg-white/10 border border-white/10 px-1.5 py-[1px] rounded-[1px]">
+                    {getCategoryLabel(currentActivity.templateType)}
+                  </span>
+                </div>
+                <h3 key={currentNewsIndex} className="text-xs md:text-sm font-medium text-white leading-snug line-clamp-2 animate-in fade-in slide-in-from-bottom-2 duration-500 drop-shadow-sm">
+                  {currentActivity.title}
+                </h3>
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 -translate-x-2 group-hover/news:opacity-100 group-hover/news:translate-x-0 transition-all duration-300 text-white/80">
+                  <ChevronRight size={16} />
+                </div>
               </div>
             </div>
-          </div>
-        </a>
-      </div>
+          </Link>
+        </div>
+      )}
 
       {/* RabbitBanner */}
       <div className="absolute bottom-0 w-full z-30">

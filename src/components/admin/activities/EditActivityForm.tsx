@@ -235,12 +235,15 @@ export default function EditActivityForm({
 
                 {templateType === "custom" && (
                     <div className={`${sectionClass} border-purple-100 bg-purple-50/30`}>
-                        <label className="text-[10px] font-bold text-purple-600 uppercase tracking-widest block mb-1">Custom Route</label>
+                        <label className="text-[10px] font-bold text-purple-600 uppercase tracking-widest block mb-1">Custom Route ID</label>
                         <input
                             {...form.register("customRoute")}
-                            placeholder="/special/page-name"
+                            placeholder="act-01, act-02, act-03, act-04..."
                             className={`${inputClass} font-mono`}
                         />
+                        <p className="text-xs text-purple-400 mt-2">
+                            可用的自定义模板: act-01, act-02, act-03, act-04
+                        </p>
                     </div>
                 )}
 

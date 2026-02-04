@@ -1,12 +1,10 @@
 // src/components/activities/articles/Activity_04.tsx
 import React from "react";
 import { MessageSquareQuote, Sparkles } from "lucide-react";
+import type { CustomActivityProps } from "@/lib/article-registry";
 
-type ArticleProps = {
-  mainImage?: string;
-};
-
-const Activity_04 = ({ mainImage }: ArticleProps) => {
+// 自定义文章组件 - 内容为精心设计的硬编码排版
+const Activity_04 = ({ activity }: CustomActivityProps) => {
   return (
     <div className="max-w-3xl mx-auto space-y-20">
       {/* --- 1. Header (纯净标题) --- */}

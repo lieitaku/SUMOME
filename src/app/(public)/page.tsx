@@ -34,7 +34,7 @@ export default async function Home() {
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        <Hero />
+        <Hero activities={activities.slice(0, 3)} />
         <AboutService />
 
         <PickupClubs clubs={pickupClubs} />
