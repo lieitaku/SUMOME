@@ -21,7 +21,6 @@ import ScrollToTop from "@/components/common/ScrollToTop";
 
 // Data & Utils
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
-import { RAW_SPONSORS } from "@/components/home/RabbitBanner/config";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
 
@@ -53,6 +52,19 @@ export default async function PrefecturePage({ params }: PageProps) {
       createdAt: "desc",
     },
   });
+
+  // 获取 Banner 数据（用于兔子旗帜）
+  const banners = await prisma.banner.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' },
+  });
+  const sponsors = banners.map(b => ({
+    id: b.id,
+    image: b.image,
+    alt: b.alt || b.name,
+    link: b.link,
+    category: b.category,
+  }));
 
   const theme = getPrefectureTheme(prefSlug);
   const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;
@@ -178,7 +190,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                       zIndex: 30,
                     }}
                   >
-                    <RabbitWalkingBanner scale={1} containerHeight="500px" />
+                    <RabbitWalkingBanner scale={1} containerHeight="500px" sponsors={sponsors} />
                   </div>
                 </div>
               </div>
@@ -233,7 +245,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                       className="px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono font-bold shadow-sm"
                       style={{ color: theme.color }}
                     >
-                      {RAW_SPONSORS.length}
+                      {sponsors.length}
                     </span>
                   </div>
 
@@ -247,7 +259,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                   >
                     {/* 兔子本体 */}
                     <div className="absolute inset-0 w-[200%] -left-[50%] origin-center scale-[0.75] flex items-center justify-center pt-8">
-                      <RabbitWalkingBanner scale={1} containerHeight="300px" />
+                      <RabbitWalkingBanner scale={1} containerHeight="300px" sponsors={sponsors} />
                     </div>
                   </div>
 

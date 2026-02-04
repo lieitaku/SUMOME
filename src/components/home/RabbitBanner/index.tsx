@@ -8,14 +8,33 @@ import {
   RABBIT_PROBABILITY_POOL,
 } from "./config";
 
+// 赞助商数据类型
+export type SponsorItem = {
+  id: string | number;
+  image: string;
+  alt: string;
+  link?: string | null;
+  category?: "club" | "sponsor"; // 类别（用于混合模式排序）
+};
+
+// 显示模式
+export type BannerDisplayMode = "all" | "club" | "sponsor" | "mixed";
+
 interface RabbitWalkingBannerProps {
   scale?: number;
   containerHeight?: string;
+  sponsors?: SponsorItem[]; // 动态传入的赞助商数据
+  displayMode?: BannerDisplayMode; // 显示模式（默认混合模式）
 }
+
+// 最小赞助商数量（确保能填满屏幕）
+const MIN_SPONSOR_COUNT = 8;
 
 export default function RabbitWalkingBanner({
   scale = 1,
   containerHeight = "500px",
+  sponsors,
+  displayMode = "mixed", // 默认混合模式
 }: RabbitWalkingBannerProps = {}) {
   const [isMobile, setIsMobile] = useState(false);
 
@@ -28,21 +47,69 @@ export default function RabbitWalkingBanner({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // 处理赞助商数据：智能填充 + 模式处理
+  const { baseSponsors, cycleCount } = useMemo(() => {
+    // 使用传入的 sponsors，否则使用默认数据
+    let originalSponsors: SponsorItem[] = sponsors && sponsors.length > 0
+      ? sponsors
+      : RAW_SPONSORS;
+
+    // 根据 displayMode 筛选和排序
+    if (displayMode === "club") {
+      // 只显示俱乐部
+      originalSponsors = originalSponsors.filter(s => s.category === "club" || !s.category);
+    } else if (displayMode === "sponsor") {
+      // 只显示赞助商
+      originalSponsors = originalSponsors.filter(s => s.category === "sponsor");
+    } else if (displayMode === "mixed") {
+      // 混合模式：先全部俱乐部，再全部赞助商
+      const clubs = originalSponsors.filter(s => s.category === "club" || !s.category);
+      const sponsors = originalSponsors.filter(s => s.category === "sponsor");
+      originalSponsors = [...clubs, ...sponsors];
+    }
+    // displayMode === "all" 时保持原顺序
+
+    // 如果没有赞助商，返回空
+    if (originalSponsors.length === 0) {
+      return { baseSponsors: [], cycleCount: 0 };
+    }
+
+    // 智能填充：确保至少有 MIN_SPONSOR_COUNT 个
+    let filled = [...originalSponsors];
+    while (filled.length < MIN_SPONSOR_COUNT && originalSponsors.length > 0) {
+      filled = [...filled, ...originalSponsors];
+    }
+    // 截取到合理数量（避免过多）
+    filled = filled.slice(0, Math.max(MIN_SPONSOR_COUNT, originalSponsors.length));
+
+    return {
+      baseSponsors: filled,
+      cycleCount: filled.length,
+    };
+  }, [sponsors, displayMode]);
+
   // 生成循环数据 - 移动端减少数量以提高性能
   const loopData = useMemo(() => {
-    // 移动端：2次循环(24个)，桌面端：4次循环(48个)
+    if (baseSponsors.length === 0) return [];
+    // 移动端：2次循环，桌面端：3次循环（减少数量提高性能）
     if (isMobile) {
-      return [...RAW_SPONSORS, ...RAW_SPONSORS];
+      return [...baseSponsors, ...baseSponsors];
     }
-    return [...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS, ...RAW_SPONSORS];
-  }, [isMobile]);
+    return [...baseSponsors, ...baseSponsors, ...baseSponsors];
+  }, [isMobile, baseSponsors]);
 
   const UNIT_WIDTH = 320 * scale;
   const GAP = (isMobile ? -110 : -50) * scale;
   // 移动端降低速度以减少 CPU 负担
   const SPEED_PX_PER_SEC = (isMobile ? 35 : 50) * scale;
-  const ONE_CYCLE_DISTANCE = (UNIT_WIDTH + GAP) * RAW_SPONSORS.length;
-  const DURATION = ONE_CYCLE_DISTANCE / SPEED_PX_PER_SEC;
+  // 动画周期 = 基础数量 × 单位宽度（确保无缝循环）
+  const ONE_CYCLE_DISTANCE = (UNIT_WIDTH + GAP) * cycleCount;
+  const DURATION = cycleCount > 0 ? ONE_CYCLE_DISTANCE / SPEED_PX_PER_SEC : 0;
+
+  // 如果没有赞助商，显示空状态
+  if (baseSponsors.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -91,7 +158,8 @@ export default function RabbitWalkingBanner({
           }
         >
           {loopData.map((item, idx) => {
-            const dataIndex = idx % RAW_SPONSORS.length;
+            // 使用 cycleCount 而不是 RAW_SPONSORS.length 来计算索引
+            const dataIndex = idx % cycleCount;
             const poolIndex = dataIndex % RABBIT_PROBABILITY_POOL.length;
             const variantIndex = RABBIT_PROBABILITY_POOL[poolIndex];
             const variant = RABBIT_VARIANTS[variantIndex] || RABBIT_VARIANTS[0];

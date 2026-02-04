@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import RabbitBanner from "@/components/home/RabbitBanner";
+import RabbitBanner, { type SponsorItem } from "@/components/home/RabbitBanner";
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 
@@ -16,6 +16,7 @@ type ActivityItem = {
 
 type HeroProps = {
   activities?: ActivityItem[];
+  sponsors?: SponsorItem[]; // 动态赞助商数据
 };
 
 // 格式化日期为 MM.DD 格式
@@ -37,7 +38,7 @@ function getCategoryLabel(templateType: string): string {
   return labels[templateType] || "INFO";
 }
 
-const Hero = ({ activities = [] }: HeroProps) => {
+const Hero = ({ activities = [], sponsors }: HeroProps) => {
   // ============================================================
   // 🔧 调试区：请直接在这里修改数值，保存后画面一定会变
   // ============================================================
@@ -204,12 +205,14 @@ const Hero = ({ activities = [] }: HeroProps) => {
             <div className="relative bg-white border-2 border-gray-900 rounded-xl px-3 py-2 shadow-lg transition-transform duration-300 hover:scale-[1.02]">
               {/* 气泡小尾巴 - 简单的三角形，跟随人物方向 */}
               {/* l1(0)=中间50%, l2(1)=偏右60%, r1(2)=中间50%, r2(3)=偏左40% */}
+              {/* 外层三角形（边框色） */}
               <div
-                className="absolute -bottom-3 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[12px] border-l-transparent border-r-transparent border-t-gray-900 transition-all duration-300 -translate-x-1/2"
+                className="absolute -bottom-[14px] w-0 h-0 border-l-[10px] border-r-[10px] border-t-[14px] border-l-transparent border-r-transparent border-t-gray-900 transition-all duration-300 -translate-x-1/2"
                 style={{ left: frameIndex === 1 ? '60%' : frameIndex === 3 ? '40%' : '50%' }}
               />
+              {/* 内层三角形（白色填充，覆盖边框） */}
               <div
-                className="absolute -bottom-[10px] w-0 h-0 border-l-[6px] border-r-[6px] border-t-[10px] border-l-transparent border-r-transparent border-t-white transition-all duration-300 -translate-x-1/2"
+                className="absolute -bottom-[9px] w-0 h-0 border-l-[8px] border-r-[8px] border-t-[11px] border-l-transparent border-r-transparent border-t-white transition-all duration-300 -translate-x-1/2"
                 style={{ left: frameIndex === 1 ? '60%' : frameIndex === 3 ? '40%' : '50%' }}
               />
 
@@ -238,7 +241,7 @@ const Hero = ({ activities = [] }: HeroProps) => {
 
       {/* RabbitBanner */}
       <div className="absolute bottom-0 w-full z-30">
-        <RabbitBanner />
+        <RabbitBanner sponsors={sponsors} />
       </div>
     </section>
   );

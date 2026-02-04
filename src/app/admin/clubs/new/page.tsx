@@ -17,7 +17,7 @@ import { createClub } from "@/lib/actions/clubs";
 const formSchema = z.object({
     name: z.string().min(1, "クラブ名は必須入力です"),
     slug: z.string()
-        .min(3, "IDは3文字以上で输入してください")
+        .min(3, "IDは3文字以上で入力してください")
         .regex(/^[a-z0-9-]+$/, "IDは半角英小文字、数字、ハイフン(-)のみ使用可能です"),
     description: z.string().optional(),
     logo: z.string().optional(),

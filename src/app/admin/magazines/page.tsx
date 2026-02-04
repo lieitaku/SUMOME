@@ -44,7 +44,7 @@ export default async function MagazineListPage({
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-black text-gray-900">広報誌データ管理</h1>
-                    <p className="text-gray-500 text-sm mt-1">定期刊行誌の封面とPDFデータの登録・編集</p>
+                    <p className="text-gray-500 text-sm mt-1">定期刊行誌の表紙とPDFデータの登録・編集</p>
                 </div>
                 <Link
                     href="/admin/magazines/new"

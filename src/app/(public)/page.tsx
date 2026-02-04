@@ -29,12 +29,27 @@ export default async function Home() {
     take: 6, // 拿 6 条，方便你的 Swiper 循环展示
   });
 
+  // ✨ 3. 获取 Banner 数据（用于兔子旗帜）
+  const banners = await prisma.banner.findMany({
+    where: { isActive: true },
+    orderBy: { sortOrder: 'asc' },
+  });
+
+  // 转换为 sponsors 格式（包含 category 用于混合模式）
+  const sponsors = banners.map(b => ({
+    id: b.id,
+    image: b.image,
+    alt: b.alt || b.name,
+    link: b.link,
+    category: b.category,
+  }));
+
   return (
     <div className="w-full flex flex-col min-h-screen">
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        <Hero activities={activities.slice(0, 3)} />
+        <Hero activities={activities.slice(0, 3)} sponsors={sponsors} />
         <AboutService />
 
         <PickupClubs clubs={pickupClubs} />

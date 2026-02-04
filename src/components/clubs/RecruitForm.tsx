@@ -78,7 +78,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase text-white mb-6 border border-white/20 backdrop-blur-md bg-white/5">
                             <Sparkles size={12} /> Recruitment
                         </div>
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm leading-tight">体验・入会申し込み</h1>
+                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm leading-tight">体験・入会申し込み</h1>
                         <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed">
                             <span className="font-bold border-b border-white/30 pb-0.5 mx-1">{club.name}</span> への第一歩。
                         </p>

@@ -159,17 +159,25 @@ model Magazine {
   @@index([region]) // 为筛选字段添加索引
 }
 
+enum BannerCategory {
+  club     // 俱乐部
+  sponsor  // 赞助商
+}
+
 model Banner {
-  id        String   @id @default(cuid())
+  id        String         @id @default(cuid())
   name      String
   image     String
   alt       String?
   link      String?
-  sortOrder Int      @default(0)
-  isActive  Boolean  @default(true)
+  category  BannerCategory @default(club)
+  sortOrder Int            @default(0)
+  isActive  Boolean        @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([category])
 }
 
 // ==========================================
