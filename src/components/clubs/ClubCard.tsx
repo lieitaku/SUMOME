@@ -30,9 +30,8 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   const dynamicTags = useMemo(() => {
     const tags: string[] = [];
     if (club.target) tags.push(club.target);
-    if (club.representative) tags.push("指導者在籍");
     return tags.slice(0, 2);
-  }, [club.target, club.representative]);
+  }, [club.target]);
 
   // --- 2. Early Return ---
   if (club.slug === "official-hq") return null;
@@ -130,8 +129,8 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
                   </div>
                 )}
               </div>
-              <span className="text-[9px] text-gray-400 font-bold tracking-tighter uppercase">
-                {club.phone ? "Contact Ready" : "Inquiry Only"}
+              <span className="text-[9px] text-gray-400 font-bold tracking-tighter">
+                {club.phone ? "電話対応可" : "お問い合わせのみ"}
               </span>
             </div>
 
