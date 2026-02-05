@@ -1,16 +1,28 @@
 import React from "react";
 import { prisma } from "@/lib/db";
-import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard } from "lucide-react";
+import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard, Inbox, AlertCircle, ArrowRight } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 
 export default async function AdminDashboardPage() {
-    // 1. ✨ 并行查询数据库中的数量（加入 Application 统计）
-    const [clubsCount, activitiesCount, magazinesCount, bannersCount, appsCount] = await Promise.all([
+    // 1. 并行查询数据库中的数量
+    const [
+        clubsCount,
+        activitiesCount,
+        magazinesCount,
+        bannersCount,
+        appsCount,
+        pendingAppsCount,
+        inquiriesCount,
+        unreadInquiriesCount
+    ] = await Promise.all([
         prisma.club.count(),
         prisma.activity.count(),
         prisma.magazine.count(),
         prisma.banner.count(),
-        prisma.application.count(), // 获取申请总数
+        prisma.application.count(),
+        prisma.application.count({ where: { status: "pending" } }),
+        prisma.inquiry.count(),
+        prisma.inquiry.count({ where: { status: "unread" } }),
     ]);
 
     // 定义统计卡片数据
@@ -46,11 +58,23 @@ export default async function AdminDashboardPage() {
         {
             label: "入会・体験申請",
             value: appsCount,
-            icon: <UserPlus className="w-6 h-6 text-rose-600" />, // 使用醒目的玫瑰色
+            icon: <UserPlus className="w-6 h-6 text-rose-600" />,
             bg: "bg-rose-50",
-            link: "/admin/applications"
+            link: "/admin/applications",
+            pending: pendingAppsCount
+        },
+        {
+            label: "お問い合わせ",
+            value: inquiriesCount,
+            icon: <Inbox className="w-6 h-6 text-cyan-600" />,
+            bg: "bg-cyan-50",
+            link: "/admin/inquiries",
+            pending: unreadInquiriesCount
         },
     ];
+
+    // 需要处理的待办事项总数
+    const totalPending = pendingAppsCount + unreadInquiriesCount;
 
     return (
         <div>
@@ -62,16 +86,71 @@ export default async function AdminDashboardPage() {
                 </p>
             </div>
 
-            {/* 核心指标卡片 - 使用 grid-cols-5 在大屏下展示 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
+            {/* 待处理提醒横幅 */}
+            {totalPending > 0 && (
+                <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-100 rounded-lg">
+                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-amber-900">未処理のタスクがあります</h3>
+                                <p className="text-sm text-amber-700">
+                                    {pendingAppsCount > 0 && (
+                                        <span className="inline-flex items-center gap-1">
+                                            <span className="font-black">{pendingAppsCount}</span>件の未対応申請
+                                        </span>
+                                    )}
+                                    {pendingAppsCount > 0 && unreadInquiriesCount > 0 && " / "}
+                                    {unreadInquiriesCount > 0 && (
+                                        <span className="inline-flex items-center gap-1">
+                                            <span className="font-black">{unreadInquiriesCount}</span>件の未読問い合わせ
+                                        </span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            {pendingAppsCount > 0 && (
+                                <Link
+                                    href="/admin/applications"
+                                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                                >
+                                    申請を確認
+                                    <ArrowRight size={12} />
+                                </Link>
+                            )}
+                            {unreadInquiriesCount > 0 && (
+                                <Link
+                                    href="/admin/inquiries"
+                                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                                >
+                                    問い合わせを確認
+                                    <ArrowRight size={12} />
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 核心指标卡片 */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
                 {stats.map((stat, index) => (
                     <Link
                         key={index}
                         href={stat.link}
-                        className="group block p-6 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
+                        className="group relative block p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
                     >
-                        <div className="flex items-center justify-between mb-4">
-                            <div className={`p-3 rounded-lg ${stat.bg}`}>
+                        {/* 待处理徽章 */}
+                        {stat.pending !== undefined && stat.pending > 0 && (
+                            <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg animate-pulse">
+                                {stat.pending}
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className={`p-2.5 rounded-lg ${stat.bg}`}>
                                 {stat.icon}
                             </div>
                             <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest group-hover:text-sumo-brand transition-colors">
@@ -79,10 +158,10 @@ export default async function AdminDashboardPage() {
                             </span>
                         </div>
                         <div className="space-y-1">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-tight">{stat.label}</h3>
-                            <p className="text-3xl font-black text-gray-900 font-serif">
+                            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{stat.label}</h3>
+                            <p className="text-2xl font-black text-gray-900 font-serif">
                                 {stat.value}
-                                <span className="text-xs font-sans font-normal text-gray-300 ml-1">件</span>
+                                <span className="text-[10px] font-sans font-normal text-gray-300 ml-1">件</span>
                             </p>
                         </div>
                     </Link>

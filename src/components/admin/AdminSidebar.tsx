@@ -4,7 +4,7 @@ import React, { useState, useTransition } from "react";
 import Link from "@/components/ui/TransitionLink";
 import { usePathname } from "next/navigation";
 import {
-    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2
+    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2, ExternalLink, Inbox
 } from "lucide-react";
 
 // 引入刚才修复好的 Server Action
@@ -99,7 +99,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                 </div>
 
                 {/* 导航菜单列表 (Navigation List) */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto custom-scrollbar">
+                <nav className="flex-1 p-4 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
                     {/* 通用区域 */}
                     <SectionLabel label="Overview" />
@@ -114,6 +114,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                             <NavItem href="/admin/magazines" icon={<BookOpen size={18} />} label="広報誌データ" activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/banners" icon={<Flag size={18} />} label="バナー広告" activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label="入会申請管理" activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/inquiries" icon={<Inbox size={18} />} label="お問い合わせ" activePath={pathname} onClick={closeMenu} />
                         </>
                     )}
 
@@ -136,6 +137,16 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
 
                 {/* 底部用户信息与登出区域 (Footer User Area) */}
                 <div className="p-4 border-t border-white/10 bg-black/20">
+                    {/* 查看前台按钮 */}
+                    <Link
+                        href="/"
+                        target="_blank"
+                        className="flex items-center justify-center gap-2 w-full px-4 py-2.5 mb-4 text-xs font-bold text-sumo-brand bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm"
+                    >
+                        <ExternalLink size={14} />
+                        サイトを確認する
+                    </Link>
+
                     <div className="flex items-center gap-3 px-2 mb-4">
                         <div className={`w-8 h-8 rounded-full border-2 border-white/20 ${role === 'ADMIN' ? 'bg-gradient-to-tr from-yellow-400 to-orange-500' : 'bg-gradient-to-tr from-blue-400 to-cyan-500'}`}></div>
                         <div className="flex-1 min-w-0">
@@ -144,11 +155,11 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         </div>
                     </div>
 
-                    {/* 登出按钮 (已集成 Server Action) */}
+                    {/* 登出按钮 */}
                     <button
                         onClick={handleSignOut}
                         disabled={isPending}
-                        className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10 rounded border border-white/10 transition-colors uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center justify-center gap-2 w-full px-4 py-2 text-xs font-bold text-white/80 hover:text-white hover:bg-white/10 rounded border border-white/10 transition-colors tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isPending ? (
                             <Loader2 size={14} className="animate-spin" />

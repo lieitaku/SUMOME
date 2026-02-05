@@ -40,17 +40,18 @@ export default async function MagazineListPage({
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
-            {/* 头部标题 */}
+            {/* 头部标题 - 与 /admin/clubs 保持一致 */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-black text-gray-900">広報誌データ管理</h1>
-                    <p className="text-gray-500 text-sm mt-1">定期刊行誌の表紙とPDFデータの登録・編集</p>
+                    <h1 className="text-2xl font-bold text-gray-900">広報誌データ管理</h1>
+                    <p className="text-gray-500 mt-1 text-xs md:text-sm">定期刊行誌の表紙とPDFデータの登録・編集</p>
                 </div>
                 <Link
                     href="/admin/magazines/new"
-                    className="flex items-center gap-2 bg-sumo-brand text-white px-5 py-2.5 rounded-full font-bold hover:bg-sumo-dark transition-all shadow-lg text-sm"
+                    className="flex items-center gap-2 bg-sumo-brand text-white px-4 py-2 rounded-lg font-bold hover:bg-sumo-dark transition-all shadow-md text-sm"
                 >
-                    <Plus size={18} /> 新規登録
+                    <Plus size={18} />
+                    <span>新規登録</span>
                 </Link>
             </div>
 

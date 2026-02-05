@@ -67,7 +67,7 @@ export default async function AdminActivitiesPage({
                     className="flex items-center gap-2 bg-sumo-brand text-white px-4 py-2 rounded-lg font-bold hover:bg-sumo-dark transition-all shadow-md text-sm"
                 >
                     <Plus size={18} />
-                    <span>新規作成</span>
+                    <span>新規登録</span>
                 </Link>
             </div>
 
