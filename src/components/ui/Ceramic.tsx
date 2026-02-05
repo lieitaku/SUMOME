@@ -26,7 +26,7 @@ const Ceramic: React.FC<CeramicProps> = ({
       className={cn(
         // === 1. 基础构造 (Base Structure) ===
         "relative overflow-hidden rounded-2xl transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)]",
-        "block", // 确保它是块级元素
+        "block isolate", // 确保它是块级元素，isolate 创建新堆叠上下文防止 transform 时圆角溢出
 
         // === 2. 物理材质 (Physical Material) ===
         "border border-gray-100 border-b-[4px]", // 核心厚度

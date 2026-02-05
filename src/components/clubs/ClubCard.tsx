@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
-import { MapPin, Instagram, Twitter, ArrowUpRight, Users } from "lucide-react";
+import { MapPin, Instagram, Twitter, ArrowUpRight, Users, Phone, Mail, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
@@ -130,25 +130,40 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
           </p>
 
           <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex -space-x-1">
-                {club.instagram && (
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center border border-white">
-                    <Instagram size={10} className="text-gray-400" />
-                  </div>
-                )}
-                {club.twitter && (
-                  <div className="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center border border-white">
-                    <Twitter size={10} className="text-gray-400" />
-                  </div>
-                )}
-              </div>
-              <span className="text-[9px] text-gray-400 font-bold tracking-tighter">
-                {club.phone ? "電話対応可" : "お問い合わせのみ"}
-              </span>
+            {/* 联系方式图标组 - 直观展示可用渠道 */}
+            <div className="flex items-center gap-1.5">
+              {club.phone && (
+                <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center" title="電話対応可">
+                  <Phone size={10} className="text-emerald-500" />
+                </div>
+              )}
+              {club.email && (
+                <div className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center" title="メール対応可">
+                  <Mail size={10} className="text-blue-500" />
+                </div>
+              )}
+              {club.website && (
+                <div className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center" title="公式サイト">
+                  <Globe size={10} className="text-purple-500" />
+                </div>
+              )}
+              {club.instagram && (
+                <div className="w-6 h-6 rounded-full bg-pink-50 flex items-center justify-center" title="Instagram">
+                  <Instagram size={10} className="text-pink-500" />
+                </div>
+              )}
+              {club.twitter && (
+                <div className="w-6 h-6 rounded-full bg-sky-50 flex items-center justify-center" title="X (Twitter)">
+                  <Twitter size={10} className="text-sky-500" />
+                </div>
+              )}
+              {/* 如果没有任何联系方式，显示一个占位 */}
+              {!club.phone && !club.email && !club.website && !club.instagram && !club.twitter && (
+                <span className="text-[9px] text-gray-300 font-medium">—</span>
+              )}
             </div>
 
-            <span className="text-[10px] font-black text-gray-300 group-hover:text-[var(--theme-color)] transition-colors uppercase tracking-[0.15em]">
+            <span className="text-[10px] font-black text-gray-300 group-hover:text-[var(--theme-color)] transition-colors uppercase tracking-widest">
               Details
             </span>
           </div>
