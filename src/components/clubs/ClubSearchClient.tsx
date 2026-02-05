@@ -286,7 +286,10 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                             >
                                 <div className="p-6 md:p-10">
                                     {/* 第一级：大区选择 (Region Tabs) */}
-                                    <div className="flex flex-wrap gap-3 md:gap-4 mb-10">
+                                    <div className={cn(
+                                        "flex flex-wrap gap-3 md:gap-4",
+                                        activeRegion !== "all" ? "mb-10" : "mb-0"
+                                    )}>
                                         <Button
                                             variant="ceramic"
                                             isActive={activeRegion === "all"}

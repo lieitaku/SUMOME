@@ -3,36 +3,112 @@
 import React, { useState, useMemo } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
-import { ArrowRight, BookOpen, Search, Filter, X } from "lucide-react";
+import { ArrowRight, BookOpen, Search, X, Filter, ChevronDown, MapPin } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
+import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { Magazine } from "@prisma/client";
 
-// ✨ 这里的 Props 接收来自数据库的真实数据
+// ==============================================================================
+// 1. 地区数据结构 (与 /clubs 页面保持一致)
+// ==============================================================================
+
+type RegionKey =
+    | "hokkaido_tohoku"
+    | "kanto"
+    | "chubu"
+    | "kansai"
+    | "chugoku"
+    | "shikoku"
+    | "kyushu_okinawa";
+
+const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
+    {
+        id: "hokkaido_tohoku",
+        label: "北海道・東北",
+        prefectures: ["北海道", "青森", "秋田", "岩手", "山形", "宮城", "福島"],
+    },
+    {
+        id: "kanto",
+        label: "関東",
+        prefectures: ["東京", "神奈川", "千葉", "埼玉", "茨城", "栃木", "群馬"],
+    },
+    {
+        id: "chubu",
+        label: "中部",
+        prefectures: ["愛知", "静岡", "岐阜", "三重", "山梨", "長野", "新潟", "富山", "石川", "福井"],
+    },
+    {
+        id: "kansai",
+        label: "関西",
+        prefectures: ["大阪", "兵庫", "京都", "滋賀", "奈良", "和歌山"],
+    },
+    {
+        id: "chugoku",
+        label: "中国",
+        prefectures: ["鳥取", "島根", "岡山", "広島", "山口"],
+    },
+    {
+        id: "shikoku",
+        label: "四国",
+        prefectures: ["徳島", "香川", "愛媛", "高知"],
+    },
+    {
+        id: "kyushu_okinawa",
+        label: "九州・沖縄",
+        prefectures: ["福岡", "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄"],
+    },
+];
+
+// ==============================================================================
+// 2. 组件定义
+// ==============================================================================
+
 interface MagazinesClientProps {
     initialMagazines: Magazine[];
-    regions: string[];
+    regions: string[]; // 保留这个 prop 以备后用
 }
 
-export default function MagazinesClient({ initialMagazines, regions }: MagazinesClientProps) {
-    const [activeRegion, setActiveRegion] = useState("All");
+export default function MagazinesClient({ initialMagazines }: MagazinesClientProps) {
+    const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all");
+    const [activePref, setActivePref] = useState<string | "all">("all");
     const [searchQuery, setSearchQuery] = useState("");
-    const [isInputFocused, setIsInputFocused] = useState(false);
+    const [isFilterExpanded, setIsFilterExpanded] = useState(true);
 
-    const isFilterActive = activeRegion !== "All" || searchQuery.length > 0 || isInputFocused;
+    const isFilterActive = activeRegion !== "all" || searchQuery.length > 0;
 
-    // ✨ 过滤逻辑：现在使用数据库字段进行过滤
+    // 根据当前选中的大区，动态计算需要显示的县列表
+    const currentPrefectures = useMemo(() => {
+        if (activeRegion === "all") return [];
+        return REGIONS.find((r) => r.id === activeRegion)?.prefectures || [];
+    }, [activeRegion]);
+
+    // 核心筛选逻辑
     const filteredMagazines = useMemo(() => {
         return initialMagazines.filter((mag) => {
-            const matchRegion = activeRegion === "All" || mag.region === activeRegion;
+            // 1. 文本搜索
             const query = searchQuery.toLowerCase();
             const matchSearch =
                 searchQuery === "" ||
                 mag.title.toLowerCase().includes(query) ||
                 (mag.description?.toLowerCase().includes(query) ?? false);
-            return matchRegion && matchSearch;
+
+            // 2. 地区筛选
+            let matchLocation = true;
+            if (activeRegion !== "all") {
+                if (activePref !== "all") {
+                    // 选了具体县：匹配 region 字段是否以该县名开头
+                    matchLocation = mag.region.startsWith(activePref);
+                } else {
+                    // 只选了大区：匹配该大区下的任意县
+                    const regionPrefs = REGIONS.find((r) => r.id === activeRegion)?.prefectures || [];
+                    matchLocation = regionPrefs.some((pref) => mag.region.startsWith(pref));
+                }
+            }
+
+            return matchSearch && matchLocation;
         });
-    }, [activeRegion, searchQuery, initialMagazines]);
+    }, [activeRegion, activePref, searchQuery, initialMagazines]);
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
@@ -71,98 +147,185 @@ export default function MagazinesClient({ initialMagazines, regions }: Magazines
                     </div>
                 </section>
 
-                {/* ==================== 2. High-End Filter (100% 复刻) ==================== */}
-                <section className="relative px-4 md:px-6 z-30 -mt-20 mb-12">
+                {/* ==================== 2. 搜索与筛选区域 (复用 /clubs 设计) ==================== */}
+                <section className="relative px-4 md:px-6 z-30 -mt-16 mb-12">
                     <div className="container mx-auto max-w-6xl">
-                        <Ceramic
-                            interactive={false}
-                            className={cn(
-                                "bg-white p-1 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-                                "border-b-[4px] border-b-gray-200 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)]",
-                                isFilterActive &&
-                                "border-b-sumo-brand -translate-y-2 shadow-[0_30px_60px_-10px_rgba(36,84,164,0.3)]",
-                            )}
-                        >
-                            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 md:p-6">
-                                <div className="w-full md:w-auto flex flex-nowrap md:flex-wrap items-center gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-hide">
-                                    <div className="flex items-center gap-2 mr-2 text-gray-400 text-xs font-bold tracking-widest uppercase whitespace-nowrap">
-                                        <Filter size={14} /> Region
-                                    </div>
-
-                                    <button
-                                        onClick={() => setActiveRegion("All")}
-                                        className={cn(
-                                            "px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex-shrink-0",
-                                            activeRegion === "All"
-                                                ? "bg-sumo-brand text-white shadow-md shadow-sumo-brand/20"
-                                                : "bg-gray-100 text-gray-500 hover:bg-gray-200",
-                                        )}
-                                    >
-                                        All
-                                    </button>
-
-                                    {regions.map((region) => (
-                                        <button
-                                            key={region}
-                                            onClick={() => setActiveRegion(region)}
-                                            className={cn(
-                                                "px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex-shrink-0",
-                                                activeRegion === region
-                                                    ? "bg-sumo-brand text-white shadow-md shadow-sumo-brand/20"
-                                                    : "bg-gray-100 text-gray-500 hover:bg-gray-200",
-                                            )}
-                                        >
-                                            {region}
-                                        </button>
-                                    ))}
+                        {/* 搜索框 - 与 /clubs 页面一致的设计 */}
+                        <div className="relative group max-w-2xl mx-auto mb-8">
+                            <div
+                                className={cn(
+                                    "relative flex items-center w-full h-16 md:h-20 rounded-2xl overflow-hidden",
+                                    "bg-white transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+                                    "border-b-4 border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.04)]",
+                                    "group-focus-within:border-b-sumo-brand group-focus-within:shadow-[0_20px_40px_rgba(36,84,164,0.15)] group-focus-within:-translate-y-1"
+                                )}
+                            >
+                                <div className="pl-6 md:pl-8 text-gray-400 group-focus-within:text-sumo-brand transition-colors">
+                                    <Search size={24} />
                                 </div>
-
-                                <div className="hidden md:block w-px h-8 bg-gray-200 mx-4"></div>
-
-                                <div className="w-full md:flex-grow relative group">
-                                    <div
-                                        className={cn(
-                                            "absolute inset-y-0 left-3 flex items-center pointer-events-none transition-colors",
-                                            isInputFocused ? "text-sumo-brand" : "text-gray-400",
-                                        )}
+                                <input
+                                    type="text"
+                                    placeholder="タイトル、キーワードで検索..."
+                                    className="w-full h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                                {searchQuery && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchQuery("")}
+                                        className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
                                     >
-                                        <Search size={16} />
+                                        <X size={18} />
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 筛选仪表盘 - 与 /clubs 页面完全一致的两级折叠面板设计 */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                            {/* 筛选器头部 */}
+                            <div
+                                className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
+                                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <Filter size={16} className="text-sumo-brand" />
+                                    <span className="text-sm font-bold text-gray-700 tracking-wide">
+                                        エリアフィルター
+                                    </span>
+                                    {activeRegion !== "all" && (
+                                        <span className="ml-2 px-2 py-0.5 bg-sumo-brand/10 text-sumo-brand text-[10px] font-bold rounded-full">
+                                            Active
+                                        </span>
+                                    )}
+                                </div>
+                                <ChevronDown
+                                    size={16}
+                                    className={cn(
+                                        "text-gray-400 transition-transform duration-300",
+                                        isFilterExpanded ? "rotate-180" : ""
+                                    )}
+                                />
+                            </div>
+
+                            {/* 筛选器内容区 */}
+                            <div
+                                className={cn(
+                                    "transition-all duration-500 ease-in-out overflow-hidden",
+                                    isFilterExpanded
+                                        ? "max-h-[600px] opacity-100"
+                                        : "max-h-0 opacity-0"
+                                )}
+                            >
+                                <div className="p-6 md:p-10">
+                                    {/* 第一级：大区选择 */}
+                                    <div className={cn(
+                                        "flex flex-wrap gap-3 md:gap-4",
+                                        activeRegion !== "all" ? "mb-10" : "mb-0"
+                                    )}>
+                                        <Button
+                                            variant="ceramic"
+                                            isActive={activeRegion === "all"}
+                                            onClick={() => {
+                                                setActiveRegion("all");
+                                                setActivePref("all");
+                                            }}
+                                        >
+                                            全国
+                                        </Button>
+
+                                        {REGIONS.map((region) => (
+                                            <Button
+                                                key={region.id}
+                                                variant="ceramic"
+                                                isActive={activeRegion === region.id}
+                                                onClick={() => {
+                                                    setActiveRegion(region.id);
+                                                    setActivePref("all");
+                                                }}
+                                            >
+                                                {region.label}
+                                            </Button>
+                                        ))}
                                     </div>
 
-                                    <input
-                                        type="text"
-                                        placeholder="キーワードで検索..."
-                                        value={searchQuery}
-                                        onFocus={() => setIsInputFocused(true)}
-                                        onBlur={() => setIsInputFocused(false)}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className={cn(
-                                            "w-full h-10 pl-10 pr-4 rounded-lg text-sm font-medium transition-all",
-                                            "bg-gray-50 border border-gray-200 text-gray-800 placeholder-gray-400",
-                                            "focus:outline-none focus:bg-white focus:border-sumo-brand",
-                                        )}
-                                    />
-                                    {searchQuery && (
-                                        <button
-                                            onClick={() => setSearchQuery("")}
-                                            className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-sumo-red transition-colors"
-                                        >
-                                            <X size={14} />
-                                        </button>
+                                    {/* 第二级：县选择 - 仅在选中大区时显示 */}
+                                    {activeRegion !== "all" && (
+                                        <div className="relative pt-8 border-t border-gray-100">
+                                            <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
+                                                Select Prefecture
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Button
+                                                    variant="ceramic"
+                                                    isActive={activePref === "all"}
+                                                    onClick={() => setActivePref("all")}
+                                                    className="px-4 py-2 text-xs rounded-lg border-b-[3px]"
+                                                >
+                                                    全て
+                                                </Button>
+
+                                                {currentPrefectures.map((pref) => (
+                                                    <Button
+                                                        key={pref}
+                                                        variant="ceramic"
+                                                        isActive={activePref === pref}
+                                                        onClick={() => setActivePref(pref)}
+                                                        className="px-4 py-2 text-xs rounded-lg border-b-[3px]"
+                                                    >
+                                                        {pref}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </div>
-                        </Ceramic>
+                        </div>
 
-                        <div className="mt-4 flex justify-between px-2 items-center">
-                            {isFilterActive && (
-                                <div className="text-xs font-bold text-sumo-brand">
-                                    {isInputFocused ? "Typing..." : "Filter Active"}
-                                </div>
-                            )}
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-auto">
-                                Showing <span className="text-sumo-dark text-base">{filteredMagazines.length}</span> Issues
-                            </span>
+                        {/* 结果统计与标签 - 与 /clubs 页面一致 */}
+                        <div className="flex items-end justify-between mt-8 mb-4 pb-4 border-b border-gray-200">
+                            <div className="flex items-baseline gap-3">
+                                <span className="text-4xl font-serif font-black text-sumo-brand">
+                                    {filteredMagazines.length}
+                                </span>
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                    Issues Found
+                                </span>
+                            </div>
+
+                            {/* 激活状态展示 */}
+                            <div className="hidden md:flex gap-2">
+                                {searchQuery && (
+                                    <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
+                                        {searchQuery}
+                                        <button
+                                            type="button"
+                                            onClick={() => setSearchQuery("")}
+                                            className="hover:text-sumo-red"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </span>
+                                )}
+                                {activeRegion !== "all" && (
+                                    <span className="pl-3 pr-2 py-1 bg-sumo-brand text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-sm shadow-sumo-brand/20">
+                                        <MapPin size={10} />
+                                        {REGIONS.find((r) => r.id === activeRegion)?.label}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setActiveRegion("all");
+                                                setActivePref("all");
+                                            }}
+                                            className="hover:text-white/70 ml-1"
+                                        >
+                                            <X size={14} />
+                                        </button>
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </section>

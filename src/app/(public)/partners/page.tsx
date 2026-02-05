@@ -404,7 +404,7 @@ const PartnersPage = () => {
                                 >
                                     <span className="flex items-center gap-2 font-bold tracking-widest text-base">
                                         <Users size={18} />
-                                        アカウント作成（無料）
+                                        アカウント作成
                                     </span>
                                 </Button>
                             </div>
