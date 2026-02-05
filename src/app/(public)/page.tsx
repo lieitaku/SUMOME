@@ -49,7 +49,7 @@ export default async function Home() {
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        <Hero activities={activities.slice(0, 3)} sponsors={sponsors} />
+        <Hero sponsors={sponsors} />
         <AboutService />
 
         <PickupClubs clubs={pickupClubs} />

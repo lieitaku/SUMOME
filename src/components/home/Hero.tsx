@@ -2,43 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import RabbitBanner, { type SponsorItem } from "@/components/home/RabbitBanner";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
-
-// Activity 数据类型（与服务端同步）
-type ActivityItem = {
-  id: string;
-  title: string;
-  date: Date;
-  category: string;
-  templateType: string;
-};
 
 type HeroProps = {
-  activities?: ActivityItem[];
   sponsors?: SponsorItem[]; // 动态赞助商数据
 };
 
-// 格式化日期为 MM.DD 格式
-function formatDate(date: Date): string {
-  const d = new Date(date);
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${month}.${day}`;
-}
-
-// 获取显示用的类型标签
-function getCategoryLabel(templateType: string): string {
-  const labels: Record<string, string> = {
-    news: "NEWS",
-    report: "REPORT",
-    event: "EVENT",
-    custom: "PICKUP",
-  };
-  return labels[templateType] || "INFO";
-}
-
-const Hero = ({ activities = [], sponsors }: HeroProps) => {
+const Hero = ({ sponsors }: HeroProps) => {
   // ============================================================
   // 🔧 调试区：请直接在这里修改数值，保存后画面一定会变
   // ============================================================
@@ -62,11 +31,7 @@ const Hero = ({ activities = [], sponsors }: HeroProps) => {
   // 自动计算水平居中 X (不要改)
   const CHAR_X = (WORLD_W - CHAR_SIZE) / 2;
 
-  const [currentNewsIndex, setCurrentNewsIndex] = useState(0);
   const [frameIndex, setFrameIndex] = useState(0);
-
-  // 动画控制
-  const duration = 20; // 动画慢一点
 
   useEffect(() => {
     // 简单的 4 帧轮播
@@ -75,18 +40,6 @@ const Hero = ({ activities = [], sponsors }: HeroProps) => {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
-
-  // 只有在有 activities 数据时才轮播
-  useEffect(() => {
-    if (activities.length === 0) return;
-    const interval = setInterval(() => {
-      setCurrentNewsIndex((prev) => (prev + 1) % activities.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [activities.length]);
-
-  // 当前显示的 activity
-  const currentActivity = activities[currentNewsIndex];
 
   return (
     <section className="relative w-full h-screen overflow-hidden bg-sumo-bg">
@@ -181,8 +134,8 @@ const Hero = ({ activities = [], sponsors }: HeroProps) => {
                 </h1>
               </div>
               <div className="flex flex-col items-end border-l border-gray-400/30 pl-4 md:pl-8 ml-2">
-                <p className="font-serif text-[10px] md:text-sm font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap">伝統を未来へ</p>
-                <p className="hidden md:block font-sans text-[8px] text-gray-500 font-medium tracking-wider uppercase text-right">Tradition & Future</p>
+                <p className="font-serif text-base md:text-xl font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap">伝統を未来へ</p>
+                <p className="hidden md:block font-sans text-xs text-gray-500 font-medium tracking-wider uppercase text-right">Tradition & Future</p>
               </div>
             </div>
             <div className="absolute bottom-2 right-3 flex gap-1 opacity-20 pointer-events-none">
@@ -196,48 +149,6 @@ const Hero = ({ activities = [], sponsors }: HeroProps) => {
           </div>
         </div>
       </div>
-
-      {/* 新闻轮播 - 使用 bottom 定位，与人物保持相对固定距离 */}
-      {currentActivity && (
-        <div className="absolute z-30 bottom-[60%] left-1/2 -translate-x-1/2 w-[90vw] max-w-[340px]">
-          {/* 漫画气泡风格 */}
-          <Link href={`/activities/${currentActivity.id}`} className="block group/news relative">
-            <div className="relative bg-white border-2 border-gray-900 rounded-xl px-3 py-2 shadow-lg transition-transform duration-300 hover:scale-[1.02]">
-              {/* 气泡小尾巴 - 简单的三角形，跟随人物方向 */}
-              {/* l1(0)=中间50%, l2(1)=偏右60%, r1(2)=中间50%, r2(3)=偏左40% */}
-              {/* 外层三角形（边框色） */}
-              <div
-                className="absolute -bottom-[14px] w-0 h-0 border-l-[10px] border-r-[10px] border-t-[14px] border-l-transparent border-r-transparent border-t-gray-900 transition-all duration-300 -translate-x-1/2"
-                style={{ left: frameIndex === 1 ? '60%' : frameIndex === 3 ? '40%' : '50%' }}
-              />
-              {/* 内层三角形（白色填充，覆盖边框） */}
-              <div
-                className="absolute -bottom-[9px] w-0 h-0 border-l-[8px] border-r-[8px] border-t-[11px] border-l-transparent border-r-transparent border-t-white transition-all duration-300 -translate-x-1/2"
-                style={{ left: frameIndex === 1 ? '60%' : frameIndex === 3 ? '40%' : '50%' }}
-              />
-
-              <div className="flex items-center gap-2">
-                <div className="flex-grow">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-mono text-[9px] text-gray-400 font-bold">
-                      {formatDate(currentActivity.date)}
-                    </span>
-                    <span className="text-[8px] font-black text-white bg-gray-900 px-1 py-0.5 rounded-sm">
-                      {getCategoryLabel(currentActivity.templateType)}
-                    </span>
-                  </div>
-                  <h3 key={currentNewsIndex} className="text-xs font-bold text-gray-900 leading-snug line-clamp-2 animate-in fade-in slide-in-from-bottom-1 duration-300">
-                    {currentActivity.title}
-                  </h3>
-                </div>
-                <div className="text-gray-300 group-hover/news:text-sumo-red transition-colors">
-                  <ChevronRight size={18} />
-                </div>
-              </div>
-            </div>
-          </Link>
-        </div>
-      )}
 
       {/* RabbitBanner */}
       <div className="absolute bottom-0 w-full z-30">
