@@ -10,6 +10,7 @@ const TITLE_MAP: Record<string, string> = {
     "/admin/activities": "活動・ニュース",
     "/admin/magazines": "広報誌データ",
     "/admin/banners": "バナー広告",
+    "/admin/prefecture-banners": "都道府県バナー",
     "/admin/settings": "システム設定",
     "/admin/my-club": "クラブ情報編集",
 };
@@ -24,6 +25,8 @@ export default function AdminPageTitle() {
     if (!title) {
         if (pathname.startsWith("/admin/clubs/")) {
             title = "クラブ詳細・編集";
+        } else if (pathname.startsWith("/admin/prefecture-banners/")) {
+            title = "都道府県バナー編集";
         } else if (pathname.startsWith("/admin/activities/")) {
             title = "記事編集";
         } else {

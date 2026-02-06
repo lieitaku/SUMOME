@@ -180,6 +180,19 @@ model Banner {
   @@index([category])
 }
 
+// 都道府県ページの Feature Banner（クラブ画像 or 占位图）
+model PrefectureBanner {
+  id     String  @id @default(cuid())
+  pref   String  @unique // 都道府県 slug (例: iwate, tokyo)
+  image  String  // 画像 URL (Supabase 或 /images/banner/...)
+  alt    String? // 画像の説明（例：〇〇県の相撲風景）
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pref])
+}
+
 // ==========================================
 // 📩 业务转化：入会申请 (Applications)
 // ==========================================

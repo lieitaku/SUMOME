@@ -34,12 +34,21 @@ export default async function PrefecturePage({ params }: PageProps) {
   const { pref } = await params;
   const prefSlug = pref;
   const prefData = PREFECTURE_DATABASE[prefSlug];
-  const displayData = prefData || {
+  const staticDisplay = prefData || {
     name: prefSlug.toUpperCase(),
     introTitle: `${prefSlug}の相撲事情`,
     introText: "現在、この地域の詳細情報は準備中です。",
     bannerImg: "",
     rikishiList: [],
+  };
+
+  // 后台设置的都道府県 Banner 优先于静态默认
+  const customBanner = await prisma.prefectureBanner.findUnique({
+    where: { pref: prefSlug },
+  });
+  const displayData = {
+    ...staticDisplay,
+    bannerImg: customBanner?.image || staticDisplay.bannerImg,
   };
 
   const filteredClubs = await prisma.club.findMany({
@@ -71,6 +80,7 @@ export default async function PrefecturePage({ params }: PageProps) {
   const bannerTitle = featuredClub
     ? `${featuredClub.name}の相撲風景`
     : `${displayData.name}の相撲風景`;
+  const bannerAlt = customBanner?.alt || bannerTitle;
   const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
   // 构建俱乐部完整地址
@@ -85,7 +95,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
-      <main className="flex-grow">
+      <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
         <section className="relative pt-40 pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">
           <div
@@ -123,16 +133,15 @@ export default async function PrefecturePage({ params }: PageProps) {
             </div>
 
             <div className="reveal-up delay-100">
-              <div className="flex items-center gap-3 mb-4 opacity-80">
-                <span className="h-[1px] w-10 bg-white/50"></span>
-                <span className="text-xs font-bold tracking-[0.3em] uppercase">
+              <div className="flex flex-col items-start mb-4 opacity-80">
+                <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white">
                   Prefecture Info
                 </span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-md">
+              <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-md text-left">
                 {displayData.name}
               </h1>
-              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed">
+              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left">
                 {displayData.name}の相撲クラブ・道場情報、
                 <br className="hidden md:inline" />
                 および出身力士のデータベース。
@@ -141,7 +150,7 @@ export default async function PrefecturePage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* ==================== SECTION 2: Top Sponsors Banner (恢复回来了) ==================== */}
+        {/* ==================== SECTION 2: Top Sponsors Banner ==================== */}
         <section className="relative px-6 z-20">
           <div className="container mx-auto max-w-6xl relative -mt-20">
             <Ceramic
@@ -290,14 +299,20 @@ export default async function PrefecturePage({ params }: PageProps) {
                   >
                     <img
                       src={displayData.bannerImg}
-                      alt={bannerTitle}
+                      alt={bannerAlt}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <Link href={clubDetailLink} className="absolute inset-0 z-0" aria-label="View Club" />
+                    <Link
+                      href={clubDetailLink}
+                      className="absolute inset-0 z-0"
+                      aria-label="View Club"
+                    >
+                      <span className="sr-only">View Club</span>
+                    </Link>
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 pointer-events-none">
                       <div className="text-white w-full flex justify-between items-end">
                         <div className="pointer-events-auto">
-                          <p className="text-[10px] font-bold tracking-widest mb-2 flex items-center gap-2 opacity-80 border-b border-white/30 pb-2 inline-block">
+                          <p className="text-[10px] font-bold tracking-widest mb-2 flex items-center gap-2 opacity-80 border-b border-white/30 pb-2">
                             <Camera size={12} /> LOCAL FEATURE
                           </p>
                           <p className="font-serif font-bold text-xl md:text-2xl tracking-wide flex items-center gap-2 transition-colors">
