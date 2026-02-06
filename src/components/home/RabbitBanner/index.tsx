@@ -103,7 +103,8 @@ export default function RabbitWalkingBanner({
   // 移动端降低速度以减少 CPU 负担
   const SPEED_PX_PER_SEC = (isMobile ? 35 : 50) * scale;
   // 动画周期 = 基础数量 × 单位宽度（确保无缝循环）
-  const ONE_CYCLE_DISTANCE = (UNIT_WIDTH + GAP) * cycleCount;
+  // 💡 取整：Safari 对亚像素值的舍入与 Chrome 不同，不取整会导致循环接缝处出现可见跳帧
+  const ONE_CYCLE_DISTANCE = Math.round((UNIT_WIDTH + GAP) * cycleCount);
   const DURATION = cycleCount > 0 ? ONE_CYCLE_DISTANCE / SPEED_PX_PER_SEC : 0;
 
   // 如果没有赞助商，显示空状态
@@ -115,19 +116,18 @@ export default function RabbitWalkingBanner({
     <>
       <style jsx>{`
         @keyframes scrollRabbit {
-          0% { transform: translate3d(0, 0, 0); }
-          100% { transform: translate3d(var(--scroll-dist), 0, 0); }
+          from { transform: translateX(0); }
+          to   { transform: translateX(var(--scroll-dist)); }
         }
         .animate-scroll {
           animation: scrollRabbit var(--scroll-duration) linear infinite;
+          -webkit-animation: scrollRabbit var(--scroll-duration) linear infinite;
           width: max-content;
-          /* 💡 核心 CSS 优化：告诉浏览器这是一个独立的合成层 */
+          /* 💡 will-change 已经能提升为独立合成层，不需要 translate3d / perspective 等 3D 技巧 */
           will-change: transform;
-          /* 💡 修复 iOS 闪烁 */
-          backface-visibility: hidden;
+          /* 💡 Safari 抗闪烁 */
           -webkit-backface-visibility: hidden;
-          perspective: 1000px;
-          transform-style: preserve-3d;
+          backface-visibility: hidden;
         }
         /* 移动端不建议 hover 暂停，因为滚动惯性可能导致卡住 */
         @media (min-width: 768px) {
@@ -143,9 +143,10 @@ export default function RabbitWalkingBanner({
         style={{
           height: containerHeight,
           zIndex: 30,
-          // 💡 优化：content-visibility 帮助浏览器跳过屏幕外渲染计算
-          contentVisibility: "auto",
-          containIntrinsicSize: `${5000 * scale}px`,
+          /* ⚠️ 已移除 contain 和 contentVisibility：
+             Safari 可能因 contain 触发意外重排，导致 CSS 动画被重置。
+             这个横向滚动区域本身就在 overflow:hidden 容器内，
+             浏览器已经自动做了必要的渲染裁剪。 */
         }}
       >
         <div
@@ -178,7 +179,8 @@ export default function RabbitWalkingBanner({
             const adjustedFlagScale = flagScale * scale;
 
             const baseTransform = variant.bodyStyle?.transform || "";
-            const finalBodyTransform = `${baseTransform} scale(${scale}) translateZ(0)`;
+            // ⚠️ 已移除 translateZ(0)，避免在 Safari 中触发不必要的 3D 合成层
+            const finalBodyTransform = `${baseTransform} scale(${scale})`;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { transform: _ignored, ...restBodyStyle } = variant.bodyStyle || {};
 
@@ -190,35 +192,39 @@ export default function RabbitWalkingBanner({
                   width: UNIT_WIDTH,
                   height: UNIT_WIDTH,
                   marginRight: GAP,
-                  // 💡 优化：移除不必要的 transformStyle 传递，减少层级复杂度
-                  // transformStyle: "preserve-3d", 
+                  // 💡 Safari z-index 终极修复：在每个项目容器内建立局部 3D 空间。
+                  // 原理：Safari 的 WebGL canvas 会自动提升到 GPU 合成层，
+                  // 普通 DOM 的 z-index 无法与之竞争。
+                  // 解法：用 preserve-3d 创建局部 3D 空间，
+                  // 然后用 translateZ 在物理层面把旗帜推到 canvas 前面。
+                  // ⚠️ 注意：preserve-3d 只在每个小容器内部，不在滚动容器上，
+                  //    所以不会出现之前的"旗帜跟不上滚动"的问题。
+                  transformStyle: "preserve-3d",
+                  WebkitTransformStyle: "preserve-3d",
                 }}
               >
-                {/* --- Rabbit Body (z-index: 0) --- */}
+                {/* --- Rabbit Body (Z=0, 在后面) --- */}
                 <div
                   className="absolute inset-0"
                   style={{
-                    zIndex: 0,
                     transformOrigin: "center bottom",
                     ...restBodyStyle,
-                    transform: finalBodyTransform,
-                    // 移动端优化：使用 contain 隔离渲染
-                    contain: "layout style paint",
+                    // translateZ(0) 把身体固定在 Z=0 平面
+                    transform: `${finalBodyTransform} translateZ(0px)`,
                   }}
                 >
                   {/* 移动端降低动画速率以减少 GPU 负担 */}
                   <RabbitActor rivSrc={variant.rivSrc} playbackRate={isMobile ? 0.4 : 0.6} />
                 </div>
 
-                {/* --- Flag + Hand (z-index: 20) --- */}
-                {/* 💡 优化：将静态图片部分标记为 isolate，避免与 Rive 画布发生重绘干扰 
-                   但 transform: translateZ(1px) 必须保留以确保层级覆盖
-                */}
+                {/* --- Flag + Hand (Z=2px, 在前面) --- */}
+                {/* 💡 translateZ(2px) 把旗帜推到身体前方 2px。
+                   在 preserve-3d 中，Z 值大 = 离观察者更近 = 视觉上在前面。
+                   没有设 perspective，所以不会产生透视变形，纯粹用于控制层级。 */}
                 <div
                   className="absolute inset-0"
                   style={{
-                    zIndex: 20,
-                    transform: "translateZ(1px)"
+                    transform: "translateZ(2px)",
                   }}
                 >
                   <div

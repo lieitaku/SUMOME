@@ -16,11 +16,13 @@ const RabbitActor: React.FC<RabbitProps> = ({
   playbackRate = 0.5,
   priority = false
 }) => {
-  const [isInView, setIsInView] = useState(false);
+  // 💡 分离 "曾经可见" 和 "当前可见" 两个状态：
+  // - hasBeenVisible: 一旦 true 就永不回 false → 控制是否挂载 Rive（避免反复创建/销毁 WebGL 上下文导致闪烁）
+  // - isInView: 实时变化 → 控制 Rive 是否播放（离开视口暂停节省 GPU）
+  const [hasBeenVisible, setHasBeenVisible] = useState(priority);
+  const [isInView, setIsInView] = useState(priority);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobileRef = useRef(typeof window !== 'undefined' && window.innerWidth < 768);
-
-  const shouldRender = priority || isInView;
 
   useEffect(() => {
     if (priority) return;
@@ -31,7 +33,12 @@ const RabbitActor: React.FC<RabbitProps> = ({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          setIsInView(entry.isIntersecting);
+          if (entry.isIntersecting) {
+            setHasBeenVisible(true);
+            setIsInView(true);
+          } else {
+            setIsInView(false);
+          }
         });
       },
       {
@@ -47,8 +54,12 @@ const RabbitActor: React.FC<RabbitProps> = ({
 
   return (
     <div ref={containerRef} className={`w-full h-full ${className || ""}`}>
-      {shouldRender ? (
-        <RiveWrapper rivSrc={rivSrc} playbackRate={playbackRate} />
+      {(priority || hasBeenVisible) ? (
+        <RiveWrapper
+          rivSrc={rivSrc}
+          playbackRate={playbackRate}
+          isPlaying={priority || isInView}
+        />
       ) : (
         // 占位符，保持布局不塌陷
         <div className="w-full h-full invisible" />
@@ -59,10 +70,12 @@ const RabbitActor: React.FC<RabbitProps> = ({
 
 const RiveWrapper = React.memo(({
   rivSrc,
-  playbackRate
+  playbackRate,
+  isPlaying,
 }: {
   rivSrc: string;
   playbackRate: number;
+  isPlaying: boolean;
 }) => {
   const { rive, RiveComponent } = useRive({
     src: rivSrc,
@@ -76,26 +89,38 @@ const RiveWrapper = React.memo(({
     }),
   });
 
+  // 设置播放速率
   useEffect(() => {
     if (rive) {
       // 🛠️ 修复说明：
-      // 1. (rive as unknown as { playbackRate: number }):
-      //    先转为 unknown 再转为具体对象结构。这是绕过 TS 类型缺失且不使用 'any' 的标准做法。
-      // 2. eslint-disable-next-line react-hooks/immutability:
-      //    保留这个注释，因为 Rive 官方确实要求直接修改实例属性。
+      // (rive as unknown as { playbackRate: number }):
+      // 先转为 unknown 再转为具体对象结构。绕过 TS 类型缺失且不使用 'any' 的标准做法。
 
       // eslint-disable-next-line react-hooks/immutability
       (rive as unknown as { playbackRate: number }).playbackRate = playbackRate;
-
-      // 腿部动作同步逻辑
-      const animation = rive.animationNames[0];
-      if (animation) {
-        const syncTime = (Date.now() % 2000) / 1000;
-        rive.scrub(animation, syncTime);
-        rive.play();
-      }
     }
   }, [rive, playbackRate]);
+
+  // 💡 播放/暂停 + 全局同步
+  // 原理：所有兔子使用 performance.now() 作为共享时钟。
+  // 公式：syncTime = (页面运行时间 / 1000) * playbackRate
+  // 在任意实时时刻 T，任何兔子的动画位置 = syncTime + (T - mount时刻) * rate
+  //   = (mount时刻/1000)*rate + (T - mount时刻)*rate
+  //   = T * rate / 1000
+  // 结论：无论何时挂载/恢复，所有兔子始终在同一动画帧上。
+  useEffect(() => {
+    if (!rive) return;
+    if (isPlaying) {
+      const animation = rive.animationNames[0];
+      if (animation) {
+        const syncTime = (performance.now() / 1000) * playbackRate;
+        rive.scrub(animation, syncTime);
+      }
+      rive.play();
+    } else {
+      rive.pause();
+    }
+  }, [rive, isPlaying, playbackRate]);
 
   return <RiveComponent className="w-full h-full block" />;
 });
