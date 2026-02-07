@@ -130,8 +130,6 @@ const LoginForm = () => {
             <div className="flex flex-col md:flex-row min-h-[550px]">
               {/* --- A. Left Side --- */}
               <div className="md:w-[35%] bg-[#FAFAFA] border-r border-gray-100 p-8 md:p-10 relative overflow-hidden flex flex-col justify-between">
-                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url('/images/bg/noise.png')" }}></div>
-
                 <div className="relative z-10">
                   <div className="w-10 h-10 rounded bg-white border border-gray-200 flex items-center justify-center text-sumo-brand shadow-sm mb-6">
                     <ShieldCheck size={20} />

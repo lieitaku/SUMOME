@@ -61,11 +61,6 @@ const AboutPage = () => {
               <div className="flex flex-col lg:flex-row min-h-[800px]">
                 {/* --- A. Left Side: Visual Anchor (淡雅灰白) --- */}
                 <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-16 relative overflow-hidden">
-                  {/* 纹理 */}
-                  <div
-                    className="absolute inset-0 opacity-[0.03]"
-                    style={{ backgroundImage: "url('/images/bg/noise.png')" }}
-                  ></div>
 
                   <div className="relative z-10 sticky top-12 h-full flex flex-col">
                     {/* 核心标语 */}

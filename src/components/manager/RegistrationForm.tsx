@@ -96,11 +96,6 @@ const RegistrationForm = () => {
 
                             {/* --- A. 左侧区域 (保持不变) --- */}
                             <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col">
-                                <div
-                                    className="absolute inset-0 opacity-[0.03] mix-blend-multiply"
-                                    style={{ backgroundImage: "url('/images/bg/noise.png')" }}
-                                ></div>
-
                                 <div className="relative z-10 flex-grow">
                                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
                                         Benefits

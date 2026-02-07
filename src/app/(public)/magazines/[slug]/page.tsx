@@ -30,8 +30,6 @@ const MagazineCover3D = ({ src, title }: { src: string; title: string }) => {
         <div className="absolute inset-0 z-10 rounded-r-md overflow-hidden shadow-2xl">
           {/* 左侧书脊高光 */}
           <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-gradient-to-r from-white/40 to-transparent z-20 pointer-events-none"></div>
-          {/* 纹理叠加 */}
-          <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 z-20 mix-blend-overlay pointer-events-none"></div>
           <Image
             src={src}
             alt={title}

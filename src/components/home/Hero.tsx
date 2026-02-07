@@ -122,7 +122,6 @@ const Hero = ({ sponsors }: HeroProps) => {
             </div>
           </div>
           <div className="flex-grow flex flex-col justify-center px-5 md:px-8 relative">
-            <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-10 pointer-events-none mix-blend-multiply"></div>
             <div className="relative z-10 flex flex-row items-center justify-between">
               <div className="flex items-center gap-3 md:gap-6">
                 <h1 className="flex items-center gap-2 md:gap-4 font-serif text-sumo-text leading-none select-none">

@@ -51,9 +51,6 @@ const ServiceCard = ({
           "antialiased", // 保持抗锯齿
         )}
       >
-        {/* --- 0. 噪点纹理 --- */}
-        <div className="absolute inset-0 bg-[url('/images/bg/noise.png')] opacity-20 mix-blend-overlay pointer-events-none z-0"></div>
-
         {/* --- 1. 背景图片 --- */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <Image

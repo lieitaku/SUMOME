@@ -172,11 +172,6 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
 
       {/* --- 4. Section: 价值 (Callout) --- */}
       <section className="bg-sumo-dark text-white p-12 md:p-20 rounded-sm relative overflow-hidden text-center">
-        {/* 背景纹理 */}
-        <div
-          className="absolute inset-0 opacity-10 pointer-events-none"
-          style={{ backgroundImage: "url('/images/bg/noise.png')" }}
-        ></div>
         <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
 
         <div className="relative z-10 max-w-3xl mx-auto">

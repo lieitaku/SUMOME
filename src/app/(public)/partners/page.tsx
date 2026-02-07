@@ -383,7 +383,6 @@ const PartnersPage = () => {
                         className="bg-[#2454a4] text-white p-12 md:p-16 text-center border-none shadow-2xl relative overflow-hidden"
                     >
                         {/* 背景光效 */}
-                        <div className="absolute top-0 left-0 w-full h-full bg-[url('/images/bg/noise.png')] opacity-10 mix-blend-overlay"></div>
                         <div className="absolute -top-24 -right-24 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
                         <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-blue-400 opacity-20 rounded-full blur-3xl"></div>
 

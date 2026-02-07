@@ -393,7 +393,6 @@ export default async function PrefecturePage({ params }: PageProps) {
         {/* ==================== SECTION 4: Bottom CTA ==================== */}
         <section className="relative py-12 overflow-hidden">
           <div className={cn("absolute inset-0 bg-gradient-to-b", theme.gradient)}></div>
-          <div className="absolute inset-0 opacity-10 bg-[url('/images/bg/noise.png')] mix-blend-overlay pointer-events-none"></div>
           <div className="container mx-auto px-6 relative z-10 text-center text-white">
             <div className="inline-flex items-center justify-center p-4 bg-white/10 rounded-full mb-6 backdrop-blur-sm">
               <MapPin size={24} />

@@ -184,12 +184,6 @@ const PrivacyPage = () => {
 
                   {/* Contact Card */}
                   <div className="bg-[#FAFAFA] border border-gray-200 p-8 rounded-sm relative overflow-hidden group">
-                    {/* 纹理 */}
-                    <div
-                      className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                      style={{ backgroundImage: "url('/images/bg/noise.png')" }}
-                    ></div>
-
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                       <div>
                         <div className="flex items-center gap-2 mb-2">
