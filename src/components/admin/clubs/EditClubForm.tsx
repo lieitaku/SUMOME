@@ -6,6 +6,11 @@ import { z } from "zod";
 import { ImageIcon, MapPin, Info, Phone, Mail, UploadCloud, X, Loader2 } from "lucide-react";
 import { Club } from "@prisma/client";
 import { useState, useCallback } from "react";
+
+// 日本郵便番号API（zipcloud）レスポンス型
+const ZIPCLOUD_API = "https://zipcloud.ibsnet.co.jp/api/search";
+type ZipCloudResult = { address1: string; address2: string; address3: string };
+type ZipCloudResponse = { status: number; results: ZipCloudResult[] | null; message: string | null };
 import { useDropzone } from "react-dropzone";
 import Image from "next/image";
 import { REGIONS } from "@/lib/constants"
@@ -69,6 +74,8 @@ interface EditClubFormProps {
 export default function EditClubForm({ initialData }: EditClubFormProps) {
     // 用于控制副图上传时的 Loading 状态
     const [isUploadingSub, setIsUploadingSub] = useState(false);
+    // 郵便番号から住所を取得中かどうか
+    const [zipLookupLoading, setZipLookupLoading] = useState(false);
 
     // --- 1. 初始化 React Hook Form ---
     const form = useForm<FormValues>({
@@ -160,6 +167,35 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
         const newImages = currentSubImages.filter((_, i) => i !== index);
         form.setValue("subImages", newImages, { shouldValidate: true, shouldDirty: true });
     };
+
+    // 郵便番号から都道府県・市区町村を自動入力（zipcloud API）
+    const fetchAddressByZipCode = useCallback(async () => {
+        const raw = form.getValues("zipCode")?.replace(/\s/g, "") ?? "";
+        const zipOnly = raw.replace(/-/g, "");
+        if (zipOnly.length !== 7 || !/^\d+$/.test(zipOnly)) return;
+
+        setZipLookupLoading(true);
+        try {
+            const res = await fetch(`${ZIPCLOUD_API}?zipcode=${zipOnly}`);
+            const data: ZipCloudResponse = await res.json();
+            if (data.status === 200 && data.results?.[0]) {
+                const r = data.results[0];
+                form.setValue("area", r.address1, { shouldValidate: true, shouldDirty: true });
+                form.setValue("city", r.address2, { shouldValidate: true, shouldDirty: true });
+                // 町域が1件だけの場合は番地欄に補完（複数ある場合はユーザーが選択するため未入力のまま）
+                if (data.results.length === 1 && r.address3) {
+                    const currentAddress = form.getValues("address");
+                    if (!currentAddress?.trim()) {
+                        form.setValue("address", r.address3, { shouldValidate: true, shouldDirty: true });
+                    }
+                }
+            }
+        } catch {
+            // ネットワークエラー等は静かに無視（入力はそのまま）
+        } finally {
+            setZipLookupLoading(false);
+        }
+    }, [form]);
 
     // --- 4. 提交处理 ---
     const onSubmit = (data: FormValues) => {
@@ -294,7 +330,20 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <label className={labelClass}>郵便番号</label>
-                            <input {...form.register("zipCode")} className={inputClass} placeholder="000-0000" />
+                            <div className="relative flex items-center gap-2">
+                                <input
+                                    {...form.register("zipCode")}
+                                    className={inputClass}
+                                    placeholder="000-0000"
+                                    onBlur={fetchAddressByZipCode}
+                                />
+                                {zipLookupLoading && (
+                                    <span className="absolute right-3 text-gray-400" aria-hidden>
+                                        <Loader2 className="animate-spin" size={18} />
+                                    </span>
+                                )}
+                            </div>
+                            <p className="text-[10px] text-gray-400 mt-1">入力後、フォーカスを外すと都道府県・市区町村を自動で入れます</p>
                         </div>
                         <div>
                             <label className={labelClass}>都道府県 <span className="text-red-500">*</span></label>

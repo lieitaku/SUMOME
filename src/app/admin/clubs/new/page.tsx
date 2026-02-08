@@ -101,11 +101,20 @@ export default function NewClubPage() {
                                         placeholder="osaka-sumo"
                                     />
 
-                                    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3 items-start mt-3">
-                                        <AlertTriangle size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
-                                        <div className="text-[11px] text-amber-900 leading-relaxed font-medium">
-                                            <span className="font-black underline">注意：</span>
-                                            このIDはURLの一部になります。後から変更するとリンク切れの原因になるため、慎重に決めてください。
+                                    <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex gap-3 items-start mt-3 space-y-3">
+                                        <AlertTriangle size={16} className="text-amber-600 mt-0.5 shrink-0" />
+                                        <div className="text-[11px] text-amber-900 leading-relaxed font-medium space-y-2">
+                                            <p>
+                                                <span className="font-black underline">注意：</span>
+                                                このIDはURLの一部になります。後から変更するとリンク切れの原因になるため、慎重に決めてください。
+                                            </p>
+                                            <p>
+                                                <span className="font-black underline">推奨の命名：</span>
+                                                半角英小文字・数字・ハイフン(-)のみ使用可能です。
+                                                <span className="block mt-1 text-amber-800">
+                                                    例：<code className="bg-amber-100/80 px-1 rounded">osaka-「club名」</code>、<code className="bg-amber-100/80 px-1 rounded">tokyo-「club名」</code> のように、クラブ名のローマ字と地域をハイフンでつなげると分かりやすいです。
+                                                </span>
+                                            </p>
                                         </div>
                                     </div>
                                     {form.formState.errors.slug && (
