@@ -106,7 +106,7 @@ export default function NewClubPage() {
                                         <div className="text-[11px] text-amber-900 leading-relaxed font-medium space-y-2">
                                             <p>
                                                 <span className="font-black underline">注意：</span>
-                                                このIDはURLの一部になります。後から変更するとリンク切れの原因になるため、慎重に決めてください。
+                                                このIDはURLの一部になります。登録後は<span className="font-bold">通常変更できません</span>（変更はシステム管理者のみ可能）。そのため、最初から慎重に決めてください。
                                             </p>
                                             <p>
                                                 <span className="font-black underline">推奨の命名：</span>
