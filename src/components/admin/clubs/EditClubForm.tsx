@@ -35,7 +35,9 @@ import { updateClub, deleteClub } from "@/lib/actions/clubs";
 const formSchema = z.object({
     id: z.string(),
     name: z.string().min(1, "必須項目です"),
-    slug: z.string().min(3, "3文字以上"),
+    slug: z.string()
+        .min(3, "3文字以上")
+        .regex(/^[a-z0-9-]+$/, "半角英小文字・数字・ハイフンのみ使用可能です"),
     description: z.string().optional(),
     logo: z.string().optional(),
     mainImage: z.string().optional(),
@@ -69,9 +71,11 @@ type FormValues = z.infer<typeof formSchema>;
 
 interface EditClubFormProps {
     initialData: Club;
+    /** 管理者(ADMIN)のみ true。クラブID(slug)の編集可否に使用 */
+    canEditSlug?: boolean;
 }
 
-export default function EditClubForm({ initialData }: EditClubFormProps) {
+export default function EditClubForm({ initialData, canEditSlug = false }: EditClubFormProps) {
     // 用于控制副图上传时的 Loading 状态
     const [isUploadingSub, setIsUploadingSub] = useState(false);
     // 郵便番号から住所を取得中かどうか
@@ -250,8 +254,23 @@ export default function EditClubForm({ initialData }: EditClubFormProps) {
                                 {form.formState.errors.name && <p className="text-red-500 text-xs mt-1">{form.formState.errors.name.message}</p>}
                             </div>
                             <div>
-                                <label className={labelClass}>クラブID (変更不可)</label>
-                                <input {...form.register("slug")} disabled className={inputClass} />
+                                <label className={labelClass}>
+                                    クラブID (URL用)
+                                    {canEditSlug ? (
+                                        <span className="text-gray-400 font-normal ml-1">— 管理者のみ変更可</span>
+                                    ) : (
+                                        <span className="text-gray-400 font-normal ml-1">— 変更不可</span>
+                                    )}
+                                </label>
+                                <input
+                                    {...form.register("slug")}
+                                    disabled={!canEditSlug}
+                                    className={inputClass}
+                                    placeholder={canEditSlug ? "例: osaka-sumo" : undefined}
+                                />
+                                {!canEditSlug && (
+                                    <p className="text-[10px] text-gray-400 mt-1">IDの変更は管理者にお問い合わせください。</p>
+                                )}
                             </div>
                             <div>
                                 <label className={labelClass}>紹介文</label>

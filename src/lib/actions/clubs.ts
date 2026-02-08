@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/auth-utils";
 
 // ==============================================================================
 // 🛠️ 通用工具函数：解析 FormData
@@ -103,6 +104,11 @@ export async function createClub(formData: FormData) {
 // 2. 編集・更新用 (Update)
 // ==============================================================================
 
+const slugSchema = z
+  .string()
+  .min(3, "IDは3文字以上で入力してください")
+  .regex(/^[a-z0-9-]+$/, "IDは半角英小文字、数字、ハイフン(-)のみ使用可能です");
+
 const UpdateClubSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "クラブ名は必須です"),
@@ -143,20 +149,51 @@ export async function updateClub(formData: FormData) {
     };
   }
 
-  try {
-    // 排除 id 和 slug (通常不允许修改 slug 以免破坏 SEO)
-    const { id, slug, ...updateData } = validatedFields.data;
+  const [currentUser, currentClub] = await Promise.all([
+    getCurrentUser(),
+    prisma.club.findUnique({
+      where: { id: validatedFields.data.id },
+      select: { slug: true },
+    }),
+  ]);
 
-    // 3. 更新数据库
+  const isAdmin = currentUser?.role === "ADMIN";
+  const { id, slug: newSlug, ...rest } = validatedFields.data;
+  const oldSlug = currentClub?.slug ?? "";
+
+  // 管理者のみ slug 変更可。変更する場合は形式・重複チェック。
+  let slugToUpdate: string | undefined;
+  if (isAdmin && newSlug != null && newSlug.trim() !== "" && newSlug !== oldSlug) {
+    const slugCheck = slugSchema.safeParse(newSlug);
+    if (!slugCheck.success) {
+      const msg = slugCheck.error.issues[0]?.message ?? "IDの形式が正しくありません。";
+      return {
+        error: msg,
+        details: { fieldErrors: { slug: slugCheck.error.issues.map((e) => e.message) } },
+      };
+    }
+    const existing = await prisma.club.findFirst({
+      where: { slug: newSlug, id: { not: id } },
+      select: { id: true },
+    });
+    if (existing) {
+      return { error: "このクラブIDは既に使われています。" };
+    }
+    slugToUpdate = newSlug;
+  }
+
+  const updateData = slugToUpdate != null ? { ...rest, slug: slugToUpdate } : rest;
+
+  try {
     await prisma.club.update({
       where: { id },
       data: updateData,
     });
 
-    // 4. 刷新页面缓存
     revalidatePath("/admin/clubs");
     revalidatePath(`/admin/clubs/${id}`);
-    revalidatePath(`/clubs/${slug}`); // 刷新前台展示页
+    revalidatePath(`/clubs/${oldSlug}`);
+    if (slugToUpdate) revalidatePath(`/clubs/${slugToUpdate}`);
 
     return { success: true };
   } catch (error) {
