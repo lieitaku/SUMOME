@@ -49,7 +49,8 @@ export default async function Home() {
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        <Hero sponsors={sponsors} />
+        {/* 使用视频背景时传 videoSrc + posterSrc（可选 videoWebmSrc），见 docs/hero-video.md */}
+        <Hero sponsors={sponsors} videoSrc="/videos/hero-bg.mp4" posterSrc="/images/hero/hero-poster.jpg" />
         <AboutService />
 
         <PickupClubs clubs={pickupClubs} />
