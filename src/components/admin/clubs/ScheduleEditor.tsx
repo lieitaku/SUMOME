@@ -236,10 +236,10 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
 
             {/* 提示文字 */}
             {items.length > 0 && (
-                <p className="text-[10px] text-gray-400 text-right">
-                    ※ 自動で曜日順・時間順に並び替えられます
-                    ※ 時間は「HH:MM - HH:MM」の形式で入力してください、開始時間しかない場合は「HH:MM」の形式で入力してください。
-                    ※ 例: 18:00 - 20:00　or 18:00
+                <p className="text-[10px] text-gray-400 text-left whitespace-pre-line">
+                    {`※ 自動で曜日順・時間順に並び替えられます
+                    ※ 開始時間しかない場合は「HH:MM」の形式で入力してください。
+                    ※ 例: 18:00 - 20:00 or 18:00`}
                 </p>
             )}
         </div>
