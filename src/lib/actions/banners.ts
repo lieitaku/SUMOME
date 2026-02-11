@@ -2,7 +2,90 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { BannerCategory } from "@prisma/client";
+import { BannerCategory, BannerDisplayMode } from "@prisma/client";
+
+// ========== 旗子显示设置（各页面显示俱乐部/赞助商/全部/混合） ==========
+
+const DEFAULT_DISPLAY_SETTINGS = {
+  homeDisplayMode: "mixed" as BannerDisplayMode,
+  prefTopDisplayMode: "mixed" as BannerDisplayMode,
+  prefSidebarDisplayMode: "mixed" as BannerDisplayMode,
+};
+
+/** 表是否存在（迁移未执行时会报错） */
+function isTableMissingError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return msg.includes("does not exist") || msg.includes("BannerDisplaySetting");
+}
+
+/** 获取旗子显示设置（前台 Home / Pref 用，无则返回默认） */
+export async function getBannerDisplaySettings() {
+  try {
+    let row = await prisma.bannerDisplaySetting.findUnique({
+      where: { id: "default" },
+    });
+    if (!row) {
+      await prisma.bannerDisplaySetting.create({
+        data: {
+          id: "default",
+          ...DEFAULT_DISPLAY_SETTINGS,
+        },
+      });
+      row = await prisma.bannerDisplaySetting.findUnique({
+        where: { id: "default" },
+      });
+    }
+    return {
+      homeDisplayMode: (row?.homeDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.homeDisplayMode) as BannerDisplayMode,
+      prefTopDisplayMode: (row?.prefTopDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.prefTopDisplayMode) as BannerDisplayMode,
+      prefSidebarDisplayMode: (row?.prefSidebarDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.prefSidebarDisplayMode) as BannerDisplayMode,
+    };
+  } catch (error) {
+    if (isTableMissingError(error)) {
+      console.warn(
+        "[getBannerDisplaySettings] 表 BannerDisplaySetting 尚未创建，请执行: npx prisma migrate deploy 或 npx prisma db push"
+      );
+      return { ...DEFAULT_DISPLAY_SETTINGS };
+    }
+    console.error("getBannerDisplaySettings:", error);
+    return { ...DEFAULT_DISPLAY_SETTINGS };
+  }
+}
+
+/** 更新旗子显示设置（后台用） */
+export async function updateBannerDisplaySettings(formData: FormData) {
+  try {
+    const homeDisplayMode = (formData.get("homeDisplayMode") as BannerDisplayMode) || "mixed";
+    const prefTopDisplayMode = (formData.get("prefTopDisplayMode") as BannerDisplayMode) || "mixed";
+    const prefSidebarDisplayMode = (formData.get("prefSidebarDisplayMode") as BannerDisplayMode) || "mixed";
+
+    const validModes: BannerDisplayMode[] = ["all", "club", "sponsor", "mixed"];
+    const toMode = (v: string): BannerDisplayMode =>
+      validModes.includes(v as BannerDisplayMode) ? (v as BannerDisplayMode) : "mixed";
+
+    await prisma.bannerDisplaySetting.upsert({
+      where: { id: "default" },
+      create: {
+        id: "default",
+        homeDisplayMode: toMode(homeDisplayMode),
+        prefTopDisplayMode: toMode(prefTopDisplayMode),
+        prefSidebarDisplayMode: toMode(prefSidebarDisplayMode),
+      },
+      update: {
+        homeDisplayMode: toMode(homeDisplayMode),
+        prefTopDisplayMode: toMode(prefTopDisplayMode),
+        prefSidebarDisplayMode: toMode(prefSidebarDisplayMode),
+      },
+    });
+
+    revalidatePath("/admin/banners");
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("updateBannerDisplaySettings:", error);
+    return { success: false, error: "表示設定の更新に失敗しました" };
+  }
+}
 
 // 获取所有 Banner（用于管理后台）
 export async function getAllBanners() {

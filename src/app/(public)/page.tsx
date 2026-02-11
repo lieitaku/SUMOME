@@ -1,5 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/db";
+import { getBannerDisplaySettings } from "@/lib/actions/banners";
 
 // 引入组件
 import Hero from "@/components/home/Hero";
@@ -44,13 +45,20 @@ export default async function Home() {
     category: b.category,
   }));
 
+  const displaySettings = await getBannerDisplaySettings();
+
   return (
     <div className="w-full flex flex-col min-h-screen">
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
         {/* 使用视频背景时传 videoSrc + posterSrc（可选 videoWebmSrc），见 docs/hero-video.md */}
-        <Hero sponsors={sponsors} videoSrc="/videos/hero-bg.mp4" posterSrc="/images/hero/hero-poster.jpg" />
+        <Hero
+          sponsors={sponsors}
+          displayMode={displaySettings.homeDisplayMode}
+          videoSrc="/videos/hero-bg.mp4"
+          posterSrc="/images/hero/hero-poster.jpg"
+        />
         <AboutService />
 
         <PickupClubs clubs={pickupClubs} />

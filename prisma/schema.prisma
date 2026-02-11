@@ -164,6 +164,14 @@ enum BannerCategory {
   sponsor  // 赞助商
 }
 
+// 各页面旗子显示模式：全部 / 仅俱乐部 / 仅赞助商 / 混合(先俱乐部后赞助商)
+enum BannerDisplayMode {
+  all
+  club
+  sponsor
+  mixed
+}
+
 model Banner {
   id        String         @id @default(cuid())
   name      String
@@ -191,6 +199,15 @@ model PrefectureBanner {
   updatedAt DateTime @updatedAt
 
   @@index([pref])
+}
+
+// 旗子在各页面的显示设置（单例，供后台「显示设置」使用）
+model BannerDisplaySetting {
+  id                   String             @id @default("default")
+  homeDisplayMode      BannerDisplayMode  @default(mixed)
+  prefTopDisplayMode   BannerDisplayMode  @default(mixed)
+  prefSidebarDisplayMode BannerDisplayMode @default(mixed)
+  updatedAt            DateTime           @updatedAt
 }
 
 // ==========================================

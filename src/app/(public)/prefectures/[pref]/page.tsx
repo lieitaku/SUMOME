@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { prisma } from "@/lib/db";
+import { getBannerDisplaySettings } from "@/lib/actions/banners";
 
 // Components
 import RabbitWalkingBanner from "@/components/home/RabbitBanner";
@@ -75,6 +76,7 @@ export default async function PrefecturePage({ params }: PageProps) {
     category: b.category,
   }));
 
+  const displaySettings = await getBannerDisplaySettings();
   const theme = getPrefectureTheme(prefSlug);
   const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;
   const bannerTitle = featuredClub
@@ -199,7 +201,12 @@ export default async function PrefecturePage({ params }: PageProps) {
                       zIndex: 30,
                     }}
                   >
-                    <RabbitWalkingBanner scale={1} containerHeight="500px" sponsors={sponsors} />
+                    <RabbitWalkingBanner
+                      scale={1}
+                      containerHeight="500px"
+                      sponsors={sponsors}
+                      displayMode={displaySettings.prefTopDisplayMode}
+                    />
                   </div>
                 </div>
               </div>
@@ -268,7 +275,12 @@ export default async function PrefecturePage({ params }: PageProps) {
                   >
                     {/* 兔子本体 */}
                     <div className="absolute inset-0 w-[200%] -left-[50%] origin-center scale-[0.75] flex items-center justify-center pt-8">
-                      <RabbitWalkingBanner scale={1} containerHeight="300px" sponsors={sponsors} />
+                      <RabbitWalkingBanner
+                        scale={1}
+                        containerHeight="300px"
+                        sponsors={sponsors}
+                        displayMode={displaySettings.prefSidebarDisplayMode}
+                      />
                     </div>
                   </div>
 

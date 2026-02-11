@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import RabbitBanner, { type SponsorItem } from "@/components/home/RabbitBanner";
+import RabbitBanner, { type SponsorItem, type BannerDisplayMode } from "@/components/home/RabbitBanner";
 
 type HeroProps = {
   sponsors?: SponsorItem[];
+  /** 旗子显示模式：全部 / 仅俱乐部 / 仅赞助商 / 混合（由后台「旗子显示设置」控制） */
+  displayMode?: BannerDisplayMode;
   /** 使用视频背景时传入。建议先压缩视频到 2–5MB，并提供 poster 图保证首屏速度 */
   videoSrc?: string;
   /** WebM 可选，体积通常更小，优先使用 */
@@ -57,7 +59,7 @@ function HeroContent() {
   );
 }
 
-const Hero = ({ sponsors, videoSrc, videoWebmSrc, posterSrc }: HeroProps) => {
+const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: HeroProps) => {
   const useVideo = Boolean(videoSrc && posterSrc);
   const [canLoadVideo, setCanLoadVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
@@ -120,7 +122,7 @@ const Hero = ({ sponsors, videoSrc, videoWebmSrc, posterSrc }: HeroProps) => {
           <HeroContent />
         </div>
         <div className="absolute bottom-0 w-full z-30">
-          <RabbitBanner sponsors={sponsors} />
+          <RabbitBanner sponsors={sponsors} displayMode={displayMode} />
         </div>
       </section>
     );
@@ -181,7 +183,7 @@ const Hero = ({ sponsors, videoSrc, videoWebmSrc, posterSrc }: HeroProps) => {
         <HeroContent />
       </div>
       <div className="absolute bottom-0 w-full z-30">
-        <RabbitBanner sponsors={sponsors} />
+        <RabbitBanner sponsors={sponsors} displayMode={displayMode} />
       </div>
     </section>
   );
