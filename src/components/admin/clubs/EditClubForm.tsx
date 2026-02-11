@@ -53,7 +53,7 @@ const formSchema = z.object({
     zipCode: z.string().optional(),
     area: z.string().min(1, "必須項目です"),
     city: z.string().optional(),
-    address: z.string().min(1, "必須項目です"),
+    address: z.string().optional(),
     mapUrl: z.string().optional(),
     phone: z.string().optional(),
     email: z.string().optional(), // ✨ 新增邮箱
@@ -392,7 +392,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                             <input {...form.register("city")} className={inputClass} placeholder="市区町村" />
                         </div>
                         <div className="md:col-span-2">
-                            <label className={labelClass}>番地・建物名 <span className="text-red-500">*</span></label>
+                            <label className={labelClass}>番地・建物名</label>
                             <input {...form.register("address")} className={inputClass} placeholder="番地・ビル名" />
                         </div>
                         <div>
