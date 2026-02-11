@@ -24,7 +24,7 @@ const DAY_ORDER: Record<string, number> = {
 
 /**
  * 从时间字符串中提取开始时间用于排序
- * 例如 "18:00 〜 20:00" -> 1800, "9:30-11:00" -> 930
+ * 例如 "18:00 - 20:00" -> 1800, "9:30-11:00" -> 930
  */
 function extractStartTime(timeStr: string): number {
     // 匹配开头的时间格式 (支持 HH:MM 或 H:MM)
@@ -161,7 +161,7 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
                     <input
                         type="text"
                         className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all placeholder:text-gray-300"
-                        placeholder="例: 18:00 〜 20:00"
+                        placeholder="例: 18:00 - 20:00"
                         value={currentTime}
                         onChange={(e) => setCurrentTime(e.target.value)}
                         onKeyDown={(e) => {
@@ -238,6 +238,8 @@ export default function ScheduleEditor({ value, onChange }: ScheduleEditorProps)
             {items.length > 0 && (
                 <p className="text-[10px] text-gray-400 text-right">
                     ※ 自動で曜日順・時間順に並び替えられます
+                    ※ 時間は「HH:MM - HH:MM」の形式で入力してください、開始時間しかない場合は「HH:MM」の形式で入力してください。
+                    ※ 例: 18:00 - 20:00　or 18:00
                 </p>
             )}
         </div>
