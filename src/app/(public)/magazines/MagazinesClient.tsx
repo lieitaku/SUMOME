@@ -392,7 +392,7 @@ export default function MagazinesClient({ initialMagazines }: MagazinesClientPro
                                 <h3 className="text-lg font-serif font-bold text-gray-700 mb-2">No Magazines Found</h3>
                                 <button
                                     onClick={() => {
-                                        setActiveRegion("All");
+                                        setActiveRegion("all");
                                         setSearchQuery("");
                                     }}
                                     className="mt-6 text-sm font-bold text-sumo-brand border-b border-sumo-brand/30 hover:border-sumo-brand pb-0.5 transition-colors"

@@ -1,7 +1,7 @@
 import React from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { Plus, BookOpen, Calendar, Pencil, ExternalLink, Search, MapPin } from "lucide-react";
+import { Plus, BookOpen, Calendar, Pencil, ExternalLink, Search, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { REGIONS } from "@/lib/constants";
@@ -9,12 +9,24 @@ import RegionFilter from "@/components/admin/ui/RegionFilter";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 12;
+
+function buildSearchParams(params: { q?: string; region?: string; pref?: string; page?: number }) {
+    const sp = new URLSearchParams();
+    if (params.q) sp.set("q", params.q);
+    if (params.region) sp.set("region", params.region);
+    if (params.pref) sp.set("pref", params.pref);
+    if (params.page && params.page > 1) sp.set("page", String(params.page));
+    return sp.toString();
+}
+
 export default async function MagazineListPage({
     searchParams,
 }: {
-    searchParams: { q?: string; region?: string; pref?: string };
+    searchParams: { q?: string; region?: string; pref?: string; page?: string };
 }) {
-    const { q, region, pref } = await searchParams;
+    const { q, region, pref, page: pageParam } = await searchParams;
+    const page = Math.max(1, parseInt(String(pageParam || "1"), 10) || 1);
 
     // 构建查询条件
     const where: Prisma.MagazineWhereInput = {};
@@ -33,10 +45,31 @@ export default async function MagazineListPage({
         where.region = { in: REGIONS[region as keyof typeof REGIONS] };
     }
 
-    const magazines = await prisma.magazine.findMany({
-        where,
-        orderBy: { issueDate: "desc" },
-    });
+    // 分页 + 只取列表所需字段，减轻 DB 与传输
+    const [magazines, total] = await Promise.all([
+        prisma.magazine.findMany({
+            where,
+            orderBy: { issueDate: "desc" },
+            take: PAGE_SIZE,
+            skip: (page - 1) * PAGE_SIZE,
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                region: true,
+                coverImage: true,
+                pdfUrl: true,
+                issueDate: true,
+                published: true,
+            },
+        }),
+        prisma.magazine.count({ where }),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+    const hasPrev = page > 1;
+    const hasNext = page < totalPages;
+    const query = { q, region, pref };
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
@@ -82,7 +115,7 @@ export default async function MagazineListPage({
                 {magazines.map((mag) => (
                     <div key={mag.id} className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
                         {/* 封面预览 */}
-                        <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+                        <div className="relative aspect-3/4 bg-gray-100 overflow-hidden">
                             {mag.coverImage ? (
                                 <Image
                                     src={mag.coverImage}
@@ -152,6 +185,44 @@ export default async function MagazineListPage({
                     </div>
                 )}
             </div>
+
+            {/* 分页：仅在有多个页面时显示 */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-gray-200 pt-6">
+                    <p className="text-sm text-gray-500">
+                        {total} 件中 {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} 件目
+                    </p>
+                    <div className="flex items-center gap-2">
+                        {hasPrev ? (
+                            <Link
+                                href={`/admin/magazines?${buildSearchParams({ ...query, page: page - 1 })}`}
+                                className="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                                <ChevronLeft size={18} /> 前へ
+                            </Link>
+                        ) : (
+                            <span className="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-100 text-sm text-gray-300 cursor-not-allowed">
+                                <ChevronLeft size={18} /> 前へ
+                            </span>
+                        )}
+                        <span className="px-3 py-2 text-sm text-gray-500 font-medium">
+                            {page} / {totalPages}
+                        </span>
+                        {hasNext ? (
+                            <Link
+                                href={`/admin/magazines?${buildSearchParams({ ...query, page: page + 1 })}`}
+                                className="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                                次へ <ChevronRight size={18} />
+                            </Link>
+                        ) : (
+                            <span className="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-100 text-sm text-gray-300 cursor-not-allowed">
+                                次へ <ChevronRight size={18} />
+                            </span>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

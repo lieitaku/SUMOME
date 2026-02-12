@@ -43,7 +43,7 @@ export default async function PrefecturePage({ params }: PageProps) {
     rikishiList: [],
   };
 
-  // 后台设置的都道府県 Banner 优先于静态默认
+  // 后台设置的都道府県 Banner 优先于静态默认（必须先拿到才能拼 displayData）
   const customBanner = await prisma.prefectureBanner.findUnique({
     where: { pref: prefSlug },
   });
@@ -52,31 +52,32 @@ export default async function PrefecturePage({ params }: PageProps) {
     bannerImg: customBanner?.image || staticDisplay.bannerImg,
   };
 
-  const filteredClubs = await prisma.club.findMany({
-    where: {
-      area: {
-        contains: displayData.name,
+  // 以下三路互不依赖，并行请求以减少总等待时间
+  const [filteredClubs, banners, displaySettings] = await Promise.all([
+    prisma.club.findMany({
+      where: {
+        area: {
+          contains: displayData.name,
+        },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+    prisma.banner.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    getBannerDisplaySettings(),
+  ]);
 
-  // 获取 Banner 数据（用于兔子旗帜）
-  const banners = await prisma.banner.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
-  });
-  const sponsors = banners.map(b => ({
+  const sponsors = banners.map((b) => ({
     id: b.id,
     image: b.image,
     alt: b.alt || b.name,
     link: b.link,
     category: b.category,
   }));
-
-  const displaySettings = await getBannerDisplaySettings();
   const theme = getPrefectureTheme(prefSlug);
   const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;
   const bannerTitle = featuredClub
@@ -119,7 +120,8 @@ export default async function PrefecturePage({ params }: PageProps) {
           </div>
 
           <div className="container mx-auto px-6 relative z-10">
-            <div className="mb-8 reveal-up">
+            {/* 首屏头部不做 reveal-up，始终可见，避免依赖 JS 未触发时整块不显示 */}
+            <div className="mb-8">
               <Link
                 href="/clubs/map"
                 className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-xs font-bold tracking-widest uppercase group"
@@ -134,7 +136,7 @@ export default async function PrefecturePage({ params }: PageProps) {
               </Link>
             </div>
 
-            <div className="reveal-up delay-100">
+            <div>
               <div className="flex flex-col items-start mb-4 opacity-80">
                 <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white">
                   Prefecture Info
@@ -375,8 +377,8 @@ export default async function PrefecturePage({ params }: PageProps) {
 
                   {filteredClubs.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      {filteredClubs.map((club, idx) => (
-                        <div key={club.id} className="reveal-up" style={{ animationDelay: `${idx * 100}ms` }}>
+                      {filteredClubs.map((club) => (
+                        <div key={club.id}>
                           <ClubCard club={club} accentColor={theme.color} />
                         </div>
                       ))}

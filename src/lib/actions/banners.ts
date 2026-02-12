@@ -1,8 +1,10 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { BannerCategory, BannerDisplayMode } from "@prisma/client";
+
+const BANNER_DISPLAY_SETTINGS_TAG = "banner-display-settings";
 
 // ========== 旗子显示设置（各页面显示俱乐部/赞助商/全部/混合） ==========
 
@@ -18,8 +20,7 @@ function isTableMissingError(error: unknown): boolean {
   return msg.includes("does not exist") || msg.includes("BannerDisplaySetting");
 }
 
-/** 获取旗子显示设置（前台 Home / Pref 用，无则返回默认） */
-export async function getBannerDisplaySettings() {
+async function getBannerDisplaySettingsUncached() {
   try {
     let row = await prisma.bannerDisplaySetting.findUnique({
       where: { id: "default" },
@@ -52,6 +53,15 @@ export async function getBannerDisplaySettings() {
   }
 }
 
+/** 获取旗子显示设置（前台 Home / Pref 用，无则返回默认；带缓存，后台更新时会失效） */
+export async function getBannerDisplaySettings() {
+  return unstable_cache(
+    getBannerDisplaySettingsUncached,
+    [BANNER_DISPLAY_SETTINGS_TAG],
+    { revalidate: 60, tags: [BANNER_DISPLAY_SETTINGS_TAG] }
+  )();
+}
+
 /** 更新旗子显示设置（后台用） */
 export async function updateBannerDisplaySettings(formData: FormData) {
   try {
@@ -80,6 +90,7 @@ export async function updateBannerDisplaySettings(formData: FormData) {
 
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag(BANNER_DISPLAY_SETTINGS_TAG);
     return { success: true };
   } catch (error) {
     console.error("updateBannerDisplaySettings:", error);

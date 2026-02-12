@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useDeferredValue, startTransition, useEffect, useRef } from "react";
 import {
     Search,
     X,
@@ -186,6 +186,46 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
         return list;
     }, [filteredClubs, sortBy]);
 
+    /**
+     * 延迟列表：点击「全国」等导致结果集骤增时，不阻塞主线程，先响应点击再渲染大列表
+     */
+    const deferredSortedClubs = useDeferredValue(sortedClubs);
+
+    /** 渐进式展示：先只渲染前 N 条，再在后续帧中分批追加，避免一次挂载数百个 DOM 导致卡顿 */
+    const INITIAL_CHUNK = 36;
+    const CHUNK_SIZE = 24;
+    const [visibleCount, setVisibleCount] = useState(INITIAL_CHUNK);
+    const prevListLengthRef = useRef(0);
+
+    // 列表变化时（如从北海道切到全国）：先只展示首屏数量，其余由下方 effect 分批追加
+    useEffect(() => {
+        const total = deferredSortedClubs.length;
+        if (total <= INITIAL_CHUNK) {
+            setVisibleCount(total);
+        } else if (prevListLengthRef.current !== total) {
+            setVisibleCount(INITIAL_CHUNK);
+        }
+        prevListLengthRef.current = total;
+    }, [deferredSortedClubs]);
+
+    // 当结果很多时，用 requestAnimationFrame 分批增加可见数量，把渲染分散到多帧
+    useEffect(() => {
+        if (visibleCount >= deferredSortedClubs.length) return;
+        let cancelled = false;
+        const id = requestAnimationFrame(() => {
+            if (cancelled) return;
+            setVisibleCount((prev) => Math.min(prev + CHUNK_SIZE, deferredSortedClubs.length));
+        });
+        return () => {
+            cancelled = true;
+            cancelAnimationFrame(id);
+        };
+    }, [visibleCount, deferredSortedClubs.length]);
+
+    /** 实际参与渲染的列表：只取前 visibleCount 条 */
+    const clubsToRender = deferredSortedClubs.slice(0, visibleCount);
+    const hasMore = visibleCount < deferredSortedClubs.length;
+
     // 重置所有筛选条件
     const handleReset = () => {
         setActiveRegion("all");
@@ -285,11 +325,8 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                     {/* ==================== 区域 2: 筛选仪表盘 (折叠面板) ==================== */}
                     <div className="max-w-6xl mx-auto mb-16 reveal-up delay-300">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                            {/* 筛选器头部 (点击切换折叠) */}
-                            <div
-                                className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50 cursor-pointer hover:bg-gray-50 transition-colors"
-                                onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-                            >
+                            {/* 筛选器头部：仅展示，无箭头 */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                                 <div className="flex items-center gap-3">
                                     <Filter size={16} className="text-sumo-brand" />
                                     <span className="text-sm font-bold text-gray-700 tracking-wide">
@@ -301,25 +338,17 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                         </span>
                                     )}
                                 </div>
-                                <ChevronDown
-                                    size={16}
-                                    className={cn(
-                                        "text-gray-400 transition-transform duration-300",
-                                        isFilterExpanded ? "rotate-180" : ""
-                                    )}
-                                />
                             </div>
 
-                            {/* 筛选器内容区 (动画容器) */}
+                            {/* 筛选器内容区 */}
                             <div
                                 className={cn(
-                                    "transition-all duration-500 ease-in-out overflow-hidden",
-                                    isFilterExpanded
-                                        ? "max-h-[600px] opacity-100"
-                                        : "max-h-0 opacity-0"
+                                    "grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out",
+                                    isFilterExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                                 )}
                             >
-                                <div className="p-6 md:p-10">
+                                <div className="min-h-0">
+                                    <div className="p-6 md:p-10">
                                     {/* 第一级：大区选择 (Region Tabs) */}
                                     <div className={cn(
                                         "flex flex-wrap gap-3 md:gap-4",
@@ -329,8 +358,10 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                             variant="ceramic"
                                             isActive={activeRegion === "all"}
                                             onClick={() => {
-                                                setActiveRegion("all");
-                                                setActivePref("all");
+                                                startTransition(() => {
+                                                    setActiveRegion("all");
+                                                    setActivePref("all");
+                                                });
                                             }}
                                         >
                                             全国
@@ -381,6 +412,7 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                             </div>
                                         </div>
                                     )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -453,8 +485,10 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                         {REGIONS.find((r) => r.id === activeRegion)?.label}
                                         <button
                                             onClick={() => {
-                                                setActiveRegion("all");
-                                                setActivePref("all");
+                                                startTransition(() => {
+                                                    setActiveRegion("all");
+                                                    setActivePref("all");
+                                                });
                                             }}
                                             className="hover:text-white/70 ml-1"
                                         >
@@ -466,20 +500,31 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                             </div>
                         </div>
 
-                        {/* 结果列表 (Grid Layout) */}
+                        {/* 结果列表：渐进式渲染，先显示首屏再分批追加，避免从地区切到全国时卡顿 */}
                         {filteredClubs.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {sortedClubs.map((club, index) => (
-                                    <div
-                                        key={club.id}
-                                        className="opacity-0 card-enter-active"
-                                        // 交错动画延迟
-                                        style={{ animationDelay: `${index * 50}ms` }}
-                                    >
-                                        <ClubCard club={club} />
+                            <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                    {clubsToRender.map((club, index) => {
+                                        const ANIMATION_CAP = 24;
+                                        const useAnimation = clubsToRender.length <= ANIMATION_CAP;
+                                        const delayMs = useAnimation ? Math.min(index * 50, 600) : 0;
+                                        return (
+                                            <div
+                                                key={club.id}
+                                                className={useAnimation ? "opacity-0 card-enter-active" : ""}
+                                                style={useAnimation ? { animationDelay: `${delayMs}ms` } : undefined}
+                                            >
+                                                <ClubCard club={club} />
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                {hasMore && (
+                                    <div className="flex justify-center py-6" aria-hidden="true">
+                                        <span className="inline-block w-6 h-6 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
                                     </div>
-                                ))}
-                            </div>
+                                )}
+                            </>
                         ) : (
                             /* 空状态展示 (Empty State) */
                             <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
