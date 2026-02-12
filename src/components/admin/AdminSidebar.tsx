@@ -186,7 +186,10 @@ function SectionLabel({ label }: SectionLabelProps) {
 // 子组件：导航单项
 // ==============================================================================
 function NavItem({ href, icon, label, activePath, onClick }: NavItemProps) {
-    const isActive = activePath === href || (href !== "/admin" && activePath.startsWith(href));
+    const isActive =
+        activePath === href ||
+        (href === "/admin" && (activePath === "/admin" || activePath === "/admin/dashboard")) ||
+        (href !== "/admin" && activePath.startsWith(href));
     return (
         <Link href={href} onClick={onClick} className={`group flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-all relative overflow-hidden ${isActive ? "text-white bg-white/10" : "text-white/70 hover:bg-white/10 hover:text-white"}`}>
             <span className={`absolute left-0 top-0 bottom-0 w-1 bg-[#D4AF37] transition-opacity ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}></span>

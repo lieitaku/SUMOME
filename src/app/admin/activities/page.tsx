@@ -1,170 +1,11 @@
-import React, { Suspense } from "react";
-import { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
-import { confirmAdmin } from "@/lib/auth-utils";
-import { redirect } from "next/navigation";
-import { Plus, Search, Pencil, Calendar, MapPin } from "lucide-react";
+import React from "react";
+import { Plus, Search } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
-import { REGIONS } from "@/lib/constants";
 import RegionFilter from "@/components/admin/ui/RegionFilter";
+import ActivitiesListClient from "@/components/admin/activities/ActivitiesListClient";
 
 export const dynamic = "force-dynamic";
-
-async function ActivitiesList({
-    q,
-    category,
-    region,
-    pref,
-}: {
-    q?: string;
-    category?: string;
-    region?: string;
-    pref?: string;
-}) {
-    const [admin, activities] = await Promise.all([
-        confirmAdmin(),
-        (async () => {
-            const where: Prisma.ActivityWhereInput = {};
-            if (q) where.title = { contains: q, mode: "insensitive" };
-            if (category && category !== "all") where.category = { equals: category };
-            if (pref) where.club = { area: { equals: pref } };
-            else if (region && region in REGIONS) where.club = { area: { in: REGIONS[region as keyof typeof REGIONS] } };
-            return prisma.activity.findMany({
-                where,
-                select: {
-                    id: true,
-                    title: true,
-                    category: true,
-                    date: true,
-                    published: true,
-                    club: { select: { name: true, area: true } },
-                },
-                orderBy: { date: "desc" },
-            });
-        })(),
-    ]);
-    if (!admin) redirect("/manager/login");
-
-    return (
-        <>
-            <div className="grid grid-cols-1 gap-4 md:hidden">
-                {activities.map((act) => (
-                    <div key={act.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className={cn(
-                                        "px-2 py-0.5 rounded text-[9px] font-black uppercase",
-                                        act.published ? "bg-green-500 text-white" : "bg-gray-400 text-white"
-                                    )}>
-                                        {act.published ? "公開中" : "下書き"}
-                                    </span>
-                                    <span className="text-[10px] font-bold text-sumo-brand uppercase tracking-wider">{act.category}</span>
-                                </div>
-                                <h3 className="font-bold text-gray-900 leading-tight">{act.title}</h3>
-                            </div>
-                        </div>
-                        <div className="space-y-2 text-sm text-gray-600 border-t border-gray-100 pt-3">
-                            <div className="flex items-center gap-2">
-                                <MapPin size={14} className="text-gray-400" />
-                                <span className="text-xs">{act.club?.name} ({act.club?.area})</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Calendar size={14} className="text-gray-400" />
-                                <span className="text-xs font-mono">{new Date(act.date).toLocaleDateString('ja-JP')}</span>
-                            </div>
-                        </div>
-                        <Link
-                            href={`/admin/activities/${act.id}`}
-                            className="flex items-center justify-center gap-2 w-full bg-gray-50 text-sumo-brand font-bold py-2.5 rounded-lg border border-gray-200 hover:bg-sumo-brand hover:text-white transition-all"
-                        >
-                            <Pencil size={16} />
-                            詳細・編集
-                        </Link>
-                    </div>
-                ))}
-            </div>
-
-            <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">活動タイトル / カテゴリ</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">所属クラブ</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">ステータス</th>
-                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">編集</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {activities.map((act) => (
-                            <tr key={act.id} className="hover:bg-gray-50/50 transition-colors group">
-                                <td className="px-6 py-4">
-                                    <div className="font-bold text-gray-900 line-clamp-1">{act.title}</div>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                        <span className="text-[10px] font-bold text-sumo-brand uppercase">{act.category}</span>
-                                        <span className="text-[10px] text-gray-400 font-mono">
-                                            {new Date(act.date).toLocaleDateString('ja-JP')}
-                                        </span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="text-sm font-medium text-gray-600">{act.club?.name}</div>
-                                    <div className="text-[10px] text-gray-400">{act.club?.area}</div>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <span className={cn(
-                                        "px-2 py-0.5 rounded text-[10px] font-bold uppercase",
-                                        act.published ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
-                                    )}>
-                                        {act.published ? "公開中" : "下書き"}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 text-right">
-                                    <Link
-                                        href={`/admin/activities/${act.id}`}
-                                        className="inline-block p-2 text-sumo-brand hover:bg-blue-50 rounded-md transition-colors"
-                                    >
-                                        <Pencil size={18} />
-                                    </Link>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                {activities.length === 0 && (
-                    <div className="px-6 py-12 text-center text-gray-400 text-sm">データが見つかりませんでした。</div>
-                )}
-            </div>
-        </>
-    );
-}
-
-function ActivitiesListFallback() {
-    return (
-        <>
-            <div className="grid grid-cols-1 gap-4 md:hidden">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm animate-pulse">
-                        <div className="h-5 w-2/3 bg-gray-200 rounded mb-2" />
-                        <div className="h-4 w-1/2 bg-gray-100 rounded mb-3" />
-                        <div className="h-10 bg-gray-100 rounded" />
-                    </div>
-                ))}
-            </div>
-            <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
-                <div className="h-12 bg-gray-50 border-b border-gray-200" />
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="h-14 border-b border-gray-100 flex gap-4 px-6 items-center">
-                        <div className="h-4 flex-1 bg-gray-200 rounded" />
-                        <div className="h-4 w-24 bg-gray-100 rounded" />
-                        <div className="h-4 w-16 bg-gray-100 rounded" />
-                    </div>
-                ))}
-            </div>
-        </>
-    );
-}
 
 export default async function AdminActivitiesPage({
     searchParams,
@@ -193,7 +34,7 @@ export default async function AdminActivitiesPage({
 
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div className="flex flex-wrap gap-4">
-                    <form className="relative flex-grow max-w-md">
+                    <form className="relative grow max-w-md">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                         <input
                             name="q"
@@ -228,9 +69,12 @@ export default async function AdminActivitiesPage({
                 />
             </div>
 
-            <Suspense fallback={<ActivitiesListFallback />}>
-                <ActivitiesList q={q} category={category} region={region} pref={pref} />
-            </Suspense>
+            <ActivitiesListClient
+                initialQ={q}
+                initialCategory={category}
+                initialRegion={region}
+                initialPref={pref}
+            />
         </div>
     );
 }

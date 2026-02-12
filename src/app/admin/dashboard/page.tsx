@@ -77,7 +77,7 @@ export default async function AdminDashboardPage() {
     const totalPending = pendingAppsCount + unreadInquiriesCount;
 
     return (
-        <div>
+        <div className="max-w-6xl mx-auto font-sans">
             {/* 欢迎语 */}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">ダッシュボード</h1>
