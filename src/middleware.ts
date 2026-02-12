@@ -64,6 +64,17 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin/magazines", request.url));
   }
 
+  // 4. 将用户邮箱写入请求头，供 admin layout 读取，避免 layout 内再次调用 Supabase（正式环境每次 RTT 很贵）
+  if (user?.email) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-user-email", user.email);
+    response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+
   return response;
 }
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Toaster } from "sonner";
@@ -6,19 +7,25 @@ import { Toaster } from "sonner";
 /**
  * 后台管理布局组件
  * 作用：包含侧边栏、全局通知容器以及权限上下文
+ * 性能：优先从 middleware 注入的 x-user-email 读取，避免同一次请求内重复调用 Supabase（正式环境 RTT 高）
  */
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // 1. 获取 Supabase 用户信息
-    const supabase = await createClient();
-    const { data: { user: authUser } } = await supabase.auth.getUser();
+    // 1. 优先使用 middleware 已注入的邮箱（同请求内 middleware 已调过 getUser，避免再调一次 Supabase）
+    const headersList = await headers();
+    const emailFromHeader = headersList.get("x-user-email");
+    let userEmail = emailFromHeader ?? null;
+    if (userEmail === null) {
+        const supabase = await createClient();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        userEmail = authUser?.email ?? "guest@sumo.com";
+    }
 
     // 2. 模拟角色（后续可根据数据库 user.role 扩展）
     const role = "ADMIN" as "ADMIN" | "OWNER";
-    const userEmail = authUser?.email || "guest@sumo.com";
 
     return (
         <div className="min-h-screen bg-[#F4F5F7] font-sans text-gray-900 overflow-x-hidden">
