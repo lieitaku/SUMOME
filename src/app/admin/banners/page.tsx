@@ -13,30 +13,27 @@ interface PageProps {
 export default async function AdminBannersPage({ searchParams }: PageProps) {
     const { category } = await searchParams;
 
-    // 根据 category 筛选
     const whereClause = category && (category === "club" || category === "sponsor")
         ? { category: category as BannerCategory }
         : {};
 
-    const banners = await prisma.banner.findMany({
-        where: whereClause,
-        orderBy: { sortOrder: "asc" },
-    });
+    const [banners, allBanners, displaySettings] = await Promise.all([
+        prisma.banner.findMany({
+            where: whereClause,
+            orderBy: { sortOrder: "asc" },
+        }),
+        prisma.banner.findMany(),
+        getBannerDisplaySettings(),
+    ]);
 
-    // 统计数据（不受筛选影响）
-    const allBanners = await prisma.banner.findMany();
     const clubBanners = allBanners.filter(b => b.category === "club");
     const sponsorBanners = allBanners.filter(b => b.category === "sponsor");
-
-    // Tab 配置
     const tabs = [
         { key: "", label: "すべて", count: allBanners.length, icon: Flag },
         { key: "club", label: "クラブ", count: clubBanners.length, icon: Building2 },
         { key: "sponsor", label: "スポンサー", count: sponsorBanners.length, icon: Megaphone },
     ];
-
     const currentTab = category || "";
-    const displaySettings = await getBannerDisplaySettings();
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 font-sans">

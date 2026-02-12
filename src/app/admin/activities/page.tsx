@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { confirmAdmin } from "@/lib/auth-utils";
@@ -11,110 +11,43 @@ import RegionFilter from "@/components/admin/ui/RegionFilter";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminActivitiesPage({
-    searchParams,
+async function ActivitiesList({
+    q,
+    category,
+    region,
+    pref,
 }: {
-    searchParams: { q?: string; category?: string; region?: string; pref?: string };
+    q?: string;
+    category?: string;
+    region?: string;
+    pref?: string;
 }) {
-    // 1. 権限チェック
-    const admin = await confirmAdmin();
+    const [admin, activities] = await Promise.all([
+        confirmAdmin(),
+        (async () => {
+            const where: Prisma.ActivityWhereInput = {};
+            if (q) where.title = { contains: q, mode: "insensitive" };
+            if (category && category !== "all") where.category = { equals: category };
+            if (pref) where.club = { area: { equals: pref } };
+            else if (region && region in REGIONS) where.club = { area: { in: REGIONS[region as keyof typeof REGIONS] } };
+            return prisma.activity.findMany({
+                where,
+                select: {
+                    id: true,
+                    title: true,
+                    category: true,
+                    date: true,
+                    published: true,
+                    club: { select: { name: true, area: true } },
+                },
+                orderBy: { date: "desc" },
+            });
+        })(),
+    ]);
     if (!admin) redirect("/manager/login");
 
-    // Next.js 15/16 非同期 searchParams 対応
-    const { q, category, region, pref } = await searchParams;
-
-    // 2. 厳密な型定義でクエリを構築
-    const where: Prisma.ActivityWhereInput = {};
-
-    // キーワード検索 (タイトル)
-    if (q) {
-        where.title = { contains: q, mode: "insensitive" };
-    }
-
-    // カテゴリフィルタ
-    if (category && category !== "all") {
-        where.category = { equals: category };
-    }
-
-    // 地域・都道府県フィルタ (関連するクラブの所在地で検索)
-    if (pref) {
-        where.club = { area: { equals: pref } };
-    } else if (region && region in REGIONS) {
-        where.club = { area: { in: REGIONS[region as keyof typeof REGIONS] } };
-    }
-
-    // 3. データ取得
-    const activities = await prisma.activity.findMany({
-        where,
-        include: {
-            club: { select: { name: true, area: true } }
-        },
-        orderBy: { date: "desc" },
-    });
-
     return (
-        <div className="max-w-6xl mx-auto space-y-6 font-sans">
-            {/* --- ヘッダー (Header) --- */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">普及・広報活動管理</h1>
-                    <p className="text-gray-500 mt-1 text-xs md:text-sm">
-                        全クラブの活動レポート、ニュースの投稿・編集
-                    </p>
-                </div>
-                <Link
-                    href="/admin/activities/new"
-                    className="flex items-center gap-2 bg-sumo-brand text-white px-4 py-2 rounded-lg font-bold hover:bg-sumo-dark transition-all shadow-md text-sm"
-                >
-                    <Plus size={18} />
-                    <span>新規登録</span>
-                </Link>
-            </div>
-
-            {/* --- 検索 & フィルタ (Search & Filter) --- */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                <div className="flex flex-wrap gap-4">
-                    {/* キーワード検索 */}
-                    <form className="relative flex-grow max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                        <input
-                            name="q"
-                            defaultValue={q}
-                            placeholder="タイトルで検索..."
-                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
-                        />
-                    </form>
-
-                    {/* カテゴリクイックフィルタ */}
-                    <div className="flex bg-gray-100 p-1 rounded-lg">
-                        {["all", "Report", "Event", "News"].map((cat) => (
-                            <Link
-                                key={cat}
-                                href={`/admin/activities?category=${cat}${q ? `&q=${q}` : ""}`}
-                                className={cn(
-                                    "px-3 py-1 rounded-md text-xs font-bold transition-all",
-                                    (category || "all") === cat
-                                        ? "bg-white text-sumo-brand shadow-sm"
-                                        : "text-gray-500 hover:text-gray-700"
-                                )}
-                            >
-                                {cat === "all" ? "全て" : cat}
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-
-                {/* 地方・都道府県フィルタ */}
-                <RegionFilter
-                    basePath="/admin/activities"
-                    currentRegion={region}
-                    currentPref={pref}
-                    currentQuery={q}
-                    extraParams={{ category }}
-                />
-            </div>
-
-            {/* --- 1. モバイル表示 (Mobile Cards) --- */}
+        <>
             <div className="grid grid-cols-1 gap-4 md:hidden">
                 {activities.map((act) => (
                     <div key={act.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
@@ -153,7 +86,6 @@ export default async function AdminActivitiesPage({
                 ))}
             </div>
 
-            {/* --- 2. PC表示 (Desktop Table) --- */}
             <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-gray-50 border-b border-gray-200">
@@ -204,6 +136,101 @@ export default async function AdminActivitiesPage({
                     <div className="px-6 py-12 text-center text-gray-400 text-sm">データが見つかりませんでした。</div>
                 )}
             </div>
+        </>
+    );
+}
+
+function ActivitiesListFallback() {
+    return (
+        <>
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm animate-pulse">
+                        <div className="h-5 w-2/3 bg-gray-200 rounded mb-2" />
+                        <div className="h-4 w-1/2 bg-gray-100 rounded mb-3" />
+                        <div className="h-10 bg-gray-100 rounded" />
+                    </div>
+                ))}
+            </div>
+            <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-pulse">
+                <div className="h-12 bg-gray-50 border-b border-gray-200" />
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="h-14 border-b border-gray-100 flex gap-4 px-6 items-center">
+                        <div className="h-4 flex-1 bg-gray-200 rounded" />
+                        <div className="h-4 w-24 bg-gray-100 rounded" />
+                        <div className="h-4 w-16 bg-gray-100 rounded" />
+                    </div>
+                ))}
+            </div>
+        </>
+    );
+}
+
+export default async function AdminActivitiesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ q?: string; category?: string; region?: string; pref?: string }>;
+}) {
+    const { q, category, region, pref } = await searchParams;
+
+    return (
+        <div className="max-w-6xl mx-auto space-y-6 font-sans">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900">普及・広報活動管理</h1>
+                    <p className="text-gray-500 mt-1 text-xs md:text-sm">
+                        全クラブの活動レポート、ニュースの投稿・編集
+                    </p>
+                </div>
+                <Link
+                    href="/admin/activities/new"
+                    className="flex items-center gap-2 bg-sumo-brand text-white px-4 py-2 rounded-lg font-bold hover:bg-sumo-dark transition-all shadow-md text-sm"
+                >
+                    <Plus size={18} />
+                    <span>新規登録</span>
+                </Link>
+            </div>
+
+            <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                <div className="flex flex-wrap gap-4">
+                    <form className="relative flex-grow max-w-md">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            name="q"
+                            defaultValue={q}
+                            placeholder="タイトルで検索..."
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
+                        />
+                    </form>
+                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                        {["all", "Report", "Event", "News"].map((cat) => (
+                            <Link
+                                key={cat}
+                                href={`/admin/activities?category=${cat}${q ? `&q=${q}` : ""}`}
+                                className={cn(
+                                    "px-3 py-1 rounded-md text-xs font-bold transition-all",
+                                    (category || "all") === cat
+                                        ? "bg-white text-sumo-brand shadow-sm"
+                                        : "text-gray-500 hover:text-gray-700"
+                                )}
+                            >
+                                {cat === "all" ? "全て" : cat}
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+                <RegionFilter
+                    basePath="/admin/activities"
+                    currentRegion={region}
+                    currentPref={pref}
+                    currentQuery={q}
+                    extraParams={{ category }}
+                />
+            </div>
+
+            <Suspense fallback={<ActivitiesListFallback />}>
+                <ActivitiesList q={q} category={category} region={region} pref={pref} />
+            </Suspense>
         </div>
     );
 }
