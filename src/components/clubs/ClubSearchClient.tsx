@@ -8,11 +8,30 @@ import {
     ChevronDown,
     SlidersHorizontal,
     MapPin,
+    Clock,
+    Map,
 } from "lucide-react";
 import { type Club } from "@prisma/client";
 import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
+
+/** 都道府県の地理順（北海道→沖縄）— 表示順の基準 */
+const PREFECTURE_ORDER: string[] = [
+    "北海道",
+    "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
+    "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
+    "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県", "静岡県", "愛知県",
+    "三重県", "滋賀県", "京都府", "大阪府", "兵庫県", "奈良県", "和歌山県",
+    "鳥取県", "島根県", "岡山県", "広島県", "山口県",
+    "徳島県", "香川県", "愛媛県", "高知県",
+    "福岡県", "佐賀県", "長崎県", "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
+];
+
+const getPrefectureIndex = (area: string): number => {
+    const idx = PREFECTURE_ORDER.indexOf(area);
+    return idx === -1 ? 999 : idx;
+};
 
 // ==============================================================================
 // 1. 类型定义与常量配置
@@ -99,12 +118,15 @@ interface ClubSearchClientProps {
     initialClubs: Club[];
 }
 
+type SortMode = "area" | "time";
+
 const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
     // --- 状态管理 (State Management) ---
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all"); // 当前选中的大区
     const [activePref, setActivePref] = useState<string | "all">("all");        // 当前选中的县
     const [searchQuery, setSearchQuery] = useState("");                         // 文本搜索关键词
     const [isFilterExpanded, setIsFilterExpanded] = useState(true);             // 筛选面板展开状态
+    const [sortBy, setSortBy] = useState<SortMode>("area");                     // 默认按都道府県地理顺序
 
     // --- 派生状态 (Derived State) ---
 
@@ -150,6 +172,19 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
             return matchQuery && matchLocation;
         });
     }, [searchQuery, activeRegion, activePref, initialClubs]);
+
+    /** 在筛选结果上按「地区顺序」或「时间」排序 */
+    const sortedClubs = useMemo(() => {
+        const list = [...filteredClubs];
+        if (sortBy === "time") {
+            const toTime = (d: Date | string | null | undefined) =>
+                d ? new Date(d).getTime() : 0;
+            list.sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
+            return list;
+        }
+        list.sort((a, b) => getPrefectureIndex(a.area) - getPrefectureIndex(b.area));
+        return list;
+    }, [filteredClubs, sortBy]);
 
     // 重置所有筛选条件
     const handleReset = () => {
@@ -353,8 +388,8 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
 
                     {/* ==================== 区域 3: 搜索结果展示 ==================== */}
                     <div className="max-w-6xl mx-auto">
-                        {/* 结果统计与标签 */}
-                        <div className="flex items-end justify-between mb-8 pb-4 border-b border-gray-200">
+                        {/* 结果统计与排序、标签 */}
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
                                     {filteredClubs.length}
@@ -364,8 +399,43 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                 </span>
                             </div>
 
-                            {/* 激活状态展示 (Breadcrumbs style) */}
-                            <div className="hidden md:flex gap-2">
+                            {/* 右侧：排序 + 筛选标签 */}
+                            <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+                                {/* 排序切换：默认按地区顺序，可切换为按时间 */}
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">
+                                        並び順
+                                    </span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSortBy("area")}
+                                        className={cn(
+                                            "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-colors",
+                                            sortBy === "area"
+                                                ? "bg-sumo-brand text-white border-sumo-brand shadow-sm"
+                                                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                                        )}
+                                    >
+                                        <Map size={14} />
+                                        地域順
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSortBy("time")}
+                                        className={cn(
+                                            "inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border transition-colors",
+                                            sortBy === "time"
+                                                ? "bg-sumo-brand text-white border-sumo-brand shadow-sm"
+                                                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                                        )}
+                                    >
+                                        <Clock size={14} />
+                                        新着順
+                                    </button>
+                                </div>
+
+                                {/* 激活状态展示 (Breadcrumbs style) */}
+                                <div className="hidden md:flex gap-2">
                                 {searchQuery && (
                                     <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
                                         {searchQuery}
@@ -392,13 +462,14 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                                         </button>
                                     </span>
                                 )}
+                                </div>
                             </div>
                         </div>
 
                         {/* 结果列表 (Grid Layout) */}
                         {filteredClubs.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                                {filteredClubs.map((club, index) => (
+                                {sortedClubs.map((club, index) => (
                                     <div
                                         key={club.id}
                                         className="opacity-0 card-enter-active"
