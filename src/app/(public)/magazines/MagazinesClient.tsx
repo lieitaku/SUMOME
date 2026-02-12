@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { ArrowRight, BookOpen, Search, X, Filter, ChevronDown, MapPin } from "lucide-react";
@@ -65,11 +65,35 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
 // ==============================================================================
 
 interface MagazinesClientProps {
-    initialMagazines: Magazine[];
-    regions: string[]; // 保留这个 prop 以备后用
+    initialMagazines?: Magazine[] | null;
+    regions?: string[];
 }
 
-export default function MagazinesClient({ initialMagazines }: MagazinesClientProps) {
+export default function MagazinesClient({ initialMagazines: initialMagazinesProp, regions: regionsProp }: MagazinesClientProps = {}) {
+    const [magazinesFromApi, setMagazinesFromApi] = useState<Magazine[] | null>(null);
+    const [magazinesLoading, setMagazinesLoading] = useState(typeof initialMagazinesProp === "undefined");
+    const [magazinesError, setMagazinesError] = useState<string | null>(null);
+    const initialMagazines = initialMagazinesProp ?? magazinesFromApi ?? [];
+
+    const regions = useMemo(() => {
+        if (regionsProp && regionsProp.length > 0) return regionsProp;
+        return Array.from(new Set(initialMagazines.map((m) => m.region)));
+    }, [regionsProp, initialMagazines]);
+
+    useEffect(() => {
+        if (typeof initialMagazinesProp !== "undefined") return;
+        setMagazinesLoading(true);
+        setMagazinesError(null);
+        fetch("/api/magazines")
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to load");
+                return res.json();
+            })
+            .then((data: Magazine[]) => setMagazinesFromApi(data))
+            .catch(() => setMagazinesError("読み込みに失敗しました。"))
+            .finally(() => setMagazinesLoading(false));
+    }, [initialMagazinesProp]);
+
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all");
     const [activePref, setActivePref] = useState<string | "all">("all");
     const [searchQuery, setSearchQuery] = useState("");
@@ -330,10 +354,16 @@ export default function MagazinesClient({ initialMagazines }: MagazinesClientPro
                     </div>
                 </section>
 
-                {/* ==================== 3. Magazine Grid (100% 复刻) ==================== */}
+                {/* ==================== 3. Magazine Grid ==================== */}
                 <section className="relative pb-32 px-6 z-20">
                     <div className="container mx-auto max-w-6xl">
-                        {filteredMagazines.length > 0 ? (
+                        {magazinesError ? (
+                            <div className="py-24 text-center text-gray-500 text-sm">{magazinesError}</div>
+                        ) : magazinesLoading && initialMagazines.length === 0 ? (
+                            <div className="flex justify-center py-24">
+                                <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
+                            </div>
+                        ) : filteredMagazines.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
                                 {filteredMagazines.map((mag) => (
                                     <div key={mag.id} className="group block relative flex flex-col">

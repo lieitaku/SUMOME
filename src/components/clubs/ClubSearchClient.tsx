@@ -114,13 +114,32 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
 // ==============================================================================
 
 interface ClubSearchClientProps {
-    /** 从服务端传入的初始俱乐部列表数据 */
-    initialClubs: Club[];
+    /** 可选：服务端传入的初始数据；不传时由客户端从 /api/clubs 拉取 */
+    initialClubs?: Club[] | null;
 }
 
 type SortMode = "area" | "time";
 
-const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
+const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientProps = {}) => {
+    const [clubsFromApi, setClubsFromApi] = useState<Club[] | null>(null);
+    const [clubsLoading, setClubsLoading] = useState(typeof initialClubsProp === "undefined");
+    const [clubsError, setClubsError] = useState<string | null>(null);
+    const initialClubs = initialClubsProp ?? clubsFromApi ?? [];
+
+    useEffect(() => {
+        if (typeof initialClubsProp !== "undefined") return;
+        setClubsLoading(true);
+        setClubsError(null);
+        fetch("/api/clubs")
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to load");
+                return res.json();
+            })
+            .then((data: Club[]) => setClubsFromApi(data))
+            .catch(() => setClubsError("読み込みに失敗しました。"))
+            .finally(() => setClubsLoading(false));
+    }, [initialClubsProp]);
+
     // --- 状态管理 (State Management) ---
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all"); // 当前选中的大区
     const [activePref, setActivePref] = useState<string | "all">("all");        // 当前选中的县
@@ -501,7 +520,15 @@ const ClubSearchClient = ({ initialClubs }: ClubSearchClientProps) => {
                         </div>
 
                         {/* 结果列表：渐进式渲染，先显示首屏再分批追加，避免从地区切到全国时卡顿 */}
-                        {filteredClubs.length > 0 ? (
+                        {clubsError ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
+                                <p className="text-gray-500 text-sm">{clubsError}</p>
+                            </div>
+                        ) : clubsLoading && initialClubs.length === 0 ? (
+                            <div className="flex justify-center py-24">
+                                <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
+                            </div>
+                        ) : filteredClubs.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {clubsToRender.map((club, index) => {
