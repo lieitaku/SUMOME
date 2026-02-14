@@ -4,7 +4,7 @@ import React, { useState, useTransition } from "react";
 import Link from "@/components/ui/TransitionLink";
 import { usePathname } from "next/navigation";
 import {
-    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2, ExternalLink, Inbox, Star
+    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2, ExternalLink, Inbox, Star, HelpCircle
 } from "lucide-react";
 
 // 引入刚才修复好的 Server Action
@@ -129,13 +129,14 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         </>
                     )}
 
-                    {/* 系统设置 */}
-                    {role === "ADMIN" && (
-                        <>
-                            <SectionLabel label="System" />
+                    {/* 系统：設定（仅管理员）、操作ガイド（全员） */}
+                    <>
+                        <SectionLabel label="System" />
+                        {role === "ADMIN" && (
                             <NavItem href="/admin/settings" icon={<Settings size={18} />} label="設定" activePath={pathname} onClick={closeMenu} />
-                        </>
-                    )}
+                        )}
+                        <NavItem href="/admin/guide" icon={<HelpCircle size={18} />} label="操作ガイド" activePath={pathname} onClick={closeMenu} />
+                    </>
                 </nav>
 
                 {/* 底部用户信息与登出区域 (Footer User Area) */}

@@ -22,7 +22,7 @@ export default async function AdminLayout({
     const role = user?.role ?? "OWNER";
 
     return (
-        <div className="min-h-screen bg-[#F4F5F7] font-sans text-gray-900 overflow-x-hidden">
+        <div className="min-h-screen bg-[#F4F5F7] font-sans text-gray-900">
 
             {/* --- 🚀 全局通知容器 (Sonner) --- */}
             <Toaster
