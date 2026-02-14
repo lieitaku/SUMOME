@@ -297,12 +297,57 @@ export async function toggleBannerActive(id: string) {
   }
 }
 
-// 更新排序
+// 更新排序（同类别内插入并顺延，与 updateBanner 一致）
 export async function updateBannerOrder(id: string, newOrder: number) {
   try {
-    await prisma.banner.update({
+    const current = await prisma.banner.findUnique({
       where: { id },
-      data: { sortOrder: newOrder },
+      select: { sortOrder: true, category: true },
+    });
+    if (!current) {
+      return { success: false, error: "バナーが見つかりません" };
+    }
+    const oldOrder = current.sortOrder;
+    const newSortOrder = Math.max(0, newOrder);
+
+    await prisma.$transaction(async (tx) => {
+      if (newSortOrder !== oldOrder) {
+        if (newSortOrder < oldOrder) {
+          const others = await tx.banner.findMany({
+            where: {
+              category: current.category,
+              id: { not: id },
+              sortOrder: { gte: newSortOrder, lt: oldOrder },
+            },
+            orderBy: { sortOrder: "desc" },
+          });
+          for (const o of others) {
+            await tx.banner.update({
+              where: { id: o.id },
+              data: { sortOrder: o.sortOrder + 1 },
+            });
+          }
+        } else {
+          const others = await tx.banner.findMany({
+            where: {
+              category: current.category,
+              id: { not: id },
+              sortOrder: { gt: oldOrder, lte: newSortOrder },
+            },
+            orderBy: { sortOrder: "asc" },
+          });
+          for (const o of others) {
+            await tx.banner.update({
+              where: { id: o.id },
+              data: { sortOrder: o.sortOrder - 1 },
+            });
+          }
+        }
+      }
+      await tx.banner.update({
+        where: { id },
+        data: { sortOrder: newSortOrder },
+      });
     });
 
     revalidatePath("/admin/banners");

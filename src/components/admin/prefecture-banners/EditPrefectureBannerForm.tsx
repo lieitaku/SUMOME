@@ -4,6 +4,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ImageUploader from "@/components/admin/ui/ImageUploader";
+import MainImagePositionEditor, {
+  parsePositionString,
+  formatPositionString,
+  parseScaleValue,
+} from "@/components/admin/clubs/MainImagePositionEditor";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import { upsertPrefectureBanner, deletePrefectureBanner } from "@/lib/actions/prefectureBanners";
@@ -15,6 +20,8 @@ const formSchema = z.object({
   pref: z.string().min(1),
   image: z.string().min(1, "画像をアップロードするか、URLを入力してください"),
   alt: z.string().optional(),
+  imagePosition: z.string().optional(),
+  imageScale: z.union([z.string(), z.number()]).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -23,12 +30,14 @@ interface EditPrefectureBannerFormProps {
   pref: string;
   prefectureName: string;
   initialBanner: PrefectureBanner | null;
+  defaultDisplayImage?: string;
 }
 
 export default function EditPrefectureBannerForm({
   pref,
   prefectureName,
   initialBanner,
+  defaultDisplayImage = "",
 }: EditPrefectureBannerFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -36,8 +45,10 @@ export default function EditPrefectureBannerForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       pref,
-      image: initialBanner?.image ?? "",
+      image: initialBanner?.image ?? defaultDisplayImage ?? "",
       alt: initialBanner?.alt ?? "",
+      imagePosition: initialBanner?.imagePosition ?? "50,50",
+      imageScale: initialBanner?.imageScale != null ? String(initialBanner.imageScale) : "1",
     },
   });
 
@@ -51,6 +62,8 @@ export default function EditPrefectureBannerForm({
     formData.append("pref", data.pref);
     formData.append("image", data.image);
     formData.append("alt", data.alt ?? "");
+    formData.append("imagePosition", data.imagePosition ?? "50,50");
+    formData.append("imageScale", String(data.imageScale ?? "1"));
     handleSubmit(upsertPrefectureBanner, formData);
   };
 
@@ -133,6 +146,19 @@ export default function EditPrefectureBannerForm({
               onChange={(url) => form.setValue("image", url)}
               bucket="images"
             />
+            {form.watch("image") && (
+              <MainImagePositionEditor
+                imageUrl={form.watch("image")}
+                position={parsePositionString(form.watch("imagePosition"))}
+                scale={parseScaleValue(form.watch("imageScale"))}
+                onPositionChange={(x, y) =>
+                  form.setValue("imagePosition", formatPositionString({ x, y }), { shouldDirty: true })
+                }
+                onScaleChange={(s) =>
+                  form.setValue("imageScale", String(s), { shouldDirty: true })
+                }
+              />
+            )}
             <p className="text-[11px] text-gray-500">
               該当県にクラブがない場合でも、ここで設定した画像が「プレースホルダー」として県ページに表示されます。
             </p>

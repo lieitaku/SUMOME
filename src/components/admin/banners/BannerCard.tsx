@@ -10,12 +10,19 @@ import { Banner } from "@prisma/client";
 /** カード表示用：API からの JSON では sponsorTier が欠ける場合があるため optional */
 type BannerForCard = Omit<Banner, "sponsorTier"> & { sponsorTier?: "OFFICIAL" | "LOCAL" | null };
 
+export type DragHandleProps = {
+    listeners: Record<string, unknown>;
+    attributes: Record<string, unknown>;
+};
+
 interface Props {
     banner: BannerForCard;
     index: number;
+    /** 拖拽排序时传入，序号徽章作为 handle */
+    dragHandleProps?: DragHandleProps;
 }
 
-export default function BannerCard({ banner, index }: Props) {
+export default function BannerCard({ banner, index, dragHandleProps }: Props) {
     const [isPending, startTransition] = useTransition();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -42,8 +49,13 @@ export default function BannerCard({ banner, index }: Props) {
                     className="object-contain p-2"
                     sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 />
-                {/* 順番バッジ */}
-                <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1">
+                {/* 順番バッジ（支持拖拽 handle） */}
+                <div
+                    className={`absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 ${dragHandleProps ? "cursor-grab active:cursor-grabbing touch-none" : ""}`}
+                    title={dragHandleProps ? "ドラッグで順序を変更" : undefined}
+                    {...(dragHandleProps?.attributes ?? {})}
+                    {...(dragHandleProps?.listeners ?? {})}
+                >
                     <GripVertical size={10} />
                     {index + 1}
                 </div>

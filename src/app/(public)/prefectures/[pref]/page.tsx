@@ -108,6 +108,17 @@ export default async function PrefecturePage({ params }: PageProps) {
     ? [featuredClub.area, featuredClub.city, featuredClub.address].filter(Boolean).join(" ")
     : "";
 
+  type BannerWithPosition = { imagePosition?: string | null; imageScale?: number | null };
+  const bannerRecord = customBanner as (BannerWithPosition & typeof customBanner) | null;
+  const bannerPosition = bannerRecord?.imagePosition ?? "50,50";
+  const [posX, posY] = bannerPosition.split(",").map((s: string) => {
+    const n = Number(s.trim());
+    return Number.isNaN(n) ? 50 : Math.min(100, Math.max(0, n));
+  });
+  const bannerScale = bannerRecord?.imageScale != null ? Number(bannerRecord.imageScale) : 1;
+  const bannerBgPosition = `${posX}% ${posY}%`;
+  const bannerBgSize = `${100 * bannerScale}%`;
+
   const ceramicStyle = {
     borderBottomColor: theme.color,
     boxShadow: `0 4px 10px -2px ${theme.shadow}, 0 2px 4px -2px ${theme.shadow}`,
@@ -328,10 +339,15 @@ export default async function PrefecturePage({ params }: PageProps) {
                     className="group relative aspect-[21/9] rounded-2xl overflow-hidden shadow-lg block ceramic-3d-hover ring-1 ring-black/5"
                     style={{ "--hover-shadow": theme.shadow } as React.CSSProperties}
                   >
-                    <img
-                      src={displayData.bannerImg}
-                      alt={bannerAlt}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    <div
+                      className="absolute inset-0 bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+                      style={{
+                        backgroundImage: `url(${displayData.bannerImg})`,
+                        backgroundPosition: bannerBgPosition,
+                        backgroundSize: bannerBgSize,
+                      }}
+                      role="img"
+                      aria-label={bannerAlt}
                     />
                     <Link
                       href={clubDetailLink}
@@ -340,31 +356,31 @@ export default async function PrefecturePage({ params }: PageProps) {
                     >
                       <span className="sr-only">View Club</span>
                     </Link>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8 pointer-events-none">
-                      <div className="text-white w-full flex justify-between items-end">
-                        <div className="pointer-events-auto">
-                          <p className="text-[10px] font-bold tracking-widest mb-2 flex items-center gap-2 opacity-80 border-b border-white/30 pb-2">
-                            <Camera size={12} /> LOCAL FEATURE
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 min-[400px]:p-8 pointer-events-none">
+                      <div className="text-white w-full flex flex-col gap-3 md:flex-row md:gap-0 md:justify-between md:items-end">
+                        <div className="pointer-events-auto min-w-0">
+                          <p className="font-bold tracking-widest mb-2 flex items-center gap-2 opacity-80 border-b border-white/30 pb-2 text-[clamp(0.5rem,1.8vw,0.625rem)]">
+                            <Camera className="w-3 h-3 min-[400px]:w-[12px] min-[400px]:h-[12px] shrink-0" /> LOCAL FEATURE
                           </p>
-                          <p className="font-serif font-bold text-xl md:text-2xl tracking-wide flex items-center gap-2 transition-colors">
+                          <p className="font-serif font-bold tracking-wide flex items-center gap-2 transition-colors text-[clamp(1rem,4vw,1.5rem)]">
                             {bannerTitle}
-                            <ArrowRight size={20} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                            <ArrowRight className="w-4 h-4 min-[400px]:w-5 min-[400px]:h-5 shrink-0 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                           </p>
                           {/* 俱乐部具体地址 */}
                           {clubAddress && (
-                            <p className="text-[11px] text-white/60 mt-2 flex items-center gap-1.5">
-                              <MapPin size={10} className="shrink-0" />
+                            <p className="text-white/60 mt-2 flex items-center gap-1.5 text-[clamp(0.625rem,1.5vw,0.6875rem)]">
+                              <MapPin className="w-2.5 h-2.5 min-[400px]:w-[10px] min-[400px]:h-[10px] shrink-0" />
                               {clubAddress}
                             </p>
                           )}
                         </div>
-                        <div className="hidden md:block pointer-events-auto relative z-10">
+                        <div className="pointer-events-auto relative z-10 shrink-0">
                           <Link
                             href={recruitLink}
-                            className="flex items-center gap-2 text-white px-5 py-2.5 rounded-full font-bold text-xs tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110"
+                            className="inline-flex items-center gap-2 text-white px-4 py-2 min-[400px]:px-5 min-[400px]:py-2.5 rounded-full font-bold tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 text-[clamp(0.625rem,1.5vw,0.75rem)] whitespace-nowrap"
                             style={{ backgroundColor: theme.color }}
                           >
-                            <UserPlus size={14} />
+                            <UserPlus className="w-3 h-3 min-[400px]:w-3.5 min-[400px]:h-3.5 shrink-0" />
                             募集中
                           </Link>
                         </div>

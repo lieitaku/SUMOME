@@ -18,11 +18,14 @@ export default async function EditPrefectureBannerPage({ params }: PageProps) {
     where: { pref },
   });
 
+  const defaultDisplayImage = banner?.image ?? prefData.bannerImg ?? "";
+
   return (
     <EditPrefectureBannerForm
       pref={pref}
       prefectureName={prefData.name}
       initialBanner={banner}
+      defaultDisplayImage={defaultDisplayImage}
     />
   );
 }

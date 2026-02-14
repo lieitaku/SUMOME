@@ -1,10 +1,23 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Image as ImageIcon, Plus, Flag, Building2, Megaphone } from "lucide-react";
 import Link from "next/link";
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent,
+} from "@dnd-kit/core";
+import { SortableContext, sortableKeyboardCoordinates, rectSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import BannerCard from "@/components/admin/banners/BannerCard";
+import { updateBannerOrder } from "@/lib/actions/banners";
 import { Banner } from "@prisma/client";
+import { toast } from "sonner";
 
 type Stats = { total: number; club: number; sponsor: number; active: number };
 
@@ -33,15 +46,65 @@ function Fallback() {
     );
 }
 
+function SortableBannerCard({ banner, index }: { banner: Banner; index: number }) {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+        id: banner.id,
+    });
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+    };
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className={isDragging ? "relative z-50 opacity-90 scale-[1.02]" : ""}
+        >
+            <BannerCard
+                banner={banner}
+                index={index}
+                dragHandleProps={{ listeners, attributes }}
+            />
+        </div>
+    );
+}
+
 function Content({
     banners,
     stats,
     category,
+    onRefetch,
 }: {
     banners: Banner[];
     stats: Stats;
     category?: string;
+    onRefetch: () => void;
 }) {
+    const [orderPending, setOrderPending] = useState(false);
+    const sensors = [
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    ];
+    const handleDragEnd = useCallback(
+        async (event: DragEndEvent) => {
+            const { active, over } = event;
+            if (!over || active.id === over.id) return;
+            const oldIndex = banners.findIndex((b) => b.id === active.id);
+            const newIndex = banners.findIndex((b) => b.id === over.id);
+            if (oldIndex === -1 || newIndex === -1) return;
+            setOrderPending(true);
+            const result = await updateBannerOrder(active.id as string, newIndex);
+            setOrderPending(false);
+            if (result?.success) {
+                toast.success("順序を更新しました");
+                onRefetch();
+            } else {
+                toast.error(result?.error ?? "順序の更新に失敗しました");
+            }
+        },
+        [banners, onRefetch]
+    );
+
     const tabs = [
         { key: "", label: "すべて", count: stats.total, icon: Flag },
         { key: "club", label: "クラブ", count: stats.club, icon: Building2 },
@@ -106,11 +169,22 @@ function Content({
                     </Link>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {banners.map((banner, index) => (
-                        <BannerCard key={banner.id} banner={banner} index={index} />
-                    ))}
-                </div>
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={banners.map((b) => b.id)}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 ${orderPending ? "pointer-events-none opacity-70" : ""}`}>
+                            {banners.map((banner, index) => (
+                                <SortableBannerCard key={banner.id} banner={banner} index={index} />
+                            ))}
+                        </div>
+                    </SortableContext>
+                </DndContext>
             )}
         </>
     );
@@ -124,6 +198,22 @@ export default function BannersListClient({ initialCategory }: Props) {
     const [data, setData] = useState<{ banners: Banner[]; stats: Stats } | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const refetch = useCallback(() => {
+        const url = initialCategory
+            ? `/admin/api/banners?category=${encodeURIComponent(initialCategory)}`
+            : "/admin/api/banners";
+        fetch(url)
+            .then((res) => {
+                if (!res.ok) throw new Error(res.status === 401 ? "Unauthorized" : "Failed to load");
+                return res.json();
+            })
+            .then(setData)
+            .catch((err) => {
+                setError(err instanceof Error ? err.message : "Failed to load");
+                setData(null);
+            });
+    }, [initialCategory]);
 
     useEffect(() => {
         const url = initialCategory
@@ -152,5 +242,12 @@ export default function BannersListClient({ initialCategory }: Props) {
         );
     }
     if (loading || !data) return <Fallback />;
-    return <Content banners={data.banners} stats={data.stats} category={initialCategory} />;
+    return (
+        <Content
+            banners={data.banners}
+            stats={data.stats}
+            category={initialCategory}
+            onRefetch={refetch}
+        />
+    );
 }

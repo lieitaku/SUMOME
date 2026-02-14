@@ -32,7 +32,8 @@ const Header = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const next = window.scrollY > 10;
+      setIsScrolled((prev) => (prev === next ? prev : next));
     };
     window.addEventListener("scroll", handleScroll);
     handleScroll();
@@ -139,14 +140,14 @@ const Header = () => {
           }}
         >
 
-          {/* --- A. Logo 区域 --- */}
+          {/* --- A. Logo 区域（仅 iPad md/lg 缩小，手机与桌面保持原样）--- */}
           <Link
             href="/"
-            className="group relative flex items-center gap-2 sm:gap-3 md:gap-4 select-none shrink-0"
+            className="group relative flex items-center gap-2 sm:gap-3 md:gap-2 lg:gap-2.5 xl:gap-4 2xl:gap-4 select-none shrink-0 min-w-0 md:max-w-[min(38%,240px)] lg:max-w-[min(38%,240px)] xl:max-w-none 2xl:max-w-none"
             onClick={() => setMenuOpen(false)}
           >
-            {/* SUMOME 文字 - 响应式字号 */}
-            <div className="flex items-baseline font-serif font-black text-2xl sm:text-2xl md:text-3xl tracking-wider sm:tracking-widest leading-none shrink-0">
+            {/* SUMOME 文字 - 手机/桌面原样，仅 md/lg 缩小 */}
+            <div className="flex items-baseline font-serif font-black text-2xl sm:text-2xl md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl tracking-wider sm:tracking-widest leading-none shrink-0">
               {["S", "U", "M", "O", "M", "E"].map((char, index) => (
                 <span
                   key={index}
@@ -157,15 +158,15 @@ const Header = () => {
               ))}
             </div>
 
-            {/* 分隔线 - 响应式高度 */}
-            <span className="h-6 sm:h-6 md:h-8 w-px bg-gray-200 shrink-0"></span>
+            {/* 分隔线 - 手机/桌面原样，仅 md/lg 缩小 */}
+            <span className="h-6 sm:h-6 md:h-4 lg:h-5 xl:h-8 2xl:h-8 w-px bg-gray-200 shrink-0"></span>
 
-            {/* 日语副标题 - 响应式字号 */}
+            {/* 日语副标题 - 手机/桌面原样，仅 md/lg 缩小 */}
             <div className="flex flex-col justify-center items-start pt-0.5 shrink-0">
-              <span className="text-xs sm:text-sm md:text-base font-serif font-bold tracking-[0.12em] sm:tracking-[0.15em] md:tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
+              <span className="text-xs sm:text-sm md:text-[9px] lg:text-[10px] xl:text-base 2xl:text-base font-serif font-bold tracking-[0.12em] sm:tracking-[0.15em] md:tracking-[0.1em] lg:tracking-[0.12em] xl:tracking-[0.2em] 2xl:tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
                 スモウメモリー
               </span>
-              <span className="text-sm sm:text-base md:text-lg font-serif font-medium tracking-normal sm:tracking-wider md:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
+              <span className="text-sm sm:text-base md:text-[10px] lg:text-xs xl:text-lg 2xl:text-lg font-serif font-medium tracking-normal sm:tracking-wider md:tracking-wider lg:tracking-widest xl:tracking-widest 2xl:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
                 相撲の思い出
               </span>
             </div>
