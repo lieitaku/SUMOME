@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, Link as LinkIcon, Hash, Type, Building2, Megaphone } from "lucide-react";
 import { createBanner, updateBanner, deleteBanner } from "@/lib/actions/banners";
-import { Banner, BannerCategory } from "@prisma/client";
+import { Banner, BannerCategory, BannerSponsorTier } from "@prisma/client";
 import ImageUploader from "@/components/admin/ui/ImageUploader";
 
 interface Props {
@@ -24,6 +24,7 @@ export default function BannerForm({ initialData }: Props) {
         alt: initialData?.alt || "",
         link: initialData?.link || "",
         category: initialData?.category || "club" as BannerCategory,
+        sponsorTier: (initialData?.category === "sponsor" ? (initialData?.sponsorTier ?? "LOCAL") : "LOCAL") as BannerSponsorTier,
         sortOrder: initialData?.sortOrder ?? 0,
         isActive: initialData?.isActive ?? true,
     });
@@ -53,6 +54,9 @@ export default function BannerForm({ initialData }: Props) {
             fd.append("alt", formData.alt || formData.name);
             fd.append("link", formData.link);
             fd.append("category", formData.category);
+            if (formData.category === "sponsor") {
+                fd.append("sponsorTier", formData.sponsorTier);
+            }
             fd.append("sortOrder", formData.sortOrder.toString());
             fd.append("isActive", formData.isActive.toString());
 
@@ -185,6 +189,35 @@ export default function BannerForm({ initialData }: Props) {
                             </button>
                         </div>
                     </div>
+
+                    {/* スポンサーランク（スポンサーのみ） */}
+                    {formData.category === "sponsor" && (
+                        <div>
+                            <label className={labelClass}>スポンサーランク</label>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, sponsorTier: "OFFICIAL" })}
+                                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 font-bold text-sm transition-all ${formData.sponsorTier === "OFFICIAL"
+                                        ? "border-amber-600 bg-amber-50 text-amber-700"
+                                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                                        }`}
+                                >
+                                    高级（OFFICIAL TOP PARTNER）
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData({ ...formData, sponsorTier: "LOCAL" })}
+                                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 font-bold text-sm transition-all ${formData.sponsorTier === "LOCAL"
+                                        ? "border-sumo-brand bg-sumo-brand/10 text-sumo-brand"
+                                        : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
+                                        }`}
+                                >
+                                    低级（LOCAL SUPPORTER）
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                     {/* 名前 */}
                     <div>

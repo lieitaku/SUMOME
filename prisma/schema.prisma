@@ -166,6 +166,12 @@ enum BannerCategory {
   sponsor  // 赞助商
 }
 
+// 赞助商等级：高级（OFFICIAL TOP PARTNER）/ 低级（LOCAL SUPPORTER）
+enum BannerSponsorTier {
+  OFFICIAL
+  LOCAL
+}
+
 // 各页面旗子显示模式：全部 / 仅俱乐部 / 仅赞助商 / 混合(先俱乐部后赞助商)
 enum BannerDisplayMode {
   all
@@ -175,14 +181,15 @@ enum BannerDisplayMode {
 }
 
 model Banner {
-  id        String         @id @default(cuid())
-  name      String
-  image     String
-  alt       String?
-  link      String?
-  category  BannerCategory @default(club)
-  sortOrder Int            @default(0)
-  isActive  Boolean        @default(true)
+  id          String              @id @default(cuid())
+  name        String
+  image       String
+  alt         String?
+  link        String?
+  category    BannerCategory      @default(club)
+  sponsorTier BannerSponsorTier?  @default(LOCAL) // 仅 category=sponsor 时使用；未定时默认 LOCAL，确定后再可改为 OFFICIAL
+  sortOrder   Int                 @default(0)
+  isActive    Boolean             @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -205,11 +212,12 @@ model PrefectureBanner {
 
 // 旗子在各页面的显示设置（单例，供后台「显示设置」使用）
 model BannerDisplaySetting {
-  id                   String             @id @default("default")
-  homeDisplayMode      BannerDisplayMode  @default(mixed)
-  prefTopDisplayMode   BannerDisplayMode  @default(mixed)
-  prefSidebarDisplayMode BannerDisplayMode @default(mixed)
-  updatedAt            DateTime           @updatedAt
+  id                     String             @id @default("default")
+  homeDisplayMode        BannerDisplayMode  @default(mixed)
+  homeSponsorTierFilter  String             @default("all") // "all" | "official_only" 首页赞助商范围
+  prefTopDisplayMode     BannerDisplayMode  @default(mixed)
+  prefSidebarDisplayMode BannerDisplayMode  @default(mixed)
+  updatedAt              DateTime           @updatedAt
 }
 
 // 首页「注目の相撲クラブ」显示的 3 个俱乐部（按顺序 1 / 2 / 3）

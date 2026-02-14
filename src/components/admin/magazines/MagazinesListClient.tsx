@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen, Calendar, Pencil, ExternalLink, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
+import SortOrderBar, { type SortMode } from "@/components/admin/ui/SortOrderBar";
 
 const PAGE_SIZE = 12;
 
@@ -18,12 +20,13 @@ export type MagazineListItem = {
     published: boolean;
 };
 
-function buildSearchParams(params: { q?: string; region?: string; pref?: string; page?: number }) {
+function buildSearchParams(params: { q?: string; region?: string; pref?: string; page?: number; sort?: SortMode }) {
     const sp = new URLSearchParams();
     if (params.q) sp.set("q", params.q);
     if (params.region) sp.set("region", params.region);
     if (params.pref) sp.set("pref", params.pref);
     if (params.page && params.page > 1) sp.set("page", String(params.page));
+    if (params.sort === "time") sp.set("sort", "time");
     return sp.toString();
 }
 
@@ -59,6 +62,8 @@ function Content({
     q,
     region,
     pref,
+    sort,
+    onSortChange,
 }: {
     magazines: MagazineListItem[];
     total: number;
@@ -67,13 +72,18 @@ function Content({
     q?: string;
     region?: string;
     pref?: string;
+    sort: SortMode;
+    onSortChange: (v: SortMode) => void;
 }) {
-    const query = { q, region, pref };
+    const query = { q, region, pref, sort };
     const hasPrev = page > 1;
     const hasNext = page < totalPages;
 
     return (
         <>
+            <div className="flex flex-wrap items-center justify-end gap-4 mb-6">
+                <SortOrderBar value={sort} onChange={onSortChange} />
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {magazines.map((mag) => (
                     <div key={mag.id} className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
@@ -150,7 +160,7 @@ function Content({
                     <div className="flex items-center gap-2">
                         {hasPrev ? (
                             <Link
-                                href={`/admin/magazines?${buildSearchParams({ ...query, page: page - 1 })}`}
+                                href={`/admin/magazines?${buildSearchParams({ ...query, page: page - 1, sort })}`}
                                 className="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
                             >
                                 <ChevronLeft size={18} /> 前へ
@@ -165,7 +175,7 @@ function Content({
                         </span>
                         {hasNext ? (
                             <Link
-                                href={`/admin/magazines?${buildSearchParams({ ...query, page: page + 1 })}`}
+                                href={`/admin/magazines?${buildSearchParams({ ...query, page: page + 1, sort })}`}
                                 className="flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
                             >
                                 次へ <ChevronRight size={18} />
@@ -187,12 +197,17 @@ interface Props {
     initialRegion?: string;
     initialPref?: string;
     initialPage: number;
+    initialSort?: SortMode;
 }
 
-export default function MagazinesListClient({ initialQ, initialRegion, initialPref, initialPage }: Props) {
+export default function MagazinesListClient({ initialQ, initialRegion, initialPref, initialPage, initialSort = "area" }: Props) {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [data, setData] = useState<{ magazines: MagazineListItem[]; total: number; totalPages: number; page: number } | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const sort: SortMode = searchParams.get("sort") === "time" ? "time" : "area";
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -200,6 +215,7 @@ export default function MagazinesListClient({ initialQ, initialRegion, initialPr
         if (initialRegion) params.set("region", initialRegion);
         if (initialPref) params.set("pref", initialPref);
         if (initialPage > 1) params.set("page", String(initialPage));
+        if (sort === "time") params.set("sort", "time");
         const query = params.toString();
         const url = query ? `/admin/api/magazines?${query}` : "/admin/api/magazines";
 
@@ -216,7 +232,16 @@ export default function MagazinesListClient({ initialQ, initialRegion, initialPr
                 setData(null);
             })
             .finally(() => setLoading(false));
-    }, [initialQ, initialRegion, initialPref, initialPage]);
+    }, [initialQ, initialRegion, initialPref, initialPage, sort]);
+
+    const handleSortChange = (newSort: SortMode) => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (newSort === "area") params.delete("sort");
+        else params.set("sort", "time");
+        params.delete("page"); // 排序变更时回到第一页
+        const qs = params.toString();
+        router.push(qs ? `/admin/magazines?${qs}` : "/admin/magazines");
+    };
 
     if (error) {
         return (
@@ -235,6 +260,8 @@ export default function MagazinesListClient({ initialQ, initialRegion, initialPr
             q={initialQ}
             region={initialRegion}
             pref={initialPref}
+            sort={sort}
+            onSortChange={handleSortChange}
         />
     );
 }

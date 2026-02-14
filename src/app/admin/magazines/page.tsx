@@ -9,10 +9,11 @@ export const dynamic = "force-dynamic";
 export default async function MagazineListPage({
     searchParams,
 }: {
-    searchParams: Promise<{ q?: string; region?: string; pref?: string; page?: string }>;
+    searchParams: Promise<{ q?: string; region?: string; pref?: string; page?: string; sort?: string }>;
 }) {
-    const { q, region, pref, page: pageParam } = await searchParams;
+    const { q, region, pref, page: pageParam, sort: sortParam } = await searchParams;
     const page = Math.max(1, parseInt(String(pageParam || "1"), 10) || 1);
+    const sort = sortParam === "time" ? "time" : "area";
 
     return (
         <div className="max-w-6xl mx-auto space-y-6">
@@ -40,7 +41,13 @@ export default async function MagazineListPage({
                         className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
                     />
                 </form>
-                <RegionFilter basePath="/admin/magazines" currentRegion={region} currentPref={pref} currentQuery={q} />
+                <RegionFilter
+                    basePath="/admin/magazines"
+                    currentRegion={region}
+                    currentPref={pref}
+                    currentQuery={q}
+                    extraParams={{ sort }}
+                />
             </div>
 
             <MagazinesListClient
@@ -48,6 +55,7 @@ export default async function MagazineListPage({
                 initialRegion={region}
                 initialPref={pref}
                 initialPage={page}
+                initialSort={sort}
             />
         </div>
     );

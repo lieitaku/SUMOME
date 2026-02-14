@@ -71,13 +71,32 @@ export default async function PrefecturePage({ params }: PageProps) {
     getBannerDisplaySettings(),
   ]);
 
-  const sponsors = banners.map((b) => ({
+  const toSponsorItem = (b: (typeof banners)[0]) => ({
     id: b.id,
     image: b.image,
     alt: b.alt || b.name,
     link: b.link,
     category: b.category,
-  }));
+  });
+
+  // OFFICIAL TOP PARTNERS: 俱乐部 + 高级赞助商
+  const sponsorsTop = banners
+    .filter(
+      (b) =>
+        b.category === "club" ||
+        (b.category === "sponsor" && b.sponsorTier === "OFFICIAL")
+    )
+    .map(toSponsorItem);
+
+  // LOCAL SUPPORTERS: 俱乐部 + 低级赞助商（未设 tier 视为 LOCAL）
+  const sponsorsSidebar = banners
+    .filter(
+      (b) =>
+        b.category === "club" ||
+        (b.category === "sponsor" && b.sponsorTier !== "OFFICIAL")
+    )
+    .map(toSponsorItem);
+
   const theme = getPrefectureTheme(prefSlug);
   const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;
   const bannerTitle = featuredClub
@@ -206,7 +225,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                     <RabbitWalkingBanner
                       scale={1}
                       containerHeight="500px"
-                      sponsors={sponsors}
+                      sponsors={sponsorsTop}
                       displayMode={displaySettings.prefTopDisplayMode}
                     />
                   </div>
@@ -263,7 +282,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                       className="px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono font-bold shadow-sm"
                       style={{ color: theme.color }}
                     >
-                      {sponsors.length}
+                      {sponsorsSidebar.length}
                     </span>
                   </div>
 
@@ -280,7 +299,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                       <RabbitWalkingBanner
                         scale={1}
                         containerHeight="300px"
-                        sponsors={sponsors}
+                        sponsors={sponsorsSidebar}
                         displayMode={displaySettings.prefSidebarDisplayMode}
                       />
                     </div>

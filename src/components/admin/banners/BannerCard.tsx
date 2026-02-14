@@ -52,7 +52,7 @@ export default function BannerCard({ banner, index }: Props) {
 
             {/* 情報 */}
             <div className="p-3 md:p-4">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-bold text-sm text-gray-900 truncate">{banner.name}</h3>
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${banner.category === "club"
                         ? "bg-blue-100 text-blue-600"
@@ -60,6 +60,14 @@ export default function BannerCard({ banner, index }: Props) {
                         }`}>
                         {banner.category === "club" ? "クラブ" : "スポンサー"}
                     </span>
+                    {banner.category === "sponsor" && banner.sponsorTier && (
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${banner.sponsorTier === "OFFICIAL"
+                            ? "bg-amber-200 text-amber-800"
+                            : "bg-gray-100 text-gray-600"
+                            }`}>
+                            {banner.sponsorTier === "OFFICIAL" ? "OFFICIAL" : "LOCAL"}
+                        </span>
+                    )}
                 </div>
                 {banner.link && (
                     <a

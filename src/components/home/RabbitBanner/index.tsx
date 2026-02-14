@@ -64,10 +64,20 @@ export default function RabbitWalkingBanner({
     } else if (displayMode === "mixed") {
       // 混合模式：先全部俱乐部，再全部赞助商
       const clubs = originalSponsors.filter(s => s.category === "club" || !s.category);
-      const sponsors = originalSponsors.filter(s => s.category === "sponsor");
-      originalSponsors = [...clubs, ...sponsors];
+      const sponsorsList = originalSponsors.filter(s => s.category === "sponsor");
+      originalSponsors = [...clubs, ...sponsorsList];
+    } else if (displayMode === "all") {
+      // すべて表示：穿插（club → sponsor → club → sponsor …）
+      const clubs = originalSponsors.filter(s => s.category === "club" || !s.category);
+      const sponsorsList = originalSponsors.filter(s => s.category === "sponsor");
+      const interleaved: SponsorItem[] = [];
+      const maxLen = Math.max(clubs.length, sponsorsList.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (i < clubs.length) interleaved.push(clubs[i]);
+        if (i < sponsorsList.length) interleaved.push(sponsorsList[i]);
+      }
+      originalSponsors = interleaved;
     }
-    // displayMode === "all" 时保持原顺序
 
     // 如果没有赞助商，返回空
     if (originalSponsors.length === 0) {

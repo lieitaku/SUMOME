@@ -28,8 +28,8 @@ const ClubsPage = () => {
           </div>
 
           <div className="container mx-auto px-6 relative z-10">
-            {/* Title Section */}
-            <div className="text-center mb-16 md:mb-20 reveal-up">
+            {/* Title Section：不做 reveal-up，首屏始终可见，避免移动端 JS 未触发时整块不显示 */}
+            <div className="text-center mb-16 md:mb-20">
               <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 bg-white rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100">
                 <MapPin size={12} className="text-sumo-brand" />
                 <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">

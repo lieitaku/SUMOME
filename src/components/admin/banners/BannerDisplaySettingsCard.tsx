@@ -12,8 +12,14 @@ const DISPLAY_MODE_OPTIONS: { value: BannerDisplayMode; label: string }[] = [
   { value: "mixed", label: "混合（クラブ→スポンサー）" },
 ];
 
+const HOME_SPONSOR_TIER_OPTIONS: { value: "all" | "official_only"; label: string }[] = [
+  { value: "all", label: "すべてのスポンサー" },
+  { value: "official_only", label: "高级スポンサーのみ" },
+];
+
 type Settings = {
   homeDisplayMode: BannerDisplayMode;
+  homeSponsorTierFilter: "all" | "official_only";
   prefTopDisplayMode: BannerDisplayMode;
   prefSidebarDisplayMode: BannerDisplayMode;
 };
@@ -35,6 +41,7 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
     startTransition(async () => {
       const fd = new FormData();
       fd.append("homeDisplayMode", formData.homeDisplayMode);
+      fd.append("homeSponsorTierFilter", formData.homeSponsorTierFilter);
       fd.append("prefTopDisplayMode", formData.prefTopDisplayMode);
       fd.append("prefSidebarDisplayMode", formData.prefSidebarDisplayMode);
       const result = await updateBannerDisplaySettings(fd);
@@ -81,24 +88,45 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
         )}
 
         {/* 首页 */}
-        <div>
-          <label className={labelClass}>
-            <Home size={12} className="inline mr-1" />
-            トップページ（Home）の旗
-          </label>
-          <select
-            value={formData.homeDisplayMode}
-            onChange={(e) =>
-              setFormData({ ...formData, homeDisplayMode: e.target.value as BannerDisplayMode })
-            }
-            className={selectClass}
-          >
-            {DISPLAY_MODE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        <div className="space-y-3">
+          <div>
+            <label className={labelClass}>
+              <Home size={12} className="inline mr-1" />
+              トップページ（Home）の旗
+            </label>
+            <select
+              value={formData.homeDisplayMode}
+              onChange={(e) =>
+                setFormData({ ...formData, homeDisplayMode: e.target.value as BannerDisplayMode })
+              }
+              className={selectClass}
+            >
+              {DISPLAY_MODE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className={labelClass}>スポンサー表示</label>
+            <select
+              value={formData.homeSponsorTierFilter}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  homeSponsorTierFilter: e.target.value as "all" | "official_only",
+                })
+              }
+              className={selectClass}
+            >
+              {HOME_SPONSOR_TIER_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* 都道府县页 - 顶部 */}

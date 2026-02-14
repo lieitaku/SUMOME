@@ -1,15 +1,29 @@
 import React from "react";
 import { prisma } from "@/lib/db";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
+import { PREFECTURE_ORDER } from "@/lib/prefecture-order";
 import { ImageIcon, Pencil, MapPin } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
+import PrefectureBannersSortBar from "@/components/admin/prefecture-banners/PrefectureBannersSortBar";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPrefectureBannersPage() {
+type SortMode = "area" | "time";
+
+export default async function AdminPrefectureBannersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string }>;
+}) {
+  const { sort: sortParam } = await searchParams;
+  const sort: SortMode = sortParam === "time" ? "time" : "area";
+
   const [dbBanners, clubCounts] = await Promise.all([
-    prisma.prefectureBanner.findMany({ orderBy: { pref: "asc" } }),
+    prisma.prefectureBanner.findMany({
+      orderBy: { pref: "asc" },
+      select: { pref: true, image: true, alt: true, updatedAt: true },
+    }),
     prisma.club.groupBy({
       by: ["area"],
       _count: { area: true },
@@ -20,8 +34,25 @@ export default async function AdminPrefectureBannersPage() {
     clubCounts.map((c) => [c.area, c._count.area])
   );
 
-  const prefs = Object.keys(PREFECTURE_DATABASE).sort();
   const bannerByPref = new Map(dbBanners.map((b) => [b.pref, b]));
+
+  // 地域順：北海道→沖縄（与前端 clubs 一致）
+  const nameToSlug = new Map<string, string>();
+  for (const [slug, info] of Object.entries(PREFECTURE_DATABASE)) {
+    nameToSlug.set(info.name, slug);
+  }
+  const prefsAreaOrder = PREFECTURE_ORDER.map((name) => nameToSlug.get(name)).filter(
+    (s): s is string => Boolean(s)
+  );
+
+  const prefs =
+    sort === "time"
+      ? [...prefsAreaOrder].sort((a, b) => {
+          const at = bannerByPref.get(a)?.updatedAt?.getTime() ?? 0;
+          const bt = bannerByPref.get(b)?.updatedAt?.getTime() ?? 0;
+          return bt - at;
+        })
+      : prefsAreaOrder;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 font-sans">
@@ -34,11 +65,13 @@ export default async function AdminPrefectureBannersPage() {
 
       <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <p className="text-xs text-gray-500 mb-4">
-          一覧は都道府県コード順。バナーを設定すると、該当県ページで静的デフォルト（
+          一覧は「並び順」で地域順・新着順を切り替え可能。バナーを設定すると、該当県ページで静的デフォルト（
           <code className="bg-gray-100 px-1 rounded">/images/banner/banner-xxx.jpg</code>
           ）の代わりに表示されます。
         </p>
       </div>
+
+      <PrefectureBannersSortBar currentSort={sort} />
 
       {/* Mobile cards */}
       <div className="grid grid-cols-1 gap-4 md:hidden">

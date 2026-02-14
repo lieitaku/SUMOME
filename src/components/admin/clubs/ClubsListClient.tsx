@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { MapPin, Pencil } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
-import RegionFilter from "@/components/admin/ui/RegionFilter";
+import SortOrderBar, { type SortMode } from "@/components/admin/ui/SortOrderBar";
+import { getPrefectureIndex } from "@/lib/prefecture-order";
 
 export type ClubListItem = {
     id: string;
@@ -40,9 +41,20 @@ function ClubsListFallback() {
     );
 }
 
-function ClubsListContent({ clubs }: { clubs: ClubListItem[] }) {
+function ClubsListContent({
+    clubs,
+    sortBy,
+    onSortChange,
+}: {
+    clubs: ClubListItem[];
+    sortBy: SortMode;
+    onSortChange: (v: SortMode) => void;
+}) {
     return (
         <>
+            <div className="flex flex-wrap items-center justify-end gap-4 mb-4">
+                <SortOrderBar value={sortBy} onChange={onSortChange} />
+            </div>
             <div className="grid grid-cols-1 gap-4 md:hidden">
                 {clubs.map((club) => (
                     <div key={club.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
@@ -127,6 +139,8 @@ export default function ClubsListClient({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const [sortBy, setSortBy] = useState<SortMode>("area");
+
     useEffect(() => {
         const params = new URLSearchParams();
         if (initialQ) params.set("q", initialQ);
@@ -154,6 +168,18 @@ export default function ClubsListClient({
             });
     }, [initialQ, initialRegion, initialPref]);
 
+    const sortedClubs = useMemo(() => {
+        if (!clubs) return [];
+        const list = [...clubs];
+        if (sortBy === "time") {
+            const toTime = (d: string | null | undefined) => (d ? new Date(d).getTime() : 0);
+            list.sort((a, b) => toTime(b.updatedAt) - toTime(a.updatedAt));
+            return list;
+        }
+        list.sort((a, b) => getPrefectureIndex(a.area) - getPrefectureIndex(b.area));
+        return list;
+    }, [clubs, sortBy]);
+
     if (error) {
         return (
             <div className="py-12 text-center text-red-500 text-sm">
@@ -166,5 +192,11 @@ export default function ClubsListClient({
         return <ClubsListFallback />;
     }
 
-    return <ClubsListContent clubs={clubs} />;
+    return (
+        <ClubsListContent
+            clubs={sortedClubs}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+        />
+    );
 }

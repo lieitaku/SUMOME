@@ -110,7 +110,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         <>
                             <SectionLabel label="Content Management" />
                             <NavItem href="/admin/clubs" icon={<Users size={18} />} label="クラブ管理" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/pickup-clubs" icon={<Star size={18} />} label="注目クラブ（トップ）" activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/pickup-clubs" icon={<Star size={18} />} label="注目クラブ" activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/activities" icon={<Calendar size={18} />} label="活動・ニュース" activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/magazines" icon={<BookOpen size={18} />} label="広報誌データ" activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/banners" icon={<Flag size={18} />} label="バナー広告" activePath={pathname} onClick={closeMenu} />

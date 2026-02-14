@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { BannerCategory, BannerDisplayMode } from "@prisma/client";
+import { BannerCategory, BannerDisplayMode, BannerSponsorTier } from "@prisma/client";
 
 const BANNER_DISPLAY_SETTINGS_TAG = "banner-display-settings";
 
@@ -10,6 +10,7 @@ const BANNER_DISPLAY_SETTINGS_TAG = "banner-display-settings";
 
 const DEFAULT_DISPLAY_SETTINGS = {
   homeDisplayMode: "mixed" as BannerDisplayMode,
+  homeSponsorTierFilter: "all" as "all" | "official_only",
   prefTopDisplayMode: "mixed" as BannerDisplayMode,
   prefSidebarDisplayMode: "mixed" as BannerDisplayMode,
 };
@@ -36,8 +37,10 @@ async function getBannerDisplaySettingsUncached() {
         where: { id: "default" },
       });
     }
+    const homeFilter = (row as { homeSponsorTierFilter?: string } | null)?.homeSponsorTierFilter;
     return {
       homeDisplayMode: (row?.homeDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.homeDisplayMode) as BannerDisplayMode,
+      homeSponsorTierFilter: (homeFilter === "official_only" ? "official_only" : "all") as "all" | "official_only",
       prefTopDisplayMode: (row?.prefTopDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.prefTopDisplayMode) as BannerDisplayMode,
       prefSidebarDisplayMode: (row?.prefSidebarDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.prefSidebarDisplayMode) as BannerDisplayMode,
     };
@@ -66,23 +69,27 @@ export async function getBannerDisplaySettings() {
 export async function updateBannerDisplaySettings(formData: FormData) {
   try {
     const homeDisplayMode = (formData.get("homeDisplayMode") as BannerDisplayMode) || "mixed";
+    const homeSponsorTierFilterRaw = formData.get("homeSponsorTierFilter") as string | null;
     const prefTopDisplayMode = (formData.get("prefTopDisplayMode") as BannerDisplayMode) || "mixed";
     const prefSidebarDisplayMode = (formData.get("prefSidebarDisplayMode") as BannerDisplayMode) || "mixed";
 
     const validModes: BannerDisplayMode[] = ["all", "club", "sponsor", "mixed"];
     const toMode = (v: string): BannerDisplayMode =>
       validModes.includes(v as BannerDisplayMode) ? (v as BannerDisplayMode) : "mixed";
+    const homeSponsorTierFilter = homeSponsorTierFilterRaw === "official_only" ? "official_only" : "all";
 
     await prisma.bannerDisplaySetting.upsert({
       where: { id: "default" },
       create: {
         id: "default",
         homeDisplayMode: toMode(homeDisplayMode),
+        homeSponsorTierFilter,
         prefTopDisplayMode: toMode(prefTopDisplayMode),
         prefSidebarDisplayMode: toMode(prefSidebarDisplayMode),
       },
       update: {
         homeDisplayMode: toMode(homeDisplayMode),
+        homeSponsorTierFilter,
         prefTopDisplayMode: toMode(prefTopDisplayMode),
         prefSidebarDisplayMode: toMode(prefSidebarDisplayMode),
       },
@@ -130,6 +137,11 @@ export async function createBanner(formData: FormData) {
     const link = formData.get("link") as string | null;
     const category = (formData.get("category") as BannerCategory) || "club";
     const sortOrder = parseInt(formData.get("sortOrder") as string) || 0;
+    const sponsorTierRaw = formData.get("sponsorTier") as string | null;
+    const sponsorTier: BannerSponsorTier | null =
+      category === "sponsor" && (sponsorTierRaw === "OFFICIAL" || sponsorTierRaw === "LOCAL")
+        ? (sponsorTierRaw as BannerSponsorTier)
+        : null;
 
     if (!name || !image) {
       return { success: false, error: "名前と画像は必須です" };
@@ -142,6 +154,7 @@ export async function createBanner(formData: FormData) {
         alt: alt || name,
         link: link || null,
         category,
+        sponsorTier: category === "sponsor" ? (sponsorTier ?? "LOCAL") : null,
         sortOrder,
         isActive: true,
       },
@@ -167,6 +180,11 @@ export async function updateBanner(formData: FormData) {
     const category = (formData.get("category") as BannerCategory) || "club";
     const sortOrder = parseInt(formData.get("sortOrder") as string) || 0;
     const isActive = formData.get("isActive") === "true";
+    const sponsorTierRaw = formData.get("sponsorTier") as string | null;
+    const sponsorTier: BannerSponsorTier | null =
+      category === "sponsor" && (sponsorTierRaw === "OFFICIAL" || sponsorTierRaw === "LOCAL")
+        ? (sponsorTierRaw as BannerSponsorTier)
+        : null;
 
     if (!id || !name || !image) {
       return { success: false, error: "必須項目が不足しています" };
@@ -180,6 +198,7 @@ export async function updateBanner(formData: FormData) {
         alt: alt || name,
         link: link || null,
         category,
+        sponsorTier: category === "sponsor" ? (sponsorTier ?? "LOCAL") : null,
         sortOrder,
         isActive,
       },

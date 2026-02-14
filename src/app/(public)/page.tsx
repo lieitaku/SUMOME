@@ -31,7 +31,16 @@ export default async function Home() {
     getBannerDisplaySettings(),
   ]);
 
-  const sponsors = banners.map((b) => ({
+  const filteredBanners =
+    displaySettings.homeSponsorTierFilter === "official_only"
+      ? banners.filter(
+          (b) =>
+            b.category === "club" ||
+            (b.category === "sponsor" && b.sponsorTier === "OFFICIAL")
+        )
+      : banners;
+
+  const sponsors = filteredBanners.map((b) => ({
     id: b.id,
     image: b.image,
     alt: b.alt || b.name,
