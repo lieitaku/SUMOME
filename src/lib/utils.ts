@@ -28,3 +28,9 @@ export function getMainImageObjectPosition(value: string | null | undefined): st
   if (Number.isNaN(x) || Number.isNaN(y)) return "50% 50%";
   return `${Math.min(100, Math.max(0, x))}% ${Math.min(100, Math.max(0, y))}%`;
 }
+
+/** 有效封面缩放 1.0–2.0，缺省为 1.0 */
+export function getMainImageScale(value: number | null | undefined): number {
+  if (value == null || Number.isNaN(value)) return 1;
+  return Math.min(2, Math.max(1, value));
+}

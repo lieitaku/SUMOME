@@ -65,6 +65,7 @@ model Club {
   logo           String?
   mainImage          String?
   mainImagePosition  String?  // 卡片封面焦点 "x,y" (0-100)，缺省为 "50,50"
+  mainImageScale     Float?   // 封面缩放 1.0–2.0，缺省为 1.0
   subImages          String[] // 副图数组
 
   // 所在地信息

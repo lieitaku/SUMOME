@@ -1,18 +1,22 @@
 "use client";
 
 import { useRef, useCallback, useState } from "react";
-import Image from "next/image";
 import { RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_POSITION = { x: 50, y: 50 };
+const MIN_SCALE = 1;
+const MAX_SCALE = 2;
+const DEFAULT_SCALE = 1;
 
 export type Position = { x: number; y: number };
 
 interface MainImagePositionEditorProps {
     imageUrl: string;
     position: Position;
+    scale: number;
     onPositionChange: (x: number, y: number) => void;
+    onScaleChange: (scale: number) => void;
     className?: string;
 }
 
@@ -35,10 +39,20 @@ export function formatPositionString(pos: Position): string {
     return `${Math.round(pos.x)},${Math.round(pos.y)}`;
 }
 
+/** 解析缩放字符串或数字，1.0–2.0，非法则 1 */
+export function parseScaleValue(value: string | number | null | undefined): number {
+    if (value == null || value === "") return DEFAULT_SCALE;
+    const n = typeof value === "number" ? value : parseFloat(String(value).trim());
+    if (Number.isNaN(n)) return DEFAULT_SCALE;
+    return Math.min(MAX_SCALE, Math.max(MIN_SCALE, n));
+}
+
 export default function MainImagePositionEditor({
     imageUrl,
     position,
+    scale,
     onPositionChange,
+    onScaleChange,
     className,
 }: MainImagePositionEditorProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -81,13 +95,16 @@ export default function MainImagePositionEditor({
 
     const handleReset = useCallback(() => {
         onPositionChange(DEFAULT_POSITION.x, DEFAULT_POSITION.y);
-    }, [onPositionChange]);
+        onScaleChange(DEFAULT_SCALE);
+    }, [onPositionChange, onScaleChange]);
+
+    const scalePercent = Math.round(scale * 100);
 
     return (
-        <div className={cn("space-y-2", className)}>
+        <div className={cn("space-y-3", className)}>
             <div className="flex items-center justify-between">
                 <label className="block text-xs font-bold uppercase tracking-wide text-gray-400">
-                    カードでの見え方（ドラッグで位置調整）
+                    カードでの見え方（ドラッグで上下左右・スライダーで拡大率）
                 </label>
                 <button
                     type="button"
@@ -95,9 +112,10 @@ export default function MainImagePositionEditor({
                     className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold text-sumo-brand rounded-lg hover:bg-blue-50 transition-colors"
                 >
                     <RotateCcw size={12} />
-                    中央に戻す
+                    中央・100%に戻す
                 </button>
             </div>
+
             <div
                 ref={containerRef}
                 role="presentation"
@@ -111,15 +129,29 @@ export default function MainImagePositionEditor({
                 onPointerUp={handlePointerUp}
                 onPointerLeave={handlePointerUp}
             >
-                <Image
-                    src={imageUrl}
-                    alt="メイン画像プレビュー"
-                    fill
-                    className={cn("object-cover select-none", isDragging && "pointer-events-none")}
-                    style={{ objectPosition: `${position.x}% ${position.y}%` }}
-                    draggable={false}
-                    sizes="(max-width: 768px) 100vw, 50vw"
+                <div
+                    className={cn("absolute inset-0 bg-no-repeat select-none", isDragging && "pointer-events-none")}
+                    style={{
+                        backgroundImage: `url(${imageUrl})`,
+                        backgroundSize: `${100 * scale}%`,
+                        backgroundPosition: `${position.x}% ${position.y}%`,
+                    }}
                 />
+            </div>
+
+            <div className="flex items-center gap-3">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider w-12 shrink-0">
+                    拡大率
+                </span>
+                <input
+                    type="range"
+                    min={MIN_SCALE * 100}
+                    max={MAX_SCALE * 100}
+                    value={scalePercent}
+                    onChange={(e) => onScaleChange(Number(e.target.value) / 100)}
+                    className="flex-1 h-2 rounded-full appearance-none bg-gray-200 accent-sumo-brand cursor-pointer"
+                />
+                <span className="text-xs font-bold text-gray-600 tabular-nums w-10">{scalePercent}%</span>
             </div>
         </div>
     );

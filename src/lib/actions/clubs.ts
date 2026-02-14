@@ -22,6 +22,7 @@ function parseFormData(formData: FormData) {
     logo: formData.get("logo") as string,
     mainImage: formData.get("mainImage") as string,
     mainImagePosition: formData.get("mainImagePosition") as string,
+    mainImageScale: formData.get("mainImageScale") as string,
     zipCode: formData.get("zipCode") as string,
     area: formData.get("area") as string,
     city: formData.get("city") as string,
@@ -118,6 +119,7 @@ const UpdateClubSchema = z.object({
   logo: z.string().optional(),
   mainImage: z.string().optional(),
   mainImagePosition: z.string().optional(),
+  mainImageScale: z.string().optional(),
 
   // ✨ 新增：副图验证 (虽然前端已经验证了，后端最好再做一次双重保险)
   subImages: z.array(z.string()).optional(),
@@ -190,7 +192,19 @@ export async function updateClub(formData: FormData) {
     slugToUpdate = newSlug;
   }
 
-  const updateData = slugToUpdate != null ? { ...rest, slug: slugToUpdate } : rest;
+  const mainImageScaleNum =
+    rest.mainImageScale != null && rest.mainImageScale !== ""
+      ? (() => {
+          const n = parseFloat(rest.mainImageScale as string);
+          return Number.isNaN(n) ? undefined : Math.min(2, Math.max(1, n));
+        })()
+      : undefined;
+
+  const updateData = {
+    ...rest,
+    ...(slugToUpdate != null ? { slug: slugToUpdate } : {}),
+    mainImageScale: mainImageScaleNum,
+  };
 
   try {
     await prisma.club.update({
