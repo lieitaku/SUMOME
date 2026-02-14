@@ -3,21 +3,12 @@
 import React, { useEffect } from "react";
 import Link from "@/components/ui/TransitionLink";
 import {
-    CheckCircle2,
-    TrendingUp,
     ShieldCheck,
     LayoutDashboard,
-    ArrowRight,
     Users,
     MousePointerClick,
     Sparkles,
-    BarChart3,
-    Bell,
-    Search,
-    Settings,
-    Menu,
     FileText,
-    Mail,
     PenTool,
 } from "lucide-react";
 
@@ -59,9 +50,9 @@ const PartnersPage = () => {
                 </div>
 
                 <div className="container mx-auto max-w-6xl px-6 relative z-10">
-                    <div className="flex flex-col lg:flex-row items-center gap-16">
-                        {/* 左侧：文案 (保持不变) */}
-                        <div className="lg:w-1/2 animate-fade-in-up">
+                    <div className="flex flex-col items-center max-w-2xl mx-auto text-center">
+                        {/* Hero 文案 */}
+                        <div className="animate-fade-in-up">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase mb-6 border border-blue-100">
                                 <Sparkles size={12} />
                                 For Club Owners
@@ -80,7 +71,7 @@ const PartnersPage = () => {
                                 <span className="font-black text-sumo-red">無料</span>です。
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
                                 <Button
                                     href="/manager/entry"
                                     className="px-8 py-4 bg-[#2454a4] text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
@@ -100,136 +91,6 @@ const PartnersPage = () => {
                             <p className="mt-4 text-xs text-gray-400 font-medium">
                                 ※ 登録には審査があります。最短3分で申請完了。
                             </p>
-                        </div>
-
-                        {/* 右侧：Dashboard 演示图 (重新设计：丰富内容) */}
-                        <div className="lg:w-1/2 relative perspective-1000">
-                            {/* 光晕背景 */}
-                            <div className="absolute -inset-4 bg-gradient-to-tr from-blue-200 to-indigo-100 rounded-3xl blur-2xl opacity-60"></div>
-
-                            <Ceramic
-                                interactive={false}
-                                className="relative bg-white border border-gray-200 shadow-2xl rounded-xl overflow-hidden transform rotate-[-2deg] hover:rotate-0 transition-transform duration-700 p-0"
-                            >
-                                {/* 模拟浏览器顶栏 */}
-                                <div className="h-8 bg-gray-50 border-b border-gray-200 flex items-center px-4 gap-2">
-                                    <div className="flex gap-1.5">
-                                        <div className="w-2.5 h-2.5 rounded-full bg-red-400"></div>
-                                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                                        <div className="w-2.5 h-2.5 rounded-full bg-green-400"></div>
-                                    </div>
-                                    <div className="mx-auto w-1/2 h-4 bg-gray-200 rounded-sm opacity-50"></div>
-                                </div>
-
-                                {/* 模拟 Dashboard 界面 */}
-                                <div className="flex h-[320px]">
-                                    {/* 侧边栏 */}
-                                    <div className="w-16 bg-gray-50 border-r border-gray-200 flex flex-col items-center py-6 gap-6">
-                                        <div className="w-8 h-8 text-sumo-brand rounded-lg flex items-center justify-center text-white">
-                                            <span className="font-bold text-xs">S</span>
-                                        </div>
-                                        <div className="flex flex-col gap-4 text-gray-400">
-                                            <LayoutDashboard size={20} className="text-sumo-brand" />
-                                            <Users size={20} />
-                                            <Mail size={20} />
-                                            <Settings size={20} />
-                                        </div>
-                                    </div>
-
-                                    {/* 主内容区 */}
-                                    <div className="flex-1 p-6 bg-white">
-                                        {/* Header */}
-                                        <div className="flex justify-between items-center mb-6">
-                                            <div>
-                                                <h4 className="font-bold text-gray-800 text-lg">
-                                                    管理画面
-                                                </h4>
-                                                <p className="text-[10px] text-gray-400">
-                                                    Welcome back, Master
-                                                </p>
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <div className="p-2 bg-gray-50 rounded-full text-gray-400">
-                                                    <Search size={16} />
-                                                </div>
-                                                <div className="p-2 bg-gray-50 rounded-full text-gray-400 relative">
-                                                    <Bell size={16} />
-                                                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* 卡片 Grid */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {/* 卡片 1: 访问量统计 */}
-                                            <div className="col-span-2 bg-blue-50/50 rounded-xl p-4 border border-blue-100">
-                                                <div className="flex justify-between items-start mb-3">
-                                                    <div>
-                                                        <p className="text-[10px] font-bold text-gray-400 uppercase">
-                                                            Total Views
-                                                        </p>
-                                                        <div className="flex items-end gap-2">
-                                                            <span className="text-2xl font-black text-gray-900">
-                                                                8,245
-                                                            </span>
-                                                            <span className="text-[10px] font-bold text-green-500 flex items-center mb-1">
-                                                                <TrendingUp size={10} className="mr-0.5" /> +12%
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <BarChart3 size={20} className="text-blue-400" />
-                                                </div>
-                                                {/* 模拟图表 */}
-                                                <div className="flex items-end gap-1 h-12">
-                                                    {[30, 45, 35, 60, 50, 75, 65, 80, 55, 90].map(
-                                                        (h, i) => (
-                                                            <div
-                                                                key={i}
-                                                                className="flex-1 bg-blue-200 rounded-t-sm hover:bg-blue-400 transition-colors"
-                                                                style={{ height: `${h}%` }}
-                                                            ></div>
-                                                        ),
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* 卡片 2: 新申请 */}
-                                            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-                                                <p className="text-[10px] font-bold text-gray-400 uppercase mb-2">
-                                                    New Applicants
-                                                </p>
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <div className="w-8 h-8 rounded-full bg-gray-200"></div>
-                                                    <div>
-                                                        <p className="text-xs font-bold text-gray-800">
-                                                            Yamada T.
-                                                        </p>
-                                                        <p className="text-[9px] text-gray-400">
-                                                            Trial Lesson
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                    <div className="w-2/3 h-full bg-green-400 rounded-full"></div>
-                                                </div>
-                                            </div>
-
-                                            {/* 卡片 3: 状态 */}
-                                            <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm flex flex-col justify-center items-center text-center">
-                                                <div className="w-8 h-8 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-1">
-                                                    <CheckCircle2 size={16} />
-                                                </div>
-                                                <p className="text-xs font-bold text-gray-800">
-                                                    Verified
-                                                </p>
-                                                <p className="text-[9px] text-gray-400">
-                                                    Public Visible
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Ceramic>
                         </div>
                     </div>
                 </div>
@@ -399,10 +260,10 @@ const PartnersPage = () => {
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Button
                                     href="/manager/entry"
-                                    className="px-10 py-5 bg-white text-[#2454a4] shadow-lg hover:shadow-xl hover:bg-gray-50 border-none"
+                                    className="px-6 sm:px-10 py-4 sm:py-5 bg-white text-[#2454a4] shadow-lg hover:shadow-xl hover:bg-gray-50 border-none"
                                 >
-                                    <span className="flex items-center gap-2 font-bold tracking-widest text-base">
-                                        <Users size={18} />
+                                    <span className="flex items-center gap-2 font-bold tracking-widest text-sm sm:text-base whitespace-nowrap">
+                                        <Users className="w-4 h-4 sm:w-[18px] sm:h-[18px] shrink-0" />
                                         アカウント作成
                                     </span>
                                 </Button>

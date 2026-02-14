@@ -7,8 +7,11 @@ import { Edit2, Trash2, ExternalLink, GripVertical } from "lucide-react";
 import { toggleBannerActive, deleteBanner } from "@/lib/actions/banners";
 import { Banner } from "@prisma/client";
 
+/** カード表示用：API からの JSON では sponsorTier が欠ける場合があるため optional */
+type BannerForCard = Omit<Banner, "sponsorTier"> & { sponsorTier?: "OFFICIAL" | "LOCAL" | null };
+
 interface Props {
-    banner: Banner;
+    banner: BannerForCard;
     index: number;
 }
 

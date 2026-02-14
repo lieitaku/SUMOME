@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import Link from "@/components/ui/TransitionLink";
+import Button from "@/components/ui/Button";
 import Ceramic from "@/components/ui/Ceramic";
 import {
   Gavel,
@@ -59,27 +59,27 @@ const TermsPage = () => {
         <div className="container mx-auto max-w-4xl">
           <Ceramic
             interactive={false}
-            className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-10 md:p-16 lg:p-20 text-sumo-dark"
+            className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-5 sm:p-10 md:p-16 lg:p-20 text-sumo-dark"
           >
             {/* 前言 */}
-            <div className="mb-16 leading-loose text-gray-700 font-medium text-justify">
+            <div className="mb-12 md:mb-16 leading-loose text-gray-700 font-medium text-justify text-sm sm:text-base">
               <p>
                 この利用規約（以下，「本規約」といいます。）は，SUMOME事務局（以下，「当方」といいます。）がこのウェブサイト上で提供するサービス（以下，「本サービス」といいます。）の利用条件を定めるものです。登録ユーザーの皆さま（以下，「ユーザー」といいます。）には，本規約に従って，本サービスをご利用いただきます。
               </p>
             </div>
 
             {/* 条款内容 */}
-            <div className="space-y-16">
+            <div className="space-y-12 md:space-y-16">
               {/* 第1条 */}
               <section>
-                <h3 className="text-xl font-serif font-bold mb-6 flex items-center gap-3">
-                  <span className="text-sumo-gold opacity-60 text-sm font-sans">
+                <h3 className="text-lg sm:text-xl font-serif font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <span className="text-sumo-gold opacity-60 text-xs sm:text-sm font-sans">
                     01.
                   </span>
                   第1条（適用）
                 </h3>
-                <div className="pl-8 border-l-2 border-gray-100">
-                  <ol className="list-decimal list-outside ml-4 space-y-4 text-gray-600 leading-relaxed text-justify">
+                <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
+                  <ol className="list-decimal list-outside ml-3 sm:ml-4 space-y-3 sm:space-y-4 text-gray-600 leading-relaxed text-justify text-sm sm:text-base">
                     <li>
                       本規約は，ユーザーと当方との間の本サービスの利用に関わる一切の関係に適用されるものとします。
                     </li>
@@ -92,20 +92,20 @@ const TermsPage = () => {
 
               {/* 第2条 */}
               <section>
-                <h3 className="text-xl font-serif font-bold mb-6 flex items-center gap-3">
-                  <span className="text-sumo-gold opacity-60 text-sm font-sans">
+                <h3 className="text-lg sm:text-xl font-serif font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <span className="text-sumo-gold opacity-60 text-xs sm:text-sm font-sans">
                     02.
                   </span>
                   第2条（利用登録）
                 </h3>
-                <div className="pl-8 border-l-2 border-gray-100">
-                  <p className="text-gray-600 leading-relaxed mb-6 text-justify">
+                <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
+                  <p className="text-gray-600 leading-relaxed mb-4 sm:mb-6 text-justify text-sm sm:text-base">
                     本サービスにおいては，登録希望者が本規約に同意の上，当方の定める方法によって利用登録を申請し，当方がこれを承認することによって，利用登録が完了するものとします。
                     <br />
                     <br />
                     当方は，利用登録の申請者に以下の事由があると判断した場合，利用登録の申請を承認しないことがあり，その理由については一切の開示義務を負わないものとします。
                   </p>
-                  <ul className="space-y-3 text-gray-600 bg-gray-50/50 p-6 rounded-sm border border-gray-100/50">
+                  <ul className="space-y-2 sm:space-y-3 text-gray-600 bg-gray-50/50 p-4 sm:p-6 rounded-sm border border-gray-100/50 text-sm sm:text-base">
                     {[
                       "利用登録の申請に際して虚偽の事項を届け出た場合",
                       "本規約に違反したことがある者からの申請である場合",
@@ -128,14 +128,14 @@ const TermsPage = () => {
 
               {/* 第3条 (禁止事项 - Grid Card) */}
               <section>
-                <h3 className="text-xl font-serif font-bold mb-6 flex items-center gap-3">
-                  <span className="text-sumo-gold opacity-60 text-sm font-sans">
+                <h3 className="text-lg sm:text-xl font-serif font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <span className="text-sumo-gold opacity-60 text-xs sm:text-sm font-sans">
                     03.
                   </span>
                   第3条（禁止事項）
                 </h3>
-                <div className="pl-8 border-l-2 border-gray-100">
-                  <p className="text-gray-600 mb-6 text-justify">
+                <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
+                  <p className="text-gray-600 mb-4 sm:mb-6 text-justify text-sm sm:text-base">
                     ユーザーは，本サービスの利用にあたり，以下の行為をしてはなりません。
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -149,7 +149,7 @@ const TermsPage = () => {
                     ].map((item, i) => (
                       <div
                         key={i}
-                        className="bg-gray-50 p-4 rounded-sm border border-gray-100 text-sm text-gray-600 font-medium leading-relaxed hover:border-sumo-gold/30 transition-colors"
+                        className="bg-gray-50 p-3 sm:p-4 rounded-sm border border-gray-100 text-xs sm:text-sm text-gray-600 font-medium leading-relaxed hover:border-sumo-gold/30 transition-colors"
                       >
                         {item}
                       </div>
@@ -160,16 +160,16 @@ const TermsPage = () => {
 
               {/* 第4条 */}
               <section>
-                <h3 className="text-xl font-serif font-bold mb-6 flex items-center gap-3">
-                  <span className="text-sumo-gold opacity-60 text-sm font-sans">
+                <h3 className="text-lg sm:text-xl font-serif font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <span className="text-sumo-gold opacity-60 text-xs sm:text-sm font-sans">
                     04.
                   </span>
                   第4条（免責事項）
                 </h3>
-                <div className="pl-8 border-l-2 border-gray-100">
-                  <div className="bg-red-50/50 p-6 rounded-sm border border-red-100 text-gray-600 space-y-4">
-                    <div className="flex items-center gap-2 text-sumo-red font-bold text-sm uppercase tracking-wider mb-2">
-                      <ShieldAlert size={16} /> Disclaimer
+                <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
+                  <div className="bg-red-50/50 p-4 sm:p-6 rounded-sm border border-red-100 text-gray-600 space-y-3 sm:space-y-4 text-sm sm:text-base">
+                    <div className="flex items-center gap-2 text-sumo-red font-bold text-xs sm:text-sm uppercase tracking-wider mb-2">
+                      <ShieldAlert size={14} /> ご注意
                     </div>
                     <p className="leading-relaxed text-justify">
                       当方の債務不履行責任は，当方の故意または重過失によらない場合には免責されるものとします。
@@ -183,18 +183,16 @@ const TermsPage = () => {
             </div>
 
             {/* Footer Action */}
-            <div className="mt-20 pt-10 border-t border-gray-100 text-center">
-              <Link href="/">
-                <button className="group relative overflow-hidden px-10 py-4 bg-sumo-dark text-white text-xs font-bold uppercase tracking-widest rounded shadow-lg hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl transition-all">
-                  <span className="relative z-10 flex items-center justify-center gap-3">
-                    <ChevronLeft
-                      size={14}
-                      className="group-hover:-translate-x-1 transition-transform"
-                    />
-                    トップページへ戻る
-                  </span>
-                </button>
-              </Link>
+            <div className="mt-12 sm:mt-20 pt-8 sm:pt-10 border-t border-gray-100 text-center">
+              <Button
+                href="/"
+                variant="primary"
+                showArrow={false}
+                className="inline-flex items-center justify-center gap-2 text-xs sm:text-sm rounded-full shadow-md transition-all duration-300 ease-out hover:shadow-lg hover:brightness-110 active:scale-[0.98]"
+              >
+                <ChevronLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+                トップページへ戻る
+              </Button>
             </div>
           </Ceramic>
         </div>

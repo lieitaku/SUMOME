@@ -213,13 +213,16 @@ model PrefectureBanner {
 }
 
 // 旗子在各页面的显示设置（单例，供后台「显示设置」使用）
+// 各位置的 sponsorTierFilter: "all" | "official_only" | "local_only"（全部 / 高级のみ / 低级のみ）
 model BannerDisplaySetting {
-  id                     String             @id @default("default")
-  homeDisplayMode        BannerDisplayMode  @default(mixed)
-  homeSponsorTierFilter  String             @default("all") // "all" | "official_only" 首页赞助商范围
-  prefTopDisplayMode     BannerDisplayMode  @default(mixed)
-  prefSidebarDisplayMode BannerDisplayMode  @default(mixed)
-  updatedAt              DateTime           @updatedAt
+  id                        String             @id @default("default")
+  homeDisplayMode           BannerDisplayMode  @default(mixed)
+  homeSponsorTierFilter     String             @default("all")
+  prefTopDisplayMode        BannerDisplayMode  @default(mixed)
+  prefTopSponsorTierFilter  String             @default("all")
+  prefSidebarDisplayMode    BannerDisplayMode  @default(mixed)
+  prefSidebarSponsorTierFilter String          @default("all")
+  updatedAt                 DateTime           @updatedAt
 }
 
 // 首页「注目の相撲クラブ」显示的 3 个俱乐部（按顺序 1 / 2 / 3）

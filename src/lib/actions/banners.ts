@@ -8,11 +8,15 @@ const BANNER_DISPLAY_SETTINGS_TAG = "banner-display-settings";
 
 // ========== 旗子显示设置（各页面显示俱乐部/赞助商/全部/混合） ==========
 
+export type SponsorTierFilter = "all" | "official_only" | "local_only";
+
 const DEFAULT_DISPLAY_SETTINGS = {
   homeDisplayMode: "mixed" as BannerDisplayMode,
-  homeSponsorTierFilter: "all" as "all" | "official_only",
+  homeSponsorTierFilter: "all" as SponsorTierFilter,
   prefTopDisplayMode: "mixed" as BannerDisplayMode,
+  prefTopSponsorTierFilter: "all" as SponsorTierFilter,
   prefSidebarDisplayMode: "mixed" as BannerDisplayMode,
+  prefSidebarSponsorTierFilter: "all" as SponsorTierFilter,
 };
 
 /** 表是否存在（迁移未执行时会报错） */
@@ -37,12 +41,20 @@ async function getBannerDisplaySettingsUncached() {
         where: { id: "default" },
       });
     }
-    const homeFilter = (row as { homeSponsorTierFilter?: string } | null)?.homeSponsorTierFilter;
+    const r = row as {
+      homeSponsorTierFilter?: string;
+      prefTopSponsorTierFilter?: string;
+      prefSidebarSponsorTierFilter?: string;
+    } | null;
+    const toSponsorFilter = (v: string | undefined): SponsorTierFilter =>
+      v === "official_only" || v === "local_only" ? v : "all";
     return {
       homeDisplayMode: (row?.homeDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.homeDisplayMode) as BannerDisplayMode,
-      homeSponsorTierFilter: (homeFilter === "official_only" ? "official_only" : "all") as "all" | "official_only",
+      homeSponsorTierFilter: toSponsorFilter(r?.homeSponsorTierFilter),
       prefTopDisplayMode: (row?.prefTopDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.prefTopDisplayMode) as BannerDisplayMode,
+      prefTopSponsorTierFilter: toSponsorFilter(r?.prefTopSponsorTierFilter),
       prefSidebarDisplayMode: (row?.prefSidebarDisplayMode ?? DEFAULT_DISPLAY_SETTINGS.prefSidebarDisplayMode) as BannerDisplayMode,
+      prefSidebarSponsorTierFilter: toSponsorFilter(r?.prefSidebarSponsorTierFilter),
     };
   } catch (error) {
     if (isTableMissingError(error)) {
@@ -71,12 +83,18 @@ export async function updateBannerDisplaySettings(formData: FormData) {
     const homeDisplayMode = (formData.get("homeDisplayMode") as BannerDisplayMode) || "mixed";
     const homeSponsorTierFilterRaw = formData.get("homeSponsorTierFilter") as string | null;
     const prefTopDisplayMode = (formData.get("prefTopDisplayMode") as BannerDisplayMode) || "mixed";
+    const prefTopSponsorTierFilterRaw = formData.get("prefTopSponsorTierFilter") as string | null;
     const prefSidebarDisplayMode = (formData.get("prefSidebarDisplayMode") as BannerDisplayMode) || "mixed";
+    const prefSidebarSponsorTierFilterRaw = formData.get("prefSidebarSponsorTierFilter") as string | null;
 
     const validModes: BannerDisplayMode[] = ["all", "club", "sponsor", "mixed"];
     const toMode = (v: string): BannerDisplayMode =>
       validModes.includes(v as BannerDisplayMode) ? (v as BannerDisplayMode) : "mixed";
-    const homeSponsorTierFilter = homeSponsorTierFilterRaw === "official_only" ? "official_only" : "all";
+    const toSponsorFilter = (v: string | null): SponsorTierFilter =>
+      v === "official_only" || v === "local_only" ? v : "all";
+    const homeSponsorTierFilter = toSponsorFilter(homeSponsorTierFilterRaw);
+    const prefTopSponsorTierFilter = toSponsorFilter(prefTopSponsorTierFilterRaw);
+    const prefSidebarSponsorTierFilter = toSponsorFilter(prefSidebarSponsorTierFilterRaw);
 
     await prisma.bannerDisplaySetting.upsert({
       where: { id: "default" },
@@ -85,13 +103,17 @@ export async function updateBannerDisplaySettings(formData: FormData) {
         homeDisplayMode: toMode(homeDisplayMode),
         homeSponsorTierFilter,
         prefTopDisplayMode: toMode(prefTopDisplayMode),
+        prefTopSponsorTierFilter,
         prefSidebarDisplayMode: toMode(prefSidebarDisplayMode),
+        prefSidebarSponsorTierFilter,
       },
       update: {
         homeDisplayMode: toMode(homeDisplayMode),
         homeSponsorTierFilter,
         prefTopDisplayMode: toMode(prefTopDisplayMode),
+        prefTopSponsorTierFilter,
         prefSidebarDisplayMode: toMode(prefSidebarDisplayMode),
+        prefSidebarSponsorTierFilter,
       },
     });
 

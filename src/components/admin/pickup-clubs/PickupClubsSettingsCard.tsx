@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Image from "next/image";
 import { Save, Loader2, Star, LayoutGrid } from "lucide-react";
 import { updateHomePickupClubs } from "@/lib/actions/pickup-clubs";
 
@@ -10,7 +11,9 @@ export type SlotItem = {
   club: { id: string; name: string; slug: string; logo: string | null } | null;
 };
 
-type ClubOption = { id: string; name: string };
+type ClubOption = { id: string; name: string; mainImage: string | null };
+
+const PLACEHOLDER_IMAGE = "/images/placeholder.jpg";
 
 const SLOT_LABELS = ["1番（左）", "2番（中央）", "3番（右）"];
 
@@ -80,30 +83,58 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
         )}
 
         <div className="space-y-4">
-          {SLOT_LABELS.map((label, i) => (
-            <div key={i}>
-              <label className={labelClass}>
-                <LayoutGrid size={12} className="inline mr-1" />
-                {label}
-              </label>
-              <select
-                value={slots[i] ?? ""}
-                onChange={(e) => {
-                  const next = [...slots];
-                  next[i] = e.target.value;
-                  setSlots(next);
-                }}
-                className={selectClass}
-              >
-                <option value="">— 未選択（新着で表示）—</option>
-                {clubOptions.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ))}
+          {SLOT_LABELS.map((label, i) => {
+            const selectedId = slots[i] ?? "";
+            const selectedClub = selectedId
+              ? clubOptions.find((c) => c.id === selectedId)
+              : null;
+            return (
+              <div key={i} className="space-y-2">
+                <label className={labelClass}>
+                  <LayoutGrid size={12} className="inline mr-1" />
+                  {label}
+                </label>
+                <select
+                  value={selectedId}
+                  onChange={(e) => {
+                    const next = [...slots];
+                    next[i] = e.target.value;
+                    setSlots(next);
+                  }}
+                  className={selectClass}
+                >
+                  <option value="">— 未選択（新着で表示）—</option>
+                  {clubOptions.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="flex items-center gap-3 mt-2 p-3 rounded-xl border border-gray-100 bg-gray-50/50 min-h-[72px]">
+                  {selectedClub ? (
+                    <>
+                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-200">
+                        <Image
+                          src={selectedClub.mainImage || PLACEHOLDER_IMAGE}
+                          alt=""
+                          fill
+                          className="object-cover"
+                          sizes="56px"
+                        />
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {selectedClub.name}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-sm text-gray-400">
+                      — 未選択（新着で表示）—
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="pt-2">

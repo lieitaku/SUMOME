@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Save, Loader2, LayoutDashboard, Home, MapPin, PanelRight } from "lucide-react";
-import { updateBannerDisplaySettings } from "@/lib/actions/banners";
+import { updateBannerDisplaySettings, type SponsorTierFilter } from "@/lib/actions/banners";
 import type { BannerDisplayMode } from "@prisma/client";
 
 const DISPLAY_MODE_OPTIONS: { value: BannerDisplayMode; label: string }[] = [
@@ -12,16 +12,19 @@ const DISPLAY_MODE_OPTIONS: { value: BannerDisplayMode; label: string }[] = [
   { value: "mixed", label: "混合（クラブ→スポンサー）" },
 ];
 
-const HOME_SPONSOR_TIER_OPTIONS: { value: "all" | "official_only"; label: string }[] = [
+const SPONSOR_TIER_OPTIONS: { value: SponsorTierFilter; label: string }[] = [
   { value: "all", label: "すべてのスポンサー" },
   { value: "official_only", label: "高级スポンサーのみ" },
+  { value: "local_only", label: "低级スポンサーのみ" },
 ];
 
 type Settings = {
   homeDisplayMode: BannerDisplayMode;
-  homeSponsorTierFilter: "all" | "official_only";
+  homeSponsorTierFilter: SponsorTierFilter;
   prefTopDisplayMode: BannerDisplayMode;
+  prefTopSponsorTierFilter: SponsorTierFilter;
   prefSidebarDisplayMode: BannerDisplayMode;
+  prefSidebarSponsorTierFilter: SponsorTierFilter;
 };
 
 interface Props {
@@ -43,7 +46,9 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
       fd.append("homeDisplayMode", formData.homeDisplayMode);
       fd.append("homeSponsorTierFilter", formData.homeSponsorTierFilter);
       fd.append("prefTopDisplayMode", formData.prefTopDisplayMode);
+      fd.append("prefTopSponsorTierFilter", formData.prefTopSponsorTierFilter);
       fd.append("prefSidebarDisplayMode", formData.prefSidebarDisplayMode);
+      fd.append("prefSidebarSponsorTierFilter", formData.prefSidebarSponsorTierFilter);
       const result = await updateBannerDisplaySettings(fd);
       if (result.success) {
         setSuccess(true);
@@ -87,12 +92,12 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
           </div>
         )}
 
-        {/* 首页 */}
+        {/* トップページ（HOME）の旗 */}
         <div className="space-y-3">
           <div>
             <label className={labelClass}>
               <Home size={12} className="inline mr-1" />
-              トップページ（Home）の旗
+              トップページ（HOME）の旗
             </label>
             <select
               value={formData.homeDisplayMode}
@@ -108,19 +113,19 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
               ))}
             </select>
           </div>
-          <div>
+          <div className="pl-4 border-l-2 border-gray-200 space-y-2">
             <label className={labelClass}>スポンサー表示</label>
             <select
               value={formData.homeSponsorTierFilter}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  homeSponsorTierFilter: e.target.value as "all" | "official_only",
+                  homeSponsorTierFilter: e.target.value as SponsorTierFilter,
                 })
               }
               className={selectClass}
             >
-              {HOME_SPONSOR_TIER_OPTIONS.map((opt) => (
+              {SPONSOR_TIER_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
@@ -129,49 +134,91 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
           </div>
         </div>
 
-        {/* 都道府县页 - 顶部 */}
-        <div>
-          <label className={labelClass}>
-            <MapPin size={12} className="inline mr-1" />
-            都道府県ページ「Official Top Partners」の旗
-          </label>
-          <select
-            value={formData.prefTopDisplayMode}
-            onChange={(e) =>
-              setFormData({ ...formData, prefTopDisplayMode: e.target.value as BannerDisplayMode })
-            }
-            className={selectClass}
-          >
-            {DISPLAY_MODE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        {/* 都道府県ページ「Official Top Partners」の旗 */}
+        <div className="space-y-3">
+          <div>
+            <label className={labelClass}>
+              <MapPin size={12} className="inline mr-1" />
+              都道府県ページ「Official Top Partners」の旗
+            </label>
+            <select
+              value={formData.prefTopDisplayMode}
+              onChange={(e) =>
+                setFormData({ ...formData, prefTopDisplayMode: e.target.value as BannerDisplayMode })
+              }
+              className={selectClass}
+            >
+              {DISPLAY_MODE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="pl-4 border-l-2 border-gray-200 space-y-2">
+            <label className={labelClass}>スポンサー表示</label>
+            <select
+              value={formData.prefTopSponsorTierFilter}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  prefTopSponsorTierFilter: e.target.value as SponsorTierFilter,
+                })
+              }
+              className={selectClass}
+            >
+              {SPONSOR_TIER_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* 都道府县页 - 侧栏 */}
-        <div>
-          <label className={labelClass}>
-            <PanelRight size={12} className="inline mr-1" />
-            都道府県ページ「Local Supporters」の旗
-          </label>
-          <select
-            value={formData.prefSidebarDisplayMode}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                prefSidebarDisplayMode: e.target.value as BannerDisplayMode,
-              })
-            }
-            className={selectClass}
-          >
-            {DISPLAY_MODE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+        {/* 都道府県ページ「Local Supporters」の旗 */}
+        <div className="space-y-3">
+          <div>
+            <label className={labelClass}>
+              <PanelRight size={12} className="inline mr-1" />
+              都道府県ページ「Local Supporters」の旗
+            </label>
+            <select
+              value={formData.prefSidebarDisplayMode}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  prefSidebarDisplayMode: e.target.value as BannerDisplayMode,
+                })
+              }
+              className={selectClass}
+            >
+              {DISPLAY_MODE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="pl-4 border-l-2 border-gray-200 space-y-2">
+            <label className={labelClass}>スポンサー表示</label>
+            <select
+              value={formData.prefSidebarSponsorTierFilter}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  prefSidebarSponsorTierFilter: e.target.value as SponsorTierFilter,
+                })
+              }
+              className={selectClass}
+            >
+              {SPONSOR_TIER_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="pt-2">

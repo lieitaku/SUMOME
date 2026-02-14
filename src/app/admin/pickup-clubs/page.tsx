@@ -16,7 +16,7 @@ export default async function AdminPickupClubsPage() {
   const clubOptions = await prisma.club.findMany({
     where: { slug: { not: "official-hq" } },
     orderBy: { name: "asc" },
-    select: { id: true, name: true },
+    select: { id: true, name: true, mainImage: true },
   });
 
   if (result.error) {

@@ -31,14 +31,14 @@ export default async function Home() {
     getBannerDisplaySettings(),
   ]);
 
-  const filteredBanners =
-    displaySettings.homeSponsorTierFilter === "official_only"
-      ? banners.filter(
-          (b) =>
-            b.category === "club" ||
-            (b.category === "sponsor" && b.sponsorTier === "OFFICIAL")
-        )
-      : banners;
+  const homeFilter = displaySettings.homeSponsorTierFilter;
+  const filteredBanners = banners.filter((b) => {
+    if (b.category === "club") return true;
+    if (b.category !== "sponsor") return false;
+    if (homeFilter === "official_only") return b.sponsorTier === "OFFICIAL";
+    if (homeFilter === "local_only") return b.sponsorTier === "LOCAL" || b.sponsorTier == null;
+    return true; // all
+  });
 
   const sponsors = filteredBanners.map((b) => ({
     id: b.id,
