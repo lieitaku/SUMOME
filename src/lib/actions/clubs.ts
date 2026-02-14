@@ -21,6 +21,7 @@ function parseFormData(formData: FormData) {
     description: formData.get("description") as string,
     logo: formData.get("logo") as string,
     mainImage: formData.get("mainImage") as string,
+    mainImagePosition: formData.get("mainImagePosition") as string,
     zipCode: formData.get("zipCode") as string,
     area: formData.get("area") as string,
     city: formData.get("city") as string,
@@ -116,6 +117,7 @@ const UpdateClubSchema = z.object({
   description: z.string().optional(),
   logo: z.string().optional(),
   mainImage: z.string().optional(),
+  mainImagePosition: z.string().optional(),
 
   // ✨ 新增：副图验证 (虽然前端已经验证了，后端最好再做一次双重保险)
   subImages: z.array(z.string()).optional(),

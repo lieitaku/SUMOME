@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { MapPin, Instagram, Twitter, ArrowUpRight, Users, Phone, Mail, Globe } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getMainImageObjectPosition } from "@/lib/utils";
 import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
 
@@ -43,6 +43,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   const themeColor = accentColor || DEFAULT_COLOR;
   const detailLink = `/clubs/${club.slug}`;
   const displayImage = club.mainImage || "/images/placeholder.jpg";
+  const mainImagePosition = getMainImageObjectPosition(club.mainImagePosition);
 
   return (
     <Ceramic
@@ -77,6 +78,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
             alt={club.name}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"
+            style={{ objectPosition: mainImagePosition }}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />

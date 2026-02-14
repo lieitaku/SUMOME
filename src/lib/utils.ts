@@ -14,3 +14,17 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+/**
+ * 将 clubs 的 mainImagePosition 字符串（如 "50,50"）转为 CSS object-position 值。
+ * 缺省或非法时返回 "50% 50%"。
+ */
+export function getMainImageObjectPosition(value: string | null | undefined): string {
+  if (!value || typeof value !== "string") return "50% 50%";
+  const parts = value.trim().split(",");
+  if (parts.length !== 2) return "50% 50%";
+  const x = Number(parts[0]);
+  const y = Number(parts[1]);
+  if (Number.isNaN(x) || Number.isNaN(y)) return "50% 50%";
+  return `${Math.min(100, Math.max(0, x))}% ${Math.min(100, Math.max(0, y))}%`;
+}

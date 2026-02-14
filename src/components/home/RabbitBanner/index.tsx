@@ -50,9 +50,8 @@ export default function RabbitWalkingBanner({
   // 处理赞助商数据：智能填充 + 模式处理
   const { baseSponsors, cycleCount } = useMemo(() => {
     // 使用传入的 sponsors，否则使用默认数据
-    let originalSponsors: SponsorItem[] = sponsors && sponsors.length > 0
-      ? sponsors
-      : RAW_SPONSORS;
+    const isUsingFallback = !sponsors || sponsors.length === 0;
+    let originalSponsors: SponsorItem[] = isUsingFallback ? RAW_SPONSORS : sponsors;
 
     // 根据 displayMode 筛选和排序
     if (displayMode === "club") {
@@ -79,7 +78,10 @@ export default function RabbitWalkingBanner({
       originalSponsors = interleaved;
     }
 
-    // 如果没有赞助商，返回空
+    // 若筛选后为空且当前用的是默认数据（RAW_SPONSORS 无 category，在 sponsor 模式下会被筛光），则退化为显示默认列表，避免兔子 banner 不显示
+    if (originalSponsors.length === 0 && isUsingFallback) {
+      originalSponsors = RAW_SPONSORS;
+    }
     if (originalSponsors.length === 0) {
       return { baseSponsors: [], cycleCount: 0 };
     }

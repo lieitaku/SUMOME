@@ -79,23 +79,18 @@ export default async function PrefecturePage({ params }: PageProps) {
     category: b.category,
   });
 
-  // OFFICIAL TOP PARTNERS: 俱乐部 + 高级赞助商
-  const sponsorsTop = banners
-    .filter(
-      (b) =>
-        b.category === "club" ||
-        (b.category === "sponsor" && b.sponsorTier === "OFFICIAL")
-    )
-    .map(toSponsorItem);
+  // 俱乐部始终两处都显示；赞助商才分 OFFICIAL / LOCAL。OFFICIAL 仅顶部，LOCAL/未设 两处都显示（先默认都显示，后台可改部分为 OFFICIAL 则只出现在顶部）
+  type BannerWithTier = (typeof banners)[0] & { sponsorTier?: string | null };
+  const forTop = (b: BannerWithTier) =>
+    b.category === "club" || (b.category === "sponsor" && (b.sponsorTier === "OFFICIAL" || b.sponsorTier === "LOCAL" || b.sponsorTier == null));
+  const forSidebar = (b: BannerWithTier) =>
+    b.category === "club" || (b.category === "sponsor" && (b.sponsorTier === "LOCAL" || b.sponsorTier == null));
 
-  // LOCAL SUPPORTERS: 俱乐部 + 低级赞助商（未设 tier 视为 LOCAL）
-  const sponsorsSidebar = banners
-    .filter(
-      (b) =>
-        b.category === "club" ||
-        (b.category === "sponsor" && b.sponsorTier !== "OFFICIAL")
-    )
-    .map(toSponsorItem);
+  // OFFICIAL TOP PARTNERS: 俱乐部（始终）+ 所有赞助商（默认都显示；设为 OFFICIAL 的也在此）
+  const sponsorsTop = banners.filter(forTop).map(toSponsorItem);
+
+  // LOCAL SUPPORTERS: 俱乐部（始终）+ LOCAL/未设 tier 的赞助商（设为 OFFICIAL 后只出现在顶部，不在此）
+  const sponsorsSidebar = banners.filter(forSidebar).map(toSponsorItem);
 
   const theme = getPrefectureTheme(prefSlug);
   const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;

@@ -63,8 +63,9 @@ model Club {
   slug           String    @unique
   description    String?   @db.Text
   logo           String?
-  mainImage      String?
-  subImages      String[] // 副图数组
+  mainImage          String?
+  mainImagePosition  String?  // 卡片封面焦点 "x,y" (0-100)，缺省为 "50,50"
+  subImages          String[] // 副图数组
 
   // 所在地信息
   zipCode        String?   // 郵便番号

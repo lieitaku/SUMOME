@@ -7,6 +7,7 @@ import {
     CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation
 } from "lucide-react";
 import { prisma } from "@/lib/db";
+import { getMainImageObjectPosition } from "@/lib/utils";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 
@@ -139,7 +140,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
 
                                     {/* 主图展示 */}
                                     <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-md border border-white/50 bg-gray-200">
-                                        <Image src={galleryImages[0]} alt={club.name} fill className="object-cover hover:scale-105 transition-transform duration-700" priority />
+                                        <Image src={galleryImages[0]} alt={club.name} fill className="object-cover hover:scale-105 transition-transform duration-700" style={{ objectPosition: getMainImageObjectPosition(club.mainImagePosition) }} priority />
                                     </div>
 
                                     {/* 副图画廊 (仅当有副图时显示) */}

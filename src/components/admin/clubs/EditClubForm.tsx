@@ -21,6 +21,7 @@ import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import ScheduleEditor from "./ScheduleEditor"; // <--- 引入日程编辑器组件
 import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
+import MainImagePositionEditor, { parsePositionString, formatPositionString } from "./MainImagePositionEditor";
 import { supabase } from "@/lib/supabase/client"; // 用于副图上传
 
 // ✨ 2. 引入 Server Actions
@@ -41,6 +42,7 @@ const formSchema = z.object({
     description: z.string().optional(),
     logo: z.string().optional(),
     mainImage: z.string().optional(),
+    mainImagePosition: z.string().optional(),
 
     // ✨ 副图验证规则
     subImages: z.array(z.string())
@@ -91,6 +93,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
             description: initialData.description || "",
             logo: initialData.logo || "",
             mainImage: initialData.mainImage || "",
+            mainImagePosition: initialData.mainImagePosition ?? "50,50",
             subImages: initialData.subImages || [],
             zipCode: initialData.zipCode || "",
             area: initialData.area || "未設定",
@@ -294,6 +297,15 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                     bucket="images"
                                 />
                             </div>
+
+                            {/* メイン画像：卡片预览与位置调整（仅在有图时显示） */}
+                            {form.watch("mainImage") && (
+                                <MainImagePositionEditor
+                                    imageUrl={form.watch("mainImage")}
+                                    position={parsePositionString(form.watch("mainImagePosition"))}
+                                    onPositionChange={(x, y) => form.setValue("mainImagePosition", formatPositionString({ x, y }), { shouldDirty: true })}
+                                />
+                            )}
 
                             {/* ✨ 多图上传区域 (Sub Images) */}
                             <div>
