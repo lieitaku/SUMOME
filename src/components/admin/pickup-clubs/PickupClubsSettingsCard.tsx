@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
-import { Save, Loader2, Star, LayoutGrid } from "lucide-react";
+import { Save, Loader2, Star, LayoutGrid, Eye } from "lucide-react";
 import { updateHomePickupClubs } from "@/lib/actions/pickup-clubs";
 
 export type SlotItem = {
@@ -26,6 +26,7 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [slots, setSlots] = useState<string[]>(() =>
     initialSlots.map((s) => s.clubId ?? "")
   );
@@ -137,7 +138,7 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
           })}
         </div>
 
-        <div className="pt-2">
+        <div className="pt-2 flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={isPending}
@@ -149,6 +150,42 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
               <Save size={16} />
             )}
             表示クラブを保存
+          </button>
+          <button
+            type="button"
+            disabled={isPreviewing}
+onClick={async () => {
+                const win = window.open("", "_blank");
+                if (!win) {
+                  alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                  return;
+                }
+                setIsPreviewing(true);
+                try {
+                  const res = await fetch("/admin/api/preview", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      type: "home_pickup",
+                      redirectPath: "/",
+                      payload: { clubIds: slots.slice(0, 3) },
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.redirectUrl) win.location.href = data.redirectUrl;
+                  else {
+                    win.close();
+                    if (data.error) alert(data.error);
+                  }
+                } finally {
+                  setIsPreviewing(false);
+                }
+              }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 disabled:opacity-50"
+          >
+            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+            プレビュー
           </button>
         </div>
       </form>

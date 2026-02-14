@@ -12,6 +12,7 @@ import {
 
 import { prisma } from "@/lib/db";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
+import { getPreviewPayload } from "@/lib/preview";
 
 // Components
 import RabbitWalkingBanner from "@/components/home/RabbitBanner";
@@ -44,12 +45,21 @@ export default async function PrefecturePage({ params }: PageProps) {
   };
 
   // 后台设置的都道府県 Banner 优先于静态默认（必须先拿到才能拼 displayData）
+  const preview = await getPreviewPayload();
+  const prefBannerPreview =
+    preview?.type === "prefecture_banner" &&
+    preview.payload &&
+    typeof preview.payload === "object" &&
+    (preview.payload as { pref?: string }).pref === prefSlug
+      ? (preview.payload as { pref: string; image?: string; alt?: string; imagePosition?: string; imageScale?: string | number })
+      : null;
+
   const customBanner = await prisma.prefectureBanner.findUnique({
     where: { pref: prefSlug },
   });
   const displayData = {
     ...staticDisplay,
-    bannerImg: customBanner?.image || staticDisplay.bannerImg,
+    bannerImg: prefBannerPreview?.image ?? customBanner?.image ?? staticDisplay.bannerImg,
   };
 
   // 以下三路互不依赖，并行请求以减少总等待时间
@@ -100,7 +110,7 @@ export default async function PrefecturePage({ params }: PageProps) {
   const bannerTitle = featuredClub
     ? `${featuredClub.name}の相撲風景`
     : `${displayData.name}の相撲風景`;
-  const bannerAlt = customBanner?.alt || bannerTitle;
+  const bannerAlt = prefBannerPreview?.alt ?? customBanner?.alt ?? bannerTitle;
   const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
   // 构建俱乐部完整地址
@@ -110,12 +120,17 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   type BannerWithPosition = { imagePosition?: string | null; imageScale?: number | null };
   const bannerRecord = customBanner as (BannerWithPosition & typeof customBanner) | null;
-  const bannerPosition = bannerRecord?.imagePosition ?? "50,50";
+  const bannerPosition = prefBannerPreview?.imagePosition ?? bannerRecord?.imagePosition ?? "50,50";
   const [posX, posY] = bannerPosition.split(",").map((s: string) => {
     const n = Number(s.trim());
     return Number.isNaN(n) ? 50 : Math.min(100, Math.max(0, n));
   });
-  const bannerScale = bannerRecord?.imageScale != null ? Number(bannerRecord.imageScale) : 1;
+  const bannerScale =
+    prefBannerPreview?.imageScale != null
+      ? Number(prefBannerPreview.imageScale)
+      : bannerRecord?.imageScale != null
+        ? Number(bannerRecord.imageScale)
+        : 1;
   const bannerBgPosition = `${posX}% ${posY}%`;
   const bannerBgSize = `${100 * bannerScale}%`;
 
@@ -126,6 +141,11 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
+      {prefBannerPreview && (
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
+          プレビュー — 未保存の内容を表示しています。
+        </div>
+      )}
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
         <section className="relative pt-40 pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">

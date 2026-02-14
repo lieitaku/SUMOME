@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Save, Loader2, Image as ImageIcon, Link as LinkIcon, Hash, Type, Building2, Megaphone } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Image as ImageIcon, Link as LinkIcon, Hash, Type, Building2, Megaphone, Eye } from "lucide-react";
 import { createBanner, updateBanner, deleteBanner } from "@/lib/actions/banners";
 import { Banner, BannerCategory, BannerSponsorTier } from "@prisma/client";
 import ImageUploader from "@/components/admin/ui/ImageUploader";
@@ -17,6 +17,7 @@ export default function BannerForm({ initialData }: Props) {
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
+    const [isPreviewing, setIsPreviewing] = useState(false);
 
     const [formData, setFormData] = useState({
         name: initialData?.name || "",
@@ -323,13 +324,59 @@ export default function BannerForm({ initialData }: Props) {
                             削除する
                         </button>
                     )}
-                    <div className="flex items-center gap-3 w-full sm:w-auto sm:ml-auto">
+                    <div className="flex items-center gap-3 w-full sm:w-auto sm:ml-auto flex-wrap">
                         <Link
                             href="/admin/banners"
                             className="flex-1 sm:flex-initial px-6 py-3 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition-all text-center"
                         >
                             キャンセル
                         </Link>
+                        <button
+                            type="button"
+                            disabled={isPreviewing || !formData.image}
+                            onClick={async () => {
+                                const win = window.open("", "_blank");
+                                if (!win) {
+                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                                    return;
+                                }
+                                setIsPreviewing(true);
+                                try {
+                                    const res = await fetch("/admin/api/preview", {
+                                        method: "POST",
+                                        credentials: "include",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            type: "banner_single",
+                                            redirectPath: "/",
+                                            payload: {
+                                                banner: {
+                                                    id: initialData?.id,
+                                                    name: formData.name,
+                                                    image: formData.image,
+                                                    alt: formData.alt || formData.name,
+                                                    link: formData.link,
+                                                    category: formData.category,
+                                                    sponsorTier: formData.category === "sponsor" ? formData.sponsorTier : null,
+                                                },
+                                            },
+                                        }),
+                                    });
+                                    const data = await res.json();
+                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
+                                    else {
+                                        win.close();
+                                        if (data.error) alert(data.error);
+                                    }
+                                } finally {
+                                    setIsPreviewing(false);
+                                }
+                            }}
+                            className="inline-flex items-center gap-2 px-5 py-3 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                            プレビュー
+                        </button>
                         <button
                             type="submit"
                             disabled={isPending}

@@ -1,9 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Info, AlertTriangle, Building2, CheckCircle2 } from "lucide-react";
+import { Info, AlertTriangle, Building2, CheckCircle2, Eye, Loader2 } from "lucide-react";
 
 // ✨ 引入统一的基础设施
 import ImageUploader from "@/components/admin/ui/ImageUploader";
@@ -27,6 +28,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function NewClubPage() {
+    const [isPreviewing, setIsPreviewing] = useState(false);
     // 1. 初始化表单
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -71,9 +73,49 @@ export default function NewClubPage() {
                 backLink="/admin/clubs"
                 isSubmitting={isSubmitting}
                 headerActions={
-                    <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter flex items-center gap-1">
-                        <CheckCircle2 size={12} /> Registration Mode
-                    </div>
+                    <>
+                        <button
+                            type="button"
+                            disabled={isPreviewing}
+                            onClick={async () => {
+                                const win = window.open("", "_blank");
+                                if (!win) {
+                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                                    return;
+                                }
+                                setIsPreviewing(true);
+                                try {
+                                    const values = form.getValues();
+                                    const slug = values.slug?.trim() || "preview";
+                                    const res = await fetch("/admin/api/preview", {
+                                        method: "POST",
+                                        credentials: "include",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            type: "club",
+                                            redirectPath: `/clubs/${slug}`,
+                                            payload: { ...values, id: "", area: "未設定", address: "", subImages: [], mainImagePosition: "50,50", mainImageScale: 1, zipCode: "", city: "", mapUrl: "", phone: "", email: "", website: "", instagram: "", twitter: "", schedule: "", target: "", representative: "" },
+                                        }),
+                                    });
+                                    const data = await res.json();
+                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
+                                    else {
+                                        win.close();
+                                        if (data.error) alert(data.error);
+                                    }
+                                } finally {
+                                    setIsPreviewing(false);
+                                }
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                            プレビュー
+                        </button>
+                        <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter flex items-center gap-1">
+                            <CheckCircle2 size={12} /> Registration Mode
+                        </div>
+                    </>
                 }
             >
                 <div className="space-y-8">

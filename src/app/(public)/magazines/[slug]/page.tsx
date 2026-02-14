@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "@/components/ui/TransitionLink";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { getPreviewPayload } from "@/lib/preview";
 import {
   ArrowLeft,
   BookOpen,
@@ -72,13 +73,37 @@ export default async function MagazineDetailPage({
 }) {
   const { slug } = await params;
 
-  // 获取杂志数据
-  const magazine = await prisma.magazine.findFirst({
-    where: {
-      slug: slug,
-      published: true
-    },
-  });
+  const preview = await getPreviewPayload();
+  const usePreview =
+    preview?.type === "magazine" &&
+    preview.payload &&
+    typeof preview.payload === "object" &&
+    "slug" in preview.payload &&
+    String((preview.payload as { slug: unknown }).slug) === slug;
+
+  let magazine: Awaited<ReturnType<typeof prisma.magazine.findFirst>>;
+  if (usePreview && preview.payload && typeof preview.payload === "object") {
+    const p = preview.payload as Record<string, unknown>;
+    magazine = {
+      id: String(p.id ?? ""),
+      title: String(p.title ?? ""),
+      slug: String(p.slug ?? slug),
+      description: p.description != null ? String(p.description) : null,
+      region: String(p.region ?? "All"),
+      coverImage: p.coverImage != null ? String(p.coverImage) : null,
+      images: Array.isArray(p.images) ? (p.images as string[]) : [],
+      pdfUrl: p.pdfUrl != null ? String(p.pdfUrl) : null,
+      readLink: p.readLink != null ? String(p.readLink) : null,
+      issueDate: p.issueDate ? new Date(p.issueDate as string) : new Date(),
+      published: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  } else {
+    magazine = await prisma.magazine.findFirst({
+      where: { slug, published: true },
+    });
+  }
 
   if (!magazine) return notFound();
 
@@ -101,7 +126,11 @@ export default async function MagazineDetailPage({
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
-
+      {usePreview && (
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
+          プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。
+        </div>
+      )}
       {/* 头部区域 */}
       <header className="relative bg-sumo-brand text-white pt-32 pb-64 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>

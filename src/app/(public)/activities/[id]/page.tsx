@@ -6,6 +6,7 @@ import React from "react";
 import { ArrowLeft, Share2, Printer, MapPin, Calendar, Hash, ImageIcon } from "lucide-react";
 // 引入 Prisma 自动生成的原始类型
 import { Activity, Club } from "@prisma/client";
+import { getPreviewPayload } from "@/lib/preview";
 
 // 1. ✨ 定义与组件完全匹配的强类型
 // 这个类型代表了：活动数据 + 必须包含的俱乐部关联数据
@@ -18,21 +19,68 @@ import StandardTemplate from "@/components/activities/StandardTemplate";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 
-export default async function ActivityDetailPage({ params }: { params: { id: string } }) {
+function normalizePreviewActivity(
+  p: Record<string, unknown>,
+  club: { id: string; name: string }
+): ActivityWithClub {
+  const date = p.date ? new Date(p.date as string) : new Date();
+  const contentData = (p.contentData ?? (p.blocks || p.event ? { blocks: p.blocks, event: p.event } : null)) as Activity["contentData"];
+  return {
+    id: String(p.id ?? "preview"),
+    title: String(p.title ?? ""),
+    slug: String(p.slug ?? "preview"),
+    date,
+    location: p.location != null ? String(p.location) : null,
+    category: String(p.category ?? "Report"),
+    mainImage: p.mainImage != null ? String(p.mainImage) : null,
+    published: true,
+    templateType: String(p.templateType ?? "news"),
+    contentData,
+    content: p.content != null ? String(p.content) : null,
+    clubId: club.id,
+    authorId: String(p.authorId ?? ""),
+    customRoute: p.customRoute != null ? String(p.customRoute) : null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    club: { id: club.id, name: club.name } as Club,
+  };
+}
+
+export default async function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  // 获取数据
-  const activityData = await prisma.activity.findUnique({
-    where: { id },
-    include: { club: true }
-  });
+  const preview = await getPreviewPayload();
+  const usePreview =
+    preview?.type === "activity" &&
+    preview.payload &&
+    typeof preview.payload === "object" &&
+    (id === "preview" || (preview.payload as { id?: string }).id === id);
 
-  // 2. ✨ 排除 null 情况，确保后续逻辑处理的 activity 永远存在
-  if (!activityData) notFound();
+  let activity: ActivityWithClub;
 
-  // 3. ✨ 显式转换类型（断言为我们定义的复合类型，而非 any）
-  // 这样 TypeScript 就会检查 activityData 是否真的包含了 club 字段
-  const activity = activityData as ActivityWithClub;
+  if (usePreview && preview.payload && typeof preview.payload === "object") {
+    const p = preview.payload as Record<string, unknown>;
+    const clubPayload = p.club as { id?: string; name?: string } | undefined;
+    const clubId = (p.clubId as string) || clubPayload?.id || "";
+    const clubName = clubPayload?.name ?? "クラブ";
+    if (!clubId) {
+      activity = normalizePreviewActivity(p, { id: "preview", name: clubName });
+    } else {
+      const clubFromDb = await prisma.club.findUnique({
+        where: { id: clubId },
+        select: { id: true, name: true },
+      });
+      const club = clubFromDb ?? { id: clubId, name: clubName };
+      activity = normalizePreviewActivity(p, club);
+    }
+  } else {
+    const activityData = await prisma.activity.findUnique({
+      where: { id },
+      include: { club: true },
+    });
+    if (!activityData) notFound();
+    activity = activityData as ActivityWithClub;
+  }
 
   // 4. ✨ 处理分发逻辑 (ArticleRegistry 现在能正确识别类型了)
   const CustomComponent = activity.customRoute ? ArticleRegistry[activity.customRoute] : null;
@@ -44,6 +92,11 @@ export default async function ActivityDetailPage({ params }: { params: { id: str
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
+      {usePreview && (
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
+          プレビュー — 未保存の内容を表示しています。
+        </div>
+      )}
       {/* --- Header 部分 --- */}
       <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>

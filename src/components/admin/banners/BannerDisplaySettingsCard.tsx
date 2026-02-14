@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Save, Loader2, LayoutDashboard, Home, MapPin, PanelRight } from "lucide-react";
+import { Save, Loader2, LayoutDashboard, Home, MapPin, PanelRight, Eye } from "lucide-react";
 import { updateBannerDisplaySettings, type SponsorTierFilter } from "@/lib/actions/banners";
 import type { BannerDisplayMode } from "@prisma/client";
 
@@ -35,6 +35,7 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
   const [formData, setFormData] = useState<Settings>(initialSettings);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -221,7 +222,7 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="pt-2 flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={isPending}
@@ -233,6 +234,42 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
               <Save size={16} />
             )}
             表示設定を保存
+          </button>
+          <button
+            type="button"
+            disabled={isPreviewing}
+            onClick={async () => {
+              const win = window.open("", "_blank");
+              if (!win) {
+                alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                return;
+              }
+              setIsPreviewing(true);
+              try {
+                const res = await fetch("/admin/api/preview", {
+                  method: "POST",
+                  credentials: "include",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    type: "banner_display",
+                    redirectPath: "/",
+                    payload: formData,
+                  }),
+                });
+                const data = await res.json();
+                if (data.redirectUrl) win.location.href = data.redirectUrl;
+                else {
+                  win.close();
+                  if (data.error) alert(data.error);
+                }
+              } finally {
+                setIsPreviewing(false);
+              }
+            }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 disabled:opacity-50"
+          >
+            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+            プレビュー
           </button>
         </div>
       </form>

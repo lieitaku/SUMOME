@@ -6,8 +6,9 @@ import * as z from "zod";
 import {
     Loader2, ImageIcon, Type, Heading, Calendar,
     LayoutTemplate, FileText, ExternalLink,
-    ArrowUp, ArrowDown, Trash2, LucideIcon
+    ArrowUp, ArrowDown, Trash2, LucideIcon, Eye
 } from "lucide-react";
+import { useState } from "react";
 import { Activity, Club } from "@prisma/client";
 
 // ✨ 1. 引入我们的“三剑客”
@@ -62,6 +63,7 @@ export default function EditActivityForm({
     clubs: Club[],
     isNew?: boolean
 }) {
+    const [isPreviewing, setIsPreviewing] = useState(false);
     const templateType = (initialData.templateType || "news") as "news" | "report" | "event" | "custom";
     const savedData = (initialData.contentData ? initialData.contentData : {}) as SavedContentData;
 
@@ -157,17 +159,75 @@ export default function EditActivityForm({
                 isDeleting={isDeleting}
                 onDelete={!isNew ? onDelete : undefined} // 新建模式不显示删除
                 headerActions={
-                    // 可以在这里放一个类型徽章
-                    <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${templateType === 'news' ? 'bg-orange-100 text-orange-600' :
-                        templateType === 'event' ? 'bg-emerald-100 text-emerald-600' :
-                            templateType === 'report' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
-                        }`}>
+                    <>
+                        <button
+                            type="button"
+                            disabled={isPreviewing}
+                            onClick={async () => {
+                                const win = window.open("", "_blank");
+                                if (!win) {
+                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                                    return;
+                                }
+                                setIsPreviewing(true);
+                                try {
+                                    const values = form.getValues();
+                                    const activityId = isNew ? "preview" : initialData.id;
+                                    const slug = isNew ? "preview" : (initialData as Activity & { slug?: string }).slug;
+                                    const selectedClub = clubs.find((c) => c.id === values.clubId);
+                                    const club = selectedClub
+                                        ? { id: selectedClub.id, name: selectedClub.name }
+                                        : { id: "preview", name: "クラブ" };
+                                    const contentData = { blocks: values.blocks, event: values.event };
+                                    const res = await fetch("/admin/api/preview", {
+                                        method: "POST",
+                                        credentials: "include",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            type: "activity",
+                                            redirectPath: `/activities/${activityId}`,
+                                            payload: {
+                                                id: activityId,
+                                                slug: slug ?? "preview",
+                                                title: values.title,
+                                                date: values.date,
+                                                clubId: values.clubId,
+                                                mainImage: values.mainImage,
+                                                templateType,
+                                                category: initialData.category,
+                                                blocks: values.blocks,
+                                                event: values.event,
+                                                contentData,
+                                                club,
+                                            },
+                                        }),
+                                    });
+                                    const data = await res.json();
+                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
+                                    else {
+                                        win.close();
+                                        if (data.error) alert(data.error);
+                                    }
+                                } finally {
+                                    setIsPreviewing(false);
+                                }
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                            プレビュー
+                        </button>
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${templateType === 'news' ? 'bg-orange-100 text-orange-600' :
+                            templateType === 'event' ? 'bg-emerald-100 text-emerald-600' :
+                                templateType === 'report' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
+                            }`}>
                         {templateType === 'news' && <FileText size={14} />}
                         {templateType === 'event' && <Calendar size={14} />}
                         {templateType === 'report' && <LayoutTemplate size={14} />}
                         {templateType === 'custom' && <ExternalLink size={14} />}
                         {templateType} Mode
                     </div>
+                    </>
                 }
             >
 

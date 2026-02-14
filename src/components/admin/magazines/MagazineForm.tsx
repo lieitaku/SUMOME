@@ -16,7 +16,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
     Calendar, X, MapPin, ImageIcon, Plus, Info,
-    Link as LinkIcon, FileText, Layout, UploadCloud, Loader2, Trash2, AlertCircle
+    Link as LinkIcon, FileText, Layout, UploadCloud, Loader2, Trash2, AlertCircle, Eye
 } from "lucide-react";
 import { Magazine } from "@prisma/client";
 import Image from "next/image";
@@ -115,6 +115,7 @@ function SortableGalleryItem({ url, index, onRemove }: { url: string; index: num
 export default function MagazineForm({ initialData, isNew = false }: { initialData?: Magazine, isNew?: boolean }) {
     const [selectedRegionTab, setSelectedRegionTab] = useState<string>("関東");
     const [isUploading, setIsUploading] = useState(false);
+    const [isPreviewing, setIsPreviewing] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -271,6 +272,46 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                 isSubmitting={isSubmitting}
                 isDeleting={isDeleting}
                 onDelete={!isNew ? onDelete : undefined}
+                headerActions={
+                    <button
+                        type="button"
+                        disabled={isPreviewing}
+onClick={async () => {
+                                const win = window.open("", "_blank");
+                                if (!win) {
+                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                                    return;
+                                }
+                                setIsPreviewing(true);
+                                try {
+                                    const values = form.getValues();
+                                    const slug = values.slug?.trim() || "preview";
+                                    const res = await fetch("/admin/api/preview", {
+                                        method: "POST",
+                                        credentials: "include",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({
+                                            type: "magazine",
+                                            redirectPath: `/magazines/${slug}`,
+                                            payload: { ...values, id: initialData?.id ?? "" },
+                                        }),
+                                    });
+                                    const data = await res.json();
+                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
+                                    else {
+                                        win.close();
+                                        if (data.error) alert(data.error);
+                                    }
+                                } finally {
+                                    setIsPreviewing(false);
+                                }
+                            }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                        プレビュー
+                    </button>
+                }
             >
                 <div className="space-y-8">
 

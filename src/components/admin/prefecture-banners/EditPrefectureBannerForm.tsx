@@ -14,7 +14,7 @@ import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import { upsertPrefectureBanner, deletePrefectureBanner } from "@/lib/actions/prefectureBanners";
 import { PrefectureBanner } from "@prisma/client";
 import { useState } from "react";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, Eye } from "lucide-react";
 
 const formSchema = z.object({
   pref: z.string().min(1),
@@ -40,6 +40,7 @@ export default function EditPrefectureBannerForm({
   defaultDisplayImage = "",
 }: EditPrefectureBannerFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -97,21 +98,66 @@ export default function EditPrefectureBannerForm({
         backLink="/admin/prefecture-banners"
         isSubmitting={isSubmitting}
         headerActions={
-          initialBanner ? (
+          <>
             <button
               type="button"
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-full text-[10px] font-bold uppercase tracking-tighter border border-red-200"
+              disabled={isPreviewing}
+              onClick={async () => {
+                const win = window.open("", "_blank");
+                if (!win) {
+                  alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                  return;
+                }
+                setIsPreviewing(true);
+                try {
+                  const values = form.getValues();
+                  const res = await fetch("/admin/api/preview", {
+                    method: "POST",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      type: "prefecture_banner",
+                      redirectPath: `/prefectures/${pref}`,
+                      payload: {
+                        pref,
+                        image: values.image,
+                        alt: values.alt ?? "",
+                        imagePosition: values.imagePosition ?? "50,50",
+                        imageScale: values.imageScale ?? "1",
+                      },
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.redirectUrl) win.location.href = data.redirectUrl;
+                  else {
+                    win.close();
+                    if (data.error) alert(data.error);
+                  }
+                } finally {
+                  setIsPreviewing(false);
+                }
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
-              {isDeleting ? (
-                <Loader2 size={12} className="animate-spin" />
-              ) : (
-                <Trash2 size={12} />
-              )}
-              カスタムを削除
+              {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+              プレビュー
             </button>
-          ) : null
+            {initialBanner ? (
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-full text-[10px] font-bold uppercase tracking-tighter border border-red-200"
+              >
+                {isDeleting ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <Trash2 size={12} />
+                )}
+                カスタムを削除
+              </button>
+            ) : null}
+          </>
         }
       >
         <div className="space-y-8">

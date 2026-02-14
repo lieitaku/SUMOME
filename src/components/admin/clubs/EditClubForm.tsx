@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ImageIcon, MapPin, Info, Phone, Mail, UploadCloud, X, Loader2 } from "lucide-react";
+import { ImageIcon, MapPin, Info, Phone, Mail, UploadCloud, X, Loader2, Eye } from "lucide-react";
 import { Club } from "@prisma/client";
 import { useState, useCallback } from "react";
 
@@ -83,6 +83,8 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
     const [isUploadingSub, setIsUploadingSub] = useState(false);
     // 郵便番号から住所を取得中かどうか
     const [zipLookupLoading, setZipLookupLoading] = useState(false);
+    // プレビュー送信中
+    const [isPreviewing, setIsPreviewing] = useState(false);
 
     // --- 1. 初始化 React Hook Form ---
     const form = useForm<FormValues>({
@@ -245,6 +247,46 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                 isSubmitting={isSubmitting}
                 isDeleting={isDeleting}
                 onDelete={onDelete}
+                headerActions={
+                    <button
+                        type="button"
+                        disabled={isPreviewing}
+                        onClick={async () => {
+                            const win = window.open("", "_blank");
+                            if (!win) {
+                                alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
+                                return;
+                            }
+                            setIsPreviewing(true);
+                            try {
+                                const values = form.getValues();
+                                const slug = values.slug?.trim() || "preview";
+                                const res = await fetch("/admin/api/preview", {
+                                    method: "POST",
+                                    credentials: "include",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        type: "club",
+                                        redirectPath: `/clubs/${slug}`,
+                                        payload: values,
+                                    }),
+                                });
+                                const data = await res.json();
+                                if (data.redirectUrl) win.location.href = data.redirectUrl;
+                                else {
+                                    win.close();
+                                    if (data.error) alert(data.error);
+                                }
+                            } finally {
+                                setIsPreviewing(false);
+                            }
+                        }}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                        プレビュー
+                    </button>
+                }
             >
                 {/* --- Section 1: 基本情報 & 画像 --- */}
                 <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">

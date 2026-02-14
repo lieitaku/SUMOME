@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getMainImageObjectPosition, getMainImageScale } from "@/lib/utils";
+import { getPreviewPayload } from "@/lib/preview";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 
@@ -19,6 +20,62 @@ interface PageProps {
     params: Promise<{ slug: string }>;
 }
 
+/** Normalize form payload to club-like object for display (preview mode). */
+function normalizePreviewClub(p: Record<string, unknown>): {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    logo: string | null;
+    mainImage: string | null;
+    mainImagePosition: string | null;
+    mainImageScale: number | null;
+    subImages: string[];
+    area: string;
+    city: string | null;
+    address: string;
+    mapUrl: string | null;
+    phone: string | null;
+    email: string | null;
+    website: string | null;
+    instagram: string | null;
+    twitter: string | null;
+    schedule: string | null;
+    target: string | null;
+    representative: string | null;
+} {
+    const scale = p.mainImageScale;
+    const scaleNum =
+        typeof scale === "number" && !Number.isNaN(scale)
+            ? scale
+            : typeof scale === "string"
+                ? Number(scale)
+                : null;
+    return {
+        id: String(p.id ?? ""),
+        name: String(p.name ?? ""),
+        slug: String(p.slug ?? ""),
+        description: p.description != null ? String(p.description) : null,
+        logo: p.logo != null ? String(p.logo) : null,
+        mainImage: p.mainImage != null ? String(p.mainImage) : null,
+        mainImagePosition: p.mainImagePosition != null ? String(p.mainImagePosition) : null,
+        mainImageScale: scaleNum != null && !Number.isNaN(scaleNum) ? scaleNum : null,
+        subImages: Array.isArray(p.subImages) ? p.subImages.map(String) : [],
+        area: String(p.area ?? "未設定"),
+        city: p.city != null ? String(p.city) : null,
+        address: String(p.address ?? ""),
+        mapUrl: p.mapUrl != null ? String(p.mapUrl) : null,
+        phone: p.phone != null ? String(p.phone) : null,
+        email: p.email != null ? String(p.email) : null,
+        website: p.website != null ? String(p.website) : null,
+        instagram: p.instagram != null ? String(p.instagram) : null,
+        twitter: p.twitter != null ? String(p.twitter) : null,
+        schedule: p.schedule != null ? String(p.schedule) : null,
+        target: p.target != null ? String(p.target) : null,
+        representative: p.representative != null ? String(p.representative) : null,
+    };
+}
+
 export default async function ClubDetailPage({ params }: PageProps) {
     // 1. 获取动态路由参数
     const { slug } = await params;
@@ -26,8 +83,23 @@ export default async function ClubDetailPage({ params }: PageProps) {
     // 2. 物理隔离官方账号 (防止通过 URL 直接访问 HQ 数据)
     if (slug === "official-hq") return notFound();
 
-    // 3. 从数据库查询俱乐部信息
-    const club = await prisma.club.findUnique({ where: { slug: slug } });
+    // 3. 预览模式：若有 preview cookie 且 type=club、slug 一致，用 payload 渲染
+    const preview = await getPreviewPayload();
+    const usePreview =
+        preview?.type === "club" &&
+        preview.payload &&
+        typeof preview.payload === "object" &&
+        "slug" in preview.payload &&
+        String((preview.payload as { slug: unknown }).slug) === slug;
+
+    let club: Awaited<ReturnType<typeof prisma.club.findUnique>>;
+    if (usePreview && preview.payload && typeof preview.payload === "object") {
+        club = normalizePreviewClub(preview.payload as Record<string, unknown>) as Awaited<
+            ReturnType<typeof prisma.club.findUnique>
+        >;
+    } else {
+        club = await prisma.club.findUnique({ where: { slug: slug } });
+    }
 
     // 如果找不到记录，返回 404 页面
     if (!club) return notFound();
@@ -93,6 +165,11 @@ export default async function ClubDetailPage({ params }: PageProps) {
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
+            {usePreview && (
+                <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
+                    プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。
+                </div>
+            )}
             <main className="flex-grow">
 
                 {/* --- Header Section (品牌视觉区) --- */}
