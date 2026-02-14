@@ -26,7 +26,7 @@ export default async function Home() {
     }),
     prisma.banner.findMany({
       where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
+      orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
     }),
     getBannerDisplaySettings(),
   ]);

@@ -266,22 +266,30 @@ export default function BannerForm({ initialData }: Props) {
                         </p>
                     </div>
 
-                    {/* 並び順 */}
+                    {/* 並び順（新規は自動で最後、編集時は同種別内で変更可） */}
                     <div>
                         <label className={labelClass}>
                             <Hash size={12} className="inline mr-1" />
                             並び順
                         </label>
-                        <input
-                            type="number"
-                            value={formData.sortOrder}
-                            onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
-                            min={0}
-                            className={`${inputClass} w-32`}
-                        />
-                        <p className="text-[10px] text-gray-400 mt-1">
-                            数値が小さいほど先に表示されます
-                        </p>
+                        {isEdit ? (
+                            <>
+                                <input
+                                    type="number"
+                                    value={formData.sortOrder}
+                                    onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
+                                    min={0}
+                                    className={`${inputClass} w-32`}
+                                />
+                                <p className="text-[10px] text-gray-400 mt-1">
+                                    同種別（クラブ or スポンサー）内での順位。小さいほど先に表示されます。変更すると他が自動でずれます。
+                                </p>
+                            </>
+                        ) : (
+                            <p className="text-sm text-gray-500 py-2">
+                                自動（最後に追加）— 同種別内で末尾に並びます
+                            </p>
+                        )}
                     </div>
 
                     {/* 有効/無効（編集時のみ） */}

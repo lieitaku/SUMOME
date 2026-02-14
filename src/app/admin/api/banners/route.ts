@@ -14,12 +14,18 @@ export async function GET(request: NextRequest) {
         ? { category: category as BannerCategory }
         : {};
 
+    const orderBy = category && (category === "club" || category === "sponsor")
+        ? { sortOrder: "asc" as const }
+        : [{ category: "asc" as const }, { sortOrder: "asc" as const }];
+
     const [banners, allBanners] = await Promise.all([
         prisma.banner.findMany({
             where: whereClause,
-            orderBy: { sortOrder: "asc" },
+            orderBy,
         }),
-        prisma.banner.findMany(),
+        prisma.banner.findMany({
+            orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+        }),
     ]);
 
     const clubBanners = allBanners.filter(b => b.category === "club");

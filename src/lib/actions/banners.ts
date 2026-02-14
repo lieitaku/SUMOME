@@ -105,18 +105,18 @@ export async function updateBannerDisplaySettings(formData: FormData) {
   }
 }
 
-// 获取所有 Banner（用于管理后台）
+// 获取所有 Banner（用于管理后台）；按类别内排序（クラブ / 赞助商各自 1,2,3…）
 export async function getAllBanners() {
   return prisma.banner.findMany({
-    orderBy: { sortOrder: "asc" },
+    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
   });
 }
 
-// 获取激活的 Banner（用于前台显示）
+// 获取激活的 Banner（用于前台显示）；按类别内排序
 export async function getActiveBanners() {
   return prisma.banner.findMany({
     where: { isActive: true },
-    orderBy: { sortOrder: "asc" },
+    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
   });
 }
 
@@ -128,7 +128,7 @@ export async function getActiveBannersByCategory(category: BannerCategory) {
   });
 }
 
-// 创建 Banner
+// 创建 Banner（同类别内 sortOrder 自动取 max+1，新条目排到该类别最后）
 export async function createBanner(formData: FormData) {
   try {
     const name = formData.get("name") as string;
@@ -136,7 +136,6 @@ export async function createBanner(formData: FormData) {
     const alt = formData.get("alt") as string | null;
     const link = formData.get("link") as string | null;
     const category = (formData.get("category") as BannerCategory) || "club";
-    const sortOrder = parseInt(formData.get("sortOrder") as string) || 0;
     const sponsorTierRaw = formData.get("sponsorTier") as string | null;
     const sponsorTier: BannerSponsorTier | null =
       category === "sponsor" && (sponsorTierRaw === "OFFICIAL" || sponsorTierRaw === "LOCAL")
@@ -146,6 +145,12 @@ export async function createBanner(formData: FormData) {
     if (!name || !image) {
       return { success: false, error: "名前と画像は必須です" };
     }
+
+    const maxResult = await prisma.banner.aggregate({
+      where: { category },
+      _max: { sortOrder: true },
+    });
+    const sortOrder = (maxResult._max.sortOrder ?? -1) + 1;
 
     await prisma.banner.create({
       data: {
@@ -169,7 +174,7 @@ export async function createBanner(formData: FormData) {
   }
 }
 
-// 更新 Banner
+// 更新 Banner（sortOrder 变更时在同类别内做「插入并顺延」）
 export async function updateBanner(formData: FormData) {
   try {
     const id = formData.get("id") as string;
@@ -178,7 +183,7 @@ export async function updateBanner(formData: FormData) {
     const alt = formData.get("alt") as string | null;
     const link = formData.get("link") as string | null;
     const category = (formData.get("category") as BannerCategory) || "club";
-    const sortOrder = parseInt(formData.get("sortOrder") as string) || 0;
+    const newOrder = parseInt(formData.get("sortOrder") as string) || 0;
     const isActive = formData.get("isActive") === "true";
     const sponsorTierRaw = formData.get("sponsorTier") as string | null;
     const sponsorTier: BannerSponsorTier | null =
@@ -190,18 +195,53 @@ export async function updateBanner(formData: FormData) {
       return { success: false, error: "必須項目が不足しています" };
     }
 
-    await prisma.banner.update({
-      where: { id },
-      data: {
-        name,
-        image,
-        alt: alt || name,
-        link: link || null,
-        category,
-        sponsorTier: category === "sponsor" ? (sponsorTier ?? "LOCAL") : null,
-        sortOrder,
-        isActive,
-      },
+    const current = await prisma.banner.findUnique({ where: { id }, select: { sortOrder: true, category: true } });
+    if (!current) {
+      return { success: false, error: "バナーが見つかりません" };
+    }
+    const oldOrder = current.sortOrder;
+
+    await prisma.$transaction(async (tx) => {
+      if (newOrder !== oldOrder) {
+        if (newOrder < oldOrder) {
+          const others = await tx.banner.findMany({
+            where: {
+              category: current.category,
+              id: { not: id },
+              sortOrder: { gte: newOrder, lt: oldOrder },
+            },
+            orderBy: { sortOrder: "desc" },
+          });
+          for (const o of others) {
+            await tx.banner.update({ where: { id: o.id }, data: { sortOrder: o.sortOrder + 1 } });
+          }
+        } else {
+          const others = await tx.banner.findMany({
+            where: {
+              category: current.category,
+              id: { not: id },
+              sortOrder: { gt: oldOrder, lte: newOrder },
+            },
+            orderBy: { sortOrder: "asc" },
+          });
+          for (const o of others) {
+            await tx.banner.update({ where: { id: o.id }, data: { sortOrder: o.sortOrder - 1 } });
+          }
+        }
+      }
+      await tx.banner.update({
+        where: { id },
+        data: {
+          name,
+          image,
+          alt: alt || name,
+          link: link || null,
+          category,
+          sponsorTier: category === "sponsor" ? (sponsorTier ?? "LOCAL") : null,
+          sortOrder: newOrder,
+          isActive,
+        },
+      });
     });
 
     revalidatePath("/admin/banners");
