@@ -46,8 +46,8 @@ const ClubsPage = () => {
               </p>
             </div>
 
-            {/* Map Section */}
-            <div className="mb-24 reveal-up delay-100">
+            {/* Map Section：不做 reveal-up，首屏始终可见，避免移动端依赖 JS 未触发时整块不显示 */}
+            <div className="mb-24">
               {/* 使用 MapWrapper 替代直接引入 JapanMap */}
               <Suspense fallback={<div className="h-[600px] w-full bg-gray-100 rounded-xl animate-pulse" />}>
                 <MapWrapper />
