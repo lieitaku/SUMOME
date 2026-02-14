@@ -203,7 +203,7 @@ export default function BannerForm({ initialData }: Props) {
                                         : "border-gray-200 bg-white text-gray-500 hover:border-gray-300"
                                         }`}
                                 >
-                                    高级（OFFICIAL TOP PARTNER）
+                                    高級（OFFICIAL TOP PARTNER）
                                 </button>
                                 <button
                                     type="button"

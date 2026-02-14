@@ -168,7 +168,7 @@ enum BannerCategory {
   sponsor  // 赞助商
 }
 
-// 赞助商等级：高级（OFFICIAL TOP PARTNER）/ 低级（LOCAL SUPPORTER）
+// 赞助商等级：高級（OFFICIAL TOP PARTNER）/ 低级（LOCAL SUPPORTER）
 enum BannerSponsorTier {
   OFFICIAL
   LOCAL
@@ -215,7 +215,7 @@ model PrefectureBanner {
 }
 
 // 旗子在各页面的显示设置（单例，供后台「显示设置」使用）
-// 各位置的 sponsorTierFilter: "all" | "official_only" | "local_only"（全部 / 高级のみ / 低级のみ）
+// 各位置的 sponsorTierFilter: "all" | "official_only" | "local_only"（全部 / 高級のみ / 低级のみ）
 model BannerDisplaySetting {
   id                        String             @id @default("default")
   homeDisplayMode           BannerDisplayMode  @default(mixed)

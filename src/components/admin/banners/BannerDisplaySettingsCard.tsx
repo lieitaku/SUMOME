@@ -14,7 +14,7 @@ const DISPLAY_MODE_OPTIONS: { value: BannerDisplayMode; label: string }[] = [
 
 const SPONSOR_TIER_OPTIONS: { value: SponsorTierFilter; label: string }[] = [
   { value: "all", label: "すべてのスポンサー" },
-  { value: "official_only", label: "高级スポンサーのみ" },
+  { value: "official_only", label: "高級スポンサーのみ" },
   { value: "local_only", label: "低级スポンサーのみ" },
 ];
 

@@ -24,8 +24,8 @@ const Button: React.FC<ButtonProps> = ({
   const shouldShowArrow =
     showArrow !== undefined ? showArrow : variant !== "ceramic";
 
-  // 2. 基础样式 (升级：加入更高级的缓动曲线和点击缩放反馈)
-  // ease-[cubic-bezier(0.19,1,0.22,1)] 是一种类似 iOS 的高级阻尼感动画
+  // 2. 基础样式 (升级：加入更高級的缓动曲线和点击缩放反馈)
+  // ease-[cubic-bezier(0.19,1,0.22,1)] 是一种类似 iOS 的高級阻尼感动画
   const baseStyles =
     "inline-flex items-center justify-center font-bold tracking-widest transition-all duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] transform group relative disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none active:scale-95";
 

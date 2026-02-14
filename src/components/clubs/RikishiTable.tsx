@@ -268,7 +268,7 @@ const RikishiTable = ({
                 onClick={() => setIsExpanded(!isExpanded)}
                 className={cn(
                   "group inline-flex items-center gap-2 px-8 py-3 rounded-full text-xs font-bold tracking-widest",
-                  // ✨ 优化点 1: 更高级的过渡设定
+                  // ✨ 优化点 1: 更高級的过渡设定
                   // duration-200 更轻快，ease-out 让结束时更顺滑
                   "transition-all duration-200 ease-out",
 
