@@ -244,7 +244,7 @@ const LoginForm = () => {
                 <div className="mt-12 text-center border-t border-gray-100 pt-6">
                   <p className="text-xs text-gray-500 font-medium">
                     アカウントをお持ちでない方は
-                    <Link href="/signup" className="text-sumo-brand font-bold ml-2 hover:underline decoration-sumo-brand/30 underline-offset-4 transition-all">新規登録</Link>
+                    <Link href="/manager/entry" className="text-sumo-brand font-bold ml-2 hover:underline decoration-sumo-brand/30 underline-offset-4 transition-all">新規登録</Link>
                   </p>
                 </div>
               </div>

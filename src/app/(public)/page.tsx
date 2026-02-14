@@ -1,6 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/db";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
+import { getPickupClubsForHome } from "@/lib/actions/pickup-clubs";
 
 // 引入组件
 import Hero from "@/components/home/Hero";
@@ -14,10 +15,7 @@ import ScrollInitializer from "@/components/utils/ScrollInitializer";
 export default async function Home() {
   // 四路请求互不依赖，并行以缩短首屏时间
   const [pickupClubs, activities, banners, displaySettings] = await Promise.all([
-    prisma.club.findMany({
-      take: 3,
-      orderBy: { createdAt: "desc" },
-    }),
+    getPickupClubsForHome(),
     prisma.activity.findMany({
       where: { published: true },
       include: {

@@ -39,7 +39,7 @@ const SERVICE_DATA: ServiceItem[] = [
     desc: "見学・体験申し込みで\n新しい一歩を",
     img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.jpg",
     delay: "delay-100",
-    href: "/manager/entry",
+    href: "/partners",
     // 🔴 热情红渐变: 从品牌红到深红，非常吸睛
     themeGradient: "bg-gradient-to-br from-[#df282f] to-[#b01c22]",
     shadowColor: "shadow-red-900/30",

@@ -1,31 +1,25 @@
 import React from "react";
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminRouteGuard from "@/components/admin/AdminRouteGuard";
 import { Toaster } from "sonner";
+import { getCurrentUser } from "@/lib/auth-utils";
 
 /**
  * 后台管理布局组件
- * 作用：包含侧边栏、全局通知容器以及权限上下文
- * 性能：优先从 middleware 注入的 x-user-email 读取，避免同一次请求内重复调用 Supabase（正式环境 RTT 高）
+ * 作用：包含侧边栏、全局通知容器；按 DB 中的 user.role 区分管理员(ADMIN)与代表者(OWNER)
+ * 性能：优先从 middleware 注入的 x-user-email 读取，避免同一次请求内重复调用 Supabase
  */
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    // 1. 优先使用 middleware 已注入的邮箱（同请求内 middleware 已调过 getUser，避免再调一次 Supabase）
+    const user = await getCurrentUser();
     const headersList = await headers();
     const emailFromHeader = headersList.get("x-user-email");
-    let userEmail = emailFromHeader ?? null;
-    if (userEmail === null) {
-        const supabase = await createClient();
-        const { data: { user: authUser } } = await supabase.auth.getUser();
-        userEmail = authUser?.email ?? "guest@sumo.com";
-    }
-
-    // 2. 模拟角色（后续可根据数据库 user.role 扩展）
-    const role = "ADMIN" as "ADMIN" | "OWNER";
+    const userEmail = user?.email ?? emailFromHeader ?? "";
+    const role = user?.role ?? "OWNER";
 
     return (
         <div className="min-h-screen bg-[#F4F5F7] font-sans text-gray-900 overflow-x-hidden">
@@ -45,9 +39,11 @@ export default async function AdminLayout({
             {/* --- 右侧主内容区域 --- */}
             <div className="flex flex-col min-h-screen transition-all duration-300 md:pl-64">
 
-                {/* 页面内容填充区 */}
+                {/* 页面内容填充区：OWNER は管理者専用ルートにアクセスすると /admin へリダイレクト */}
                 <main className="flex-1 px-6 py-8 pt-24 md:p-12 md:pt-8 w-full max-w-full">
-                    {children}
+                    <AdminRouteGuard role={role}>
+                        {children}
+                    </AdminRouteGuard>
                 </main>
 
                 {/* 底部版权栏 */}

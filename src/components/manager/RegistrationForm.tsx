@@ -92,9 +92,10 @@ const RegistrationForm = () => {
                         interactive={false}
                         className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden p-0"
                     >
-                        <div className="flex flex-col lg:flex-row min-h-[700px]">
+                        {/* 手机端：表单位于上、Benefits 于下；桌面端：左 Benefits、右表单 */}
+                        <div className="flex flex-col-reverse lg:flex-row min-h-[700px]">
 
-                            {/* --- A. 左侧区域 (保持不变) --- */}
+                            {/* --- A. 左侧区域（桌面）/ 下方（手机）--- */}
                             <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col">
                                 <div className="relative z-10 flex-grow">
                                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
@@ -110,20 +111,24 @@ const RegistrationForm = () => {
                                     <div className="space-y-8">
                                         {[
                                             {
-                                                title: "専用ページ作成",
-                                                desc: "SEOに強い、魅力的なクラブ紹介ページを自動生成。",
+                                                title: "検索に強い公式ページ",
+                                                desc: "Web知識は不要。スマホだけで、Google検索で上位に表示される「見やすい募集ページ」が自動で作れます。",
                                             },
                                             {
-                                                title: "体験・入会管理",
-                                                desc: "申し込み状況を管理し、対応漏れを防ぎます。",
+                                                title: "問い合わせ・入会を自動整理",
+                                                desc: "電話やメールのやり取りはもう不要。体験申し込みや質問をシステムが整理し、対応漏れをゼロにします。",
                                             },
                                             {
-                                                title: "情報発信",
-                                                desc: "活動報告や大会結果を、全国の相撲ファンへ届けます。",
+                                                title: "ファンを増やす広報活動",
+                                                desc: "日々の稽古や大会の熱気を全国へ。手間なく発信でき、OBや支援者との強いつながりを生み出します。",
                                             },
                                         ].map((item, idx) => (
                                             <div key={idx} className="flex gap-4 group">
-                                                <div className="mt-1 w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-300 group-hover:border-sumo-brand group-hover:text-sumo-brand group-hover:bg-white transition-all shadow-sm">
+                                                <div className={cn(
+                                                    "mt-1 w-6 h-6 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0",
+                                                    "border-sumo-brand text-sumo-brand bg-white",
+                                                    "md:border-gray-300 md:text-gray-300 md:bg-transparent md:group-hover:border-sumo-brand md:group-hover:text-sumo-brand md:group-hover:bg-white"
+                                                )}>
                                                     <Check size={12} />
                                                 </div>
                                                 <div>
@@ -296,7 +301,7 @@ const RegistrationForm = () => {
                                     <p className="text-xs font-medium text-gray-500">
                                         アカウントをお持ちの方は
                                         <Link
-                                            href="/login"
+                                            href="/manager/login"
                                             className="text-sumo-brand font-bold ml-2 hover:underline tracking-wide"
                                         >
                                             こちらからログイン

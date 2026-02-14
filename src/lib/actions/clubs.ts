@@ -153,11 +153,17 @@ export async function updateClub(formData: FormData) {
     getCurrentUser(),
     prisma.club.findUnique({
       where: { id: validatedFields.data.id },
-      select: { slug: true },
+      select: { slug: true, ownerId: true },
     }),
   ]);
 
-  const isAdmin = currentUser?.role === "ADMIN";
+  if (!currentUser) {
+    return { error: "ログインしてください。" };
+  }
+  const isAdmin = currentUser.role === "ADMIN";
+  if (!isAdmin && currentClub?.ownerId !== currentUser.id) {
+    return { error: "このクラブの編集権限がありません。" };
+  }
   const { id, slug: newSlug, ...rest } = validatedFields.data;
   const oldSlug = currentClub?.slug ?? "";
 
@@ -192,6 +198,7 @@ export async function updateClub(formData: FormData) {
 
     revalidatePath("/admin/clubs");
     revalidatePath(`/admin/clubs/${id}`);
+    revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${oldSlug}`);
     if (slugToUpdate) revalidatePath(`/clubs/${slugToUpdate}`);
 
@@ -206,19 +213,29 @@ export async function updateClub(formData: FormData) {
 // 3. 削除用 (Delete)
 // ==============================================================================
 export async function deleteClub(id: string) {
-  try {
-    // 1. 先查一下 slug，为了刷新前台路径
-    const club = await prisma.club.findUnique({
+  const [currentUser, club] = await Promise.all([
+    getCurrentUser(),
+    prisma.club.findUnique({
       where: { id },
-      select: { slug: true },
-    });
+      select: { slug: true, ownerId: true },
+    }),
+  ]);
+  if (!currentUser) {
+    return { error: "ログインしてください。" };
+  }
+  if (currentUser.role !== "ADMIN" && club?.ownerId !== currentUser.id) {
+    return { error: "このクラブの削除権限がありません。" };
+  }
+  if (!club) {
+    return { error: "クラブが見つかりません。" };
+  }
 
-    // 2. 执行删除
+  try {
     await prisma.club.delete({ where: { id } });
 
-    // 3. 刷新相关缓存
     revalidatePath("/admin/clubs");
-    if (club) revalidatePath(`/clubs/${club.slug}`);
+    revalidatePath("/admin/my-club");
+    revalidatePath(`/clubs/${club.slug}`);
 
     return { success: true };
   } catch (error) {

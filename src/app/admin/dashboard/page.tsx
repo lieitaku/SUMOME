@@ -1,10 +1,20 @@
 import React from "react";
 import { prisma } from "@/lib/db";
-import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard, Inbox, AlertCircle, ArrowRight } from "lucide-react";
+import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard, Inbox, AlertCircle, ArrowRight, Store } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
+import { getCurrentUser } from "@/lib/auth-utils";
 
 export default async function AdminDashboardPage() {
-    // 1. 并行查询数据库中的数量
+    const user = await getCurrentUser();
+    const isAdmin = user?.role === "ADMIN";
+
+    if (isAdmin) {
+        return <AdminDashboard />;
+    }
+    return <OwnerDashboard />;
+}
+
+async function AdminDashboard() {
     const [
         clubsCount,
         activitiesCount,
@@ -25,55 +35,15 @@ export default async function AdminDashboardPage() {
         prisma.inquiry.count({ where: { status: "unread" } }),
     ]);
 
-    // 定义统计卡片数据
     const stats = [
-        {
-            label: "登録クラブ数",
-            value: clubsCount - 1, // 排除官方总部
-            icon: <Users className="w-6 h-6 text-blue-600" />,
-            bg: "bg-blue-50",
-            link: "/admin/clubs"
-        },
-        {
-            label: "活動・ニュース",
-            value: activitiesCount,
-            icon: <Calendar className="w-6 h-6 text-purple-600" />,
-            bg: "bg-purple-50",
-            link: "/admin/activities"
-        },
-        {
-            label: "広報誌データ",
-            value: magazinesCount,
-            icon: <BookOpen className="w-6 h-6 text-amber-600" />,
-            bg: "bg-amber-50",
-            link: "/admin/magazines"
-        },
-        {
-            label: "バナー広告",
-            value: bannersCount,
-            icon: <Flag className="w-6 h-6 text-emerald-600" />,
-            bg: "bg-emerald-50",
-            link: "/admin/banners"
-        },
-        {
-            label: "入会・体験申請",
-            value: appsCount,
-            icon: <UserPlus className="w-6 h-6 text-rose-600" />,
-            bg: "bg-rose-50",
-            link: "/admin/applications",
-            pending: pendingAppsCount
-        },
-        {
-            label: "お問い合わせ",
-            value: inquiriesCount,
-            icon: <Inbox className="w-6 h-6 text-cyan-600" />,
-            bg: "bg-cyan-50",
-            link: "/admin/inquiries",
-            pending: unreadInquiriesCount
-        },
+        { label: "登録クラブ数", value: clubsCount - 1, icon: <Users className="w-6 h-6 text-blue-600" />, bg: "bg-blue-50", link: "/admin/clubs" },
+        { label: "活動・ニュース", value: activitiesCount, icon: <Calendar className="w-6 h-6 text-purple-600" />, bg: "bg-purple-50", link: "/admin/activities" },
+        { label: "広報誌データ", value: magazinesCount, icon: <BookOpen className="w-6 h-6 text-amber-600" />, bg: "bg-amber-50", link: "/admin/magazines" },
+        { label: "バナー広告", value: bannersCount, icon: <Flag className="w-6 h-6 text-emerald-600" />, bg: "bg-emerald-50", link: "/admin/banners" },
+        { label: "入会・体験申請", value: appsCount, icon: <UserPlus className="w-6 h-6 text-rose-600" />, bg: "bg-rose-50", link: "/admin/applications", pending: pendingAppsCount },
+        { label: "お問い合わせ", value: inquiriesCount, icon: <Inbox className="w-6 h-6 text-cyan-600" />, bg: "bg-cyan-50", link: "/admin/inquiries", pending: unreadInquiriesCount },
     ];
 
-    // 需要处理的待办事项总数
     const totalPending = pendingAppsCount + unreadInquiriesCount;
 
     return (
@@ -192,6 +162,120 @@ export default async function AdminDashboardPage() {
                     >
                         <UserPlus className="w-4 h-4 mr-2" />
                         申請メッセージを確認
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+async function OwnerDashboard() {
+    const user = await getCurrentUser();
+    if (!user) return null;
+
+    const myClubs = await prisma.club.findMany({
+        where: { ownerId: user.id },
+        select: { id: true, name: true },
+    });
+    const clubIds = myClubs.map((c) => c.id);
+
+    const [appsCount, pendingAppsCount] = await Promise.all([
+        prisma.application.count({ where: { clubId: { in: clubIds } } }),
+        prisma.application.count({ where: { clubId: { in: clubIds }, status: "pending" } }),
+    ]);
+
+    const stats = [
+        { label: "クラブ情報", value: myClubs.length, icon: <Store className="w-6 h-6 text-blue-600" />, bg: "bg-blue-50", link: "/admin/my-club" },
+        { label: "入会・体験申請", value: appsCount, icon: <UserPlus className="w-6 h-6 text-rose-600" />, bg: "bg-rose-50", link: "/admin/applications", pending: pendingAppsCount },
+    ];
+
+    return (
+        <div className="max-w-6xl mx-auto font-sans">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">ダッシュボード</h1>
+                <p className="text-gray-500 mt-2">
+                    クラブ管理画面へようこそ。ご自身のクラブ情報と入会申請を確認できます。
+                </p>
+            </div>
+
+            {pendingAppsCount > 0 && (
+                <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-100 rounded-lg">
+                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-amber-900">未対応の申請があります</h3>
+                                <p className="text-sm text-amber-700">
+                                    <span className="font-black">{pendingAppsCount}</span>件
+                                </p>
+                            </div>
+                        </div>
+                        <Link
+                            href="/admin/applications"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                        >
+                            申請を確認
+                            <ArrowRight size={12} />
+                        </Link>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+                {stats.map((stat, index) => (
+                    <Link
+                        key={index}
+                        href={stat.link}
+                        className="group relative block p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
+                    >
+                        {stat.pending !== undefined && stat.pending > 0 && (
+                            <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg animate-pulse">
+                                {stat.pending}
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className={`p-2.5 rounded-lg ${stat.bg}`}>
+                                {stat.icon}
+                            </div>
+                            <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest group-hover:text-sumo-brand transition-colors">
+                                View
+                            </span>
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{stat.label}</h3>
+                            <p className="text-2xl font-black text-gray-900 font-serif">
+                                {stat.value}
+                                <span className="text-[10px] font-sans font-normal text-gray-300 ml-1">件</span>
+                            </p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
+                <div className="w-16 h-16 bg-blue-50 text-sumo-brand rounded-full flex items-center justify-center mx-auto mb-6">
+                    <LayoutDashboard size={32} />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-2">クラブ運営を始めましょう</h3>
+                <p className="text-gray-500 mb-8 max-w-md mx-auto text-sm leading-relaxed">
+                    左メニューから「クラブ情報編集」で掲載内容を更新し、「入会申請管理」で体験・入会希望に対応できます。
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                    <Link
+                        href="/admin/my-club"
+                        className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl text-white bg-sumo-brand hover:bg-sumo-dark shadow-lg shadow-blue-900/10 transition-all"
+                    >
+                        <Store className="w-4 h-4 mr-2" />
+                        クラブ情報を編集
+                    </Link>
+                    <Link
+                        href="/admin/applications"
+                        className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl text-sumo-brand bg-blue-50 hover:bg-blue-100 transition-all"
+                    >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        入会申請を確認
                     </Link>
                 </div>
             </div>

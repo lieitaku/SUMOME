@@ -95,6 +95,7 @@ model Club {
   activities     Activity[]
   applications   Application[] // 关联的申请记录
   published      Boolean   @default(false) // 默认为 false (草稿状态)
+  homePickup     HomePickupClub? // 首页「注目の相撲クラブ」槽位（最多 3 个）
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -209,6 +210,14 @@ model BannerDisplaySetting {
   prefTopDisplayMode   BannerDisplayMode  @default(mixed)
   prefSidebarDisplayMode BannerDisplayMode @default(mixed)
   updatedAt            DateTime           @updatedAt
+}
+
+// 首页「注目の相撲クラブ」显示的 3 个俱乐部（按顺序 1 / 2 / 3）
+// 未配置或某槽位俱乐部被删除时，首页回退为「最新 3 件」
+model HomePickupClub {
+  sortOrder Int     @unique // 0, 1, 2 对应左 / 中 / 右
+  clubId    String? @unique // 一个俱乐部最多出现在一个槽位
+  club      Club?   @relation(fields: [clubId], references: [id], onDelete: SetNull)
 }
 
 // ==========================================

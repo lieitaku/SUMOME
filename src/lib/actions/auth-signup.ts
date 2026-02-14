@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { z } from "zod";
@@ -55,16 +55,15 @@ export async function signUp(
   }
 
   const { email, password, name, clubName } = validatedFields.data;
-  const supabase = await createClient();
 
-  // 2. Supabase Auth 注册
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { name: name },
-    },
-  });
+  // 2. Supabase Auth 注册（用 Admin API 仅为避免发确认邮件报错；角色由下方 Prisma 的 role: "OWNER" 决定，不是管理员）
+  const { data: authData, error: authError } =
+    await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { name },
+    });
 
   if (authError) {
     return {
