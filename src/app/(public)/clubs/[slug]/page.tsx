@@ -15,6 +15,9 @@ import Button from "@/components/ui/Button";
 // 定义品牌色常量
 const BRAND_BLUE = "#2454a4";
 
+// 预览依赖 Cookie，禁止静态缓存
+export const dynamic = "force-dynamic";
+
 // 页面参数定义 (Next.js 15+)
 interface PageProps {
     params: Promise<{ slug: string }>;
@@ -166,8 +169,11 @@ export default async function ClubDetailPage({ params }: PageProps) {
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
             {usePreview && (
-                <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
-                    プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。
+                <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
+                    <span>プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。</span>
+                    <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
+                        編集に戻る
+                    </a>
                 </div>
             )}
             <main className="flex-grow">

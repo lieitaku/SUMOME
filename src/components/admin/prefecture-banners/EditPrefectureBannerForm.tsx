@@ -11,6 +11,7 @@ import MainImagePositionEditor, {
 } from "@/components/admin/clubs/MainImagePositionEditor";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { upsertPrefectureBanner, deletePrefectureBanner } from "@/lib/actions/prefectureBanners";
 import { PrefectureBanner } from "@prisma/client";
 import { useState } from "react";
@@ -41,6 +42,7 @@ export default function EditPrefectureBannerForm({
 }: EditPrefectureBannerFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -103,11 +105,6 @@ export default function EditPrefectureBannerForm({
               type="button"
               disabled={isPreviewing}
               onClick={async () => {
-                const win = window.open("", "_blank");
-                if (!win) {
-                  alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                  return;
-                }
                 setIsPreviewing(true);
                 try {
                   const values = form.getValues();
@@ -128,11 +125,11 @@ export default function EditPrefectureBannerForm({
                     }),
                   });
                   const data = await res.json();
-                  if (data.redirectUrl) win.location.href = data.redirectUrl;
-                  else {
-                    win.close();
-                    if (data.error) alert(data.error);
+                  if (data.redirectUrl) {
+                    setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                    return;
                   }
+                  if (data.error) alert(data.error);
                 } finally {
                   setIsPreviewing(false);
                 }
@@ -160,6 +157,7 @@ export default function EditPrefectureBannerForm({
           </>
         }
       >
+        <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="都道府県バナー プレビュー" />
         <div className="space-y-8">
           <div className={sectionClass}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

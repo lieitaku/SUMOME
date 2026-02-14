@@ -23,6 +23,7 @@ import Image from "next/image";
 
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { createMagazine, updateMagazine, deleteMagazine } from "@/lib/actions/magazines";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
@@ -116,6 +117,7 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
     const [selectedRegionTab, setSelectedRegionTab] = useState<string>("関東");
     const [isUploading, setIsUploading] = useState(false);
     const [isPreviewing, setIsPreviewing] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -277,11 +279,6 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                         type="button"
                         disabled={isPreviewing}
 onClick={async () => {
-                                const win = window.open("", "_blank");
-                                if (!win) {
-                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                                    return;
-                                }
                                 setIsPreviewing(true);
                                 try {
                                     const values = form.getValues();
@@ -297,22 +294,23 @@ onClick={async () => {
                                         }),
                                     });
                                     const data = await res.json();
-                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
-                                    else {
-                                        win.close();
-                                        if (data.error) alert(data.error);
+if (data.redirectUrl) {
+                                        setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                                        return;
                                     }
+                                    if (data.error) alert(data.error);
                                 } finally {
                                     setIsPreviewing(false);
                                 }
                             }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                    >
-                        {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
-                        プレビュー
-                    </button>
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                        >
+                            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+                            プレビュー
+                        </button>
                 }
             >
+                <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="広報誌 プレビュー" />
                 <div className="space-y-8">
 
                     {/* Section 1: 标题 (必填) */}

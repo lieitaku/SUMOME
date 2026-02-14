@@ -32,6 +32,8 @@ interface PageProps {
   }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export default async function PrefecturePage({ params }: PageProps) {
   const { pref } = await params;
   const prefSlug = pref;
@@ -142,8 +144,11 @@ export default async function PrefecturePage({ params }: PageProps) {
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       {prefBannerPreview && (
-        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
-          プレビュー — 未保存の内容を表示しています。
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
+          <span>プレビュー — 未保存の内容を表示しています。</span>
+          <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
+            編集に戻る
+          </a>
         </div>
       )}
       <main className="grow">

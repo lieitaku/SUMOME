@@ -13,6 +13,8 @@ import ActivityReport from "@/components/home/ActivityReport"; // 待会儿给�
 import CTA from "@/components/home/CTA";
 import ScrollInitializer from "@/components/utils/ScrollInitializer";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const preview = await getPreviewPayload();
   const isPreview =
@@ -100,8 +102,11 @@ export default async function Home() {
   return (
     <div className="w-full flex flex-col min-h-screen">
       {isPreview && (
-        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
-          プレビュー — 未保存の内容を表示しています。
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
+          <span>プレビュー — 未保存の内容を表示しています。</span>
+          <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
+            編集に戻る
+          </a>
         </div>
       )}
       <ScrollInitializer />

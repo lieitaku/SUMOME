@@ -19,6 +19,7 @@ import { REGIONS } from "@/lib/constants"
 import ImageUploader from "@/components/admin/ui/ImageUploader";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 import ScheduleEditor from "./ScheduleEditor"; // <--- 引入日程编辑器组件
 import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
 import MainImagePositionEditor, { parsePositionString, formatPositionString, parseScaleValue } from "./MainImagePositionEditor";
@@ -83,8 +84,9 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
     const [isUploadingSub, setIsUploadingSub] = useState(false);
     // 郵便番号から住所を取得中かどうか
     const [zipLookupLoading, setZipLookupLoading] = useState(false);
-    // プレビュー送信中
+    // プレビュー送信中 / プレビュー用 URL（設定時はモーダル表示）
     const [isPreviewing, setIsPreviewing] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     // --- 1. 初始化 React Hook Form ---
     const form = useForm<FormValues>({
@@ -252,11 +254,6 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                         type="button"
                         disabled={isPreviewing}
                         onClick={async () => {
-                            const win = window.open("", "_blank");
-                            if (!win) {
-                                alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                                return;
-                            }
                             setIsPreviewing(true);
                             try {
                                 const values = form.getValues();
@@ -272,11 +269,11 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                     }),
                                 });
                                 const data = await res.json();
-                                if (data.redirectUrl) win.location.href = data.redirectUrl;
-                                else {
-                                    win.close();
-                                    if (data.error) alert(data.error);
+                                if (data.redirectUrl) {
+                                    setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                                    return;
                                 }
+                                if (data.error) alert(data.error);
                             } finally {
                                 setIsPreviewing(false);
                             }
@@ -288,6 +285,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                     </button>
                 }
             >
+                <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="クラブ プレビュー" />
                 {/* --- Section 1: 基本情報 & 画像 --- */}
                 <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <h2 className={sectionHeading}>

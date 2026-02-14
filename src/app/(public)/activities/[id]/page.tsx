@@ -19,6 +19,8 @@ import StandardTemplate from "@/components/activities/StandardTemplate";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 
+export const dynamic = "force-dynamic";
+
 function normalizePreviewActivity(
   p: Record<string, unknown>,
   club: { id: string; name: string }
@@ -93,8 +95,11 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
       {usePreview && (
-        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold">
-          プレビュー — 未保存の内容を表示しています。
+        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
+          <span>プレビュー — 未保存の内容を表示しています。</span>
+          <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
+            編集に戻る
+          </a>
         </div>
       )}
       {/* --- Header 部分 --- */}

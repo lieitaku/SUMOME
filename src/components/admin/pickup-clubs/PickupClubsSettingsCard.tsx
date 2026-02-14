@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { Save, Loader2, Star, LayoutGrid, Eye } from "lucide-react";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { updateHomePickupClubs } from "@/lib/actions/pickup-clubs";
 
 export type SlotItem = {
@@ -27,6 +28,7 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [slots, setSlots] = useState<string[]>(() =>
     initialSlots.map((s) => s.clubId ?? "")
   );
@@ -155,11 +157,6 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
             type="button"
             disabled={isPreviewing}
 onClick={async () => {
-                const win = window.open("", "_blank");
-                if (!win) {
-                  alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                  return;
-                }
                 setIsPreviewing(true);
                 try {
                   const res = await fetch("/admin/api/preview", {
@@ -173,22 +170,23 @@ onClick={async () => {
                     }),
                   });
                   const data = await res.json();
-                  if (data.redirectUrl) win.location.href = data.redirectUrl;
-                  else {
-                    win.close();
-                    if (data.error) alert(data.error);
+if (data.redirectUrl) {
+                    setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                    return;
                   }
+                  if (data.error) alert(data.error);
                 } finally {
                   setIsPreviewing(false);
                 }
               }}
-            className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 disabled:opacity-50"
-          >
-            {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
-            プレビュー
-          </button>
+              className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 disabled:opacity-50"
+            >
+              {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
+              プレビュー
+            </button>
         </div>
       </form>
+      <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="注目クラブ プレビュー" />
     </div>
   );
 }

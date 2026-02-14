@@ -8,6 +8,7 @@ import { ArrowLeft, Save, Loader2, Image as ImageIcon, Link as LinkIcon, Hash, T
 import { createBanner, updateBanner, deleteBanner } from "@/lib/actions/banners";
 import { Banner, BannerCategory, BannerSponsorTier } from "@prisma/client";
 import ImageUploader from "@/components/admin/ui/ImageUploader";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 
 interface Props {
     initialData?: Banner;
@@ -18,6 +19,7 @@ export default function BannerForm({ initialData }: Props) {
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string | null>(null);
     const [isPreviewing, setIsPreviewing] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     const [formData, setFormData] = useState({
         name: initialData?.name || "",
@@ -90,6 +92,7 @@ export default function BannerForm({ initialData }: Props) {
 
     return (
         <div className="p-4 md:p-6 lg:p-10 max-w-3xl mx-auto bg-[#F9FAFB] min-h-screen">
+            <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="バナー プレビュー" />
             {/* Header */}
             <header className="mb-6 md:mb-8">
                 <Link
@@ -335,11 +338,6 @@ export default function BannerForm({ initialData }: Props) {
                             type="button"
                             disabled={isPreviewing || !formData.image}
                             onClick={async () => {
-                                const win = window.open("", "_blank");
-                                if (!win) {
-                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                                    return;
-                                }
                                 setIsPreviewing(true);
                                 try {
                                     const res = await fetch("/admin/api/preview", {
@@ -363,11 +361,11 @@ export default function BannerForm({ initialData }: Props) {
                                         }),
                                     });
                                     const data = await res.json();
-                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
-                                    else {
-                                        win.close();
-                                        if (data.error) alert(data.error);
+                                    if (data.redirectUrl) {
+                                        setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                                        return;
                                     }
+                                    if (data.error) alert(data.error);
                                 } finally {
                                     setIsPreviewing(false);
                                 }

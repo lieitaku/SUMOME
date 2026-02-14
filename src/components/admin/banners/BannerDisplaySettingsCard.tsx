@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Save, Loader2, LayoutDashboard, Home, MapPin, PanelRight, Eye } from "lucide-react";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { updateBannerDisplaySettings, type SponsorTierFilter } from "@/lib/actions/banners";
 import type { BannerDisplayMode } from "@prisma/client";
 
@@ -36,6 +37,7 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<Settings>(initialSettings);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -239,11 +241,6 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
             type="button"
             disabled={isPreviewing}
             onClick={async () => {
-              const win = window.open("", "_blank");
-              if (!win) {
-                alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                return;
-              }
               setIsPreviewing(true);
               try {
                 const res = await fetch("/admin/api/preview", {
@@ -257,11 +254,11 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
                   }),
                 });
                 const data = await res.json();
-                if (data.redirectUrl) win.location.href = data.redirectUrl;
-                else {
-                  win.close();
-                  if (data.error) alert(data.error);
+                if (data.redirectUrl) {
+                  setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                  return;
                 }
+                if (data.error) alert(data.error);
               } finally {
                 setIsPreviewing(false);
               }
@@ -273,6 +270,7 @@ export default function BannerDisplaySettingsCard({ initialSettings }: Props) {
           </button>
         </div>
       </form>
+      <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="旗の表示 プレビュー" />
     </div>
   );
 }

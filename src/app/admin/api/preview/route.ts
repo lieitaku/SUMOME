@@ -32,8 +32,10 @@ export async function POST(request: NextRequest) {
     const url = new URL(request.url);
     const origin = url.origin;
     const redirectUrl = `${origin}${path}`;
+    // 用于 iframe 预览：先打开 bridge，在 iframe 内设置 cookie 再跳转，避免 iframe 不带上父页的 cookie
+    const bridgeUrl = `${origin}/admin/api/preview/bridge?id=${encodeURIComponent(id)}&path=${encodeURIComponent(path)}`;
 
-    const res = NextResponse.json({ redirectUrl });
+    const res = NextResponse.json({ redirectUrl, previewId: id, bridgeUrl });
     res.cookies.set(PREVIEW_COOKIE, id, {
         httpOnly: true,
         path: "/",

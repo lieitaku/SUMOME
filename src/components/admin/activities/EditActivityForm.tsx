@@ -15,6 +15,7 @@ import { Activity, Club } from "@prisma/client";
 import ImageUploader from "@/components/admin/ui/ImageUploader";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 
 // ✨ 2. 引入 Server Actions
 import { updateActivityAction, createActivityAction, deleteActivityAction } from "@/lib/actions/activities";
@@ -64,6 +65,7 @@ export default function EditActivityForm({
     isNew?: boolean
 }) {
     const [isPreviewing, setIsPreviewing] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const templateType = (initialData.templateType || "news") as "news" | "report" | "event" | "custom";
     const savedData = (initialData.contentData ? initialData.contentData : {}) as SavedContentData;
 
@@ -164,11 +166,6 @@ export default function EditActivityForm({
                             type="button"
                             disabled={isPreviewing}
                             onClick={async () => {
-                                const win = window.open("", "_blank");
-                                if (!win) {
-                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                                    return;
-                                }
                                 setIsPreviewing(true);
                                 try {
                                     const values = form.getValues();
@@ -203,11 +200,11 @@ export default function EditActivityForm({
                                         }),
                                     });
                                     const data = await res.json();
-                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
-                                    else {
-                                        win.close();
-                                        if (data.error) alert(data.error);
+                                    if (data.redirectUrl) {
+                                        setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                                        return;
                                     }
+                                    if (data.error) alert(data.error);
                                 } finally {
                                     setIsPreviewing(false);
                                 }
@@ -230,6 +227,7 @@ export default function EditActivityForm({
                     </>
                 }
             >
+                <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="活動 プレビュー" />
 
                 {/* Section 1: 基础信息 */}
                 <div className={sectionClass}>

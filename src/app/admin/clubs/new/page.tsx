@@ -10,6 +10,7 @@ import { Info, AlertTriangle, Building2, CheckCircle2, Eye, Loader2 } from "luci
 import ImageUploader from "@/components/admin/ui/ImageUploader";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
+import PreviewModal from "@/components/admin/ui/PreviewModal";
 
 // ✨ 引入 Server Action
 import { createClub } from "@/lib/actions/clubs";
@@ -29,6 +30,7 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function NewClubPage() {
     const [isPreviewing, setIsPreviewing] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     // 1. 初始化表单
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -78,11 +80,6 @@ export default function NewClubPage() {
                             type="button"
                             disabled={isPreviewing}
                             onClick={async () => {
-                                const win = window.open("", "_blank");
-                                if (!win) {
-                                    alert("ポップアップがブロックされています。ブラウザの設定でこのサイトのポップアップを許可してください。");
-                                    return;
-                                }
                                 setIsPreviewing(true);
                                 try {
                                     const values = form.getValues();
@@ -98,11 +95,11 @@ export default function NewClubPage() {
                                         }),
                                     });
                                     const data = await res.json();
-                                    if (data.redirectUrl) win.location.href = data.redirectUrl;
-                                    else {
-                                        win.close();
-                                        if (data.error) alert(data.error);
+                                    if (data.redirectUrl) {
+                                        setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                                        return;
                                     }
+                                    if (data.error) alert(data.error);
                                 } finally {
                                     setIsPreviewing(false);
                                 }
@@ -118,6 +115,7 @@ export default function NewClubPage() {
                     </>
                 }
             >
+                <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="クラブ プレビュー" />
                 <div className="space-y-8">
                     {/* Section 1: 基本情报 */}
                     <div className={sectionClass}>
