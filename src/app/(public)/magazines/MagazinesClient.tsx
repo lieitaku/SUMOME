@@ -98,8 +98,9 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     const [activePref, setActivePref] = useState<string | "all">("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterExpanded, setIsFilterExpanded] = useState(true);
+    const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
-    const isFilterActive = activeRegion !== "all" || searchQuery.length > 0;
+    const isFilterActive = activeRegion !== "all" || searchQuery.length > 0 || sortOrder !== "newest";
 
     // 根据当前选中的大区，动态计算需要显示的县列表
     const currentPrefectures = useMemo(() => {
@@ -109,7 +110,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
 
     // 核心筛选逻辑
     const filteredMagazines = useMemo(() => {
-        return initialMagazines.filter((mag) => {
+        const filtered = initialMagazines.filter((mag) => {
             // 1. 文本搜索
             const query = searchQuery.toLowerCase();
             const matchSearch =
@@ -132,7 +133,17 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
 
             return matchSearch && matchLocation;
         });
-    }, [activeRegion, activePref, searchQuery, initialMagazines]);
+
+        // 3. 新着順 / 古い順 排序
+        return filtered.sort((a, b) => {
+            const aTime = new Date(a.issueDate).getTime();
+            const bTime = new Date(b.issueDate).getTime();
+            if (sortOrder === "newest") {
+                return bTime - aTime; // 新着順（新しい→古い）
+            }
+            return aTime - bTime; // 古い順（古い→新しい）
+        });
+    }, [activeRegion, activePref, searchQuery, initialMagazines, sortOrder]);
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
@@ -308,8 +319,8 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                             </div>
                         </div>
 
-                        {/* 结果统计与标签 - 与 /clubs 页面一致 */}
-                        <div className="flex items-end justify-between mt-8 mb-4 pb-4 border-b border-gray-200">
+                        {/* 结果统计 + 新着順 / 古い順 切り替え + 激活标签 */}
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mt-8 mb-4 pb-4 border-b border-gray-200">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
                                     {filteredMagazines.length}
@@ -319,36 +330,71 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 </span>
                             </div>
 
-                            {/* 激活状态展示 */}
-                            <div className="hidden md:flex gap-2">
-                                {searchQuery && (
-                                    <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
-                                        {searchQuery}
+                            <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
+                                {/* 排序：PC + SP 共通 UI */}
+                                <div className="inline-flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
+                                        Sort
+                                    </span>
+                                    <div className="inline-flex rounded-full bg-gray-100 p-1">
                                         <button
                                             type="button"
-                                            onClick={() => setSearchQuery("")}
-                                            className="hover:text-sumo-red"
+                                            onClick={() => setSortOrder("newest")}
+                                            className={cn(
+                                                "px-3 py-1 rounded-full text-[11px] font-bold tracking-wide transition-colors",
+                                                sortOrder === "newest"
+                                                    ? "bg-sumo-brand text-white"
+                                                    : "text-gray-500"
+                                            )}
                                         >
-                                            <X size={14} />
+                                            新着順
                                         </button>
-                                    </span>
-                                )}
-                                {activeRegion !== "all" && (
-                                    <span className="pl-3 pr-2 py-1 bg-sumo-brand text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-sm shadow-sumo-brand/20">
-                                        <MapPin size={10} />
-                                        {REGIONS.find((r) => r.id === activeRegion)?.label}
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setActiveRegion("all");
-                                                setActivePref("all");
-                                            }}
-                                            className="hover:text-white/70 ml-1"
+                                            onClick={() => setSortOrder("oldest")}
+                                            className={cn(
+                                                "px-3 py-1 rounded-full text-[11px] font-bold tracking-wide transition-colors",
+                                                sortOrder === "oldest"
+                                                    ? "bg-sumo-brand text-white"
+                                                    : "text-gray-500"
+                                            )}
                                         >
-                                            <X size={14} />
+                                            古い順
                                         </button>
-                                    </span>
-                                )}
+                                    </div>
+                                </div>
+
+                                {/* 激活状态展示（移动端也显示） */}
+                                <div className="flex flex-wrap gap-2">
+                                    {searchQuery && (
+                                        <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
+                                            {searchQuery}
+                                            <button
+                                                type="button"
+                                                onClick={() => setSearchQuery("")}
+                                                className="hover:text-sumo-red"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </span>
+                                    )}
+                                    {activeRegion !== "all" && (
+                                        <span className="pl-3 pr-2 py-1 bg-sumo-brand text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-sm shadow-sumo-brand/20">
+                                            <MapPin size={10} />
+                                            {REGIONS.find((r) => r.id === activeRegion)?.label}
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setActiveRegion("all");
+                                                    setActivePref("all");
+                                                }}
+                                                className="hover:text-white/70 ml-1"
+                                            >
+                                                <X size={14} />
+                                            </button>
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

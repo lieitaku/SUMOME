@@ -69,11 +69,11 @@ export const dynamic = "force-dynamic";
  * 杂志详情主页面 (Server Component)
  */
 export default async function MagazineDetailPage({
-  params
+  params,
 }: {
-  params: Promise<{ slug: string }>
+  params: { slug: string };
 }) {
-  const { slug } = await params;
+  const { slug } = params;
 
   const preview = await getPreviewPayload();
   const usePreview =
@@ -128,14 +128,14 @@ export default async function MagazineDetailPage({
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
-      {usePreview && (
+      {(usePreview && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
             編集に戻る
           </a>
         </div>
-      )}
+      )) as React.ReactNode}
       {/* 头部区域 */}
       <header className="relative bg-sumo-brand text-white pt-32 pb-64 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
