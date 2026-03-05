@@ -166,7 +166,7 @@ const Header = () => {
               <span className="text-xs sm:text-sm md:text-[9px] lg:text-[10px] xl:text-base 2xl:text-base font-serif font-bold tracking-[0.12em] sm:tracking-[0.15em] md:tracking-[0.1em] lg:tracking-[0.12em] xl:tracking-[0.2em] 2xl:tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
                 スモウメモリー
               </span>
-              <span className="text-sm sm:text-base md:text-[10px] lg:text-xs xl:text-lg 2xl:text-lg font-serif font-medium tracking-normal sm:tracking-wider md:tracking-wider lg:tracking-widest xl:tracking-widest 2xl:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
+              <span className="text-sm sm:text-base md:text-[10px] lg:text-xs xl:text-lg 2xl:text-lg font-serif font-bold tracki  ng-normal sm:tracking-wider md:tracking-wider lg:tracking-widest xl:tracking-widest 2xl:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
                 相撲の思い出
               </span>
             </div>

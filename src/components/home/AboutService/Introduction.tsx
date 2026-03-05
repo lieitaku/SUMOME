@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 const Introduction = () => {
   return (
-    <div className="flex flex-col lg:flex-row items-center justify-between gap-16 lg:gap-24">
+    <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-16 lg:gap-24">
       {/* 左侧：视觉重心 (图片) */}
       <div className="relative w-full lg:w-1/2 h-[400px] lg:h-[500px] reveal-up group">
         {/* 装饰框：极简黑线框 */}

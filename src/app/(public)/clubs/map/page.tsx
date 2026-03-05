@@ -13,7 +13,7 @@ const ClubsPage = () => {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
         {/* === Hero Area === */}
-        <section className="relative pt-48 pb-32 overflow-hidden">
+        <section className="relative pt-24 pb-20 md:pt-48 md:pb-32 overflow-hidden">
           {/* Background Decoration */}
           <div
             className="absolute inset-0 pointer-events-none z-0"
@@ -29,7 +29,7 @@ const ClubsPage = () => {
 
           <div className="container mx-auto px-6 relative z-10">
             {/* Title Section：不做 reveal-up，首屏始终可见，避免移动端 JS 未触发时整块不显示 */}
-            <div className="text-center mb-16 md:mb-20">
+            <div className="text-center mb-10 md:mb-20">
               <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 bg-white rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100">
                 <MapPin size={12} className="text-sumo-brand" />
                 <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
@@ -47,7 +47,7 @@ const ClubsPage = () => {
             </div>
 
             {/* Map Section：不做 reveal-up，首屏始终可见，避免移动端依赖 JS 未触发时整块不显示 */}
-            <div className="mb-24">
+            <div className="mb-16 md:mb-24">
               {/* 使用 MapWrapper 替代直接引入 JapanMap */}
               <Suspense fallback={<div className="h-[600px] w-full bg-gray-100 rounded-xl animate-pulse" />}>
                 <MapWrapper />

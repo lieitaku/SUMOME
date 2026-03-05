@@ -23,7 +23,7 @@ const ManagerInfo = () => {
             もっと多くの人へ。
           </h2>
 
-          <p className="text-sumo-text/70 leading-loose mb-10 font-medium text-sm md:text-base">
+          <p className="text-sumo-text/70 leading-loose mb-6 md:mb-10 font-medium text-sm md:text-base">
             SUMOMEは、全国の相撲クラブと、
             <br />
             未来の力士たちを繋ぐ架け橋です。
@@ -54,7 +54,7 @@ const ManagerInfo = () => {
            2. md:gap-0: 电脑上保持 0 间距，像表格一样整齐。
            3. md:border-t: 只有电脑上需要顶部的这根分割线。
         */}
-        <div className="lg:col-span-7 flex flex-col gap-6 md:gap-0 mt-12 lg:mt-0 md:border-t md:border-gray-200">
+        <div className="lg:col-span-7 flex flex-col gap-6 md:gap-0 mt-4 md:mt-8 lg:mt-0 md:border-t md:border-gray-200">
           <BenefitCard
             number="01"
             delay="delay-100"

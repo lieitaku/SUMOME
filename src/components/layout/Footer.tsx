@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Star, Mail } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { useParams, usePathname } from "next/navigation";
 import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
@@ -64,7 +63,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#faf9f6] text-sumo-dark pt-24 pb-12 relative overflow-hidden border-t border-gray-100">
+    <footer className="bg-[#faf9f6] text-sumo-dark pt-16 pb-10 md:pt-24 md:pb-12 relative overflow-hidden border-t border-gray-100">
       {/* Background Texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03]"
@@ -77,7 +76,7 @@ const Footer = () => {
       <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-white to-transparent opacity-60 pointer-events-none"></div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-16 mb-20">
+        <div className="flex flex-col md:flex-row justify-between items-start gap-10 md:gap-16 mb-10 md:mb-20">
           {/* --- Left Column: Brand Info --- */}
           <div className="md:w-1/3">
             {isHomePage ? (
@@ -125,7 +124,7 @@ const Footer = () => {
               </Link>
             )}
 
-            <p className="text-sm text-gray-500 mb-8 leading-loose font-medium font-sans">
+            <p className="text-sm text-gray-500 mb-6 md:mb-8 leading-loose font-medium font-sans">
               相撲クラブ検索・応援プラットフォーム
               <br />
               <span className="text-xs opacity-70 mt-2 block">
@@ -133,36 +132,10 @@ const Footer = () => {
               </span>
             </p>
 
-            {/* 社交图标：跟随主题色 */}
-            <div className="flex gap-3">
-              {[Star, Mail].map((Icon, idx) => (
-                <div
-                  key={idx}
-                  className="w-10 h-10 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-400 transition-all duration-300 cursor-pointer group shadow-sm"
-                  style={
-                    {
-                      "--hover-color": themeColor,
-                    } as React.CSSProperties
-                  }
-                >
-                  <style jsx>{`
-                    .group:hover {
-                      background-color: var(--hover-color);
-                      border-color: var(--hover-color);
-                      color: white;
-                    }
-                  `}</style>
-                  <Icon
-                    size={16}
-                    className="group-hover:scale-110 transition-transform"
-                  />
-                </div>
-              ))}
-            </div>
           </div>
 
           {/* --- Right Column: Sitemap --- */}
-          <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-12 text-sm">
+          <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 text-sm">
             {/* Column 1 */}
             <div>
               <h4
@@ -261,7 +234,7 @@ const Footer = () => {
         </div>
 
         {/* --- Bottom Copyright --- */}
-        <div className="pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest">
+        <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest">
           <p className="font-sans">
             &copy; 2025 SUMOME INC. All Rights Reserved.
           </p>

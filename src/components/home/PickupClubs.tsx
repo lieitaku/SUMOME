@@ -23,7 +23,7 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
   return (
     <Section background="gray" id="pickup-clubs">
       {/* 头部标题区 */}
-      <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 border-b border-gray-200 pb-8 reveal-up">
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-16 border-b border-gray-200 pb-8 reveal-up">
         <div>
           <span className="text-sumo-brand text-xs font-bold tracking-[0.3em] mb-3 block uppercase font-sans">
             Pick Up Clubs

@@ -15,14 +15,32 @@ type HeroProps = {
   posterSrc?: string;
 };
 
+/** 视口横向 < 370px 时为窄屏（卡片两行） */
+function useNarrowCard() {
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 369px)");
+    const update = () => setNarrow(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return narrow;
+}
+
 /** 顶部心技体卡片，视频/图片两种模式共用 */
 function HeroContent() {
+  const narrow = useNarrowCard();
   return (
-    <div className="relative flex flex-row items-stretch rounded-2xl overflow-hidden h-[80px] md:h-[90px] shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
+    <div
+      className={`relative flex flex-row items-stretch rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.1)] ${
+        narrow ? "min-h-[80px]" : "h-[80px] md:h-[90px]"
+      }`}
+    >
       <div className="absolute inset-0 bg-white/90 backdrop-blur-[60px] backdrop-saturate-[1.5]" />
       <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-      <div className="bg-sumo-red text-white w-[60px] md:w-[80px] flex flex-col justify-center items-center shrink-0 relative overflow-hidden z-10">
-        <div className="absolute inset-0 bg-black/10 mix-blend-overlay"></div>
+      <div className="bg-sumo-red text-white w-[60px] md:w-[80px] flex flex-col justify-center items-center shrink-0 relative overflow-hidden z-10 self-stretch min-h-full">
+        <div className="absolute inset-0 bg-black/10 mix-blend-overlay" />
         <span className="text-[10px] md:text-xs font-bold leading-none opacity-90 font-serif">20</span>
         <span className="text-2xl md:text-3xl font-black tracking-tighter leading-none my-0.5 font-serif">26</span>
         <div className="flex flex-col items-center border-t border-white/30 pt-1 mt-1 w-8">
@@ -30,8 +48,12 @@ function HeroContent() {
           <span className="text-[8px] md:text-[9px] tracking-widest opacity-90 mt-0.5 transform scale-90">始動</span>
         </div>
       </div>
-      <div className="flex-grow flex flex-col justify-center px-5 md:px-8 relative">
-        <div className="relative z-10 flex flex-row items-center justify-between">
+      <div className="flex-grow flex flex-col justify-center px-5 md:px-8 relative min-w-0">
+        <div
+          className={`relative z-10 flex justify-between gap-2 ${
+            narrow ? "flex-col items-start gap-2" : "flex-row items-center gap-0"
+          }`}
+        >
           <div className="flex items-center gap-3 md:gap-6">
             <h1 className="flex items-center gap-2 md:gap-4 font-serif text-sumo-text leading-none select-none">
               <span className="text-3xl md:text-4xl font-black tracking-tighter text-sumo-red">心</span>
@@ -41,8 +63,17 @@ function HeroContent() {
               <span className="text-3xl md:text-4xl font-black tracking-tighter text-sumo-red">体</span>
             </h1>
           </div>
-          <div className="flex flex-col items-end border-l border-gray-400/30 pl-4 md:pl-8 ml-2">
-            <p className="font-serif text-base md:text-xl font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap">伝統を未来へ</p>
+          <div
+            className={`flex flex-col items-end border-gray-400/30 min-w-0 flex-shrink ${
+              narrow ? "border-l-0 pl-0 ml-0 self-end" : "border-l pl-4 md:pl-8 ml-2"
+            }`}
+          >
+            <p
+              className="font-serif font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap"
+              style={{ fontSize: "clamp(0.875rem, 4.2vw, 1.25rem)" }}
+            >
+              伝統を未来へ
+            </p>
             <p className="hidden md:block font-sans text-xs text-gray-500 font-medium tracking-wider uppercase text-right">Tradition & Future</p>
           </div>
         </div>

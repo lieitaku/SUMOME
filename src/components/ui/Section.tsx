@@ -19,7 +19,7 @@ const Section: React.FC<SectionProps> = ({
       id={id}
       className={cn(
         // 1. 基础布局
-        "w-full py-20 md:py-28 relative overflow-hidden",
+        "w-full py-12 md:py-28 relative overflow-hidden",
         // 2. 背景色控制 (瑞士风格只有白和极淡的灰)
         background === "white" ? "bg-sumo-bg" : "bg-gray-50",
         className,

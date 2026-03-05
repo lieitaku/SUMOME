@@ -62,14 +62,14 @@ const AboutService = () => {
   return (
     <Section background="white" id="service">
       {/* 1. Introduction (保持不变) */}
-      <div className="mb-32">
+      <div className="mb-16 md:mb-32">
         <Introduction />
       </div>
 
       {/* 2. 三本柱 (下层功能) */}
       <div className="relative z-10">
         {/* 标题区 */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 reveal-up border-b border-gray-200 pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-16 reveal-up border-b border-gray-200 pb-8">
           <div>
             <p className="text-sumo-brand font-bold text-xs tracking-[0.3em] mb-2 uppercase font-sans">
               Our Core Services
