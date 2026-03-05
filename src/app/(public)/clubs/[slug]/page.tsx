@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "@/components/ui/TransitionLink";
 import {
     MapPin, Users, ChevronLeft, Sparkles, CheckCircle2,
-    CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation
+    CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation, Phone
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { getMainImageObjectPosition, getMainImageScale } from "@/lib/utils";
@@ -168,14 +168,14 @@ export default async function ClubDetailPage({ params }: PageProps) {
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
-            {usePreview && (
+            {(usePreview && (
                 <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
                     <span>プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。</span>
                     <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
                         編集に戻る
                     </a>
                 </div>
-            )}
+            )) as React.ReactNode}
             <main className="flex-grow">
 
                 {/* --- Header Section (品牌视觉区) --- */}
@@ -259,32 +259,33 @@ export default async function ClubDetailPage({ params }: PageProps) {
                                     <div className="mt-auto pt-8 border-t border-gray-200/50">
                                         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Official Links</h3>
                                         <div className="flex gap-4">
-                                            {/* Instagram */}
+                                            {club.phone && (
+                                                <a href={`tel:${club.phone}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-emerald-100" title="電話をかける">
+                                                    <Phone size={20} />
+                                                </a>
+                                            )}
                                             {club.instagram && (
                                                 <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-pink-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-pink-100">
                                                     <Instagram size={20} />
                                                 </a>
                                             )}
-                                            {/* Twitter/X */}
                                             {club.twitter && (
                                                 <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-black shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
                                                     <Twitter size={20} />
                                                 </a>
                                             )}
-                                            {/* 官方网站 */}
                                             {club.website && (
                                                 <a href={club.website} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-blue-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-blue-100">
                                                     <Globe size={20} />
                                                 </a>
                                             )}
-                                            {/* 邮箱 */}
                                             {club.email && (
-                                                <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-cyan-600shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
+                                                <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-cyan-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
                                                     <Mail size={20} />
                                                 </a>
                                             )}
                                         </div>
-                                        {(!club.instagram && !club.twitter && !club.website && !club.email) && (
+                                        {(!club.phone && !club.instagram && !club.twitter && !club.website && !club.email) && (
                                             <p className="text-xs text-gray-400">SNS情報は登録されていません。</p>
                                         )}
                                     </div>
@@ -402,7 +403,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
                                                             {club.address}
                                                         </p>
                                                     </div>
-                                                    <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-sumo-brand transition-colors">
+                                                    <div className="w-10 h-10 shrink-0 aspect-square bg-gray-50 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-sumo-brand transition-colors">
                                                         <Navigation size={20} />
                                                     </div>
                                                 </div>
@@ -418,7 +419,33 @@ export default async function ClubDetailPage({ params }: PageProps) {
                                             </div>
                                         </div>
 
-                                        {/* 3. 募集对象信息 */}
+                                        {/* 3. 電話番号 */}
+                                        {club.phone && (
+                                            <div className="col-span-1 md:col-span-2">
+                                                <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                    <Phone size={14} className="text-sumo-brand" /> Contact
+                                                </h4>
+                                                <a
+                                                    href={`tel:${club.phone}`}
+                                                    className="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex items-center justify-between gap-4"
+                                                >
+                                                    <div className="flex items-center gap-4 min-w-0">
+                                                        <div className="w-10 h-10 shrink-0 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                                                            <Phone size={18} className="text-emerald-600" />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">TEL</p>
+                                                            <p className="text-lg font-black text-gray-900 tabular-nums tracking-wide whitespace-nowrap">{club.phone}</p>
+                                                        </div>
+                                                    </div>
+                                                    <span className="hidden md:inline text-[10px] font-bold text-emerald-600 uppercase tracking-widest shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        Tap to Call
+                                                    </span>
+                                                </a>
+                                            </div>
+                                        )}
+
+                                        {/* 4. 募集对象信息 */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
                                                 <Target size={14} className="text-sumo-brand" /> Target
@@ -441,7 +468,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
                                     <div className="mt-auto">
                                         <Button href={`/clubs/${club.slug}/recruit`} className="w-full py-6 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all rounded-2xl" style={{ backgroundColor: BRAND_BLUE }}>
                                             <span className="flex items-center gap-3 text-lg font-black uppercase tracking-tighter">
-                                                <Users size={20} /> 体験・入会を申し込む
+                                                <Users size={20} /> 入会を申し込む
                                             </span>
                                         </Button>
                                         <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">Feel free to visit us anytime.</p>
