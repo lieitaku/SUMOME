@@ -16,7 +16,7 @@ const CTA = () => {
             Join The Community
           </span>
           <h2 className="text-5xl md:text-7xl font-black text-sumo-text font-serif leading-tight">
-            未来の横綱を、
+            将来の横綱を、
             <br className="md:hidden" />
             <span className="text-sumo-brand inline-block border-b-4 border-sumo-brand pb-2 mx-2">
               ここ

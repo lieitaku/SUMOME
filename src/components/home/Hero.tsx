@@ -118,7 +118,7 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
   // ========== 视频背景模式（16:9 循环） ==========
   if (useVideo) {
     return (
-      <section className="relative w-full h-screen overflow-hidden bg-sumo-bg">
+      <section className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]">
         {/* 背景层：poster 立即显示 → 视频加载后淡入 */}
         <div className="absolute inset-0 z-0">
           <img
@@ -148,7 +148,6 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
             </video>
           )}
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-[15vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/80 to-transparent z-10 pointer-events-none" />
         <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
           <HeroContent />
         </div>
@@ -167,7 +166,7 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
   const CHAR_X = (WORLD_W - CHAR_SIZE) / 2;
 
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-sumo-bg">
+    <section className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]">
       <svg
         className="absolute inset-0 w-full h-full z-0 pointer-events-none"
         viewBox={`0 0 ${WORLD_W} ${WORLD_H}`}
@@ -209,7 +208,6 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
         />
       </svg>
 
-      <div className="absolute bottom-0 left-0 w-full h-[15vh] bg-gradient-to-t from-sumo-bg via-sumo-bg/80 to-transparent z-10 pointer-events-none" />
       <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
         <HeroContent />
       </div>

@@ -119,6 +119,8 @@ export default async function Home() {
           videoSrc="/videos/hero-bg.mp4"
           posterSrc="/images/hero/hero-poster.jpg"
         />
+        <CTA />
+
         <AboutService />
 
         <PickupClubs clubs={pickupClubs} />
@@ -126,8 +128,6 @@ export default async function Home() {
         <ManagerInfo />
 
         <ActivityReport activities={activities} />
-
-        <CTA />
       </main>
     </div>
   );
