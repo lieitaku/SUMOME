@@ -67,8 +67,8 @@ export default function BannerCard({ banner, index, dragHandleProps }: Props) {
 
             {/* 情報 */}
             <div className="p-3 md:p-4">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <h3 className="font-bold text-sm text-gray-900 truncate">{banner.name}</h3>
+                <h3 className="font-bold text-sm text-gray-900 truncate mb-1">{banner.name}</h3>
+                <div className="flex items-center gap-1.5 mb-1">
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${banner.category === "club"
                         ? "bg-blue-100 text-blue-600"
                         : "bg-amber-100 text-amber-600"
@@ -76,11 +76,14 @@ export default function BannerCard({ banner, index, dragHandleProps }: Props) {
                         {banner.category === "club" ? "クラブ" : "スポンサー"}
                     </span>
                     {banner.category === "sponsor" && banner.sponsorTier && (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${banner.sponsorTier === "OFFICIAL"
-                            ? "bg-amber-200 text-amber-800"
-                            : "bg-gray-100 text-gray-600"
-                            }`}>
-                            {banner.sponsorTier === "OFFICIAL" ? "OFFICIAL" : "LOCAL"}
+                        <span
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap ${
+                                banner.sponsorTier === "OFFICIAL"
+                                    ? "bg-amber-200 text-amber-800"
+                                    : "bg-gray-100 text-gray-600"
+                            }`}
+                        >
+                            {banner.sponsorTier === "OFFICIAL" ? "公式スポンサー" : "地域スポンサー"}
                         </span>
                     )}
                 </div>
