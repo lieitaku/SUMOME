@@ -61,6 +61,28 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
 ];
 
 // ==============================================================================
+// 1.5 都道府県の北→南 順序マップ（地域順ソートに使用）
+// ==============================================================================
+
+const PREFECTURE_ORDER: Record<string, number> = {
+    "北海道": 1,
+    "青森": 2, "岩手": 3, "秋田": 4, "宮城": 5, "山形": 6, "福島": 7,
+    "茨城": 8, "栃木": 9, "群馬": 10, "埼玉": 11, "千葉": 12, "東京": 13, "神奈川": 14,
+    "新潟": 15, "富山": 16, "石川": 17, "福井": 18, "山梨": 19, "長野": 20, "岐阜": 21, "静岡": 22, "愛知": 23,
+    "三重": 24, "滋賀": 25, "京都": 26, "大阪": 27, "兵庫": 28, "奈良": 29, "和歌山": 30,
+    "鳥取": 31, "島根": 32, "岡山": 33, "広島": 34, "山口": 35,
+    "徳島": 36, "香川": 37, "愛媛": 38, "高知": 39,
+    "福岡": 40, "佐賀": 41, "長崎": 42, "熊本": 43, "大分": 44, "宮崎": 45, "鹿児島": 46, "沖縄": 47,
+};
+
+function getPrefectureOrder(region: string): number {
+    for (const [pref, order] of Object.entries(PREFECTURE_ORDER)) {
+        if (region.startsWith(pref)) return order;
+    }
+    return 999;
+}
+
+// ==============================================================================
 // 2. 组件定义
 // ==============================================================================
 
@@ -98,9 +120,9 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     const [activePref, setActivePref] = useState<string | "all">("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterExpanded, setIsFilterExpanded] = useState(true);
-    const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
+    const [sortOrder, setSortOrder] = useState<"region" | "newest">("region");
 
-    const isFilterActive = activeRegion !== "all" || searchQuery.length > 0 || sortOrder !== "newest";
+    const isFilterActive = activeRegion !== "all" || searchQuery.length > 0 || sortOrder !== "region";
 
     // 根据当前选中的大区，动态计算需要显示的县列表
     const currentPrefectures = useMemo(() => {
@@ -134,14 +156,13 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
             return matchSearch && matchLocation;
         });
 
-        // 3. 新着順 / 古い順 排序
         return filtered.sort((a, b) => {
-            const aTime = new Date(a.issueDate).getTime();
-            const bTime = new Date(b.issueDate).getTime();
-            if (sortOrder === "newest") {
-                return bTime - aTime; // 新着順（新しい→古い）
+            if (sortOrder === "region") {
+                const orderDiff = getPrefectureOrder(a.region) - getPrefectureOrder(b.region);
+                if (orderDiff !== 0) return orderDiff;
+                return new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
             }
-            return aTime - bTime; // 古い順（古い→新しい）
+            return new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
         });
     }, [activeRegion, activePref, searchQuery, initialMagazines, sortOrder]);
 
@@ -339,6 +360,18 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     <div className="inline-flex rounded-full bg-gray-100 p-1">
                                         <button
                                             type="button"
+                                            onClick={() => setSortOrder("region")}
+                                            className={cn(
+                                                "px-3 py-1 rounded-full text-[11px] font-bold tracking-wide transition-colors",
+                                                sortOrder === "region"
+                                                    ? "bg-sumo-brand text-white"
+                                                    : "text-gray-500"
+                                            )}
+                                        >
+                                            地域順
+                                        </button>
+                                        <button
+                                            type="button"
                                             onClick={() => setSortOrder("newest")}
                                             className={cn(
                                                 "px-3 py-1 rounded-full text-[11px] font-bold tracking-wide transition-colors",
@@ -348,18 +381,6 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                             )}
                                         >
                                             新着順
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setSortOrder("oldest")}
-                                            className={cn(
-                                                "px-3 py-1 rounded-full text-[11px] font-bold tracking-wide transition-colors",
-                                                sortOrder === "oldest"
-                                                    ? "bg-sumo-brand text-white"
-                                                    : "text-gray-500"
-                                            )}
-                                        >
-                                            古い順
                                         </button>
                                     </div>
                                 </div>
