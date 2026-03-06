@@ -2,7 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // 授权图片域名
+    unoptimized: true,
+    // 授权图片域名（若未来恢复优化，可继续使用）
     remotePatterns: [
       {
         protocol: "https",

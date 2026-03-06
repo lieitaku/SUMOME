@@ -20,7 +20,7 @@ const ClubsPage = () => {
               backgroundSize: "40px 40px",
             }}
           />
-          <div className="absolute top-20 left-10 md:left-1/4 text-[40vw] md:text-[25vw] font-serif font-bold text-sumo-brand opacity-[0.03] select-none pointer-events-none leading-none z-0 mix-blend-multiply">
+          <div className="absolute top-30 left-10 md:left-1/4 text-[40vw] md:text-[25vw] font-serif font-bold text-sumo-brand opacity-[0.05] select-none pointer-events-none leading-none z-0 mix-blend-multiply">
             47
           </div>
 

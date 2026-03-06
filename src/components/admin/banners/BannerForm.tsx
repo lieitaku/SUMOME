@@ -129,12 +129,12 @@ export default function BannerForm({ initialData }: Props) {
                             <ul className="text-[11px] text-blue-600 space-y-0.5">
                                 <li>• サイズ: <span className="font-bold">160×290 px</span>（縦長）</li>
                                 <li>• 比率: 約 <span className="font-bold">1:1.8</span>（縦向き）</li>
-                                <li>• 形式: <span className="font-bold text-green-600">JPG / WebP 推奨</span></li>
+                                <li>• 形式: <span className="font-bold text-green-600">WebP 推奨</span></li>
                                 <li>• ファイルサイズ: <span className="font-bold">300KB 以下</span>推奨</li>
                             </ul>
                             <p className="text-[10px] text-amber-600 mt-2 flex items-start gap-1">
                                 <span>⚠️</span>
-                                <span>PNG は容量が大きくなりがちです。可能であれば JPG か WebP に変換してからアップロードしてください。</span>
+                                <span>PNG は容量が大きくなりがちです。可能であれば “WebP” に変換してからアップロードしてください。</span>
                             </p>
                         </div>
 
