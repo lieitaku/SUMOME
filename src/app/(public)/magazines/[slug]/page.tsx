@@ -5,16 +5,17 @@ import { notFound } from "next/navigation";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedMagazineBySlug } from "@/lib/cached-queries";
 import {
-  ArrowLeft,
   BookOpen,
-  Calendar,
-  Tag,
   Layers,
   ArrowRight,
+  ChevronLeft,
+  MapPin,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import { ShareButton, MagazineReader } from "@/components/magazine/MagazineClientComponents";
+
+const BRAND_BLUE = "#2454a4";
 
 /**
  * 3D 书封展示组件
@@ -132,57 +133,59 @@ export default async function MagazineDetailPage({
           </a>
         </div>
       )) as React.ReactNode}
-      {/* 头部区域 */}
-      <header className="relative bg-sumo-brand text-white pt-32 pb-64 overflow-hidden shadow-xl">
-        <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
 
-        {/* 背景网格纹理 */}
+      {/* --- Header Section (与 clubs/[slug] 统一风格) --- */}
+      <section className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+        {/* 背景渐变 */}
         <div
-          className="absolute inset-0 opacity-20 pointer-events-none"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
-            backgroundSize: "40px 40px",
-          }}
+          className="absolute inset-0"
+          style={{ background: `linear-gradient(to bottom, ${BRAND_BLUE}, #1a3a7a)` }}
         ></div>
 
-        {/* 封面模糊背景氛围 */}
-        {magazine.coverImage && (
-          <div className="absolute inset-0 opacity-20 scale-110 blur-3xl saturate-150 pointer-events-none mix-blend-overlay">
-            <Image src={magazine.coverImage} alt="bg" fill className="object-cover" />
+        {/* 背景网格装饰 */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+
+        {/* 巨大水印 */}
+        <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 text-[15vw] font-black text-white opacity-[0.03] select-none pointer-events-none tracking-tighter mix-blend-overlay">
+          MAG
+        </div>
+
+        <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
+          {/* 返回按钮 */}
+          <div className="flex justify-center mb-8">
+            <Link
+              href="/magazines"
+              className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group"
+            >
+              <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to List</span>
+            </Link>
           </div>
-        )}
 
-        <div className="container mx-auto max-w-6xl relative z-10 px-6">
-          {/* 返回导航 */}
-          <Link href="/magazines" className="inline-flex items-center gap-3 text-white/60 hover:text-white transition-colors group mb-12">
-            <div className="w-8 h-8 rounded-full bg-white/5 backdrop-blur-sm flex items-center justify-center border border-white/10 group-hover:bg-white group-hover:text-sumo-brand transition-all">
-              <ArrowLeft size={14} />
-            </div>
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back</span>
-          </Link>
+          {/* 标题 */}
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-black tracking-tight mb-6 text-white leading-tight">
+            {magazine.title}
+          </h1>
 
-          {/* 标题与元数据 */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-            <div className="max-w-3xl">
-              <div className="flex flex-wrap items-center gap-6 mb-6 opacity-80">
-                <div className="flex items-center gap-2 text-xs font-mono tracking-wide px-3 py-1 bg-white/10 rounded-full border border-white/10">
-                  <Calendar size={12} className="text-sumo-gold" />
-                  <span>{year}.{month}.{day}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs font-medium tracking-wide">
-                  <Tag size={14} className="text-white/50" />
-                  <span className="uppercase tracking-widest">{magazine.region} Area</span>
-                </div>
-              </div>
-
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-bold leading-[1.1] tracking-tight mb-4 drop-shadow-md text-transparent bg-clip-text bg-gradient-to-br from-white via-white to-white/70">
-                {magazine.title}
-              </h1>
-            </div>
+          {/* 顶部简要信息：区域 + 发刊日 */}
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-white/80 font-medium">
+            <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-[10px] uppercase tracking-widest border border-white/10">
+              <MapPin size={12} /> {magazine.region}
+            </span>
+            <span className="hidden md:inline w-px h-4 bg-white/20"></span>
+            <span className="text-[10px] uppercase tracking-[0.2em] opacity-80">
+              {year}.{month}.{day} 発行
+            </span>
           </div>
         </div>
-      </header>
+      </section>
 
       {/* 主体内容区域 */}
       <section className="relative px-4 md:px-6 -mt-32 z-20 pb-32">
