@@ -1,5 +1,6 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "@/components/ui/TransitionLink";
+import Image from "next/image";
 import {
   ChevronLeft,
   Camera,
@@ -104,6 +105,7 @@ export default async function PrefecturePage({ params }: PageProps) {
   const bannerAlt = prefBannerPreview?.alt ?? customBanner?.alt ?? bannerTitle;
   const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
+  
   // 构建俱乐部完整地址
   const clubAddress = featuredClub
     ? [featuredClub.area, featuredClub.city, featuredClub.address].filter(Boolean).join(" ")
@@ -123,7 +125,7 @@ export default async function PrefecturePage({ params }: PageProps) {
         ? Number(bannerRecord.imageScale)
         : 1;
   const bannerBgPosition = `${posX}% ${posY}%`;
-  const bannerBgSize = `${100 * bannerScale}%`;
+  const bannerBgSize = bannerScale === 1 ? "cover" : `${100 * bannerScale}%`; // 防御性逻辑：未缩放时强制 cover
 
   const ceramicStyle = {
     borderBottomColor: theme.color,
@@ -135,6 +137,7 @@ export default async function PrefecturePage({ params }: PageProps) {
       {prefBannerPreview && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。</span>
+          {/* eslint-disable-next-line no-script-url */}
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
             編集に戻る
           </a>
@@ -142,7 +145,7 @@ export default async function PrefecturePage({ params }: PageProps) {
       )}
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        <section className="relative pt-40 pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">
+        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">
           <div
             className={cn(
               "absolute inset-0 bg-gradient-to-b opacity-100",
@@ -162,7 +165,6 @@ export default async function PrefecturePage({ params }: PageProps) {
           </div>
 
           <div className="container mx-auto px-6 relative z-10">
-            {/* 首屏头部不做 reveal-up，始终可见，避免依赖 JS 未触发时整块不显示 */}
             <div className="mb-8">
               <Link
                 href="/clubs/map"
@@ -184,10 +186,11 @@ export default async function PrefecturePage({ params }: PageProps) {
                   Prefecture Info
                 </span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-md text-left">
+              {/* 优化点 1：移动端字体从 text-5xl 降级为 text-4xl，防止超长打乱布局 */}
+              <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left">
                 {displayData.name}
               </h1>
-              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left">
+              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base">
                 {displayData.name}の相撲クラブ・道場情報、
                 <br className="hidden md:inline" />
                 および出身力士のデータベース。
@@ -198,7 +201,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
         {/* ==================== SECTION 2: Top Sponsors Banner ==================== */}
         <section className="relative px-6 z-20">
-          <div className="container mx-auto max-w-6xl relative -mt-20">
+          <div className="container mx-auto max-w-6xl relative -mt-16 md:-mt-20">
             <Ceramic
               interactive={false}
               className="border border-gray-100 border-b-[6px]"
@@ -259,44 +262,38 @@ export default async function PrefecturePage({ params }: PageProps) {
         </section>
 
         {/* ==================== SECTION 3: Main Content Grid ==================== */}
-        <section className="relative pb-24 px-6 pt-20">
+        <section className="relative pb-24 px-6 pt-16 md:pt-20">
           <div className="container mx-auto max-w-6xl relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
 
-              {/* --- ✨ 左侧边栏 (Left Sidebar) --- */}
-              {/* 1. lg:sticky lg:top-24: 保持吸顶
-                  2. 移除了 max-h-... 和 overflow-y-auto: 这样就不会出现滚动条了
-                  3. flex flex-col gap-6: 保持间距
-              */}
+              {/* --- 左侧边栏 (Left Sidebar) --- */}
               <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-6">
-
                 {/* Intro Card */}
                 <Ceramic
                   interactive={false}
-                  className="p-8 md:p-10 border border-gray-100 border-b-[6px]"
+                  className="p-6 md:p-10 border border-gray-100 border-b-[6px]"
                   style={ceramicStyle}
                 >
-                  <h3 className="text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100 flex items-center gap-3">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100 flex items-center gap-3">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0"
                       style={{ backgroundColor: theme.color, color: "white" }}
                     >
                       <Info size={20} />
                     </div>
                     <span className="tracking-tight">{displayData.introTitle}</span>
                   </h3>
-                  <p className="text-base text-gray-700 leading-loose text-justify font-medium">
+                  <p className="text-sm md:text-base text-gray-700 leading-loose text-justify font-medium">
                     {displayData.introText}
                   </p>
                 </Ceramic>
 
-                {/* ✨ Local Supporters Card (纯兔子版) */}
+                {/* Local Supporters Card */}
                 <Ceramic
                   interactive={false}
                   className="p-0 border border-gray-100 border-b-[6px] overflow-hidden"
                   style={ceramicStyle}
                 >
-                  {/* Header */}
                   <div className="bg-gray-50/50 px-6 py-3 border-b border-gray-100 flex justify-between items-center relative z-10">
                     <p className="text-[10px] text-gray-400 tracking-widest font-bold uppercase">
                       Local Supporters
@@ -309,7 +306,6 @@ export default async function PrefecturePage({ params }: PageProps) {
                     </span>
                   </div>
 
-                  {/* 兔子容器 */}
                   <div
                     className="relative w-full h-[240px] bg-white overflow-hidden"
                     style={{
@@ -317,7 +313,6 @@ export default async function PrefecturePage({ params }: PageProps) {
                       WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)"
                     }}
                   >
-                    {/* 兔子本体 */}
                     <div className="absolute inset-0 w-[200%] -left-[50%] origin-center scale-[0.75] flex items-center justify-center pt-8">
                       <RabbitWalkingBanner
                         scale={1}
@@ -328,7 +323,6 @@ export default async function PrefecturePage({ params }: PageProps) {
                     </div>
                   </div>
 
-                  {/* Footer Link */}
                   <Link
                     href="/contact"
                     className="block py-3 bg-gray-50 text-center border-t border-gray-100 transition-colors group hover:bg-white"
@@ -342,60 +336,81 @@ export default async function PrefecturePage({ params }: PageProps) {
                     </span>
                   </Link>
                 </Ceramic>
-
               </div>
 
               {/* --- Right Main Content --- */}
-              <div className="lg:col-span-8 flex flex-col gap-12">
+              {/* 优化点 2：移动端 gap 降级为 8，减少无效留白 */}
+              <div className="lg:col-span-8 flex flex-col gap-8 md:gap-12">
+                
                 {/* Feature Banner */}
                 {displayData.bannerImg && (
                   <div
-                    className="group relative aspect-[21/9] rounded-2xl overflow-hidden shadow-lg block ceramic-3d-hover ring-1 ring-black/5"
-                    style={{ "--hover-shadow": theme.shadow } as React.CSSProperties}
+                    className="group relative rounded-2xl overflow-hidden shadow-lg bg-white border border-gray-100 border-b-[6px] ceramic-3d-hover transition-all duration-500"
+                    style={{ 
+                      "--hover-shadow": theme.shadow,
+                      borderBottomColor: theme.color 
+                    } as React.CSSProperties}
                   >
-                    <div
-                      className="absolute inset-0 bg-no-repeat transition-transform duration-700 group-hover:scale-105"
-                      style={{
-                        backgroundImage: `url(${displayData.bannerImg})`,
-                        backgroundPosition: bannerBgPosition,
-                        backgroundSize: bannerBgSize,
-                      }}
-                      role="img"
-                      aria-label={bannerAlt}
-                    />
-                    <Link
-                      href={clubDetailLink}
-                      className="absolute inset-0 z-0"
-                      aria-label="View Club"
-                    >
-                      <span className="sr-only">View Club</span>
-                    </Link>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-6 min-[400px]:p-8 pointer-events-none">
-                      <div className="text-white w-full flex flex-col gap-3 md:flex-row md:gap-0 md:justify-between md:items-end">
-                        <div className="pointer-events-auto min-w-0">
-                          <p className="font-bold tracking-widest mb-2 flex items-center gap-2 opacity-80 border-b border-white/30 pb-2 text-[clamp(0.5rem,1.8vw,0.625rem)]">
-                            <Camera className="w-3 h-3 min-[400px]:w-[12px] min-[400px]:h-[12px] shrink-0" /> LOCAL FEATURE
-                          </p>
-                          <p className="font-serif font-bold tracking-wide flex items-center gap-2 transition-colors text-[clamp(1rem,4vw,1.5rem)]">
-                            {bannerTitle}
-                            <ArrowRight className="w-4 h-4 min-[400px]:w-5 min-[400px]:h-5 shrink-0 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
-                          </p>
-                          {/* 俱乐部具体地址 */}
+                    {/* 上半部分：图片区域 */}
+                    <div className="relative aspect-[21/9] overflow-hidden">
+                      <Image
+                        src={displayData.bannerImg}
+                        alt={bannerAlt}
+                        fill
+                        priority
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        style={{
+                          objectPosition: bannerBgPosition,
+                        }}
+                      />
+                      <Link
+                        href={clubDetailLink}
+                        className="absolute inset-0 z-0"
+                        aria-label="View Club"
+                      >
+                        <span className="sr-only">View Club</span>
+                      </Link>
+                      {/* 图片上的轻微渐变，仅为了让左上角的标签更清晰 */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+                    </div>
+
+                    {/* 下半部分：文字信息区域（类似移动端的卡片式布局） */}
+                    <div className="p-6 md:p-8 bg-white relative">
+                      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
+                        <div className="min-w-0 flex flex-col gap-3">
+                          <div className="flex items-center gap-2">
+                            <span 
+                              className="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase"
+                              style={{ backgroundColor: `${theme.color}15`, color: theme.color }}
+                            >
+                              LOCAL FEATURE
+                            </span>
+                            <div className="h-px grow bg-gray-100" />
+                          </div>
+                          
+                          <Link href={clubDetailLink} className="group/title">
+                            <h3 className="font-serif font-bold tracking-wide text-xl md:text-2xl text-gray-900 group-hover/title:text-gray-600 transition-colors flex items-center gap-2">
+                              {bannerTitle}
+                              <ArrowRight className="w-5 h-5 shrink-0 text-gray-400 group-hover/title:translate-x-1 transition-transform" />
+                            </h3>
+                          </Link>
+
                           {clubAddress && (
-                            <p className="text-white/60 mt-2 flex items-center gap-1.5 text-[clamp(0.625rem,1.5vw,0.6875rem)]">
-                              <MapPin className="w-2.5 h-2.5 min-[400px]:w-[10px] min-[400px]:h-[10px] shrink-0" />
-                              {clubAddress}
+                            <p className="text-gray-500 flex items-start gap-2 text-sm md:text-base">
+                              <MapPin className="w-4 h-4 shrink-0 mt-1 text-gray-400" />
+                              <span>{clubAddress}</span>
                             </p>
                           )}
                         </div>
-                        <div className="pointer-events-auto relative z-10 shrink-0">
+
+                        <div className="shrink-0">
                           <Link
                             href={recruitLink}
-                            className="inline-flex items-center gap-2 text-white px-4 py-2 min-[400px]:px-5 min-[400px]:py-2.5 rounded-full font-bold tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 hover:brightness-110 text-[clamp(0.625rem,1.5vw,0.75rem)] whitespace-nowrap"
+                            className="inline-flex items-center justify-center gap-2 text-white px-8 py-3.5 rounded-xl font-bold tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-sm w-full md:w-auto"
                             style={{ backgroundColor: theme.color }}
                           >
-                            <UserPlus className="w-3 h-3 min-[400px]:w-3.5 min-[400px]:h-3.5 shrink-0" />
-                            募集中
+                            <UserPlus className="w-4 h-4 shrink-0" />
+                            メンバー募集中
                           </Link>
                         </div>
                       </div>
@@ -405,25 +420,25 @@ export default async function PrefecturePage({ params }: PageProps) {
 
                 {/* Club List */}
                 <div>
-                  <div className="flex items-end justify-between mb-8 pb-4 border-b border-gray-200/60">
+                  <div className="flex items-end justify-between mb-6 md:mb-8 pb-4 border-b border-gray-200/60">
                     <div>
-                      <h2 className="text-3xl font-serif font-black flex items-center gap-3" style={{ color: theme.color }}>
+                      <h2 className="text-2xl md:text-3xl font-serif font-black flex items-center gap-3" style={{ color: theme.color }}>
                         クラブ一覧
                       </h2>
-                      <p className="text-xs text-gray-400 font-bold tracking-widest mt-2 uppercase">
+                      <p className="text-[10px] md:text-xs text-gray-400 font-bold tracking-widest mt-1 md:mt-2 uppercase">
                         Registered Sumo Clubs
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-4xl font-serif font-black" style={{ color: theme.color }}>
+                      <span className="text-3xl md:text-4xl font-serif font-black" style={{ color: theme.color }}>
                         {filteredClubs.length}
                       </span>
-                      <span className="text-xs text-gray-400 font-bold ml-1">件</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-bold ml-1">件</span>
                     </div>
                   </div>
 
                   {filteredClubs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                       {filteredClubs.map((club) => (
                         <div key={club.id}>
                           <ClubCard club={club} accentColor={theme.color} />
@@ -431,20 +446,26 @@ export default async function PrefecturePage({ params }: PageProps) {
                       ))}
                     </div>
                   ) : (
-                    <Ceramic interactive={false} className="p-16 text-center border border-gray-100 border-b-[6px]" style={{ borderBottomColor: theme.color }}>
-                      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${theme.color}1A`, color: theme.color }}>
-                        <MapPin size={24} />
+                    <Ceramic interactive={false} className="p-10 md:p-16 text-center border border-gray-100 border-b-[6px]" style={{ borderBottomColor: theme.color }}>
+                      <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${theme.color}1A`, color: theme.color }}>
+                        <MapPin className="w-6 h-6 md:w-8 md:h-8" />
                       </div>
-                      <p className="text-gray-400 font-medium">現在、この地域の掲載クラブはありません。</p>
+                      <p className="text-sm md:text-base text-gray-400 font-medium">現在、この地域の掲載クラブはありません。</p>
                     </Ceramic>
                   )}
                 </div>
 
                 {/* Rikishi Table */}
                 <div>
-                  <Ceramic interactive={false} className="p-0 border border-gray-100 border-b-[6px] overflow-hidden" style={ceramicStyle}>
-                    <RikishiTable rikishiList={displayData.rikishiList} prefectureName={displayData.name} accentColor={theme.color} />
-                  </Ceramic>
+                  <Suspense fallback={
+                    <div className="h-[400px] w-full bg-white rounded-2xl border border-gray-100 animate-pulse flex items-center justify-center text-gray-400">
+                      Loading Rikishi Data...
+                    </div>
+                  }>
+                    <Ceramic interactive={false} className="p-0 border border-gray-100 border-b-[6px] overflow-hidden" style={ceramicStyle}>
+                      <RikishiTable rikishiList={displayData.rikishiList} prefectureName={displayData.name} accentColor={theme.color} />
+                    </Ceramic>
+                  </Suspense>
                 </div>
               </div>
             </div>
@@ -452,22 +473,22 @@ export default async function PrefecturePage({ params }: PageProps) {
         </section>
 
         {/* ==================== SECTION 4: Bottom CTA ==================== */}
-        <section className="relative py-12 overflow-hidden">
+        <section className="relative py-12 md:py-16 overflow-hidden">
           <div className={cn("absolute inset-0 bg-gradient-to-b", theme.gradient)}></div>
           <div className="container mx-auto px-6 relative z-10 text-center text-white">
-            <div className="inline-flex items-center justify-center p-4 bg-white/10 rounded-full mb-6 backdrop-blur-sm">
-              <MapPin size={24} />
+            <div className="inline-flex items-center justify-center p-3 md:p-4 bg-white/10 rounded-full mb-4 md:mb-6 backdrop-blur-sm">
+              <MapPin className="w-5 h-5 md:w-6 md:h-6" />
             </div>
-            <h3 className="text-2xl md:text-3xl font-serif font-black mb-4 drop-shadow-md">
+            <h3 className="text-xl md:text-3xl font-serif font-black mb-3 md:mb-4 drop-shadow-md">
               {displayData.name}の相撲文化を深堀り
             </h3>
-            <p className="text-white/80 max-w-lg mx-auto mb-8 text-sm font-medium">
+            <p className="text-white/80 max-w-lg mx-auto mb-6 md:mb-8 text-xs md:text-sm font-medium px-4">
               {displayData.name}の相撲文化をさらに深く知るための情報を提供しています。
             </p>
             <Link
               href="/contact"
               className={cn(
-                "group inline-flex items-center gap-2 bg-white px-8 py-3 rounded-full font-bold text-sm tracking-wider shadow-lg transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]",
+                "group inline-flex items-center gap-2 bg-white px-6 md:px-8 py-3 rounded-full font-bold text-xs md:text-sm tracking-wider shadow-lg transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]",
               )}
               style={{ color: theme.color }}
             >

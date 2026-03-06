@@ -83,6 +83,8 @@ const RiveWrapper = React.memo(({
     autoplay: true,
     // 💡 优化：禁用鼠标/触摸监听器，纯展示用途可以节省 CPU
     shouldDisableRiveListeners: true,
+    // 💡 性能优化：降低 Rive 内部渲染分辨率，对于这种背景装饰物，0.5 甚至更低在视觉上几乎无损，但能大幅减轻 GPU 压力
+    devicePixelRatio: 0.5,
     layout: new Layout({
       fit: Fit.Cover,
       alignment: Alignment.Center,

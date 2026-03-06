@@ -88,17 +88,21 @@ export default function RabbitWalkingBanner({
 
     // 智能填充：确保至少有 MIN_SPONSOR_COUNT 个
     let filled = [...originalSponsors];
-    while (filled.length < MIN_SPONSOR_COUNT && originalSponsors.length > 0) {
-      filled = [...filled, ...originalSponsors];
+    // 💡 优化：如果赞助商数量非常多，不要全部渲染，限制最大显示数量以减轻 GPU 负担
+    const MAX_VISIBLE_SPONSORS = isMobile ? 12 : 20;
+    const truncatedSponsors = originalSponsors.slice(0, MAX_VISIBLE_SPONSORS);
+    
+    while (filled.length < MIN_SPONSOR_COUNT && truncatedSponsors.length > 0) {
+      filled = [...filled, ...truncatedSponsors];
     }
     // 截取到合理数量（避免过多）
-    filled = filled.slice(0, Math.max(MIN_SPONSOR_COUNT, originalSponsors.length));
+    filled = filled.slice(0, Math.max(MIN_SPONSOR_COUNT, truncatedSponsors.length));
 
     return {
       baseSponsors: filled,
       cycleCount: filled.length,
     };
-  }, [sponsors, displayMode]);
+  }, [sponsors, displayMode, isMobile]);
 
   // 生成循环数据 - 移动端减少数量以提高性能
   const loopData = useMemo(() => {
