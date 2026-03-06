@@ -24,7 +24,7 @@ const SERVICE_DATA: ServiceItem[] = [
     kanji: "探",
     title: "SEARCH",
     desc: "全国のクラブを\n地域から検索",
-    img: "/images/about/search.jpg",
+    img: "/images/about/search.webp",
     delay: "",
     href: "/clubs/map",
     // 🟢 优雅绿渐变: 从富有生机的翠绿到深邃的森林绿，清新且高雅
@@ -37,7 +37,7 @@ const SERVICE_DATA: ServiceItem[] = [
     kanji: "結",
     title: "CONNECT",
     desc: "見学・体験申し込みで\n新しい一歩を",
-    img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.jpg",
+    img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.webp",
     delay: "delay-100",
     href: "/partners",
     // 🔴 热情红渐变: 从品牌红到深红，非常吸睛
@@ -49,7 +49,7 @@ const SERVICE_DATA: ServiceItem[] = [
     kanji: "録",
     title: "ARCHIVE",
     desc: "活動の記録を\n美しいフォトブックに",
-    img: "https://cdn.pixabay.com/photo/2014/08/22/18/46/photographer-424620_1280.jpg",
+    img: "https://cdn.pixabay.com/photo/2014/08/22/18/46/photographer-424620_1280.webp",
     delay: "delay-200",
     href: "/magazines",
     // 🟡 辉煌金渐变: 这种颜色很难调，这里用一种偏橙的金，避免像土黄

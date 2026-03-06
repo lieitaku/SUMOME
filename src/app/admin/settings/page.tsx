@@ -1,10 +1,11 @@
 import React from "react";
-import { UserPlus, Shield, Lock, User, Save, Store, HelpCircle, Mail } from "lucide-react";
+import { UserPlus, Shield, Lock, User, Save, Store, HelpCircle, Mail, Zap } from "lucide-react";
 import { toast } from "sonner"; // 假设你是用 Sonner，如果是客户端组件里用
 import { createStaffAccount, updateMyProfile, updatePassword } from "@/lib/actions/users";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 // 这里引入客户端组件 (Form 需要是 'use client')
 import { ProfileForm, PasswordForm, CreateStaffForm } from "./components"; // 下面我会把组件代码给你，建议拆分，或者像之前一样放在同一个文件底部
@@ -84,27 +85,51 @@ export default async function SettingsPage() {
                 <div className="space-y-8">
 
                     {isAdmin ? (
-                        /* ================== ADMIN 专属视图 ================== */
-                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 h-full">
-                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                <div className="p-2 bg-sumo-brand/10 text-sumo-brand rounded-lg">
-                                    <UserPlus size={20} />
+                        <div className="space-y-8">
+                            {/* ================== ADMIN 专属视图 ================== */}
+                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                    <div className="p-2 bg-sumo-brand/10 text-sumo-brand rounded-lg">
+                                        <UserPlus size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-bold text-gray-900">チームメンバー追加</h2>
+                                        <p className="text-xs text-gray-400">新しい管理者を招待・作成します</p>
+                                    </div>
+                                </div>
+
+                                <div className="bg-sumo-brand/5 p-4 rounded-xl flex items-start gap-3 border border-sumo-brand/10 mb-6">
+                                    <Shield size={16} className="text-sumo-brand mt-0.5 shrink-0" />
+                                    <p className="text-[11px] text-sumo-brand leading-relaxed font-bold">
+                                        作成されたアカウントは「特権管理者」権限を持ちます。<br />
+                                        慎重に操作してください。
+                                    </p>
+                                </div>
+
+                                <CreateStaffForm />
+                            </div>
+
+                            {/* 3. 系统性能优化 (Admin 专属) */}
+                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                                    <Zap size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-bold text-gray-900">チームメンバー追加</h2>
-                                    <p className="text-xs text-gray-400">新しい管理者を招待・作成します</p>
+                                    <h2 className="text-lg font-bold text-gray-900">システムパフォーマンス</h2>
+                                    <p className="text-xs text-gray-400">画像の最適化とメンテナンス</p>
                                 </div>
                             </div>
-
-                            <div className="bg-sumo-brand/5 p-4 rounded-xl flex items-start gap-3 border border-sumo-brand/10 mb-6">
-                                <Shield size={16} className="text-sumo-brand mt-0.5 shrink-0" />
-                                <p className="text-[11px] text-sumo-brand leading-relaxed font-bold">
-                                    作成されたアカウントは「特権管理者」権限を持ちます。<br />
-                                    慎重に操作してください。
-                                </p>
+                            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                                過去にアップロードされた古い形式の画像（JPG/PNG）を、読み込みの速い WebP 形式に一括変換します。
+                            </p>
+                                <Link
+                                    href="/admin/settings/migration"
+                                    className="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-gray-800 transition-colors"
+                                >
+                                    画像フォーマット遷移ツール
+                                </Link>
                             </div>
-
-                            <CreateStaffForm />
                         </div>
                     ) : (
                         /* ================== OWNER 专属视图 ================== */

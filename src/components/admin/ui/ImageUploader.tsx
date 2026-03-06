@@ -2,15 +2,8 @@
 
 import { useState, useRef } from "react";
 import { Loader2, ImageIcon, CloudUpload, X } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-// ⚠️ 确保你的 .env 包含这两个变量
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface ImageUploaderProps {
     value?: string | null; // 允许 null，兼容数据库
@@ -49,24 +42,27 @@ export default function ImageUploader({
 
         try {
             setUploading(true);
-            // 生成唯一文件名: timestamp-random.ext
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const filePath = `${fileName}`;
 
-            // 1. 上传到 Supabase
-            const { error: uploadError } = await supabase.storage
-                .from(bucket)
-                .upload(filePath, file);
+            // 使用 API 路由进行上传和 WebP 转换
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("bucket", bucket);
 
-            if (uploadError) throw uploadError;
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
 
-            // 2. 获取 Public URL
-            const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "アップロードに失败しました");
+            }
+
+            const { url } = await response.json();
 
             // 3. 回填 URL
-            onChange(data.publicUrl);
-            toast.success("画像をアップロードしました");
+            onChange(url);
+            toast.success("画像をアップロードしました (WebP変換済)");
         } catch (error: unknown) {
             console.error(error);
             const message = error instanceof Error ? error.message : "不明なエラーが発生しました";

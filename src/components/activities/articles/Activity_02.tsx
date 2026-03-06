@@ -8,11 +8,11 @@ import type { CustomActivityProps } from "@/lib/article-registry";
 const Activity_02 = ({ activity }: CustomActivityProps) => {
   // ✅ 应用你指定的真实图片路径
   const galleryImages = [
-    "/images/activities/activity-2/act02-yokohama-scene-01.jpg",
-    "/images/activities/activity-2/act02-yokohama-scene-02.jpg",
-    "/images/activities/activity-2/act02-yokohama-scene-03.jpg",
-    "/images/activities/activity-2/act02-yokohama-scene-04.jpg",
-    "/images/activities/activity-2/act02-yokohama-scene-05.jpg",
+    "/images/activities/activity-2/act02-yokohama-scene-01.webp",
+    "/images/activities/activity-2/act02-yokohama-scene-02.webp",
+    "/images/activities/activity-2/act02-yokohama-scene-03.webp",
+    "/images/activities/activity-2/act02-yokohama-scene-04.webp",
+    "/images/activities/activity-2/act02-yokohama-scene-05.webp",
   ];
 
   return (

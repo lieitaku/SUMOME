@@ -14,7 +14,7 @@ export type SlotItem = {
 
 type ClubOption = { id: string; name: string; mainImage: string | null };
 
-const PLACEHOLDER_IMAGE = "/images/placeholder.jpg";
+const PLACEHOLDER_IMAGE = "/images/placeholder.webp";
 
 const SLOT_LABELS = ["1番（左）", "2番（中央）", "3番（右）"];
 

@@ -121,7 +121,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
     ].filter((img): img is string => !!img);
 
     if (galleryImages.length === 0) {
-        galleryImages.push("/images/placeholder.jpg");
+        galleryImages.push("/images/placeholder.webp");
     }
 
     // 日程解析逻辑：尝试解析 JSON 字符串，兼容旧数据格式

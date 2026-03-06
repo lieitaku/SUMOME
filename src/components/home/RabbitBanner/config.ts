@@ -40,7 +40,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   // 使用: rabbit1.riv
   {
     rivSrc: "/assets/rabbit1.riv",
-    hand: "/images/rabbit/hand-2.png",
+    hand: "/images/rabbit/hand-2.webp",
     flagStyle: {
       bottom: "60px",
       left: "-2px",
@@ -55,7 +55,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   // 使用: rabbit1.riv
   {
     rivSrc: "/assets/rabbit1.riv",
-    hand: "/images/rabbit/hand-1.png",
+    hand: "/images/rabbit/hand-1.webp",
     handStyle: { transform: "translate(-2px,-126px)" },
     flagStyle: {
       bottom: "60px",
@@ -71,7 +71,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   // 🆕 使用: rabbit2.riv (第四种兔子用新文件)
   {
     rivSrc: "/assets/rabbit2.riv",
-    hand: "/images/rabbit/hand-4.png",
+    hand: "/images/rabbit/hand-4.webp",
     // 手部位置微调
     handStyle: { transform: "translate(0,0px)" },
     flagStyle: {
@@ -100,6 +100,6 @@ export const RABBIT_PROBABILITY_POOL = [1, 1, 0, 1, 1, 1, 2, 1, 1, 1, 0, 1];
 // 🏢 赞助商数据生成
 export const RAW_SPONSORS = Array.from({ length: 12 }, (_, i) => ({
   id: i + 1,
-  image: `/images/sponsors/${i + 1}.jpg`,
+  image: `/images/sponsors/${i + 1}.webp`,
   alt: `Sponsor ${i + 1}`,
 }));

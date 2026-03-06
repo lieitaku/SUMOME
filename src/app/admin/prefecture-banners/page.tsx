@@ -66,7 +66,7 @@ export default async function AdminPrefectureBannersPage({
       <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <p className="text-xs text-gray-500 mb-4">
           一覧は「並び順」で地域順・新着順を切り替え可能。バナーを設定すると、該当県ページで静的デフォルト（
-          <code className="bg-gray-100 px-1 rounded">/images/banner/banner-xxx.jpg</code>
+          <code className="bg-gray-100 px-1 rounded">/images/banner/banner-xxx.webp</code>
           ）の代わりに表示されます。
         </p>
       </div>

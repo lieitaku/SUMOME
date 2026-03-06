@@ -81,7 +81,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
                 {/* 图片区域 - 竖向比例，更有杂志感 */}
                 <div className="relative aspect-3/4 bg-gray-100 group overflow-hidden">
                   <Image
-                    src={activity.mainImage || "/images/placeholder-activity.jpg"}
+                    src={activity.mainImage || "/images/placeholder-activity.webp"}
                     alt={activity.title}
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

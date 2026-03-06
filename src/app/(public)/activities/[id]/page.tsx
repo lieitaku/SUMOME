@@ -84,7 +84,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
   // 处理展示用的辅助变量
   const displayDate = new Date(activity.date);
-  const safeImage = activity.mainImage || "/images/placeholder.jpg";
+  const safeImage = activity.mainImage || "/images/placeholder.webp";
   const displayLocation = activity.location || activity.club?.name || "SUMOME";
 
   return (

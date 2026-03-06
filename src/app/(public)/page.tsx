@@ -104,7 +104,7 @@ export default async function Home() {
           sponsors={sponsors}
           displayMode={displaySettings.homeDisplayMode}
           videoSrc="/videos/hero-bg.mp4"
-          posterSrc="/images/hero/hero-poster.jpg"
+          posterSrc="/images/hero/hero-poster.webp"
         />
         <CTA />
 

@@ -98,7 +98,7 @@ export default function ActivitiesListClient({
                 >
                   <div className="relative aspect-[3/4] bg-gray-100 group">
                     <Image
-                      src={act.mainImage || "/images/placeholder.jpg"}
+                      src={act.mainImage || "/images/placeholder.webp"}
                       alt={act.title}
                       fill
                       className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"

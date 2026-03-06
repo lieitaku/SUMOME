@@ -25,7 +25,7 @@ const PageHero = ({
       {/* 1. 背景纹理 */}
       <div
         className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none"
-        style={{ backgroundImage: `url('/images/bg/washi.png')` }}
+        style={{ backgroundImage: `url('/images/bg/washi.webp')` }}
       ></div>
 
       {/* 2. 氛围装饰 (蓝天下的光晕 - 稍微减淡一点，以免影响蓝色的纯度) */}

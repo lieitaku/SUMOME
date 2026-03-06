@@ -23,7 +23,6 @@ import PreviewModal from "@/components/admin/ui/PreviewModal";
 import ScheduleEditor from "./ScheduleEditor"; // <--- 引入日程编辑器组件
 import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
 import MainImagePositionEditor, { parsePositionString, formatPositionString, parseScaleValue } from "./MainImagePositionEditor";
-import { supabase } from "@/lib/supabase/client"; // 用于副图上传
 
 // ✨ 2. 引入 Server Actions
 import { updateClub, deleteClub } from "@/lib/actions/clubs";
@@ -144,18 +143,24 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
 
         setIsUploadingSub(true);
         try {
-            // 并发上传多张图片
+            // 并发上传多张图片 (使用 API 路由进行 WebP 转换)
             const uploadedUrls = await Promise.all(acceptedFiles.map(async (file) => {
-                const fileExt = file.name.split('.').pop();
-                const fileName = `clubs/sub-${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("bucket", "images");
 
-                // 上传到 Supabase Storage
-                const { error } = await supabase.storage.from('images').upload(fileName, file);
-                if (error) throw error;
+                const response = await fetch("/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
 
-                // 获取公开链接
-                const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(fileName);
-                return publicUrl;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "アップロードに失敗しました");
+                }
+
+                const { url } = await response.json();
+                return url;
             }));
 
             // 更新表单状态 (追加新图片)

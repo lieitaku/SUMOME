@@ -41,7 +41,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
 
   const themeColor = accentColor || DEFAULT_COLOR;
   const detailLink = `/clubs/${club.slug}`;
-  const displayImage = club.mainImage || "/images/placeholder.jpg";
+  const displayImage = club.mainImage || "/images/placeholder.webp";
   const mainImagePosition = getMainImageObjectPosition(club.mainImagePosition);
   const mainImageScale = getMainImageScale(club.mainImageScale);
   const useBackgroundCover = mainImageScale > 1;

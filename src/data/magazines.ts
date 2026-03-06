@@ -16,7 +16,7 @@ export const magazinesData: Magazine[] = [
     title: "SUMOME Vol.1",
     subTitle: "創刊号：相撲の未来を拓く",
     publishDate: "2024.04.01",
-    coverImage: "/images/magazines/cover-1.jpg",
+    coverImage: "/images/magazines/cover-1.webp",
     description:
       "記念すべき創刊号。愛知・岐阜の強豪クラブ取材記事に加え、レジェンド力士への独占インタビューを掲載。",
     toc: [
@@ -32,7 +32,7 @@ export const magazinesData: Magazine[] = [
     title: "SUMOME Vol.2",
     subTitle: "関東の虎、西の龍",
     publishDate: "2024.06.15",
-    coverImage: "/images/magazines/cover-2.jpg",
+    coverImage: "/images/magazines/cover-2.webp",
     description:
       "関東の強豪大学・高校を特集。埼玉栄、日体大など、名門の稽古場に潜入取材。",
     toc: [
@@ -48,7 +48,7 @@ export const magazinesData: Magazine[] = [
     title: "SUMOME Vol.3",
     subTitle: "北の大地で育つ魂",
     publishDate: "2024.08.20",
-    coverImage: "/images/magazines/cover-3.jpg",
+    coverImage: "/images/magazines/cover-3.webp",
     description:
       "北海道・東北特集。雪国ならではのトレーニング法と、粘り強い足腰の秘密に迫る。",
     toc: [
@@ -64,7 +64,7 @@ export const magazinesData: Magazine[] = [
     title: "SUMOME Vol.4",
     subTitle: "九州・沖縄の風",
     publishDate: "2024.10.10",
-    coverImage: "/images/magazines/cover-4.jpg",
+    coverImage: "/images/magazines/cover-4.webp",
     description:
       "相撲どころ九州の底力。地域に根付く土俵文化と、沖縄の独自相撲を取材。",
     toc: ["秋場所展望", "データで見る勝敗の分かれ目", "九州大会レポート"],
@@ -76,7 +76,7 @@ export const magazinesData: Magazine[] = [
     title: "SUMOME Vol.5",
     subTitle: "関西・四国の技",
     publishDate: "2024.12.01",
-    coverImage: "/images/magazines/cover-5.jpg",
+    coverImage: "/images/magazines/cover-5.webp",
     description:
       "小柄な選手が大型選手を倒すための「技」を特集。関西・四国の指導者に聞く。",
     toc: [

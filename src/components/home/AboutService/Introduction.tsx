@@ -16,7 +16,7 @@ const Introduction = () => {
         {/* 图片容器 */}
         <div className="relative w-full h-full z-10 overflow-hidden bg-gray-100">
           <Image
-            src="/images/bg/about-intro.jpg"
+            src="/images/bg/about-intro.webp"
             alt="About Sumome"
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-105"

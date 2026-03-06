@@ -26,7 +26,6 @@ import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { createMagazine, updateMagazine, deleteMagazine } from "@/lib/actions/magazines";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner"; // 确保安装了 sonner，如果没有请删除这行用 alert
 
 /**
@@ -163,14 +162,24 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
     const currentPrefecture = form.watch("region");
     const currentCover = form.watch("coverImage");
 
-    // Supabase 上传逻辑
+    // API 上传逻辑 (WebP 转换)
     const uploadFile = async (file: File) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-        const { data, error } = await supabase.storage.from('magazines').upload(fileName, file);
-        if (error) throw error;
-        const { data: { publicUrl } } = supabase.storage.from('magazines').getPublicUrl(fileName);
-        return publicUrl;
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("bucket", "magazines");
+
+        const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "アップロードに失敗しました");
+        }
+
+        const { url } = await response.json();
+        return url;
     };
 
     // 封面上传

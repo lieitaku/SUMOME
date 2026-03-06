@@ -13,13 +13,13 @@
    # 压缩：720p、约 20 秒、无声音，输出到 public/videos/
    ffmpeg -i 你的视频.mp4 -vf "scale=1280:720" -c:v libx264 -crf 28 -preset slow -an -t 20 -movflags +faststart -y public/videos/hero-bg.mp4
    # 截第一帧当封面
-   ffmpeg -i public/videos/hero-bg.mp4 -vframes 1 -q:v 2 -y public/images/hero/hero-poster.jpg
+   ffmpeg -i public/videos/hero-bg.mp4 -vframes 1 -q:v 2 -y public/images/hero/hero-poster.webp
    ```
 
 3. **在首页启用**  
    打开 `src/app/(public)/page.tsx`，把 `<Hero sponsors={sponsors} />` 改成：  
    ```tsx
-   <Hero sponsors={sponsors} videoSrc="/videos/hero-bg.mp4" posterSrc="/images/hero/hero-poster.jpg" />
+   <Hero sponsors={sponsors} videoSrc="/videos/hero-bg.mp4" posterSrc="/images/hero/hero-poster.webp" />
    ```
 
 4. 刷新首页即可看到视频背景（首屏先出 poster，加载完后自动播）。
@@ -68,10 +68,10 @@ ffmpeg -i 你的原片.mp4 -vf "scale=960:540" -c:v libx264 -crf 30 -preset slow
 截一帧当 poster（例如第 0 秒）：
 
 ```bash
-ffmpeg -i hero-bg.mp4 -vf "scale=1280:720" -vframes 1 -q:v 2 hero-poster.jpg
+ffmpeg -i hero-bg.mp4 -vf "scale=1280:720" -vframes 1 -q:v 2 hero-poster.webp
 ```
 
-再用你习惯的方式转成 WebP 放到 `public/images/hero/hero-poster.webp` 或 `.jpg`。
+再用你习惯的方式转成 WebP 放到 `public/images/hero/hero-poster.webp` 或 `.webp`。
 
 ---
 
@@ -81,7 +81,7 @@ ffmpeg -i hero-bg.mp4 -vf "scale=1280:720" -vframes 1 -q:v 2 hero-poster.jpg
    - `public/videos/hero-bg.mp4`  
    - （可选）`public/videos/hero-bg.webm`
 2. 把 poster 图放到 `public/images/hero/`，例如：  
-   - `public/images/hero/hero-poster.jpg` 或 `hero-poster.webp`
+   - `public/images/hero/hero-poster.webp` 或 `hero-poster.webp`
 3. 在首页给 Hero 传入视频与 poster：
 
 ```tsx
@@ -89,7 +89,7 @@ ffmpeg -i hero-bg.mp4 -vf "scale=1280:720" -vframes 1 -q:v 2 hero-poster.jpg
   sponsors={sponsors}
   videoSrc="/videos/hero-bg.mp4"
   videoWebmSrc="/videos/hero-bg.webm"  // 可选
-  posterSrc="/images/hero/hero-poster.jpg"
+  posterSrc="/images/hero/hero-poster.webp"
 />
 ```
 

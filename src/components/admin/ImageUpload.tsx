@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 
 interface ImageUploadProps {
     value?: string;           // 现在的图片URL
@@ -40,30 +39,27 @@ export default function ImageUpload({
 
         try {
             setIsLoading(true);
-            const supabase = createClient();
 
-            // 1. 生成唯一文件名
-            const fileExt = file.name.split(".").pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-            const filePath = `${fileName}`;
+            // 使用 API 路由进行上传和 WebP 转换
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("bucket", bucket);
 
-            // 2. 上传
-            const { error: uploadError } = await supabase.storage
-                .from(bucket)
-                .upload(filePath, file);
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
 
-            if (uploadError) {
-                throw uploadError;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "アップロードに失敗しました");
             }
 
-            // 3. 获取公开链接
-            const { data: { publicUrl } } = supabase.storage
-                .from(bucket)
-                .getPublicUrl(filePath);
+            const { url } = await response.json();
 
             // 4. 更新
-            setPreview(publicUrl);
-            onChange(publicUrl);
+            setPreview(url);
+            onChange(url);
 
         } catch (error) {
             console.error("Upload error:", error);
