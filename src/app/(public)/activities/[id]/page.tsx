@@ -4,9 +4,9 @@ import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import React from "react";
 import { ArrowLeft, Share2, Printer, MapPin, Calendar, Hash, ImageIcon } from "lucide-react";
-// 引入 Prisma 自动生成的原始类型
 import { Activity, Club } from "@prisma/client";
 import { getPreviewPayload } from "@/lib/preview";
+import { getCachedActivityWithClub } from "@/lib/cached-queries";
 
 // 1. ✨ 定义与组件完全匹配的强类型
 // 这个类型代表了：活动数据 + 必须包含的俱乐部关联数据
@@ -18,8 +18,6 @@ import { ArticleRegistry } from "@/lib/article-registry";
 import StandardTemplate from "@/components/activities/StandardTemplate";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
-
-export const dynamic = "force-dynamic";
 
 function normalizePreviewActivity(
   p: Record<string, unknown>,
@@ -76,10 +74,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
       activity = normalizePreviewActivity(p, club);
     }
   } else {
-    const activityData = await prisma.activity.findUnique({
-      where: { id },
-      include: { club: true },
-    });
+    const activityData = await getCachedActivityWithClub(id);
     if (!activityData) notFound();
     activity = activityData as ActivityWithClub;
   }

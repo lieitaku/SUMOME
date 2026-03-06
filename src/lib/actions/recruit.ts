@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { ApplicationStatus } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth-utils";
 
@@ -31,6 +31,7 @@ export async function submitApplicationAction(data: ApplicationInput) {
       },
     });
     revalidatePath("/admin/applications");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     return { error: "送信に失敗しました。" };
@@ -57,6 +58,7 @@ export async function updateApplicationStatusAction(id: string, status: Applicat
       data: { status },
     });
     revalidatePath("/admin/applications");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error(error);
@@ -78,6 +80,7 @@ export async function deleteApplicationAction(id: string) {
   try {
     await prisma.application.delete({ where: { id } });
     revalidatePath("/admin/applications");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Delete error:", error);

@@ -6,17 +6,14 @@ import {
     MapPin, Users, ChevronLeft, Sparkles, CheckCircle2,
     CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation, Phone
 } from "lucide-react";
-import { prisma } from "@/lib/db";
 import { getMainImageObjectPosition, getMainImageScale } from "@/lib/utils";
 import { getPreviewPayload } from "@/lib/preview";
+import { getCachedClubBySlug } from "@/lib/cached-queries";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 
 // 定义品牌色常量
 const BRAND_BLUE = "#2454a4";
-
-// 预览依赖 Cookie，禁止静态缓存
-export const dynamic = "force-dynamic";
 
 // 页面参数定义 (Next.js 15+)
 interface PageProps {
@@ -95,13 +92,13 @@ export default async function ClubDetailPage({ params }: PageProps) {
         "slug" in preview.payload &&
         String((preview.payload as { slug: unknown }).slug) === slug;
 
-    let club: Awaited<ReturnType<typeof prisma.club.findUnique>>;
+    let club: Awaited<ReturnType<typeof getCachedClubBySlug>>;
     if (usePreview && preview.payload && typeof preview.payload === "object") {
         club = normalizePreviewClub(preview.payload as Record<string, unknown>) as Awaited<
-            ReturnType<typeof prisma.club.findUnique>
+            ReturnType<typeof getCachedClubBySlug>
         >;
     } else {
-        club = await prisma.club.findUnique({ where: { slug: slug } });
+        club = await getCachedClubBySlug(slug);
     }
 
     // 如果找不到记录，返回 404 页面

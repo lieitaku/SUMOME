@@ -1,8 +1,8 @@
 import React from "react";
 import { prisma } from "@/lib/db";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
-import { getPickupClubsForHome } from "@/lib/actions/pickup-clubs";
 import { getPreviewPayload } from "@/lib/preview";
+import { getCachedActiveBanners, getCachedPickupClubsForHome } from "@/lib/cached-queries";
 
 // 引入组件
 import Hero from "@/components/home/Hero";
@@ -12,16 +12,19 @@ import ManagerInfo from "@/components/home/ManagerInfo";
 import CTA from "@/components/home/CTA";
 import ScrollInitializer from "@/components/utils/ScrollInitializer";
 
-export const dynamic = "force-dynamic";
-
 export default async function Home() {
   const preview = await getPreviewPayload();
   const isPreview =
     !!preview &&
     (preview.redirectPath === "/" || preview.redirectPath === "" || preview.type === "banner_single");
 
-  let displaySettings = await getBannerDisplaySettings();
-  let pickupClubs = await getPickupClubsForHome();
+  const [displaySettingsInit, pickupClubsRaw, bannersFromDb] = await Promise.all([
+    getBannerDisplaySettings(),
+    getCachedPickupClubsForHome(),
+    getCachedActiveBanners(),
+  ]);
+  let displaySettings = displaySettingsInit;
+  let pickupClubs = pickupClubsRaw;
 
   if (preview?.type === "banner_display" && preview.payload && typeof preview.payload === "object") {
     const p = preview.payload as Record<string, string>;
@@ -44,11 +47,6 @@ export default async function Home() {
       pickupClubs = order.map((id) => (id ? found.find((c) => c.id === id) : null)).filter(Boolean) as typeof pickupClubs;
     }
   }
-
-  const bannersFromDb = await prisma.banner.findMany({
-    where: { isActive: true },
-    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
-  });
 
   let banners = bannersFromDb;
   if (preview?.type === "banner_single" && preview.payload && typeof preview.payload === "object") {

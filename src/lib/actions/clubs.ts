@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentUser } from "@/lib/auth-utils";
 
 // ==============================================================================
@@ -94,11 +94,11 @@ export async function createClub(formData: FormData) {
     return { error: "このIDは既に使われている可能性があります。" };
   }
 
-  // ✨ 刷新缓存
   revalidatePath("/admin/clubs");
   revalidatePath("/clubs");
+  revalidateTag("clubs");
+  revalidateTag("admin-stats");
 
-  // ✅ 返回成功对象，让前端 Hook 接管跳转
   return { success: true };
 }
 
@@ -217,6 +217,8 @@ export async function updateClub(formData: FormData) {
     revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${oldSlug}`);
     if (slugToUpdate) revalidatePath(`/clubs/${slugToUpdate}`);
+    revalidateTag("clubs");
+    revalidateTag("admin-stats");
 
     return { success: true };
   } catch (error) {
@@ -252,6 +254,8 @@ export async function deleteClub(id: string) {
     revalidatePath("/admin/clubs");
     revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${club.slug}`);
+    revalidateTag("clubs");
+    revalidateTag("admin-stats");
 
     return { success: true };
   } catch (error) {

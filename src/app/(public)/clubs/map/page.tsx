@@ -5,9 +5,6 @@ import Ceramic from "@/components/ui/Ceramic";
 // 引入我们刚才写的中间件
 import MapWrapper from "@/components/clubs/MapWrapper";
 
-// ✅ 强制动态渲染配置保留在 Server Component 中
-export const dynamic = "force-dynamic";
-
 const ClubsPage = () => {
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">

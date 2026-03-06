@@ -10,12 +10,18 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-import { prisma } from "@/lib/db";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
 import { getPreviewPayload } from "@/lib/preview";
+import {
+  getCachedActiveBanners,
+  getCachedClubsByArea,
+  getCachedPrefectureBanner,
+} from "@/lib/cached-queries";
+
+// Client component wrapper: dynamic import with ssr: false (must live in a Client Component in Next.js 16)
+import RabbitWalkingBanner from "@/components/home/RabbitBanner/RabbitBannerDynamic";
 
 // Components
-import RabbitWalkingBanner from "@/components/home/RabbitBanner";
 import RikishiTable from "@/components/clubs/RikishiTable";
 import ClubCard from "@/components/clubs/ClubCard";
 import Ceramic from "@/components/ui/Ceramic";
@@ -32,8 +38,6 @@ interface PageProps {
   }>;
 }
 
-export const dynamic = "force-dynamic";
-
 export default async function PrefecturePage({ params }: PageProps) {
   const { pref } = await params;
   const prefSlug = pref;
@@ -46,7 +50,6 @@ export default async function PrefecturePage({ params }: PageProps) {
     rikishiList: [],
   };
 
-  // 后台设置的都道府県 Banner 优先于静态默认（必须先拿到才能拼 displayData）
   const preview = await getPreviewPayload();
   const prefBannerPreview =
     preview?.type === "prefecture_banner" &&
@@ -56,32 +59,18 @@ export default async function PrefecturePage({ params }: PageProps) {
       ? (preview.payload as { pref: string; image?: string; alt?: string; imagePosition?: string; imageScale?: string | number })
       : null;
 
-  const customBanner = await prisma.prefectureBanner.findUnique({
-    where: { pref: prefSlug },
-  });
+  // All four queries are independent — fire them in parallel with caching
+  const [customBanner, filteredClubs, banners, displaySettings] = await Promise.all([
+    getCachedPrefectureBanner(prefSlug),
+    getCachedClubsByArea(staticDisplay.name),
+    getCachedActiveBanners(),
+    getBannerDisplaySettings(),
+  ]);
+
   const displayData = {
     ...staticDisplay,
     bannerImg: prefBannerPreview?.image ?? customBanner?.image ?? staticDisplay.bannerImg,
   };
-
-  // 以下三路互不依赖，并行请求以减少总等待时间
-  const [filteredClubs, banners, displaySettings] = await Promise.all([
-    prisma.club.findMany({
-      where: {
-        area: {
-          contains: displayData.name,
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    prisma.banner.findMany({
-      where: { isActive: true },
-      orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
-    }),
-    getBannerDisplaySettings(),
-  ]);
 
   const toSponsorItem = (b: (typeof banners)[0]) => ({
     id: b.id,

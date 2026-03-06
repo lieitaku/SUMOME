@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db"; // 保持您原有的引用路径
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { Prisma } from "@prisma/client";
 
 // Zod Schema
@@ -57,8 +57,9 @@ export async function createMagazine(formData: FormData) {
 
     revalidatePath("/admin/magazines");
     revalidatePath("/magazines");
+    revalidateTag("magazines");
+    revalidateTag("admin-stats");
 
-    // ✅ 关键修改：返回成功状态，把控制权交给前端（前端会弹窗并跳转）
     return { success: true, message: "登録しました" };
   } catch (err) {
     console.error("Create Error:", err);
@@ -102,13 +103,13 @@ export async function updateMagazine(id: string, formData: FormData) {
       data: validated.data,
     });
 
-    // 刷新缓存
     revalidatePath("/admin/magazines");
-    revalidatePath(`/admin/magazines/${id}`); // 确保 Description 刷新
+    revalidatePath(`/admin/magazines/${id}`);
     revalidatePath("/magazines");
     revalidatePath(`/magazines/${validated.data.slug}`);
+    revalidateTag("magazines");
+    revalidateTag("admin-stats");
 
-    // ✅ 关键修改：返回成功状态
     return { success: true, message: "保存しました" };
   } catch (err) {
     console.error("Update Error:", err);
@@ -124,7 +125,9 @@ export async function deleteMagazine(id: string) {
     await prisma.magazine.delete({ where: { id } });
     revalidatePath("/admin/magazines");
     revalidatePath("/magazines");
-    // ✅ 保持一致，返回成功状态
+    revalidateTag("magazines");
+    revalidateTag("admin-stats");
+
     return { success: true, message: "削除しました" };
   } catch (err) {
     console.error("Delete Error:", err);

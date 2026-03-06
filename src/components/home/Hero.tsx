@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import RabbitBanner, { type SponsorItem, type BannerDisplayMode } from "@/components/home/RabbitBanner";
+import RabbitBanner from "@/components/home/RabbitBanner/RabbitBannerDynamic";
+import type { SponsorItem, BannerDisplayMode } from "@/components/home/RabbitBanner";
 
 type HeroProps = {
   sponsors?: SponsorItem[];

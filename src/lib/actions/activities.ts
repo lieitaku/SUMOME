@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { Prisma } from "@prisma/client";
@@ -187,11 +187,12 @@ export async function updateActivityAction(id: string, formData: FormData) {
       data: updateData,
     });
 
-    // 4. 刷新缓存
     revalidatePath("/admin/activities");
     revalidatePath(`/activities/${id}`);
     revalidatePath("/activities");
-    
+    revalidateTag("activities");
+    revalidateTag("admin-stats");
+
     return { success: true };
 
   } catch (dbError) {
@@ -213,5 +214,7 @@ export async function deleteActivityAction(id: string) {
 
   revalidatePath("/admin/activities");
   revalidatePath("/activities");
+  revalidateTag("activities");
+  revalidateTag("admin-stats");
   return { success: true };
 }

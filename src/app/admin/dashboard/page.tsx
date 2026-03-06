@@ -1,8 +1,28 @@
 import React from "react";
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard, Inbox, AlertCircle, ArrowRight, Store } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { getCurrentUser } from "@/lib/auth-utils";
+
+async function getDashboardStatsUncached() {
+    return Promise.all([
+        prisma.club.count(),
+        prisma.activity.count(),
+        prisma.magazine.count(),
+        prisma.banner.count(),
+        prisma.application.count(),
+        prisma.application.count({ where: { status: "pending" } }),
+        prisma.inquiry.count(),
+        prisma.inquiry.count({ where: { status: "unread" } }),
+    ]);
+}
+
+const getCachedDashboardStats = () =>
+    unstable_cache(getDashboardStatsUncached, ["admin-dashboard-stats"], {
+        revalidate: 60,
+        tags: ["admin-stats"],
+    })();
 
 export default async function AdminDashboardPage() {
     const user = await getCurrentUser();
@@ -24,16 +44,7 @@ async function AdminDashboard() {
         pendingAppsCount,
         inquiriesCount,
         unreadInquiriesCount
-    ] = await Promise.all([
-        prisma.club.count(),
-        prisma.activity.count(),
-        prisma.magazine.count(),
-        prisma.banner.count(),
-        prisma.application.count(),
-        prisma.application.count({ where: { status: "pending" } }),
-        prisma.inquiry.count(),
-        prisma.inquiry.count({ where: { status: "unread" } }),
-    ]);
+    ] = await getCachedDashboardStats();
 
     const stats = [
         { label: "登録クラブ数", value: clubsCount - 1, icon: <Users className="w-6 h-6 text-blue-600" />, bg: "bg-blue-50", link: "/admin/clubs" },

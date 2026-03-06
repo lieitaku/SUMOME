@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 /** 获取单个都道府県的 Banner 配置 */
 export async function getPrefectureBanner(pref: string) {
@@ -66,6 +66,7 @@ export async function upsertPrefectureBanner(formData: FormData) {
   revalidatePath("/admin/prefecture-banners");
   revalidatePath(`/admin/prefecture-banners/${pref}`);
   revalidatePath(`/prefectures/${pref}`);
+  revalidateTag("prefecture-banners");
   return { success: true };
 }
 
@@ -82,5 +83,6 @@ export async function deletePrefectureBanner(pref: string) {
 
   revalidatePath("/admin/prefecture-banners");
   revalidatePath(`/prefectures/${pref}`);
+  revalidateTag("prefecture-banners");
   return { success: true };
 }

@@ -189,6 +189,8 @@ export async function createBanner(formData: FormData) {
 
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag("active-banners");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to create banner:", error);
@@ -268,6 +270,8 @@ export async function updateBanner(formData: FormData) {
 
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag("active-banners");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to update banner:", error);
@@ -290,6 +294,8 @@ export async function toggleBannerActive(id: string) {
 
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag("active-banners");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to toggle banner:", error);
@@ -352,6 +358,8 @@ export async function updateBannerOrder(id: string, newOrder: number) {
 
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag("active-banners");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to update banner order:", error);
@@ -368,6 +376,8 @@ export async function deleteBanner(id: string) {
 
     revalidatePath("/admin/banners");
     revalidatePath("/");
+    revalidateTag("active-banners");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete banner:", error);

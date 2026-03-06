@@ -2,8 +2,8 @@ import React from "react";
 import Image from "next/image";
 import Link from "@/components/ui/TransitionLink";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
 import { getPreviewPayload } from "@/lib/preview";
+import { getCachedMagazineBySlug } from "@/lib/cached-queries";
 import {
   ArrowLeft,
   BookOpen,
@@ -63,8 +63,6 @@ const MagazineCover3D = ({ src, title }: { src: string; title: string }) => {
   );
 };
 
-export const dynamic = "force-dynamic";
-
 /**
  * 杂志详情主页面 (Server Component)
  */
@@ -83,7 +81,7 @@ export default async function MagazineDetailPage({
     "slug" in preview.payload &&
     String((preview.payload as { slug: unknown }).slug) === slug;
 
-  let magazine: Awaited<ReturnType<typeof prisma.magazine.findFirst>>;
+  let magazine: Awaited<ReturnType<typeof getCachedMagazineBySlug>>;
   if (usePreview && preview.payload && typeof preview.payload === "object") {
     const p = preview.payload as Record<string, unknown>;
     magazine = {
@@ -102,9 +100,7 @@ export default async function MagazineDetailPage({
       updatedAt: new Date(),
     };
   } else {
-    magazine = await prisma.magazine.findFirst({
-      where: { slug, published: true },
-    });
+    magazine = await getCachedMagazineBySlug(slug);
   }
 
   if (!magazine) return notFound();

@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentUser } from "@/lib/auth-utils";
 
 const PICKUP_SLOTS = 3; // 首页显示 3 个俱乐部
@@ -77,6 +77,7 @@ export async function updateHomePickupClubs(formData: FormData) {
     });
     revalidatePath("/");
     revalidatePath("/admin/pickup-clubs");
+    revalidateTag("home-pickup");
     return { success: true };
   } catch (error) {
     console.error("updateHomePickupClubs:", error);

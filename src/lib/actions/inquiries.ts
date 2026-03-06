@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { InquiryStatus } from "@prisma/client";
 
 // 创建询问（联系表单提交）
@@ -27,6 +27,7 @@ export async function createInquiry(formData: {
     });
 
     revalidatePath("/admin/inquiries");
+    revalidateTag("admin-stats");
     return { success: true, id: inquiry.id };
   } catch (error) {
     console.error("Failed to create inquiry:", error);
@@ -43,6 +44,7 @@ export async function updateInquiryStatus(id: string, status: InquiryStatus) {
     });
 
     revalidatePath("/admin/inquiries");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to update inquiry status:", error);
@@ -58,6 +60,7 @@ export async function deleteInquiry(id: string) {
     });
 
     revalidatePath("/admin/inquiries");
+    revalidateTag("admin-stats");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete inquiry:", error);
