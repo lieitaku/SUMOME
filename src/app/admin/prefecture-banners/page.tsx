@@ -13,7 +13,7 @@ export default async function AdminPrefectureBannersPage({
   searchParams: Promise<{ sort?: string }>;
 }) {
   const { sort: sortParam } = await searchParams;
-  const sort: SortMode = sortParam === "time" ? "time" : "area";
+  const sort = sortParam === "time" ? "time" : "area";
 
   const [dbBanners, clubCounts] = await Promise.all([
     prisma.prefectureBanner.findMany({

@@ -99,6 +99,8 @@ export default function EditPrefectureBannerForm({
         subTitle={`Prefecture Banner · ${pref}`}
         backLink="/admin/prefecture-banners"
         isSubmitting={isSubmitting}
+        onDelete={initialBanner ? handleDelete : undefined}
+        isDeleting={isDeleting}
         headerActions={
           <>
             <button
@@ -139,21 +141,6 @@ export default function EditPrefectureBannerForm({
               {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
               プレビュー
             </button>
-            {initialBanner ? (
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-full text-[10px] font-bold uppercase tracking-tighter border border-red-200"
-              >
-                {isDeleting ? (
-                  <Loader2 size={12} className="animate-spin" />
-                ) : (
-                  <Trash2 size={12} />
-                )}
-                カスタムを削除
-              </button>
-            ) : null}
           </>
         }
       >
