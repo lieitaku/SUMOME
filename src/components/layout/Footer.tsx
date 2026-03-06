@@ -236,7 +236,7 @@ const Footer = () => {
         {/* --- Bottom Copyright --- */}
         <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest">
           <p className="font-sans">
-            &copy; 2025 SUMOME INC. All Rights Reserved.
+            &copy; 2025 MEMORY INC. All Rights Reserved.
           </p>
           <div className="flex items-center gap-6 mt-4 md:mt-0">
             <span

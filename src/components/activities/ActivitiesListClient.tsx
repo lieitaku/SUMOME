@@ -56,7 +56,7 @@ export default function ActivitiesListClient({
 
   if (error) {
     return (
-      <section className="relative py-24 px-6 z-20" id="activity-list-top">
+      <section className="relative -mt-10 md:mt-0 pt-0 md:pt-24 pb-24 px-6 z-20" id="activity-list-top">
         <div className="container mx-auto max-w-6xl">
           <div className="py-24 text-center text-gray-500 text-sm">{error}</div>
         </div>
@@ -66,7 +66,7 @@ export default function ActivitiesListClient({
 
   if (loading || !data) {
     return (
-      <section className="relative py-24 px-6 z-20" id="activity-list-top">
+      <section className="relative -mt-10 md:mt-0 pt-0 md:pt-24 pb-24 px-6 z-20" id="activity-list-top">
         <div className="container mx-auto max-w-6xl">
           <div className="flex justify-center py-24">
             <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
@@ -79,7 +79,7 @@ export default function ActivitiesListClient({
   const { activities, totalPages, page: currentPage } = data;
 
   return (
-    <section className="relative py-24 px-6 z-20" id="activity-list-top">
+    <section className="relative -mt-10 md:mt-0 pt-0 md:pt-24 pb-24 px-6 z-20" id="activity-list-top">
       <div className="container mx-auto max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {activities.map((act) => {

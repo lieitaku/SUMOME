@@ -16,7 +16,7 @@ export default async function MagazineListPage({
     const sort = sortParam === "time" ? "time" : "area";
 
     return (
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6 mb-[-16px] md:mb-0">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">広報誌データ管理</h1>

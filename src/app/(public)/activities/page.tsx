@@ -14,7 +14,7 @@ export default async function ActivitiesPage({
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
         {/* ==================== 1. Hero Section ==================== */}
-        <section className="relative pt-40 pb-32 overflow-hidden bg-sumo-brand text-white shadow-xl">
+        <section className="relative pt-40 pb-20 md:pb-32 overflow-hidden bg-sumo-brand text-white shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
           <div
             className="absolute inset-0 pointer-events-none opacity-20"

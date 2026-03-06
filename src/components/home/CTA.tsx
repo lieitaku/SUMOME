@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const CTA = () => {
   return (
-    <Section background="white" className="!py-16 md:!py-40" id="cta">
+    <Section background="white" className="!pt-16 !pb-6 md:!py-40" id="cta">
       <div className="max-w-5xl mx-auto reveal-up">
         {/* --- 顶部文案区 --- */}
         <div className="text-center mb-16 md:mb-20">

@@ -9,7 +9,7 @@ import Section from "@/components/ui/Section";
 const ManagerInfo = () => {
   return (
     <Section background="white" id="manager-info">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start relative z-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-start relative z-10">
         {/* --- 左侧：固定介绍区域 (Sticky) --- */}
         <div className="lg:col-span-5 lg:sticky lg:top-32 reveal-up">
           <span className="text-sumo-brand text-xs font-bold tracking-[0.2em] mb-6 block uppercase flex items-center gap-3 font-sans">
@@ -54,7 +54,7 @@ const ManagerInfo = () => {
            2. md:gap-0: 电脑上保持 0 间距，像表格一样整齐。
            3. md:border-t: 只有电脑上需要顶部的这根分割线。
         */}
-        <div className="lg:col-span-7 flex flex-col gap-6 md:gap-0 mt-4 md:mt-8 lg:mt-0 md:border-t md:border-gray-200">
+        <div className="lg:col-span-7 flex flex-col gap-6 md:gap-0 mt-2 md:mt-8 lg:mt-0 md:border-t md:border-gray-200">
           <BenefitCard
             number="01"
             delay="delay-100"

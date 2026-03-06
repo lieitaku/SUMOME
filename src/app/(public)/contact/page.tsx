@@ -69,7 +69,7 @@ const ContactPage = () => {
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
       {/* ==================== 1. Header (纯净碧空) ==================== */}
-      <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+      <header className="relative bg-sumo-brand text-white pt-32 pb-20 md:pb-48 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
@@ -103,7 +103,7 @@ const ContactPage = () => {
       </header>
 
       {/* ==================== 2. Main Form Section (雅致白瓷) ==================== */}
-      <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
+      <section className="relative px-4 md:px-6 z-20 -mt-10 md:-mt-24 pb-32">
         <div className="container mx-auto max-w-6xl">
           <Ceramic
             interactive={false}

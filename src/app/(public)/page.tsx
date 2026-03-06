@@ -9,7 +9,6 @@ import Hero from "@/components/home/Hero";
 import AboutService from "@/components/home/AboutService";
 import PickupClubs from "@/components/home/PickupClubs";
 import ManagerInfo from "@/components/home/ManagerInfo";
-import ActivityReport from "@/components/home/ActivityReport"; // 待会儿给它传 props
 import CTA from "@/components/home/CTA";
 import ScrollInitializer from "@/components/utils/ScrollInitializer";
 
@@ -46,20 +45,10 @@ export default async function Home() {
     }
   }
 
-  const [activities, bannersFromDb] = await Promise.all([
-    prisma.activity.findMany({
-      where: { published: true },
-      include: {
-        club: { select: { name: true } },
-      },
-      orderBy: { date: "desc" },
-      take: 6,
-    }),
-    prisma.banner.findMany({
-      where: { isActive: true },
-      orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
-    }),
-  ]);
+  const bannersFromDb = await prisma.banner.findMany({
+    where: { isActive: true },
+    orderBy: [{ category: "asc" }, { sortOrder: "asc" }],
+  });
 
   let banners = bannersFromDb;
   if (preview?.type === "banner_single" && preview.payload && typeof preview.payload === "object") {
@@ -126,8 +115,6 @@ export default async function Home() {
         <PickupClubs clubs={pickupClubs} />
 
         <ManagerInfo />
-
-        <ActivityReport activities={activities} />
       </main>
     </div>
   );

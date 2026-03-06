@@ -170,7 +170,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
             <main className="flex-grow">
                 {/* ==================== 1. Hero Section (100% 复刻) ==================== */}
-                <section className="relative pt-40 pb-48 overflow-hidden bg-sumo-brand text-white shadow-xl">
+                <section className="relative pt-40 pb-20 md:pb-48 overflow-hidden bg-sumo-brand text-white shadow-xl">
                     <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
                     <div
                         className="absolute inset-0 pointer-events-none opacity-20"
@@ -204,7 +204,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                 </section>
 
                 {/* ==================== 2. 搜索与筛选区域 (复用 /clubs 设计) ==================== */}
-                <section className="relative px-4 md:px-6 z-30 -mt-16 mb-12">
+                <section className="relative px-4 md:px-6 z-30 -mt-10 md:-mt-16 mb-12">
                     <div className="container mx-auto max-w-6xl">
                         {/* 搜索框 - 与 /clubs 页面一致的设计 */}
                         <div className="relative group max-w-2xl mx-auto mb-8">

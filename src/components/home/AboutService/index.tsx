@@ -60,7 +60,7 @@ const SERVICE_DATA: ServiceItem[] = [
 
 const AboutService = () => {
   return (
-    <Section background="white" id="service">
+    <Section background="white" className="!pt-4 md:!pt-28" id="service">
       {/* 1. Introduction (保持不变) */}
       <div className="mb-16 md:mb-32">
         <Introduction />

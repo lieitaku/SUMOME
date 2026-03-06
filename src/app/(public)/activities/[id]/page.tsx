@@ -94,16 +94,16 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
-      {usePreview && (
+      {usePreview ? (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
             編集に戻る
           </a>
         </div>
-      )}
+      ) : null}
       {/* --- Header 部分 --- */}
-      <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+      <header className="relative bg-sumo-brand text-white pt-32 pb-20 md:pb-48 overflow-hidden shadow-xl">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
 
         {/* 背景网格装饰 */}
@@ -146,7 +146,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
       </header>
 
       {/* --- 内容区域 --- */}
-      <section className="relative px-4 md:px-6 -mt-24 z-20 pb-32">
+      <section className="relative px-4 md:px-6 -mt-10 md:-mt-24 z-20 pb-32">
         <div className="container mx-auto max-w-5xl">
           <Ceramic
             interactive={false}
