@@ -125,12 +125,24 @@ function Content({ apps }: { apps: ApplicationListItem[] }) {
     );
 }
 
-export default function ApplicationsListClient() {
-    const [list, setList] = useState<ApplicationListItem[] | null>(null);
-    const [loading, setLoading] = useState(true);
+interface Props {
+    initialData?: ApplicationListItem[];
+}
+
+export default function ApplicationsListClient({ initialData }: Props) {
+    const [list, setList] = useState<ApplicationListItem[] | null>(initialData || null);
+    const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
+    const isFirstMount = React.useRef(true);
+
     useEffect(() => {
+        if (isFirstMount.current && initialData) {
+            isFirstMount.current = false;
+            return;
+        }
+        isFirstMount.current = false;
+
         fetch("/admin/api/applications")
             .then((res) => {
                 if (!res.ok) throw new Error(res.status === 401 ? "Unauthorized" : "Failed to load");

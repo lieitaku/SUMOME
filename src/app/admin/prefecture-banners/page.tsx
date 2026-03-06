@@ -7,10 +7,6 @@ import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 import PrefectureBannersSortBar from "@/components/admin/prefecture-banners/PrefectureBannersSortBar";
 
-export const dynamic = "force-dynamic";
-
-type SortMode = "area" | "time";
-
 export default async function AdminPrefectureBannersPage({
   searchParams,
 }: {

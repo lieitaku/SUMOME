@@ -102,6 +102,7 @@ model Club {
   updatedAt      DateTime  @updatedAt
 
   @@index([area]) // 优化按地区查询的性能
+  @@index([name]) // 优化搜索性能
 }
 
 // ==========================================
@@ -136,6 +137,8 @@ model Activity {
 
   @@index([clubId])
   @@index([category])
+  @@index([title]) // 优化搜索性能
+  @@index([date])  // 优化排序性能
 }
 
 // ==========================================
@@ -161,6 +164,7 @@ model Magazine {
 
   @@index([issueDate]) // 为日期添加索引，提高列表查询性能
   @@index([region]) // 为筛选字段添加索引
+  @@index([title])  // 优化搜索性能
 }
 
 enum BannerCategory {
@@ -262,6 +266,7 @@ model Application {
 
   @@index([clubId])
   @@index([status])
+  @@index([createdAt]) // 优化排序性能
 }
 
 // ==========================================

@@ -140,12 +140,24 @@ function Content({ inquiries }: { inquiries: InquiryListItem[] }) {
     );
 }
 
-export default function InquiriesListClient() {
-    const [list, setList] = useState<InquiryListItem[] | null>(null);
-    const [loading, setLoading] = useState(true);
+interface Props {
+    initialData?: InquiryListItem[];
+}
+
+export default function InquiriesListClient({ initialData }: Props) {
+    const [list, setList] = useState<InquiryListItem[] | null>(initialData || null);
+    const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
+    const isFirstMount = React.useRef(true);
+
     useEffect(() => {
+        if (isFirstMount.current && initialData) {
+            isFirstMount.current = false;
+            return;
+        }
+        isFirstMount.current = false;
+
         fetch("/admin/api/inquiries")
             .then((res) => {
                 if (!res.ok) throw new Error(res.status === 401 ? "Unauthorized" : "Failed to load");

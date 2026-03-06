@@ -128,20 +128,32 @@ interface ClubsListClientProps {
     initialQ?: string;
     initialRegion?: string;
     initialPref?: string;
+    initialData?: ClubListItem[];
 }
 
 export default function ClubsListClient({
     initialQ,
     initialRegion,
     initialPref,
+    initialData,
 }: ClubsListClientProps) {
-    const [clubs, setClubs] = useState<ClubListItem[] | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [clubs, setClubs] = useState<ClubListItem[] | null>(initialData || null);
+    const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
     const [sortBy, setSortBy] = useState<SortMode>("area");
 
+    // 使用 ref 跟踪是否是首次挂载，且是否有初始数据
+    const isFirstMount = React.useRef(true);
+
     useEffect(() => {
+        // 如果是首次挂载且有初始数据，跳过首次 fetch
+        if (isFirstMount.current && initialData) {
+            isFirstMount.current = false;
+            return;
+        }
+        isFirstMount.current = false;
+
         const params = new URLSearchParams();
         if (initialQ) params.set("q", initialQ);
         if (initialRegion) params.set("region", initialRegion);

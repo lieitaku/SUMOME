@@ -3,8 +3,9 @@ import { Plus, Search } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import RegionFilter from "@/components/admin/ui/RegionFilter";
 import ClubsListClient from "@/components/admin/clubs/ClubsListClient";
-
-export const dynamic = "force-dynamic";
+import { prisma } from "@/lib/db";
+import { REGIONS } from "@/lib/constants";
+import { Prisma } from "@prisma/client";
 
 export default async function AdminClubsPage({
     searchParams,
@@ -12,6 +13,31 @@ export default async function AdminClubsPage({
     searchParams: Promise<{ q?: string; region?: string; pref?: string }>;
 }) {
     const { q, region, pref } = await searchParams;
+
+    // SSR 预取数据
+    const where: Prisma.ClubWhereInput = { id: { not: "official-hq" } };
+    if (q) where.name = { contains: q, mode: "insensitive" };
+    if (pref) where.area = { equals: pref };
+    else if (region && region in REGIONS) where.area = { in: REGIONS[region as keyof typeof REGIONS] };
+
+    const initialClubs = await prisma.club.findMany({
+        where,
+        orderBy: { updatedAt: "desc" },
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            area: true,
+            city: true,
+            updatedAt: true,
+        },
+    });
+
+    // 将 Date 对象转换为字符串，以便传递给 Client Component
+    const serializedClubs = initialClubs.map(club => ({
+        ...club,
+        updatedAt: club.updatedAt.toISOString(),
+    }));
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 font-sans">
@@ -42,7 +68,12 @@ export default async function AdminClubsPage({
                 <RegionFilter basePath="/admin/clubs" currentRegion={region} currentPref={pref} currentQuery={q} />
             </div>
 
-            <ClubsListClient initialQ={q} initialRegion={region} initialPref={pref} />
+            <ClubsListClient 
+                initialQ={q} 
+                initialRegion={region} 
+                initialPref={pref} 
+                initialData={serializedClubs}
+            />
         </div>
     );
 }

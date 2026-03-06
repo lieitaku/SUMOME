@@ -4,7 +4,15 @@ import PickupClubsSettingsCard from "@/components/admin/pickup-clubs/PickupClubs
 import type { SlotItem } from "@/components/admin/pickup-clubs/PickupClubsSettingsCard";
 
 export default async function AdminPickupClubsPage() {
-  const result = await getHomePickupClubs();
+  const [result, clubOptions] = await Promise.all([
+    getHomePickupClubs(),
+    prisma.club.findMany({
+      where: { slug: { not: "official-hq" } },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true, mainImage: true },
+    }),
+  ]);
+
   const slots: SlotItem[] =
     result.data ??
     [
@@ -12,12 +20,6 @@ export default async function AdminPickupClubsPage() {
       { sortOrder: 1, clubId: null, club: null },
       { sortOrder: 2, clubId: null, club: null },
     ];
-
-  const clubOptions = await prisma.club.findMany({
-    where: { slug: { not: "official-hq" } },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, mainImage: true },
-  });
 
   if (result.error) {
     return (

@@ -139,14 +139,29 @@ interface Props {
     initialCategory?: string;
     initialRegion?: string;
     initialPref?: string;
+    initialData?: ActivityListItem[];
 }
 
-export default function ActivitiesListClient({ initialQ, initialCategory, initialRegion, initialPref }: Props) {
-    const [list, setList] = useState<ActivityListItem[] | null>(null);
-    const [loading, setLoading] = useState(true);
+export default function ActivitiesListClient({ 
+    initialQ, 
+    initialCategory, 
+    initialRegion, 
+    initialPref,
+    initialData
+}: Props) {
+    const [list, setList] = useState<ActivityListItem[] | null>(initialData || null);
+    const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
+    const isFirstMount = React.useRef(true);
+
     useEffect(() => {
+        if (isFirstMount.current && initialData) {
+            isFirstMount.current = false;
+            return;
+        }
+        isFirstMount.current = false;
+
         const params = new URLSearchParams();
         if (initialQ) params.set("q", initialQ);
         if (initialCategory) params.set("category", initialCategory);

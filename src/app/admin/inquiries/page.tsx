@@ -1,7 +1,33 @@
 import React from "react";
 import InquiriesListClient from "@/components/admin/inquiries/InquiriesListClient";
+import { prisma } from "@/lib/db";
+import { confirmAdmin } from "@/lib/auth-utils";
+import { redirect } from "next/navigation";
 
-export default function AdminInquiriesPage() {
+export default async function AdminInquiriesPage() {
+    const admin = await confirmAdmin();
+    if (!admin) redirect("/admin");
+
+    const inquiries = await prisma.inquiry.findMany({
+        orderBy: { createdAt: "desc" },
+        select: {
+            id: true,
+            inquiryType: true,
+            name: true,
+            furigana: true,
+            email: true,
+            phone: true,
+            message: true,
+            status: true,
+            createdAt: true,
+        },
+    });
+
+    const serializedInquiries = inquiries.map(inq => ({
+        ...inq,
+        createdAt: inq.createdAt.toISOString(),
+    }));
+
     return (
         <div className="max-w-6xl mx-auto space-y-6 font-sans">
             <div className="flex items-center justify-between">
@@ -12,7 +38,7 @@ export default function AdminInquiriesPage() {
                     </p>
                 </div>
             </div>
-            <InquiriesListClient />
+            <InquiriesListClient initialData={serializedInquiries} />
         </div>
     );
 }

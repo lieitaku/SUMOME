@@ -4,8 +4,9 @@ import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 import RegionFilter from "@/components/admin/ui/RegionFilter";
 import ActivitiesListClient from "@/components/admin/activities/ActivitiesListClient";
-
-export const dynamic = "force-dynamic";
+import { prisma } from "@/lib/db";
+import { REGIONS } from "@/lib/constants";
+import { Prisma } from "@prisma/client";
 
 export default async function AdminActivitiesPage({
     searchParams,
@@ -14,13 +15,44 @@ export default async function AdminActivitiesPage({
 }) {
     const { q, category, region, pref } = await searchParams;
 
+    // SSR 预取数据
+    const where: Prisma.ActivityWhereInput = {};
+    if (q) where.title = { contains: q, mode: "insensitive" };
+    if (category && category !== "all") where.category = category;
+    
+    if (pref) where.club = { area: { equals: pref } };
+    else if (region && region in REGIONS) where.club = { area: { in: REGIONS[region as keyof typeof REGIONS] } };
+
+    const initialActivities = await prisma.activity.findMany({
+        where,
+        orderBy: { date: "desc" },
+        select: {
+            id: true,
+            title: true,
+            category: true,
+            date: true,
+            published: true,
+            club: {
+                select: {
+                    name: true,
+                    area: true,
+                },
+            },
+        },
+    });
+
+    const serializedActivities = initialActivities.map(act => ({
+        ...act,
+        date: act.date.toISOString(),
+    }));
+
     return (
         <div className="max-w-6xl mx-auto space-y-6 font-sans">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">普及・広報活動管理</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">普及・広報活动管理</h1>
                     <p className="text-gray-500 mt-1 text-xs md:text-sm">
-                        全クラブの活動レポート、ニュースの投稿・編集
+                        全クラブの活动レポート、ニュースの投稿・編集
                     </p>
                 </div>
                 <Link
@@ -74,6 +106,7 @@ export default async function AdminActivitiesPage({
                 initialCategory={category}
                 initialRegion={region}
                 initialPref={pref}
+                initialData={serializedActivities}
             />
         </div>
     );

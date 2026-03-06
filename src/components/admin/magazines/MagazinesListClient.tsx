@@ -198,18 +198,34 @@ interface Props {
     initialPref?: string;
     initialPage: number;
     initialSort?: SortMode;
+    initialData?: { magazines: MagazineListItem[]; total: number; totalPages: number; page: number };
 }
 
-export default function MagazinesListClient({ initialQ, initialRegion, initialPref, initialPage, initialSort = "area" }: Props) {
+export default function MagazinesListClient({ 
+    initialQ, 
+    initialRegion, 
+    initialPref, 
+    initialPage, 
+    initialSort = "area",
+    initialData
+}: Props) {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const [data, setData] = useState<{ magazines: MagazineListItem[]; total: number; totalPages: number; page: number } | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [data, setData] = useState<{ magazines: MagazineListItem[]; total: number; totalPages: number; page: number } | null>(initialData || null);
+    const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
     const sort: SortMode = searchParams.get("sort") === "time" ? "time" : "area";
 
+    const isFirstMount = React.useRef(true);
+
     useEffect(() => {
+        if (isFirstMount.current && initialData) {
+            isFirstMount.current = false;
+            return;
+        }
+        isFirstMount.current = false;
+
         const params = new URLSearchParams();
         if (initialQ) params.set("q", initialQ);
         if (initialRegion) params.set("region", initialRegion);
