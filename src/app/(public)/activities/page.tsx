@@ -1,6 +1,7 @@
 import React from "react";
 import { Calendar } from "lucide-react";
 import ActivitiesListClient from "@/components/activities/ActivitiesListClient";
+import { getCachedActivitiesPage } from "@/lib/cached-queries";
 
 export default async function ActivitiesPage({
   searchParams,
@@ -9,6 +10,7 @@ export default async function ActivitiesPage({
 }) {
   const { page: pageParam } = await searchParams;
   const initialPage = Math.max(1, Number(pageParam) || 1);
+  const initialData = await getCachedActivitiesPage(initialPage);
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
@@ -45,7 +47,7 @@ export default async function ActivitiesPage({
         </section>
 
         {/* ==================== 2. Activity Grid (client, from API) ==================== */}
-        <ActivitiesListClient initialPage={initialPage} />
+        <ActivitiesListClient initialPage={initialPage} initialData={initialData} />
       </main>
     </div>
   );

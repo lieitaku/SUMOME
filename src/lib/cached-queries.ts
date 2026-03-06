@@ -79,3 +79,53 @@ export function getCachedActivityWithClub(id: string) {
     { revalidate: 60, tags: ["activities"] }
   )(id);
 }
+
+/** Cached all published magazines. Invalidate with tag "magazines". */
+export function getCachedAllMagazines() {
+  return unstable_cache(
+    () =>
+      prisma.magazine.findMany({
+        where: { published: true },
+        orderBy: { issueDate: "desc" },
+      }),
+    ["all-magazines"],
+    { revalidate: 3600, tags: ["magazines"] }
+  )();
+}
+
+/** Cached activities by page. Invalidate with tag "activities". */
+export function getCachedActivitiesPage(page: number, pageSize: number = 6) {
+  return unstable_cache(
+    async (p: number, ps: number) => {
+      const [activities, totalItems] = await Promise.all([
+        prisma.activity.findMany({
+          skip: (p - 1) * ps,
+          take: ps,
+          orderBy: { date: "desc" },
+          include: { club: { select: { name: true } } },
+        }),
+        prisma.activity.count(),
+      ]);
+      return {
+        activities,
+        totalItems,
+        totalPages: Math.ceil(totalItems / ps),
+        page: p,
+      };
+    },
+    ["activities-page"],
+    { revalidate: 3600, tags: ["activities"] }
+  )(page, pageSize);
+}
+
+/** Cached all clubs. Invalidate with tag "clubs". */
+export function getCachedAllClubs() {
+  return unstable_cache(
+    () =>
+      prisma.club.findMany({
+        orderBy: { createdAt: "desc" },
+      }),
+    ["all-clubs"],
+    { revalidate: 3600, tags: ["clubs"] }
+  )();
+}

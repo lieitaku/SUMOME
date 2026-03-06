@@ -33,14 +33,17 @@ type ApiResponse = {
 
 export default function ActivitiesListClient({
   initialPage,
+  initialData,
 }: {
   initialPage: number;
+  initialData?: ApiResponse | null;
 }) {
-  const [data, setData] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<ApiResponse | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (initialData && initialPage === initialData.page) return;
     const page = Math.max(1, initialPage);
     setLoading(true);
     setError(null);
@@ -52,7 +55,7 @@ export default function ActivitiesListClient({
       .then((d: ApiResponse) => setData(d))
       .catch(() => setError("読み込みに失敗しました。"))
       .finally(() => setLoading(false));
-  }, [initialPage]);
+  }, [initialPage, initialData]);
 
   if (error) {
     return (
