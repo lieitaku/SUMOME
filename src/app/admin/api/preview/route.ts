@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const path = redirectPath.startsWith("/") ? redirectPath : `/${redirectPath}`;
 
     const id = crypto.randomUUID().slice(0, 8);
-    setPreview(id, type, path, payload);
+    await setPreview(id, type, path, payload);
 
     const url = new URL(request.url);
     const origin = url.origin;

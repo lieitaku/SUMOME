@@ -1,5 +1,7 @@
 import React from "react";
 import Image from "next/image";
+
+export const dynamic = "force-dynamic";
 import Link from "@/components/ui/TransitionLink";
 import { notFound } from "next/navigation";
 import { getPreviewPayload } from "@/lib/preview";
@@ -69,10 +71,14 @@ const MagazineCover3D = ({ src, title }: { src: string; title: string }) => {
  */
 export default async function MagazineDetailPage({
   params,
+  searchParams,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ embedded?: string }>;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const isEmbedded = sp?.embedded === "1";
 
   const preview = await getPreviewPayload();
   const usePreview =
@@ -125,7 +131,7 @@ export default async function MagazineDetailPage({
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
-      {(usePreview && (
+      {(usePreview && !isEmbedded && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">

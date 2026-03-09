@@ -12,12 +12,15 @@ import { getCachedClubBySlug } from "@/lib/cached-queries";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 
+export const dynamic = "force-dynamic";
+
 // 定义品牌色常量
 const BRAND_BLUE = "#2454a4";
 
 // 页面参数定义 (Next.js 15+)
 interface PageProps {
     params: Promise<{ slug: string }>;
+    searchParams?: Promise<{ embedded?: string }>;
 }
 
 /** Normalize form payload to club-like object for display (preview mode). */
@@ -76,9 +79,11 @@ function normalizePreviewClub(p: Record<string, unknown>): {
     };
 }
 
-export default async function ClubDetailPage({ params }: PageProps) {
+export default async function ClubDetailPage({ params, searchParams }: PageProps) {
     // 1. 获取动态路由参数
     const { slug } = await params;
+    const sp = searchParams ? await searchParams : {};
+    const isEmbedded = sp?.embedded === "1";
 
     // 2. 物理隔离官方账号 (防止通过 URL 直接访问 HQ 数据)
     if (slug === "official-hq") return notFound();
@@ -165,7 +170,7 @@ export default async function ClubDetailPage({ params }: PageProps) {
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
-            {(usePreview && (
+            {(usePreview && !isEmbedded && (
                 <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
                     <span>プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。</span>
                     <a href="javascript:history.back()" className="underline font-bold hover:no-underline">

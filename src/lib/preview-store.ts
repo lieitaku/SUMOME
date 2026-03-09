@@ -1,45 +1,55 @@
 /**
- * In-memory preview payload store with TTL.
- * Used for "preview without saving": payload is stored briefly and read once by the frontend page.
- * Serverless: not shared across instances; acceptable for low preview traffic.
+ * Preview payload store with TTL.
+ * Used for "preview without saving": payload is stored briefly and read by the frontend page.
+ *
+ * Uses database (PreviewDraft table) for cross-instance sharing in Serverless.
+ * Industry pattern: Payload CMS, Strapi, etc. use similar draft/preview storage.
  */
+
+import { prisma } from "@/lib/db";
 
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
-type Stored = { type: string; redirectPath: string; payload: unknown; expiresAt: number };
+export type Stored = { type: string; redirectPath: string; payload: unknown; expiresAt: number };
 
-const store = new Map<string, Stored>();
-
-function prune() {
-    const now = Date.now();
-    for (const [id, v] of store.entries()) {
-        if (v.expiresAt <= now) store.delete(id);
-    }
-}
-
-export function setPreview(id: string, type: string, redirectPath: string, payload: unknown): void {
-    prune();
-    store.set(id, {
-        type,
-        redirectPath,
-        payload,
-        expiresAt: Date.now() + TTL_MS,
+async function pruneExpired() {
+    await prisma.previewDraft.deleteMany({
+        where: { expiresAt: { lt: new Date() } },
     });
 }
 
-export function getPreview(id: string): Stored | null {
-    const v = store.get(id);
-    if (!v) return null;
-    if (v.expiresAt <= Date.now()) {
-        store.delete(id);
+export async function setPreview(id: string, type: string, redirectPath: string, payload: unknown): Promise<void> {
+    await pruneExpired();
+    const expiresAt = new Date(Date.now() + TTL_MS);
+    await prisma.previewDraft.upsert({
+        where: { previewId: id },
+        create: { previewId: id, type, path: redirectPath, payload: payload as object, expiresAt },
+        update: { type, path: redirectPath, payload: payload as object, expiresAt },
+    });
+}
+
+export async function getPreview(id: string): Promise<Stored | null> {
+    const row = await prisma.previewDraft.findUnique({
+        where: { previewId: id },
+    });
+    if (!row) return null;
+    if (row.expiresAt < new Date()) {
+        await prisma.previewDraft.delete({ where: { previewId: id } });
         return null;
     }
-    return v;
+    return {
+        type: row.type,
+        redirectPath: row.path,
+        payload: row.payload,
+        expiresAt: row.expiresAt.getTime(),
+    };
 }
 
 /** Remove after read so each preview is one-time use (optional; can also rely on TTL). */
-export function consumePreview(id: string): Stored | null {
-    const v = getPreview(id);
-    if (v) store.delete(id);
+export async function consumePreview(id: string): Promise<Stored | null> {
+    const v = await getPreview(id);
+    if (v) {
+        await prisma.previewDraft.delete({ where: { previewId: id } }).catch(() => {});
+    }
     return v;
 }

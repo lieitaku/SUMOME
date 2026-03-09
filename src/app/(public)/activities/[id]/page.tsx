@@ -14,6 +14,8 @@ type ActivityWithClub = Activity & {
   club: Club;
 };
 
+export const dynamic = "force-dynamic";
+
 import { ArticleRegistry } from "@/lib/article-registry";
 import StandardTemplate from "@/components/activities/StandardTemplate";
 import Ceramic from "@/components/ui/Ceramic";
@@ -46,8 +48,16 @@ function normalizePreviewActivity(
   };
 }
 
-export default async function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ActivityDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ embedded?: string }>;
+}) {
   const { id } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const isEmbedded = sp?.embedded === "1";
 
   const preview = await getPreviewPayload();
   const usePreview =
@@ -89,7 +99,7 @@ export default async function ActivityDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
-      {usePreview ? (
+      {usePreview && !isEmbedded ? (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">

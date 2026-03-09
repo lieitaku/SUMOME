@@ -127,6 +127,11 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* 预览 iframe 内隐藏 ScrollToTop 等，避免底部显示不全 */
+  body.preview-embedded [data-embedded-hide] {
+    display: none !important;
+  }
 }
 
 /* ==========================================================================

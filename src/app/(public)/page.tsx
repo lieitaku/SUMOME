@@ -1,5 +1,7 @@
 import React from "react";
 import { prisma } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActiveBanners, getCachedPickupClubsForHome } from "@/lib/cached-queries";
@@ -12,7 +14,13 @@ import ManagerInfo from "@/components/home/ManagerInfo";
 import CTA from "@/components/home/CTA";
 import ScrollInitializer from "@/components/utils/ScrollInitializer";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ embedded?: string }>;
+}) {
+  const { embedded } = await searchParams;
+  const isEmbedded = embedded === "1";
   const preview = await getPreviewPayload();
   const isPreview =
     !!preview &&
@@ -88,7 +96,7 @@ export default async function Home() {
 
   return (
     <div className="w-full flex flex-col min-h-screen">
-      {isPreview && (
+      {isPreview && !isEmbedded && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">

@@ -240,6 +240,23 @@ model HomePickupClub {
 }
 
 // ==========================================
+// 👁️ 预览草稿 (Preview Draft - 未保存内容临时存储)
+// ==========================================
+// 管理画面「プレビュー」用。Serverless 下内存不共享，改用 DB 存储。
+// TTL 5 分钟，由查询时检查 expiresAt 清理。
+model PreviewDraft {
+  id           String   @id @default(cuid())
+  previewId    String   @unique // 8 位短 ID，用于 cookie/URL
+  type         String   // club, banner_single, prefecture_banner, etc.
+  path         String   // 目标路径如 /clubs/osaka-sumo
+  payload      Json     // 预览数据
+  expiresAt    DateTime
+
+  @@index([previewId])
+  @@index([expiresAt])
+}
+
+// ==========================================
 // 📩 业务转化：入会申请 (Applications)
 // ==========================================
 

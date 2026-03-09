@@ -16,7 +16,7 @@ export async function getPreviewPayload(): Promise<{
     const cookieStore = await cookies();
     const id = cookieStore.get(PREVIEW_COOKIE_NAME)?.value;
     if (!id) return null;
-    const stored = getPreview(id);
+    const stored = await getPreview(id);
     if (!stored) return null;
     return {
         type: stored.type,

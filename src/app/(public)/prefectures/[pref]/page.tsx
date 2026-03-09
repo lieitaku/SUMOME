@@ -33,14 +33,17 @@ import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
-  params: Promise<{
-    pref: string;
-  }>;
+  params: Promise<{ pref: string }>;
+  searchParams?: Promise<{ embedded?: string }>;
 }
 
-export default async function PrefecturePage({ params }: PageProps) {
+export default async function PrefecturePage({ params, searchParams }: PageProps) {
   const { pref } = await params;
+  const sp = searchParams ? await searchParams : {};
+  const isEmbedded = sp?.embedded === "1";
   const prefSlug = pref;
   const prefData = PREFECTURE_DATABASE[prefSlug];
   const staticDisplay = prefData || {
@@ -134,7 +137,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
-      {prefBannerPreview && (
+      {prefBannerPreview && !isEmbedded && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。</span>
           {/* eslint-disable-next-line no-script-url */}

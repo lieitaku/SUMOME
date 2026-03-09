@@ -29,8 +29,9 @@ const ScrollToTop = () => {
   };
 
   return (
-    // 外层控制进出场动画
+    // 外层控制进出场动画；preview-embedded 时隐藏（iframe 内预览）
     <div
+      data-embedded-hide
       className={cn(
         "fixed bottom-8 right-6 z-50 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)",
         isVisible
