@@ -60,7 +60,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     preview.payload &&
     typeof preview.payload === "object" &&
     (preview.payload as { pref?: string }).pref === prefSlug
-      ? (preview.payload as { pref: string; image?: string; alt?: string; imagePosition?: string; imageScale?: string | number })
+      ? (preview.payload as { pref: string; image?: string; alt?: string; imagePosition?: string; imageScale?: string | number; imageRotation?: string | number })
       : null;
 
   // All four queries are independent — fire them in parallel with caching
@@ -114,7 +114,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     ? [featuredClub.area, featuredClub.city, featuredClub.address].filter(Boolean).join(" ")
     : "";
 
-  type BannerWithPosition = { imagePosition?: string | null; imageScale?: number | null };
+  type BannerWithPosition = { imagePosition?: string | null; imageScale?: number | null; imageRotation?: number | null };
   const bannerRecord = customBanner as (BannerWithPosition & typeof customBanner) | null;
   const bannerPosition = prefBannerPreview?.imagePosition ?? bannerRecord?.imagePosition ?? "50,50";
   const [posX, posY] = bannerPosition.split(",").map((s: string) => {
@@ -127,8 +127,16 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
       : bannerRecord?.imageScale != null
         ? Number(bannerRecord.imageScale)
         : 1;
+  const bannerRotation =
+    prefBannerPreview?.imageRotation != null
+      ? (() => {
+          const n = Number(prefBannerPreview.imageRotation);
+          return [0, 90, 180, 270].includes(n) ? n : 0;
+        })()
+      : bannerRecord?.imageRotation != null && [0, 90, 180, 270].includes(bannerRecord.imageRotation)
+        ? bannerRecord.imageRotation
+        : 0;
   const bannerBgPosition = `${posX}% ${posY}%`;
-  const bannerBgSize = bannerScale === 1 ? "cover" : `${100 * bannerScale}%`; // 防御性逻辑：未缩放时强制 cover
 
   const ceramicStyle = {
     borderBottomColor: theme.color,
@@ -356,16 +364,30 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   >
                     {/* 上半部分：图片区域 */}
                     <div className="relative aspect-[21/9] overflow-hidden">
-                      <Image
-                        src={displayData.bannerImg}
-                        alt={bannerAlt}
-                        fill
-                        priority
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        style={{
-                          objectPosition: bannerBgPosition,
-                        }}
-                      />
+                      {bannerScale > 1 ? (
+                        <div
+                          className="absolute inset-0 bg-no-repeat transition-transform duration-700 group-hover:scale-105"
+                          style={{
+                            backgroundImage: `url(${displayData.bannerImg})`,
+                            backgroundSize: `${100 * bannerScale}%`,
+                            backgroundPosition: bannerBgPosition,
+                            transform: `rotate(${bannerRotation}deg)`,
+                          }}
+                          aria-hidden
+                        />
+                      ) : (
+                        <Image
+                          src={displayData.bannerImg}
+                          alt={bannerAlt}
+                          fill
+                          priority
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                          style={{
+                            objectPosition: bannerBgPosition,
+                            transform: `rotate(${bannerRotation}deg)`,
+                          }}
+                        />
+                      )}
                       <Link
                         href={clubDetailLink}
                         className="absolute inset-0 z-0"

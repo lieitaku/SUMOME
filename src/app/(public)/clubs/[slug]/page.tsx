@@ -6,7 +6,7 @@ import {
     MapPin, Users, ChevronLeft, Sparkles, CheckCircle2,
     CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation, Phone
 } from "lucide-react";
-import { getMainImageObjectPosition, getMainImageScale } from "@/lib/utils";
+import { getMainImageObjectPosition, getMainImageScale, getMainImageRotation } from "@/lib/utils";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedClubBySlug } from "@/lib/cached-queries";
 import Ceramic from "@/components/ui/Ceramic";
@@ -33,6 +33,7 @@ function normalizePreviewClub(p: Record<string, unknown>): {
     mainImage: string | null;
     mainImagePosition: string | null;
     mainImageScale: number | null;
+    mainImageRotation: number | null;
     subImages: string[];
     area: string;
     city: string | null;
@@ -54,6 +55,16 @@ function normalizePreviewClub(p: Record<string, unknown>): {
             : typeof scale === "string"
                 ? Number(scale)
                 : null;
+    const rot = p.mainImageRotation;
+    const rotNum =
+        typeof rot === "number" && [0, 90, 180, 270].includes(rot)
+            ? rot
+            : typeof rot === "string"
+                ? (() => {
+                    const n = parseInt(rot, 10);
+                    return [0, 90, 180, 270].includes(n) ? n : 0;
+                })()
+                : 0;
     return {
         id: String(p.id ?? ""),
         name: String(p.name ?? ""),
@@ -63,6 +74,7 @@ function normalizePreviewClub(p: Record<string, unknown>): {
         mainImage: p.mainImage != null ? String(p.mainImage) : null,
         mainImagePosition: p.mainImagePosition != null ? String(p.mainImagePosition) : null,
         mainImageScale: scaleNum != null && !Number.isNaN(scaleNum) ? scaleNum : null,
+        mainImageRotation: rotNum,
         subImages: Array.isArray(p.subImages) ? p.subImages.map(String) : [],
         area: String(p.area ?? "未設定"),
         city: p.city != null ? String(p.city) : null,
@@ -232,11 +244,12 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                     backgroundImage: `url(${galleryImages[0]})`,
                                                     backgroundSize: `${100 * getMainImageScale(club.mainImageScale)}%`,
                                                     backgroundPosition: getMainImageObjectPosition(club.mainImagePosition),
+                                                    transform: `rotate(${getMainImageRotation(club.mainImageRotation)}deg)`,
                                                 }}
                                                 aria-hidden
                                             />
                                         ) : (
-                                            <Image src={galleryImages[0]} alt={club.name} fill className="object-cover hover:scale-105 transition-transform duration-700" style={{ objectPosition: getMainImageObjectPosition(club.mainImagePosition) }} priority />
+                                            <Image src={galleryImages[0]} alt={club.name} fill className="object-cover hover:scale-105 transition-transform duration-700" style={{ objectPosition: getMainImageObjectPosition(club.mainImagePosition), transform: `rotate(${getMainImageRotation(club.mainImageRotation)}deg)` }} priority />
                                         )}
                                     </div>
 

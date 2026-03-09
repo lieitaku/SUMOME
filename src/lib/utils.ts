@@ -29,8 +29,14 @@ export function getMainImageObjectPosition(value: string | null | undefined): st
   return `${Math.min(100, Math.max(0, x))}% ${Math.min(100, Math.max(0, y))}%`;
 }
 
-/** 有效封面缩放 1.0–2.0，缺省为 1.0 */
+/** 有效封面缩放 1.0–4.0，缺省为 1.0 */
 export function getMainImageScale(value: number | null | undefined): number {
   if (value == null || Number.isNaN(value)) return 1;
-  return Math.min(2, Math.max(1, value));
+  return Math.min(4, Math.max(1, value));
+}
+
+/** 有效旋转角度 0/90/180/270，缺省为 0 */
+export function getMainImageRotation(value: number | null | undefined): number {
+  if (value == null || Number.isNaN(value)) return 0;
+  return [0, 90, 180, 270].includes(value) ? value : 0;
 }

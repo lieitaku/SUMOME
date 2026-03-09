@@ -23,6 +23,7 @@ function parseFormData(formData: FormData) {
     mainImage: formData.get("mainImage") as string,
     mainImagePosition: formData.get("mainImagePosition") as string,
     mainImageScale: formData.get("mainImageScale") as string,
+    mainImageRotation: formData.get("mainImageRotation") as string,
     zipCode: formData.get("zipCode") as string,
     area: formData.get("area") as string,
     city: formData.get("city") as string,
@@ -120,6 +121,7 @@ const UpdateClubSchema = z.object({
   mainImage: z.string().optional(),
   mainImagePosition: z.string().optional(),
   mainImageScale: z.string().optional(),
+  mainImageRotation: z.string().optional(),
 
   // ✨ 新增：副图验证 (虽然前端已经验证了，后端最好再做一次双重保险)
   subImages: z.array(z.string()).optional(),
@@ -196,7 +198,15 @@ export async function updateClub(formData: FormData) {
     rest.mainImageScale != null && rest.mainImageScale !== ""
       ? (() => {
           const n = parseFloat(rest.mainImageScale as string);
-          return Number.isNaN(n) ? undefined : Math.min(2, Math.max(1, n));
+          return Number.isNaN(n) ? undefined : Math.min(4, Math.max(1, n));
+        })()
+      : undefined;
+
+  const mainImageRotationNum =
+    rest.mainImageRotation != null && rest.mainImageRotation !== ""
+      ? (() => {
+          const n = parseInt(rest.mainImageRotation as string, 10);
+          return [0, 90, 180, 270].includes(n) ? n : undefined;
         })()
       : undefined;
 
@@ -204,14 +214,10 @@ export async function updateClub(formData: FormData) {
     ...rest,
     ...(slugToUpdate != null ? { slug: slugToUpdate } : {}),
     mainImageScale: mainImageScaleNum,
+    mainImageRotation: mainImageRotationNum,
   };
 
-  try {
-    await prisma.club.update({
-      where: { id },
-      data: updateData,
-    });
-
+  const doRevalidate = () => {
     revalidatePath("/admin/clubs");
     revalidatePath(`/admin/clubs/${id}`);
     revalidatePath("/admin/my-club");
@@ -219,10 +225,43 @@ export async function updateClub(formData: FormData) {
     if (slugToUpdate) revalidatePath(`/clubs/${slugToUpdate}`);
     revalidateTag("clubs");
     revalidateTag("admin-stats");
+  };
 
+  try {
+    await prisma.club.update({
+      where: { id },
+      data: updateData,
+    });
+    doRevalidate();
     return { success: true };
   } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
     console.error("更新失敗:", error);
+
+    // mainImageRotation カラム未存在時は omit してリトライ（マイグレーション未適用対応）
+    if (
+      mainImageRotationNum != null &&
+      /mainImageRotation|does not exist|column.*not found/i.test(errMsg)
+    ) {
+      try {
+        const { mainImageRotation: _, ...dataWithoutRotation } = updateData;
+        await prisma.club.update({
+          where: { id },
+          data: dataWithoutRotation,
+        });
+        doRevalidate();
+        return { success: true };
+      } catch (retryErr) {
+        console.error("更新リトライ失敗:", retryErr);
+        return { error: "データベースの更新に失敗しました。" };
+      }
+    }
+    if (/mainImagePosition|mainImageScale|does not exist|column.*not found/i.test(errMsg)) {
+      return {
+        error:
+          "データベースのマイグレーションが未適用の可能性があります。`npx prisma migrate deploy` を実行してください。",
+      };
+    }
     return { error: "データベースの更新に失敗しました。" };
   }
 }

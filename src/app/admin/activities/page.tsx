@@ -66,14 +66,26 @@ export default async function AdminActivitiesPage({
 
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
                 <div className="flex flex-wrap gap-4">
-                    <form className="relative grow max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                        <input
-                            name="q"
-                            defaultValue={q}
-                            placeholder="タイトルで検索..."
-                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
-                        />
+                    <form className="flex gap-2 grow max-w-md" action="/admin/activities" method="get">
+                        {region && <input type="hidden" name="region" value={region} />}
+                        {pref && <input type="hidden" name="pref" value={pref} />}
+                        {category && <input type="hidden" name="category" value={category} />}
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                            <input
+                                name="q"
+                                defaultValue={q}
+                                placeholder="タイトルで検索..."
+                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
+                            />
+                        </div>
+                        <button
+                            type="submit"
+                            className="flex items-center gap-1.5 bg-sumo-brand text-white px-4 py-2 rounded-lg font-bold hover:bg-sumo-dark transition-all shadow-md text-sm shrink-0"
+                        >
+                            <Search size={16} />
+                            検索
+                        </button>
                     </form>
                     <div className="flex bg-gray-100 p-1 rounded-lg">
                         {["all", "Report", "Event", "News"].map((cat) => (

@@ -22,7 +22,7 @@ import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
 import ScheduleEditor from "./ScheduleEditor"; // <--- 引入日程编辑器组件
 import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
-import MainImagePositionEditor, { parsePositionString, formatPositionString, parseScaleValue } from "./MainImagePositionEditor";
+import MainImagePositionEditor, { parsePositionString, formatPositionString, parseScaleValue, parseRotationValue } from "./MainImagePositionEditor";
 
 // ✨ 2. 引入 Server Actions
 import { updateClub, deleteClub } from "@/lib/actions/clubs";
@@ -44,6 +44,7 @@ const formSchema = z.object({
     mainImage: z.string().optional(),
     mainImagePosition: z.string().optional(),
     mainImageScale: z.string().optional(),
+    mainImageRotation: z.string().optional(),
 
     // ✨ 副图验证规则
     subImages: z.array(z.string())
@@ -99,6 +100,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
             mainImage: initialData.mainImage || "",
             mainImagePosition: initialData.mainImagePosition ?? "50,50",
             mainImageScale: initialData.mainImageScale != null ? String(initialData.mainImageScale) : "1",
+            mainImageRotation: initialData.mainImageRotation != null ? String(initialData.mainImageRotation) : "0",
             subImages: initialData.subImages || [],
             zipCode: initialData.zipCode || "",
             area: initialData.area || "未設定",
@@ -351,8 +353,10 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                     imageUrl={form.watch("mainImage")}
                                     position={parsePositionString(form.watch("mainImagePosition"))}
                                     scale={parseScaleValue(form.watch("mainImageScale"))}
+                                    rotation={parseRotationValue(form.watch("mainImageRotation"))}
                                     onPositionChange={(x, y) => form.setValue("mainImagePosition", formatPositionString({ x, y }), { shouldDirty: true })}
                                     onScaleChange={(s) => form.setValue("mainImageScale", String(s), { shouldDirty: true })}
+                                    onRotationChange={(deg) => form.setValue("mainImageRotation", String(deg), { shouldDirty: true })}
                                 />
                             )}
 

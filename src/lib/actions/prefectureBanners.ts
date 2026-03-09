@@ -37,7 +37,13 @@ function parseScale(value: unknown): number {
   if (value == null) return 1;
   const n = typeof value === "number" ? value : parseFloat(String(value).trim());
   if (Number.isNaN(n)) return 1;
-  return Math.min(2, Math.max(1, n));
+  return Math.min(4, Math.max(1, n));
+}
+
+function parseRotation(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const n = parseInt(String(value).trim(), 10);
+  return [0, 90, 180, 270].includes(n) ? n : null;
 }
 
 /** 创建或更新都道府県 Banner（有则更新，无则创建） */
@@ -47,20 +53,57 @@ export async function upsertPrefectureBanner(formData: FormData) {
   const alt = (formData.get("alt") as string)?.trim() || null;
   const imagePosition = parsePosition(formData.get("imagePosition"));
   const imageScale = parseScale(formData.get("imageScale"));
+  const imageRotation = parseRotation(formData.get("imageRotation"));
 
   if (!UpsertSchema.pref(pref)) return { error: "都道府県を指定してください。" };
   if (!UpsertSchema.image(image)) return { error: "画像URLは必須です。" };
   if (!UpsertSchema.alt(alt)) return { error: "alt は文字列で指定してください。" };
 
+  const createData = {
+    pref,
+    image,
+    alt,
+    imagePosition,
+    imageScale,
+    ...(imageRotation != null ? { imageRotation } : {}),
+  };
+  const updateData = {
+    image,
+    alt,
+    imagePosition,
+    imageScale,
+    ...(imageRotation != null ? { imageRotation } : {}),
+  };
+
   try {
     await prisma.prefectureBanner.upsert({
       where: { pref },
-      create: { pref, image, alt, imagePosition, imageScale },
-      update: { image, alt, imagePosition, imageScale },
+      create: createData,
+      update: updateData,
     });
   } catch (e) {
+    const errMsg = e instanceof Error ? e.message : String(e);
     console.error("PrefectureBanner upsert failed:", e);
-    return { error: "保存に失敗しました。" };
+
+    // imageRotation カラム未存在時は omit してリトライ（マイグレーション未適用対応）
+    if (imageRotation != null && /imageRotation|does not exist|column.*not found/i.test(errMsg)) {
+      try {
+        const { imageRotation: _, ...createWithoutRotation } = createData;
+        const { imageRotation: __, ...updateWithoutRotation } = updateData;
+        await prisma.prefectureBanner.upsert({
+          where: { pref },
+          create: createWithoutRotation,
+          update: updateWithoutRotation,
+        });
+      } catch (retryErr) {
+        console.error("PrefectureBanner upsert retry failed:", retryErr);
+        return { error: "保存に失敗しました。" };
+      }
+    } else if (/imagePosition|imageScale|does not exist|column.*not found/i.test(errMsg)) {
+      return { error: "データベースのマイグレーションが未適用の可能性があります。`npx prisma migrate deploy` を実行してください。" };
+    } else {
+      return { error: "保存に失敗しました。" };
+    }
   }
 
   revalidatePath("/admin/prefecture-banners");

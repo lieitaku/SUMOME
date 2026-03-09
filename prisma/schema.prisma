@@ -65,7 +65,8 @@ model Club {
   logo           String?
   mainImage          String?
   mainImagePosition  String?  // 卡片封面焦点 "x,y" (0-100)，缺省为 "50,50"
-  mainImageScale     Float?   // 封面缩放 1.0–2.0，缺省为 1.0
+  mainImageScale     Float?   // 封面缩放 1.0–4.0，缺省为 1.0
+  mainImageRotation  Int?     // 旋转角度 0/90/180/270，缺省为 0
   subImages          String[] // 副图数组
 
   // 所在地信息
@@ -205,12 +206,13 @@ model Banner {
 
 // 都道府県ページの Feature Banner（クラブ画像 or 占位图）
 model PrefectureBanner {
-  id            String   @id @default(cuid())
-  pref          String   @unique // 都道府県 slug (例: iwate, tokyo)
-  image         String   // 画像 URL (Supabase 或 /images/banner/...)
-  alt           String?  // 画像の説明（例：〇〇県の相撲風景）
-  imagePosition String?  @default("50,50") // "x,y" 百分比，与 Club 一致
-  imageScale    Float?   @default(1) // 1–2，与 Club 一致
+  id             String   @id @default(cuid())
+  pref           String   @unique // 都道府県 slug (例: iwate, tokyo)
+  image          String   // 画像 URL (Supabase 或 /images/banner/...)
+  alt            String?  // 画像の説明（例：〇〇県の相撲風景）
+  imagePosition  String?  @default("50,50") // "x,y" 百分比，与 Club 一致
+  imageScale     Float?   @default(1) // 1–4，与 Club 一致
+  imageRotation  Int?     // 旋转角度 0/90/180/270，缺省为 0
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

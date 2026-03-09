@@ -56,14 +56,25 @@ export default async function AdminClubsPage({
             </div>
 
             <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
-                <form className="relative max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                    <input
-                        name="q"
-                        defaultValue={q}
-                        placeholder="クラブ名で検索..."
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
-                    />
+                <form className="flex gap-2 max-w-md" action="/admin/clubs" method="get">
+                    {region && <input type="hidden" name="region" value={region} />}
+                    {pref && <input type="hidden" name="pref" value={pref} />}
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                        <input
+                            name="q"
+                            defaultValue={q}
+                            placeholder="クラブ名で検索..."
+                            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-sumo-brand outline-none transition-all"
+                        />
+                    </div>
+                    <button
+                        type="submit"
+                        className="flex items-center gap-1.5 bg-sumo-brand text-white px-4 py-2 rounded-lg font-bold hover:bg-sumo-dark transition-all shadow-md text-sm shrink-0"
+                    >
+                        <Search size={16} />
+                        検索
+                    </button>
                 </form>
                 <RegionFilter basePath="/admin/clubs" currentRegion={region} currentPref={pref} currentQuery={q} />
             </div>

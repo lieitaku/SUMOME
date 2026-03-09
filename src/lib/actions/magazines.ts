@@ -48,7 +48,7 @@ export async function createMagazine(formData: FormData) {
 
     if (!validated.success) {
       console.error("Validation Error:", validated.error);
-      return { success: false, message: "入力内容に誤りがあります。" };
+      return { error: "入力内容に誤りがあります。" };
     }
 
     await prisma.magazine.create({
@@ -67,12 +67,9 @@ export async function createMagazine(formData: FormData) {
       err instanceof Prisma.PrismaClientKnownRequestError &&
       err.code === "P2002"
     ) {
-      return {
-        success: false,
-        message: "このID（Slug）は既に使用されています。",
-      };
+      return { error: "このID（Slug）は既に使用されています。" };
     }
-    return { success: false, message: "保存に失敗しました。" };
+    return { error: "保存に失敗しました。" };
   }
 }
 
@@ -86,17 +83,13 @@ export async function updateMagazine(id: string, formData: FormData) {
 
     if (!validated.success) {
       console.error("Validation Error:", validated.error);
-      return { success: false, message: "入力内容を確認してください。" };
+      return { error: "入力内容を確認してください。" };
     }
 
     const existing = await prisma.magazine.findFirst({
       where: { slug: validated.data.slug, NOT: { id: id } },
     });
-    if (existing)
-      return {
-        success: false,
-        message: "このID（Slug）は既に使用されています。",
-      };
+    if (existing) return { error: "このID（Slug）は既に使用されています。" };
 
     await prisma.magazine.update({
       where: { id },
@@ -113,7 +106,7 @@ export async function updateMagazine(id: string, formData: FormData) {
     return { success: true, message: "保存しました" };
   } catch (err) {
     console.error("Update Error:", err);
-    return { success: false, message: "更新に失敗しました。" };
+    return { error: "更新に失敗しました。" };
   }
 }
 

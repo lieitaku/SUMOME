@@ -8,6 +8,7 @@ import MainImagePositionEditor, {
   parsePositionString,
   formatPositionString,
   parseScaleValue,
+  parseRotationValue,
 } from "@/components/admin/clubs/MainImagePositionEditor";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
@@ -23,6 +24,7 @@ const formSchema = z.object({
   alt: z.string().optional(),
   imagePosition: z.string().optional(),
   imageScale: z.union([z.string(), z.number()]).optional(),
+  imageRotation: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -52,6 +54,7 @@ export default function EditPrefectureBannerForm({
       alt: initialBanner?.alt ?? "",
       imagePosition: initialBanner?.imagePosition ?? "50,50",
       imageScale: initialBanner?.imageScale != null ? String(initialBanner.imageScale) : "1",
+      imageRotation: initialBanner?.imageRotation != null ? String(initialBanner.imageRotation) : "0",
     },
   });
 
@@ -67,6 +70,7 @@ export default function EditPrefectureBannerForm({
     formData.append("alt", data.alt ?? "");
     formData.append("imagePosition", data.imagePosition ?? "50,50");
     formData.append("imageScale", String(data.imageScale ?? "1"));
+    formData.append("imageRotation", data.imageRotation ?? "0");
     handleSubmit(upsertPrefectureBanner, formData);
   };
 
@@ -117,12 +121,13 @@ export default function EditPrefectureBannerForm({
                     body: JSON.stringify({
                       type: "prefecture_banner",
                       redirectPath: `/prefectures/${pref}`,
-                      payload: {
+                        payload: {
                         pref,
                         image: values.image,
                         alt: values.alt ?? "",
                         imagePosition: values.imagePosition ?? "50,50",
                         imageScale: values.imageScale ?? "1",
+                        imageRotation: values.imageRotation ?? "0",
                       },
                     }),
                   });
@@ -182,11 +187,15 @@ export default function EditPrefectureBannerForm({
                 imageUrl={form.watch("image")}
                 position={parsePositionString(form.watch("imagePosition"))}
                 scale={parseScaleValue(form.watch("imageScale"))}
+                rotation={parseRotationValue(form.watch("imageRotation"))}
                 onPositionChange={(x, y) =>
                   form.setValue("imagePosition", formatPositionString({ x, y }), { shouldDirty: true })
                 }
                 onScaleChange={(s) =>
                   form.setValue("imageScale", String(s), { shouldDirty: true })
+                }
+                onRotationChange={(deg) =>
+                  form.setValue("imageRotation", String(deg), { shouldDirty: true })
                 }
               />
             )}
