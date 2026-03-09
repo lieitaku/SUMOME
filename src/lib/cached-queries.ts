@@ -118,11 +118,12 @@ export function getCachedActivitiesPage(page: number, pageSize: number = 6) {
   )(page, pageSize);
 }
 
-/** Cached all clubs. Invalidate with tag "clubs". */
+/** Cached all clubs (excluding official-hq). Invalidate with tag "clubs". */
 export function getCachedAllClubs() {
   return unstable_cache(
     () =>
       prisma.club.findMany({
+        where: { slug: { not: "official-hq" } },
         orderBy: { createdAt: "desc" },
       }),
     ["all-clubs"],

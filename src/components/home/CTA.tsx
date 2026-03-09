@@ -30,7 +30,7 @@ const CTA = () => {
           {/* === 左侧：寻找道场 (Search) === */}
           <Link
             href="/clubs/map"
-            className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-500
+            className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
             
             /* Mobile Style: 独立白卡片 */
             bg-white border border-gray-100 rounded-sm shadow-sm
@@ -41,30 +41,31 @@ const CTA = () => {
             */
             md:bg-white md:rounded-none md:shadow-none md:border-y md:border-l md:border-r-0 md:border-gray-100
 
-            /* Desktop Hover Interaction: 背景变红 */
+            /* 按下时变红：桌面 hover / 手机 touch 时 active 会触发 */
             hover:bg-sumo-red hover:border-sumo-red
+            active:bg-sumo-red active:border-sumo-red
             "
           >
-            {/* 1. 核心内容 */}
-            <div className="flex flex-col items-center z-10">
-              <div className="mb-5 text-sumo-red opacity-100 group-hover:text-white group-hover:scale-110 transition-all duration-500">
+            {/* 1. 核心内容：按下时文字/图标变白（[.group:active_&] 表示父 .group 处于 :active 时） */}
+            <div className="flex flex-col items-center z-10 [.group:active_&]:text-white">
+              <div className="mb-5 text-sumo-red opacity-100 group-hover:text-white [.group:active_&]:text-white group-hover:scale-110 [.group:active_&]:scale-110 transition-all duration-200">
                 <Search size={48} strokeWidth={1.5} />
               </div>
 
-              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white tracking-tight mb-2 transition-colors duration-300">
+              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white [.group:active_&]:text-white tracking-tight mb-2 transition-colors duration-200">
                 近くの道場を探す
               </h3>
 
-              <p className="text-xs font-bold tracking-[0.2em] text-gray-400 group-hover:text-white/80 uppercase transition-colors duration-300">
+              <p className="text-xs font-bold tracking-[0.2em] text-gray-400 group-hover:text-white/80 [.group:active_&]:text-white/80 uppercase transition-colors duration-200">
                 Find A Club
               </p>
             </div>
 
-            {/* 2. 视觉锚点 (Magic Button) */}
+            {/* 2. 视觉锚点 (Magic Button)：按下时圆圈变白 */}
             <div
-              className="mt-8 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500
+              className="mt-8 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200
               border border-sumo-red text-sumo-red
-              group-hover:bg-white group-hover:border-white group-hover:scale-110 group-hover:shadow-lg
+              group-hover:bg-white group-hover:border-white [.group:active_&]:bg-white [.group:active_&]:border-white group-hover:scale-110 [.group:active_&]:scale-110 group-hover:shadow-lg
             "
             >
               <ArrowRight size={24} />
@@ -77,7 +78,7 @@ const CTA = () => {
           {/* === 右侧：管理者入口 (Manager) === */}
           <Link
             href="/manager/entry"
-            className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-500
+            className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
             
             /* Mobile Style */
             bg-white border border-gray-100 rounded-sm shadow-sm
@@ -88,29 +89,30 @@ const CTA = () => {
             */
             md:bg-white md:rounded-none md:shadow-none md:border md:border-gray-100
             
-            /* Desktop Hover Interaction: 背景变蓝 */
+            /* 按下时变蓝：桌面 hover / 手机 touch 时 active 会触发 */
             hover:bg-sumo-brand hover:border-sumo-brand
+            active:bg-sumo-brand active:border-sumo-brand
             "
           >
-            <div className="flex flex-col items-center z-10">
-              <div className="mb-5 text-sumo-brand opacity-100 group-hover:text-white group-hover:scale-110 transition-all duration-500">
+            <div className="flex flex-col items-center z-10 [.group:active_&]:text-white">
+              <div className="mb-5 text-sumo-brand opacity-100 group-hover:text-white [.group:active_&]:text-white group-hover:scale-110 [.group:active_&]:scale-110 transition-all duration-200">
                 <Plus size={48} strokeWidth={1.5} />
               </div>
 
-              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white tracking-tight mb-2 transition-colors duration-300">
+              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white [.group:active_&]:text-white tracking-tight mb-2 transition-colors duration-200">
                 クラブを掲載する
               </h3>
 
-              <p className="text-xs font-bold tracking-[0.2em] text-gray-400 group-hover:text-white/80 uppercase transition-colors duration-300">
+              <p className="text-xs font-bold tracking-[0.2em] text-gray-400 group-hover:text-white/80 [.group:active_&]:text-white/80 uppercase transition-colors duration-200">
                 For Managers
               </p>
             </div>
 
-            {/* 视觉锚点 (Magic Button) */}
+            {/* 视觉锚点 (Magic Button)：按下时圆圈变白 */}
             <div
-              className="mt-8 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-500
+              className="mt-8 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200
               border border-sumo-brand text-sumo-brand
-              group-hover:bg-white group-hover:border-white group-hover:scale-110 group-hover:shadow-lg
+              group-hover:bg-white group-hover:border-white [.group:active_&]:bg-white [.group:active_&]:border-white group-hover:scale-110 [.group:active_&]:scale-110 group-hover:shadow-lg
             "
             >
               <ArrowRight size={24} />
