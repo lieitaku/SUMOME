@@ -7,6 +7,14 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+export async function generateMetadata({ params }: PageProps) {
+  const { slug } = await params;
+  if (slug === "official-hq") return { title: "Not Found" };
+  const club = await prisma.club.findUnique({ where: { slug } });
+  if (!club) return { title: "Not Found" };
+  return { title: `${club.name} - 体験・入会申し込み` };
+}
+
 export default async function RecruitPage({ params }: PageProps) {
   const { slug } = await params;
 

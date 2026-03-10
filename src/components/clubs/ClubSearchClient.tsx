@@ -229,6 +229,12 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
     const clubsToRender = deferredSortedClubs.slice(0, visibleCount);
     const hasMore = visibleCount < deferredSortedClubs.length;
 
+    const resultsSectionRef = useRef<HTMLDivElement>(null);
+
+    const handleSearchClick = () => {
+        resultsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
     // 重置所有筛选条件
     const handleReset = () => {
         setActiveRegion("all");
@@ -302,25 +308,35 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     "group-focus-within:border-b-sumo-brand group-focus-within:shadow-[0_20px_40px_rgba(36,84,164,0.15)] group-focus-within:-translate-y-1"
                                 )}
                             >
-                                <div className="pl-6 md:pl-8 text-gray-400 group-focus-within:text-sumo-brand transition-colors">
+                                <div className="pl-6 md:pl-8 text-gray-400 group-focus-within:text-sumo-brand transition-colors shrink-0">
                                     <Search size={24} />
                                 </div>
                                 <input
                                     type="text"
                                     placeholder="クラブ名、地域名で検索..."
-                                    className="w-full h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
+                                    className="flex-1 min-w-0 h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
                                 />
                                 {/* 清除按钮：仅在有输入时显示 */}
                                 {searchQuery && (
                                     <button
+                                        type="button"
                                         onClick={() => setSearchQuery("")}
-                                        className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+                                        className="p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors shrink-0"
                                     >
                                         <X size={18} />
                                     </button>
                                 )}
+                                {/* 検索确定按钮 */}
+                                <button
+                                    type="button"
+                                    onClick={handleSearchClick}
+                                    className="mr-4 ml-1 px-5 py-2.5 rounded-xl bg-sumo-brand text-white text-sm font-bold tracking-wide hover:bg-sumo-brand/90 active:scale-[0.98] transition-all shadow-sm shrink-0"
+                                >
+                                    検索
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -422,7 +438,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                     </div>
 
                     {/* ==================== 区域 3: 搜索结果展示 ==================== */}
-                    <div className="max-w-6xl mx-auto">
+                    <div ref={resultsSectionRef} className="max-w-6xl mx-auto">
                         {/* 结果统计与排序、标签 */}
                         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
                             <div className="flex items-baseline gap-3">

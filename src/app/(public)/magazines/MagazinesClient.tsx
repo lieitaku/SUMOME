@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { ArrowRight, BookOpen, Search, X, Filter, ChevronDown, MapPin } from "lucide-react";
@@ -166,6 +166,11 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
         });
     }, [activeRegion, activePref, searchQuery, initialMagazines, sortOrder]);
 
+    const resultsSectionRef = useRef<HTMLDivElement>(null);
+    const handleSearchClick = () => {
+        resultsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
             <main className="flex-grow">
@@ -206,7 +211,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                 {/* ==================== 2. 搜索与筛选区域 (复用 /clubs 设计) ==================== */}
                 <section className="relative px-4 md:px-6 z-30 -mt-10 md:-mt-16 mb-12">
                     <div className="container mx-auto max-w-6xl">
-                        {/* 搜索框 - 与 /clubs 页面一致的设计 */}
+                        {/* 搜索框 - 与 /clubs 页面一致的设计（含検索按钮） */}
                         <div className="relative group max-w-2xl mx-auto mb-8">
                             <div
                                 className={cn(
@@ -216,25 +221,33 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     "group-focus-within:border-b-sumo-brand group-focus-within:shadow-[0_20px_40px_rgba(36,84,164,0.15)] group-focus-within:-translate-y-1"
                                 )}
                             >
-                                <div className="pl-6 md:pl-8 text-gray-400 group-focus-within:text-sumo-brand transition-colors">
+                                <div className="pl-6 md:pl-8 text-gray-400 group-focus-within:text-sumo-brand transition-colors shrink-0">
                                     <Search size={24} />
                                 </div>
                                 <input
                                     type="text"
                                     placeholder="タイトル、キーワードで検索..."
-                                    className="w-full h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
+                                    className="flex-1 min-w-0 h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
                                 />
                                 {searchQuery && (
                                     <button
                                         type="button"
                                         onClick={() => setSearchQuery("")}
-                                        className="mr-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+                                        className="p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors shrink-0"
                                     >
                                         <X size={18} />
                                     </button>
                                 )}
+                                <button
+                                    type="button"
+                                    onClick={handleSearchClick}
+                                    className="mr-4 ml-1 px-5 py-2.5 rounded-xl bg-sumo-brand text-white text-sm font-bold tracking-wide hover:bg-sumo-brand/90 active:scale-[0.98] transition-all shadow-sm shrink-0"
+                                >
+                                    検索
+                                </button>
                             </div>
                         </div>
 
@@ -422,7 +435,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                 </section>
 
                 {/* ==================== 3. Magazine Grid ==================== */}
-                <section className="relative pb-32 px-6 z-20">
+                <section ref={resultsSectionRef} className="relative pb-32 px-6 z-20">
                     <div className="container mx-auto max-w-6xl">
                         {magazinesError ? (
                             <div className="py-24 text-center text-gray-500 text-sm">{magazinesError}</div>
