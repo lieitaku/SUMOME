@@ -12,9 +12,28 @@ type HeroProps = {
   videoSrc?: string;
   /** WebM 视频，体积通常更小；可只提供 WebM，现代浏览器均支持 */
   videoWebmSrc?: string;
+  /** 竖屏/手机端 WebM 视频（9:16），不传则竖屏沿用 videoWebmSrc */
+  videoWebmSrcMobile?: string;
+  /** 竖屏/手机端 MP4（可选） */
+  videoSrcMobile?: string;
   /** 视频封面图（建议从视频截一帧），用于首屏 LCP，使用视频时必填 */
   posterSrc?: string;
+  /** 竖屏/手机端封面图（可选），不传则竖屏沿用 posterSrc */
+  posterSrcMobile?: string;
 };
+
+/** 视口为竖屏或宽高比 ≤1（手机/窄屏）时为 true，用于选择竖屏视频 */
+function useIsPortraitOrNarrow() {
+  const [portrait, setPortrait] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(max-aspect-ratio: 1/1)");
+    const update = () => setPortrait(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return portrait;
+}
 
 /** 视口横向 < 370px 时为窄屏（卡片两行） */
 function useNarrowCard() {
@@ -91,12 +110,28 @@ function HeroContent() {
   );
 }
 
-const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: HeroProps) => {
-  const useVideo = Boolean(posterSrc && (videoSrc || videoWebmSrc));
+const Hero = ({
+  sponsors,
+  displayMode,
+  videoSrc,
+  videoWebmSrc,
+  videoWebmSrcMobile,
+  videoSrcMobile,
+  posterSrc,
+  posterSrcMobile,
+}: HeroProps) => {
+  const hasAnyVideo = Boolean(videoSrc || videoWebmSrc || videoWebmSrcMobile || videoSrcMobile);
+  const hasAnyPoster = Boolean(posterSrc || posterSrcMobile);
+  const useVideo = hasAnyPoster && hasAnyVideo;
+  const isMobileView = useIsPortraitOrNarrow();
   const [canLoadVideo, setCanLoadVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const effectiveWebm = isMobileView && videoWebmSrcMobile ? videoWebmSrcMobile : videoWebmSrc;
+  const effectiveMp4 = isMobileView && videoSrcMobile ? videoSrcMobile : videoSrc;
+  const effectivePoster = (isMobileView ? (posterSrcMobile ?? posterSrc) : (posterSrc ?? posterSrcMobile)) ?? "";
 
   // 延迟加载视频：等页面主资源加载完再请求视频，避免拖慢 LCP
   useEffect(() => {
@@ -116,14 +151,14 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
 
   const onVideoPlaying = () => setVideoPlaying(true);
 
-  // ========== 视频背景模式（16:9 循环） ==========
+  // ========== 视频背景模式：横屏用 16:9，竖屏用 9:16 ==========
   if (useVideo) {
     return (
       <section className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]">
         {/* 背景层：poster 立即显示 → 视频加载后淡入 */}
         <div className="absolute inset-0 z-0">
           <img
-            src={posterSrc}
+            src={effectivePoster}
             alt=""
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               videoPlaying ? "opacity-0" : "opacity-100"
@@ -131,21 +166,22 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
             aria-hidden
             fetchPriority="high"
           />
-          {canLoadVideo && (
+          {canLoadVideo && (effectiveWebm || effectiveMp4) && (
             <video
+              key={isMobileView ? "mobile" : "desktop"}
               ref={videoRef}
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay
               muted
               loop
               playsInline
-              poster={posterSrc}
+              poster={effectivePoster}
               preload="metadata"
               onPlaying={onVideoPlaying}
               aria-hidden
             >
-              {videoWebmSrc && <source src={videoWebmSrc} type="video/webm" />}
-              {videoSrc && <source src={videoSrc} type="video/mp4" />}
+              {effectiveWebm && <source src={effectiveWebm} type="video/webm" />}
+              {effectiveMp4 && <source src={effectiveMp4} type="video/mp4" />}
             </video>
           )}
         </div>
