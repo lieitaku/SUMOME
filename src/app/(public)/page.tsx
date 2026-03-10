@@ -111,7 +111,7 @@ export default async function Home({
         <Hero
           sponsors={sponsors}
           displayMode={displaySettings.homeDisplayMode}
-          videoWebmSrc="/videos/hero-bg.webm"
+          videoWebmSrc="/videos/hero-bg-landscape.webm"
           videoWebmSrcMobile="/videos/hero-bg-portrait.webm"
           posterSrc="/images/hero/hero-poster.webp"
           posterSrcMobile="/images/hero/hero-poster-portrait.webp"
