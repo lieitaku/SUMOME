@@ -23,7 +23,7 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
   return (
     <Section background="gray" id="pickup-clubs">
       {/* 头部标题区 */}
-      <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-16 border-b border-gray-200 pb-8 reveal-up">
+      <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-6 md:mb-16 border-b border-gray-200 pb-4 md:pb-8 reveal-up">
         <div>
           <span className="text-sumo-brand text-xs font-bold tracking-[0.3em] mb-3 block uppercase font-sans">
             Pick Up Clubs
@@ -60,7 +60,7 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
       </div>
 
       {/* 移动端按钮 */}
-      <div className="mt-12 text-center md:hidden reveal-up delay-100">
+      <div className="mt-8 text-center md:hidden reveal-up delay-100">
         <Button
           href="/clubs"
           variant="outline"

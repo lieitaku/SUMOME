@@ -53,7 +53,7 @@ const Introduction = () => {
         {/* 链接 */}
         <Link
           href="/about"
-          className="group inline-flex items-center gap-2 mt-10 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all"
+          className="group inline-flex items-center gap-2 mt-6 md:mt-10 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all"
         >
           <span className="text-sm font-bold tracking-widest">
             MORE DETAILS

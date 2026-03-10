@@ -37,7 +37,7 @@ const SERVICE_DATA: ServiceItem[] = [
     kanji: "結",
     title: "CONNECT",
     desc: "見学・体験申し込みで\n新しい一歩を",
-    img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.webp",
+    img: "https://cdn.pixabay.com/photo/2019/09/20/10/45/write-4491459_1280.jpg",
     delay: "delay-100",
     href: "/partners",
     // 🔴 热情红渐变: 从品牌红到深红，非常吸睛
@@ -49,7 +49,7 @@ const SERVICE_DATA: ServiceItem[] = [
     kanji: "録",
     title: "ARCHIVE",
     desc: "活動の記録を\n美しいフォトブックに",
-    img: "https://cdn.pixabay.com/photo/2014/08/22/18/46/photographer-424620_1280.webp",
+    img: "https://cdn.pixabay.com/photo/2014/08/22/18/46/photographer-424620_1280.jpg",
     delay: "delay-200",
     href: "/magazines",
     // 🟡 辉煌金渐变: 这种颜色很难调，这里用一种偏橙的金，避免像土黄
@@ -60,16 +60,16 @@ const SERVICE_DATA: ServiceItem[] = [
 
 const AboutService = () => {
   return (
-    <Section background="white" className="!pt-4 md:!pt-28" id="service">
+    <Section background="white" className="pt-2! pb-10! md:py-28!" id="service">
       {/* 1. Introduction (保持不变) */}
-      <div className="mb-16 md:mb-32">
+      <div className="mb-10 md:mb-32">
         <Introduction />
       </div>
 
       {/* 2. 三本柱 (下层功能) */}
       <div className="relative z-10">
         {/* 标题区 */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 md:mb-16 reveal-up border-b border-gray-200 pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-16 reveal-up border-b border-gray-200 pb-4 md:pb-8">
           <div>
             <p className="text-sumo-brand font-bold text-xs tracking-[0.3em] mb-2 uppercase font-sans">
               Our Core Services
@@ -84,7 +84,7 @@ const AboutService = () => {
         </div>
 
         {/* 卡片网格 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 items-stretch">
           {SERVICE_DATA.map((item, idx) => (
             <ServiceCard
               key={item.id}

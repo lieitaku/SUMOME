@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 
 const CTA = () => {
   return (
-    <Section background="white" className="!pt-16 !pb-6 md:!py-40" id="cta">
+    <Section background="white" className="py-0 pt-6 md:py-40" id="cta">
       <div className="max-w-5xl mx-auto reveal-up">
         {/* --- 顶部文案区 --- */}
-        <div className="text-center mb-16 md:mb-20">
+        <div className="text-center mb-10 md:mb-20">
           <span className="text-sumo-brand font-bold tracking-[0.3em] uppercase text-xs md:text-sm mb-6 block font-sans">
             Join The Community
           </span>
@@ -26,11 +26,11 @@ const CTA = () => {
         </div>
 
         {/* --- 双子星行动条 (Dual Action Bar) --- */}
-        <div className="flex flex-col md:flex-row w-full gap-6 md:gap-0">
+        <div className="flex flex-col md:flex-row w-full gap-4 md:gap-0">
           {/* === 左侧：寻找道场 (Search) === */}
           <Link
             href="/clubs/map"
-            className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
+            className="group relative flex-1 md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
             
             /* Mobile Style: 独立白卡片 */
             bg-white border border-gray-100 rounded-sm shadow-sm
@@ -63,7 +63,7 @@ const CTA = () => {
 
             {/* 2. 视觉锚点 (Magic Button)：按下时圆圈变白 */}
             <div
-              className="mt-8 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200
+              className="mt-4 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200
               border border-sumo-red text-sumo-red
               group-hover:bg-white group-hover:border-white [.group:active_&]:bg-white [.group:active_&]:border-white group-hover:scale-110 [.group:active_&]:scale-110 group-hover:shadow-lg
             "
@@ -78,7 +78,7 @@ const CTA = () => {
           {/* === 右侧：管理者入口 (Manager) === */}
           <Link
             href="/manager/entry"
-            className="group relative flex-1 h-[280px] md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
+            className="group relative flex-1 md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
             
             /* Mobile Style */
             bg-white border border-gray-100 rounded-sm shadow-sm
@@ -110,7 +110,7 @@ const CTA = () => {
 
             {/* 视觉锚点 (Magic Button)：按下时圆圈变白 */}
             <div
-              className="mt-8 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200
+              className="mt-4 md:mt-12 w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200
               border border-sumo-brand text-sumo-brand
               group-hover:bg-white group-hover:border-white [.group:active_&]:bg-white [.group:active_&]:border-white group-hover:scale-110 [.group:active_&]:scale-110 group-hover:shadow-lg
             "
@@ -122,11 +122,11 @@ const CTA = () => {
             <div className="md:hidden absolute left-0 top-4 bottom-4 w-[4px] bg-sumo-brand rounded-r"></div>
           </Link>
         </div>
-
         {/* 底部补充文案 */}
-        <p className="mt-12 text-xs text-gray-400 font-medium tracking-wider">
+        <p className="mt-8 text-xs text-gray-400 font-medium tracking-wider">
           ※ 登録・利用は完全無料です
         </p>
+
       </div>
     </Section>
   );
