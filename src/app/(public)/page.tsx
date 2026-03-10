@@ -107,11 +107,11 @@ export default async function Home({
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        {/* 使用视频背景时传 videoSrc + posterSrc（可选 videoWebmSrc），见 docs/hero-video.md */}
+        {/* 使用视频背景时传 videoWebmSrc（或 videoSrc）+ posterSrc */}
         <Hero
           sponsors={sponsors}
           displayMode={displaySettings.homeDisplayMode}
-          videoSrc="/videos/hero-bg.mp4"
+          videoWebmSrc="/videos/hero-bg.webm"
           posterSrc="/images/hero/hero-poster.webp"
         />
         <CTA />

@@ -8,11 +8,11 @@ type HeroProps = {
   sponsors?: SponsorItem[];
   /** 旗子显示模式：全部 / 仅俱乐部 / 仅赞助商 / 混合（由后台「旗子显示设置」控制） */
   displayMode?: BannerDisplayMode;
-  /** 使用视频背景时传入。建议先压缩视频到 2–5MB，并提供 poster 图保证首屏速度 */
+  /** 使用视频背景时传入 MP4（可选，与 videoWebmSrc 二选一或同时提供） */
   videoSrc?: string;
-  /** WebM 可选，体积通常更小，优先使用 */
+  /** WebM 视频，体积通常更小；可只提供 WebM，现代浏览器均支持 */
   videoWebmSrc?: string;
-  /** 视频封面图（建议从视频截一帧），用于首屏 LCP，必填 */
+  /** 视频封面图（建议从视频截一帧），用于首屏 LCP，使用视频时必填 */
   posterSrc?: string;
 };
 
@@ -92,7 +92,7 @@ function HeroContent() {
 }
 
 const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: HeroProps) => {
-  const useVideo = Boolean(videoSrc && posterSrc);
+  const useVideo = Boolean(posterSrc && (videoSrc || videoWebmSrc));
   const [canLoadVideo, setCanLoadVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
@@ -145,7 +145,7 @@ const Hero = ({ sponsors, displayMode, videoSrc, videoWebmSrc, posterSrc }: Hero
               aria-hidden
             >
               {videoWebmSrc && <source src={videoWebmSrc} type="video/webm" />}
-              <source src={videoSrc!} type="video/mp4" />
+              {videoSrc && <source src={videoSrc} type="video/mp4" />}
             </video>
           )}
         </div>
