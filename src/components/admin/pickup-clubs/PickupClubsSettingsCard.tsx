@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
-import { Save, Loader2, Star, LayoutGrid, Eye } from "lucide-react";
+import { Save, Loader2, Star, Eye, Plus, Trash2, ArrowRightLeft } from "lucide-react";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { updateHomePickupClubs } from "@/lib/actions/pickup-clubs";
+import ClubSelectorModal from "./ClubSelectorModal";
+import { cn } from "@/lib/utils";
 
 export type SlotItem = {
   sortOrder: number;
@@ -16,7 +18,7 @@ type ClubOption = { id: string; name: string; mainImage: string | null };
 
 const PLACEHOLDER_IMAGE = "/images/placeholder.webp";
 
-const SLOT_LABELS = ["1番（左）", "2番（中央）", "3番（右）"];
+const SLOT_LABELS = ["Left (1番目)", "Center (2番目)", "Right (3番目)"];
 
 interface Props {
   initialSlots: SlotItem[];
@@ -29,9 +31,15 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
   const [success, setSuccess] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  
+  // State for slots (array of club IDs)
   const [slots, setSlots] = useState<string[]>(() =>
     initialSlots.map((s) => s.clubId ?? "")
   );
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeSlotIndex, setActiveSlotIndex] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,142 +58,181 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
     });
   };
 
-  const labelClass =
-    "block text-xs font-bold mb-2 uppercase tracking-wide text-gray-400";
-  const selectClass =
-    "w-full px-4 py-3 rounded-xl border border-gray-200 outline-none transition-all text-sm focus:ring-2 focus:ring-sumo-brand focus:border-transparent bg-white";
+  const handleOpenModal = (index: number) => {
+    setActiveSlotIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const handleSelectClub = (clubId: string) => {
+    if (activeSlotIndex === null) return;
+    
+    // Check if club is already selected in another slot
+    const existingIndex = slots.indexOf(clubId);
+    if (existingIndex !== -1 && existingIndex !== activeSlotIndex) {
+      if (!confirm("このクラブは既に他の枠で選択されています。移動しますか？")) {
+        return;
+      }
+      // Swap or Move logic: Here we just clear the old one and set the new one
+      const newSlots = [...slots];
+      newSlots[existingIndex] = ""; // Clear old position
+      newSlots[activeSlotIndex] = clubId; // Set new position
+      setSlots(newSlots);
+    } else {
+      const newSlots = [...slots];
+      newSlots[activeSlotIndex] = clubId;
+      setSlots(newSlots);
+    }
+  };
+
+  const handleRemoveClub = (e: React.MouseEvent, index: number) => {
+    e.stopPropagation();
+    const newSlots = [...slots];
+    newSlots[index] = "";
+    setSlots(newSlots);
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-      <div className="px-4 md:px-6 py-4 border-b border-gray-100 bg-gray-50/50">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-sumo-brand/10 flex items-center justify-center">
-            <Star className="w-5 h-5 text-sumo-brand" />
+      {/* Header */}
+      <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-sumo-brand/10 flex items-center justify-center text-sumo-brand">
+            <Star size={20} />
           </div>
           <div>
-            <h2 className="text-base font-bold text-gray-900">
-              注目の相撲クラブ（3件）
-            </h2>
-            <p className="text-xs text-gray-500">
-              トップページの「Pick Up Clubs」に表示するクラブを、左から順に選んでください。未設定の場合は「新着3件」が表示されます。
-            </p>
+            <h2 className="text-base font-bold text-gray-900">注目の相撲クラブ設定</h2>
+            <p className="text-xs text-gray-500">トップページに表示する3つのクラブを選択してください</p>
           </div>
+        </div>
+        
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+           <button
+            type="button"
+            disabled={isPreviewing}
+            onClick={async () => {
+              setIsPreviewing(true);
+              try {
+                const res = await fetch("/admin/api/preview", {
+                  method: "POST",
+                  credentials: "include",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    type: "home_pickup",
+                    redirectPath: "/",
+                    payload: { clubIds: slots.slice(0, 3) },
+                  }),
+                });
+                const data = await res.json();
+                if (data.redirectUrl) {
+                  setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
+                  return;
+                }
+                if (data.error) alert(data.error);
+              } finally {
+                setIsPreviewing(false);
+              }
+            }}
+            className="hidden md:inline-flex items-center gap-2 px-4 py-2 border border-gray-200 bg-white text-gray-700 text-xs font-bold rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50"
+          >
+            {isPreviewing ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+            プレビュー
+          </button>
+          
+          <button
+            onClick={handleSubmit}
+            disabled={isPending}
+            className="inline-flex items-center gap-2 px-5 py-2 bg-sumo-brand text-white text-xs font-bold rounded-lg hover:brightness-110 transition-all disabled:opacity-50 shadow-md shadow-sumo-brand/20"
+          >
+            {isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            変更を保存
+          </button>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-4 md:p-6 space-y-5">
+      <div className="p-6 md:p-8">
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 text-sm font-medium px-4 py-3 rounded-xl">
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-600 text-sm font-medium px-4 py-3 rounded-xl animate-in fade-in slide-in-from-top-2">
             {error}
           </div>
         )}
         {success && (
-          <div className="bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-3 rounded-xl">
+          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 text-sm font-medium px-4 py-3 rounded-xl animate-in fade-in slide-in-from-top-2">
             保存しました。トップページの表示はすぐに反映されます。
           </div>
         )}
 
-        <div className="space-y-4">
+        {/* Slots Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {SLOT_LABELS.map((label, i) => {
             const selectedId = slots[i] ?? "";
             const selectedClub = selectedId
               ? clubOptions.find((c) => c.id === selectedId)
               : null;
+
             return (
-              <div key={i} className="space-y-2">
-                <label className={labelClass}>
-                  <LayoutGrid size={12} className="inline mr-1" />
-                  {label}
-                </label>
-                <select
-                  value={selectedId}
-                  onChange={(e) => {
-                    const next = [...slots];
-                    next[i] = e.target.value;
-                    setSlots(next);
-                  }}
-                  className={selectClass}
+              <div key={i} className="flex flex-col gap-3">
+                <div className="flex items-center justify-between px-1">
+                  <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">{label}</span>
+                  {selectedClub && (
+                    <button 
+                      onClick={(e) => handleRemoveClub(e, i)}
+                      className="text-[10px] font-bold text-red-400 hover:text-red-600 flex items-center gap-1 transition-colors"
+                    >
+                      <Trash2 size={10} /> 解除
+                    </button>
+                  )}
+                </div>
+
+                <div 
+                  onClick={() => handleOpenModal(i)}
+                  className={cn(
+                    "relative aspect-[4/3] rounded-2xl border-2 transition-all cursor-pointer group overflow-hidden bg-gray-50 flex flex-col items-center justify-center text-center p-4",
+                    selectedClub 
+                      ? "border-transparent shadow-md hover:shadow-lg hover:scale-[1.02]" 
+                      : "border-dashed border-gray-200 hover:border-sumo-brand hover:bg-sumo-brand/5"
+                  )}
                 >
-                  <option value="">— 未選択（新着で表示）—</option>
-                  {clubOptions.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="flex items-center gap-3 mt-2 p-3 rounded-xl border border-gray-100 bg-gray-50/50 min-h-[72px]">
                   {selectedClub ? (
                     <>
-                      <div className="relative w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-gray-200">
-                        <Image
-                          src={selectedClub.mainImage || PLACEHOLDER_IMAGE}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="56px"
-                        />
+                      <Image
+                        src={selectedClub.mainImage || PLACEHOLDER_IMAGE}
+                        alt={selectedClub.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
+                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                        <p className="text-sm font-bold line-clamp-2 leading-tight">{selectedClub.name}</p>
+                        <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full border border-white/10 group-hover:bg-sumo-brand group-hover:border-sumo-brand transition-colors">
+                          <ArrowRightLeft size={10} /> 変更する
+                        </div>
                       </div>
-                      <span className="text-sm font-medium text-gray-900">
-                        {selectedClub.name}
-                      </span>
                     </>
                   ) : (
-                    <span className="text-sm text-gray-400">
-                      — 未選択（新着で表示）—
-                    </span>
+                    <div className="flex flex-col items-center gap-3 text-gray-400 group-hover:text-sumo-brand transition-colors">
+                      <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Plus size={24} />
+                      </div>
+                      <span className="text-xs font-bold">クラブを選択</span>
+                    </div>
                   )}
                 </div>
               </div>
             );
           })}
         </div>
+      </div>
 
-        <div className="pt-2 flex flex-wrap items-center gap-3">
-          <button
-            type="submit"
-            disabled={isPending}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-sumo-brand text-white text-sm font-bold rounded-xl hover:brightness-110 transition-all disabled:opacity-50"
-          >
-            {isPending ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Save size={16} />
-            )}
-            表示クラブを保存
-          </button>
-          <button
-            type="button"
-            disabled={isPreviewing}
-onClick={async () => {
-                setIsPreviewing(true);
-                try {
-                  const res = await fetch("/admin/api/preview", {
-                    method: "POST",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      type: "home_pickup",
-                      redirectPath: "/",
-                      payload: { clubIds: slots.slice(0, 3) },
-                    }),
-                  });
-                  const data = await res.json();
-if (data.redirectUrl) {
-                    setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
-                    return;
-                  }
-                  if (data.error) alert(data.error);
-                } finally {
-                  setIsPreviewing(false);
-                }
-              }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-xl hover:bg-gray-50 disabled:opacity-50"
-            >
-              {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
-              プレビュー
-            </button>
-        </div>
-      </form>
+      <ClubSelectorModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleSelectClub}
+        clubs={clubOptions}
+        currentSelectedId={activeSlotIndex !== null ? slots[activeSlotIndex] : null}
+      />
+
       <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="注目クラブ プレビュー" />
     </div>
   );

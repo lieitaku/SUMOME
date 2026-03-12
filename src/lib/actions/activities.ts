@@ -80,7 +80,7 @@ function parseFormData(formData: FormData) {
     slug: generateSlug(title), // 注意：Update 时通常不更新 slug，需在 Update 函数里剔除
     date: new Date(formData.get("date") as string),
     templateType,
-    category: templateType === "news" ? "News" : "Report", // 简单分类逻辑
+    category: templateType === "news" ? "News" : templateType === "event" ? "Event" : "Report",
     location: formData.get("location") as string || null,
     mainImage: formData.get("mainImage") as string || null,
     customRoute: formData.get("customRoute") as string || null,

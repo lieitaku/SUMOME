@@ -36,10 +36,14 @@ const EventMetaSchema = z.object({
     description: z.string().optional(),
 });
 
+const templateTypeOptions = ["news", "report", "event", "custom"] as const;
+type TemplateType = (typeof templateTypeOptions)[number];
+
 const formSchema = z.object({
     title: z.string().min(1, "タイトルを入力してください"),
     date: z.string(),
     clubId: z.string().min(1, "クラブを選択してください"),
+    templateType: z.enum(templateTypeOptions),
     mainImage: z.string().optional(),
     customRoute: z.string().optional(),
     blocks: z.array(BlockSchema).optional(),
@@ -66,7 +70,7 @@ export default function EditActivityForm({
 }) {
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const templateType = (initialData.templateType || "news") as "news" | "report" | "event" | "custom";
+    const initialTemplateType = (initialData.templateType || "news") as TemplateType;
     const savedData = (initialData.contentData ? initialData.contentData : {}) as SavedContentData;
 
     // 初始化 Blocks
@@ -86,6 +90,7 @@ export default function EditActivityForm({
             title: initialData.title || "",
             date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             clubId: initialData.clubId || (clubs.length > 0 ? clubs[0].id : ""),
+            templateType: initialTemplateType,
             mainImage: initialData.mainImage || "",
             customRoute: initialData.customRoute || "",
             blocks: initialBlocks,
@@ -97,6 +102,8 @@ export default function EditActivityForm({
         control: form.control,
         name: "blocks",
     });
+
+    const templateType = form.watch("templateType");
 
     // ✨ 2. 使用通用 Hook 处理保存
     const { isSubmitting, handleSubmit } = useFormAction({
@@ -118,13 +125,13 @@ export default function EditActivityForm({
         formData.append("title", values.title);
         formData.append("date", values.date);
         formData.append("clubId", values.clubId);
-        formData.append("templateType", templateType);
+        formData.append("templateType", values.templateType);
         if (values.mainImage) formData.append("mainImage", values.mainImage);
         if (values.customRoute) formData.append("customRoute", values.customRoute);
 
         // 复杂 JSON 数据封装
         const contentDataPayload: SavedContentData = { blocks: values.blocks };
-        if (templateType === "event" && values.event) {
+        if (values.templateType === "event" && values.event) {
             contentDataPayload.event = values.event;
             if (values.event.venue) formData.append("location", values.event.venue);
         }
@@ -190,7 +197,7 @@ export default function EditActivityForm({
                                                 date: values.date,
                                                 clubId: values.clubId,
                                                 mainImage: values.mainImage,
-                                                templateType,
+                                                templateType: values.templateType,
                                                 category: initialData.category,
                                                 blocks: values.blocks,
                                                 event: values.event,
@@ -214,16 +221,6 @@ export default function EditActivityForm({
                             {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
                             プレビュー
                         </button>
-                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 ${templateType === 'news' ? 'bg-orange-100 text-orange-600' :
-                            templateType === 'event' ? 'bg-emerald-100 text-emerald-600' :
-                                templateType === 'report' ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600'
-                            }`}>
-                        {templateType === 'news' && <FileText size={14} />}
-                        {templateType === 'event' && <Calendar size={14} />}
-                        {templateType === 'report' && <LayoutTemplate size={14} />}
-                        {templateType === 'custom' && <ExternalLink size={14} />}
-                        {templateType} Mode
-                    </div>
                     </>
                 }
             >
@@ -233,6 +230,21 @@ export default function EditActivityForm({
                 <div className={sectionClass}>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-6">
+                            <div>
+                                <label className={labelClass}>記事タイプ</label>
+                                <select
+                                    {...form.register("templateType")}
+                                    className={`${inputClass} w-auto min-w-[180px] ${templateType === 'news' ? 'border-orange-200 bg-orange-50/50' :
+                                        templateType === 'event' ? 'border-emerald-200 bg-emerald-50/50' :
+                                            templateType === 'report' ? 'border-blue-200 bg-blue-50/50' : 'border-purple-200 bg-purple-50/50'
+                                        }`}
+                                >
+                                    <option value="news">News (ニュース)</option>
+                                    <option value="report">Report (活動報告)</option>
+                                    <option value="event">Event (イベント告知)</option>
+                                    <option value="custom">Custom (専門モード)</option>
+                                </select>
+                            </div>
                             <div>
                                 <label className={labelClass}>タイトル <span className="text-red-500">*</span></label>
                                 <input

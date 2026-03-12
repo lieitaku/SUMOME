@@ -2,7 +2,7 @@ import React from "react";
 import { prisma } from "@/lib/db";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import { PREFECTURE_ORDER } from "@/lib/prefecture-order";
-import { ImageIcon, Pencil, MapPin } from "lucide-react";
+import { ImageIcon, Pencil, MapPin, Info } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { cn } from "@/lib/utils";
 import PrefectureBannersSortBar from "@/components/admin/prefecture-banners/PrefectureBannersSortBar";
@@ -59,12 +59,18 @@ export default async function AdminPrefectureBannersPage({
         </p>
       </div>
 
-      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
-        <p className="text-xs text-gray-500 mb-4">
-          一覧は「並び順」で地域順・新着順を切り替え可能。バナーを設定すると、該当県ページで静的デフォルト（
-          <code className="bg-gray-100 px-1 rounded">/images/banner/banner-xxx.webp</code>
-          ）の代わりに表示されます。
-        </p>
+      <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100 shadow-sm flex items-start gap-3">
+        <div className="bg-blue-100 p-1.5 rounded-full text-blue-600 shrink-0 mt-0.5">
+          <Info size={14} />
+        </div>
+        <div className="text-xs text-blue-800 leading-relaxed">
+          <p className="font-bold mb-1">バナー設定について</p>
+          <p className="opacity-80">
+            一覧は「並び順」で地域順・新着順を切り替え可能。バナーを設定すると、該当県ページで静的デフォルト（
+            <code className="bg-blue-100 px-1 py-0.5 rounded text-blue-700 mx-1 font-mono">/images/banner/banner-xxx.webp</code>
+            ）の代わりに表示されます。
+          </p>
+        </div>
       </div>
 
       <PrefectureBannersSortBar currentSort={sort} />
