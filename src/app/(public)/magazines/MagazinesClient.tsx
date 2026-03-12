@@ -121,7 +121,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterExpanded, setIsFilterExpanded] = useState(true);
     const [sortOrder, setSortOrder] = useState<"region" | "newest">("region");
-    const [mobileLayout, setMobileLayout] = useState<"single" | "double">("single");
+    const [mobileLayout, setMobileLayout] = useState<"single" | "double">("double");
 
     const isFilterActive = activeRegion !== "all" || searchQuery.length > 0 || sortOrder !== "region";
 
@@ -369,7 +369,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 {/* 排序：PC + SP 共通 UI */}
                                 <div className="inline-flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                                        Sort
+                                        ソート
                                     </span>
                                     <div className="inline-flex rounded-full bg-gray-100 p-1">
                                         <button
@@ -402,7 +402,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 {/* 手机端布局切换（单列 / 双列） */}
                                 <div className="md:hidden inline-flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                                        Layout
+                                        表示
                                     </span>
                                     <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
                                         <button
@@ -521,7 +521,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
                                                 </div>
                                             </div>
-                                            <div className="flex-1 px-3 pb-4 pt-2 text-center flex flex-col items-center">
+                                            <div className="flex-1 px-3 pb-2 md:pb-4 pt-2 text-center flex flex-col items-center">
                                                 <div className="text-xs font-mono text-gray-400 mb-2">
                                                     {/* ✨ 格式化数据库日期 */}
                                                     {new Date(mag.issueDate).toLocaleDateString("ja-JP").replace(/\//g, ".")}
@@ -536,10 +536,12 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                                 >
                                                     {mag.title}
                                                 </h3>
-                                                <p className="text-xs md:text-sm text-gray-500 font-medium line-clamp-2 leading-relaxed max-w-xs">
-                                                    {mag.description}
-                                                </p>
-                                                <div className="mt-4 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                                {mobileLayout === "single" && (
+                                                    <p className="text-xs md:text-sm text-gray-500 font-medium line-clamp-2 leading-relaxed max-w-xs">
+                                                        {mag.description}
+                                                    </p>
+                                                )}
+                                                <div className="mt-4 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hidden md:block">
                                                     <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.2em] text-sumo-brand uppercase">
                                                         VIEW DETAILS <ArrowRight size={10} />
                                                     </span>
