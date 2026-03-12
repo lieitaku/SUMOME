@@ -187,7 +187,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                     className="text-current group-hover:text-gray-900 transition-colors"
                   />
                 </div>
-                Back to Map
+                地図に戻る
               </Link>
             </div>
 
@@ -235,7 +235,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                       className="w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: theme.color }}
                     ></span>
-                    Official Top Partners
+                    トップスポンサー
                   </span>
                 </div>
                 <div

@@ -62,7 +62,7 @@ const AboutService = () => {
   return (
     <Section background="white" className="pt-2! pb-10! md:py-28!" id="service">
       {/* 1. Introduction (保持不变) */}
-      <div className="mb-10 md:mb-32">
+      <div className="mb-6 md:mb-32">
         <Introduction />
       </div>
 

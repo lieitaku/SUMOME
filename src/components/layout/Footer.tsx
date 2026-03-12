@@ -138,13 +138,8 @@ const Footer = () => {
           <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 text-sm">
             {/* Column 1 */}
             <div>
-              <h4
-                className="font-serif font-bold mb-6 tracking-widest text-xs uppercase border-b pb-2 inline-block"
-                style={{
-                  color: themeColor,
-                  borderColor: `${themeColor}1A`, // 10% opacity
-                }}
-              >
+              <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
+                <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
                 SITEMAP
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
@@ -173,13 +168,8 @@ const Footer = () => {
 
             {/* Column 2 */}
             <div>
-              <h4
-                className="font-serif font-bold mb-6 tracking-widest text-xs uppercase border-b pb-2 inline-block"
-                style={{
-                  color: themeColor,
-                  borderColor: `${themeColor}1A`,
-                }}
-              >
+              <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
+                <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
                 FOR MANAGERS
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
@@ -203,13 +193,8 @@ const Footer = () => {
 
             {/* Column 3 */}
             <div>
-              <h4
-                className="font-serif font-bold mb-6 tracking-widest text-xs uppercase border-b pb-2 inline-block"
-                style={{
-                  color: themeColor,
-                  borderColor: `${themeColor}1A`,
-                }}
-              >
+              <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
+                <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
                 SUPPORT
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">

@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 const Introduction = () => {
   return (
-    <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-16 lg:gap-24">
+    <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-6 lg:gap-24">
       {/* 左侧：视觉重心 (图片) */}
       <div className="relative w-full lg:w-1/2 h-[400px] lg:h-[500px] reveal-up group">
         {/* 装饰框：极简黑线框 */}
@@ -28,14 +28,14 @@ const Introduction = () => {
       {/* 右侧：叙事 (文字) */}
       <div className="w-full lg:w-1/2 flex flex-col items-start lg:pl-10 reveal-up delay-100">
         {/* 大标题：墨色 + 红色强调 */}
-        <h2 className="text-3xl md:text-5xl font-black leading-tight tracking-wide text-sumo-text mb-8 font-serif">
+        <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-wide text-sumo-text mb-6 font-serif">
           相撲の<span className="text-sumo-red">熱</span>を、
           <br />
           世界へ<span className="text-sumo-brand">届</span>ける。
         </h2>
 
         {/* 正文：深灰，易读 */}
-        <div className="text-sumo-text/80 text-base leading-loose tracking-wide font-medium space-y-6">
+        <div className="text-sumo-text/80 text-base leading-loose tracking-wide font-medium space-y-4">
           <p>
             SUMOMEは、国技「相撲」の魅力をテクノロジーの力で最大化する次世代プラットフォームです。
           </p>
@@ -45,10 +45,10 @@ const Introduction = () => {
           </p>
         </div>
 
-        {/* 链接 */}
+        {/* 链接：与正文保持 24px，与下方图片由父级 gap-6 控制 */}
         <Link
           href="/about"
-          className="group inline-flex items-center gap-2 mt-6 md:mt-10 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all"
+          className="group inline-flex items-center gap-2 mt-6 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all md:mt-10"
         >
           <span className="text-sm font-bold tracking-widest">
             詳細を見る
