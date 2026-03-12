@@ -33,12 +33,12 @@ export function getCachedPrefectureBanner(prefSlug: string) {
   )(prefSlug);
 }
 
-/** Cached clubs by prefecture name (area). Invalidate with tag "clubs". */
+/** Cached clubs by prefecture name (area). Excludes SUMOME事务局 (official-hq). Invalidate with tag "clubs". */
 export function getCachedClubsByArea(prefName: string) {
   return unstable_cache(
     async (area: string) =>
       prisma.club.findMany({
-        where: { area },
+        where: { area, slug: { not: "official-hq" }, hidden: false },
         orderBy: { createdAt: "desc" },
       }),
     ["prefecture-clubs"],
@@ -49,7 +49,10 @@ export function getCachedClubsByArea(prefName: string) {
 /** Cached club by slug. Invalidate with tag "clubs". */
 export function getCachedClubBySlug(slug: string) {
   return unstable_cache(
-    async (s: string) => prisma.club.findUnique({ where: { slug: s } }),
+    async (s: string) =>
+      prisma.club.findFirst({
+        where: { slug: s, hidden: false },
+      }),
     ["club-by-slug"],
     { revalidate: 60, tags: ["clubs"] }
   )(slug);
@@ -123,7 +126,7 @@ export function getCachedAllClubs() {
   return unstable_cache(
     () =>
       prisma.club.findMany({
-        where: { slug: { not: "official-hq" } },
+        where: { slug: { not: "official-hq" }, hidden: false },
         orderBy: { createdAt: "desc" },
       }),
     ["all-clubs"],

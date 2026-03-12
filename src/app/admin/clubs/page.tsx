@@ -23,14 +23,6 @@ export default async function AdminClubsPage({
     const initialClubs = await prisma.club.findMany({
         where,
         orderBy: { updatedAt: "desc" },
-        select: {
-            id: true,
-            name: true,
-            slug: true,
-            area: true,
-            city: true,
-            updatedAt: true,
-        },
     });
 
     // 将 Date 对象转换为字符串，以便传递给 Client Component

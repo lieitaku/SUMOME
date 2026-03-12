@@ -12,6 +12,7 @@ export type ClubListItem = {
     slug: string;
     area: string;
     city: string | null;
+    hidden?: boolean;
     updatedAt: string;
 };
 
@@ -62,6 +63,13 @@ function ClubsListContent({
                             <h3 className="font-bold text-lg text-gray-900">{club.name}</h3>
                             <span className="text-xs text-gray-400 font-mono">#{club.slug}</span>
                         </div>
+                        <div className="flex items-center gap-2 text-xs">
+                            {club.hidden ? (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-bold">非表示</span>
+                            ) : (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold">表示中</span>
+                            )}
+                        </div>
                         <div className="space-y-2 text-sm text-gray-600 border-t border-gray-100 pt-3">
                             <div className="flex items-center gap-2">
                                 <MapPin size={14} className="text-sumo-brand" />
@@ -83,6 +91,7 @@ function ClubsListContent({
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">クラブ名 / ID</th>
+                            <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">状態</th>
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">所在地</th>
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">更新日</th>
                             <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">編集</th>
@@ -91,9 +100,20 @@ function ClubsListContent({
                     <tbody className="divide-y divide-gray-100">
                         {clubs.map((club) => (
                             <tr key={club.id} className="hover:bg-gray-50/50 transition-colors group">
-                                <td className="px-6 py-4">
+                                <td className="px-6 py-4 align-middle">
                                     <div className="font-bold text-gray-900">{club.name}</div>
                                     <div className="text-xs text-gray-400 font-mono">#{club.slug}</div>
+                                </td>
+                                <td className="px-6 py-4 align-middle text-center">
+                                    {club.hidden ? (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 text-xs font-bold">
+                                            非表示
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-bold">
+                                            表示中
+                                        </span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-1.5 text-sm text-gray-600">

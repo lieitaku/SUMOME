@@ -273,12 +273,12 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
         </section>
 
         {/* ==================== SECTION 3: Main Content Grid ==================== */}
-        <section className="relative pb-24 px-6 pt-16 md:pt-20">
+        <section className="relative pb-12 md:pb-24 px-6 pt-12 md:pt-20">
           <div className="container mx-auto max-w-6xl relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-start">
 
               {/* --- 左侧边栏 (Left Sidebar) --- */}
-              <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-6">
+              <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-4 lg:gap-6">
                 {/* Intro Card */}
                 <Ceramic
                   interactive={false}
@@ -305,17 +305,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   className="p-0 border border-gray-100 border-b-[6px] overflow-hidden"
                   style={ceramicStyle}
                 >
-                  <div className="bg-gray-50/50 px-6 py-3 border-b border-gray-100 flex justify-between items-center relative z-10">
-                    <p className="text-[10px] text-gray-400 tracking-widest font-bold uppercase">
-                      Local Supporters
-                    </p>
-                    <span
-                      className="px-2 py-0.5 bg-white border border-gray-200 rounded text-[10px] font-mono font-bold shadow-sm"
-                      style={{ color: theme.color }}
-                    >
-                      {sponsorsSidebar.length}
-                    </span>
-                  </div>
 
                   <div
                     className="relative w-full h-[240px] bg-white overflow-hidden"
@@ -350,8 +339,8 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
               </div>
 
               {/* --- Right Main Content --- */}
-              {/* 优化点 2：移动端 gap 降级为 8，减少无效留白 */}
-              <div className="lg:col-span-8 flex flex-col gap-8 md:gap-12">
+              {/* 移动端缩小卡片间距 */}
+              <div className="lg:col-span-8 flex flex-col gap-4 md:gap-12">
                 
                 {/* Feature Banner */}
                 {displayData.bannerImg && (
@@ -463,7 +452,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   </div>
 
                   {filteredClubs.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                       {filteredClubs.map((club) => (
                         <div key={club.id}>
                           <ClubCard club={club} accentColor={theme.color} />
@@ -480,7 +469,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   )}
                 </div>
 
-                {/* Rikishi Table */}
+                {/* Rikishi Table（出身力士一覧） */}
                 <div>
                   <Suspense fallback={
                     <div className="h-[400px] w-full bg-white rounded-2xl border border-gray-100 animate-pulse flex items-center justify-center text-gray-400">
@@ -494,32 +483,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                 </div>
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* ==================== SECTION 4: Bottom CTA ==================== */}
-        <section className="relative py-12 md:py-16 overflow-hidden">
-          <div className={cn("absolute inset-0 bg-gradient-to-b", theme.gradient)}></div>
-          <div className="container mx-auto px-6 relative z-10 text-center text-white">
-            <div className="inline-flex items-center justify-center p-3 md:p-4 bg-white/10 rounded-full mb-4 md:mb-6 backdrop-blur-sm">
-              <MapPin className="w-5 h-5 md:w-6 md:h-6" />
-            </div>
-            <h3 className="text-xl md:text-3xl font-serif font-black mb-3 md:mb-4 drop-shadow-md">
-              {displayData.name}の相撲文化を深堀り
-            </h3>
-            <p className="text-white/80 max-w-lg mx-auto mb-6 md:mb-8 text-xs md:text-sm font-medium px-4">
-              {displayData.name}の相撲文化をさらに深く知るための情報を提供しています。
-            </p>
-            <Link
-              href="/contact"
-              className={cn(
-                "group inline-flex items-center gap-2 bg-white px-6 md:px-8 py-3 rounded-full font-bold text-xs md:text-sm tracking-wider shadow-lg transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-0.5 active:scale-[0.98]",
-              )}
-              style={{ color: theme.color }}
-            >
-              地域に関するお問い合わせ
-              <ExternalLink size={16} className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-            </Link>
           </div>
         </section>
       </main>

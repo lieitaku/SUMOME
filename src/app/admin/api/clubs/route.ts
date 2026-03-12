@@ -10,6 +10,7 @@ const LIST_SELECT = {
     slug: true,
     area: true,
     city: true,
+    hidden: true,
     updatedAt: true,
 } as const;
 

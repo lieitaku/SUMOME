@@ -97,7 +97,7 @@ const PartnersPage = () => {
             </section>
 
             {/* ==================== 2. Why SUMOME? ==================== */}
-            <section id="features" className="pt-12 pb-10 md:py-24 px-4 md:px-6 relative z-10">
+            <section id="features" className="pt-8 pb-8 md:py-24 px-4 md:px-6 relative z-10">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12 md:mb-16">
                         <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-2">
@@ -108,7 +108,7 @@ const PartnersPage = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
                         {/* Feature 1 */}
                         <Ceramic
                             interactive={false}
@@ -178,7 +178,7 @@ const PartnersPage = () => {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
                         {/* Step 1 */}
                         <div className="relative overflow-hidden bg-white rounded-2xl p-8 border border-gray-100 hover:border-[#2454a4]/30 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-500 group">
                             {/* 背景大字水印 */}
@@ -192,7 +192,7 @@ const PartnersPage = () => {
                                         <MousePointerClick className="w-5 h-5" />
                                     </div>
                                     <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
-                                        Step 01
+                                        ステップ 01
                                     </span>
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
@@ -216,7 +216,7 @@ const PartnersPage = () => {
                                         <PenTool className="w-5 h-5" />
                                     </div>
                                     <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
-                                        Step 02
+                                        ステップ 02
                                     </span>
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
@@ -240,7 +240,7 @@ const PartnersPage = () => {
                                         <FileText className="w-5 h-5" />
                                     </div>
                                     <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
-                                        Step 03
+                                        ステップ 03
                                     </span>
                                 </div>
                                 <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
@@ -288,12 +288,12 @@ const PartnersPage = () => {
                                 </Button>
                             </div>
                             <p className="mt-6 text-xs text-blue-200 opacity-80">
-                                Already have an account?{" "}
+                            アカウントをお持ちの方はこちら{" "}
                                 <Link
                                     href="/manager/login"
                                     className="underline hover:text-white font-bold"
                                 >
-                                    Login here
+                                    ログイン
                                 </Link>
                             </p>
                         </div>

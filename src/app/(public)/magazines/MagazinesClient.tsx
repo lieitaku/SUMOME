@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
-import { ArrowRight, BookOpen, Search, X, Filter, ChevronDown, MapPin } from "lucide-react";
+import { ArrowRight, BookOpen, Search, X, Filter, ChevronDown, MapPin, LayoutGrid, LayoutList } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -121,6 +121,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     const [searchQuery, setSearchQuery] = useState("");
     const [isFilterExpanded, setIsFilterExpanded] = useState(true);
     const [sortOrder, setSortOrder] = useState<"region" | "newest">("region");
+    const [mobileLayout, setMobileLayout] = useState<"single" | "double">("single");
 
     const isFilterActive = activeRegion !== "all" || searchQuery.length > 0 || sortOrder !== "region";
 
@@ -173,10 +174,10 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
 
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
-            <main className="flex-grow">
+            <main className="grow">
                 {/* ==================== 1. Hero Section (100% 复刻) ==================== */}
                 <section className="relative pt-40 pb-20 md:pb-48 overflow-hidden bg-sumo-brand text-white shadow-xl">
-                    <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
+                    <div className="absolute inset-0 bg-linear-to-b from-sumo-brand to-[#2454a4]"></div>
                     <div
                         className="absolute inset-0 pointer-events-none opacity-20"
                         style={{
@@ -398,6 +399,41 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     </div>
                                 </div>
 
+                                {/* 手机端布局切换（单列 / 双列） */}
+                                <div className="md:hidden inline-flex items-center gap-2">
+                                    <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
+                                        Layout
+                                    </span>
+                                    <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => setMobileLayout("double")}
+                                            className={cn(
+                                                "p-2 rounded-full transition-colors",
+                                                mobileLayout === "double"
+                                                    ? "bg-sumo-brand text-white"
+                                                    : "text-gray-500"
+                                            )}
+                                            aria-label="双列表示"
+                                        >
+                                            <LayoutGrid size={18} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setMobileLayout("single")}
+                                            className={cn(
+                                                "p-2 rounded-full transition-colors",
+                                                mobileLayout === "single"
+                                                    ? "bg-sumo-brand text-white"
+                                                    : "text-gray-500"
+                                            )}
+                                            aria-label="単列表示"
+                                        >
+                                            <LayoutList size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+
                                 {/* 激活状态展示（移动端也显示） */}
                                 <div className="flex flex-wrap gap-2">
                                     {searchQuery && (
@@ -444,21 +480,35 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
                             </div>
                         ) : filteredMagazines.length > 0 ? (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-20">
+                            <div
+                                className={cn(
+                                    "grid",
+                                    mobileLayout === "double"
+                                        ? "grid-cols-2 gap-x-4 gap-y-8"
+                                        : "grid-cols-1 gap-y-10",
+                                    "md:grid-cols-2 md:gap-x-12 md:gap-y-20 lg:grid-cols-3"
+                                )}
+                            >
                                 {filteredMagazines.map((mag) => (
-                                    <div key={mag.id} className="group block relative flex flex-col">
+                                    <div
+                                        key={mag.id}
+                                        className={cn(
+                                            "group relative flex flex-col h-full",
+                                            mobileLayout === "double" && "md:max-w-none"
+                                        )}
+                                    >
                                         <Ceramic
                                             as={Link}
                                             href={`/magazines/${mag.slug}`} // ✨ 链接改用数据库的 slug
                                             interactive={true}
                                             className={cn(
-                                                "relative mb-8 bg-white",
+                                                "relative bg-white flex flex-col h-full",
                                                 "border-b-sumo-brand",
                                                 "md:border-b-gray-200 md:hover:border-b-sumo-brand",
                                             )}
                                         >
-                                            <div className="p-3">
-                                                <div className="relative aspect-[3/4] overflow-hidden rounded-lg shadow-inner bg-gray-100">
+                                            <div className={cn("p-3", mobileLayout === "double" && "p-2")}>
+                                                <div className="relative aspect-3/4 overflow-hidden rounded-lg shadow-inner bg-gray-100">
                                                     {mag.coverImage && (
                                                         <Image
                                                             src={mag.coverImage}
@@ -471,26 +521,31 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                                     <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300 pointer-events-none"></div>
                                                 </div>
                                             </div>
-                                        </Ceramic>
-                                        <div className="text-center px-2 flex-grow flex flex-col items-center">
-                                            <div className="text-xs font-mono text-gray-400 mb-2">
-                                                {/* ✨ 格式化数据库日期 */}
-                                                {new Date(mag.issueDate).toLocaleDateString('ja-JP').replace(/\//g, '.')}
-                                            </div>
-                                            <Link href={`/magazines/${mag.slug}`} className="block">
-                                                <h3 className="text-2xl font-serif font-black text-gray-900 mb-2 leading-tight group-hover:text-sumo-brand transition-colors">
+                                            <div className="flex-1 px-3 pb-4 pt-2 text-center flex flex-col items-center">
+                                                <div className="text-xs font-mono text-gray-400 mb-2">
+                                                    {/* ✨ 格式化数据库日期 */}
+                                                    {new Date(mag.issueDate).toLocaleDateString("ja-JP").replace(/\//g, ".")}
+                                                </div>
+                                                <h3
+                                                    className={cn(
+                                                        "font-serif font-black text-gray-900 mb-1 leading-tight group-hover:text-sumo-brand transition-colors",
+                                                        // 手机端整体减小字号，根据单列/双列微调
+                                                        "text-sm md:text-xl",
+                                                        mobileLayout === "single" && "text-base md:text-2xl"
+                                                    )}
+                                                >
                                                     {mag.title}
                                                 </h3>
-                                            </Link>
-                                            <p className="text-sm text-gray-500 font-medium line-clamp-2 leading-relaxed max-w-xs">
-                                                {mag.description}
-                                            </p>
-                                            <div className="mt-4 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-                                                <span className="text-[10px] font-bold tracking-[0.2em] text-sumo-brand flex items-center gap-1 uppercase">
-                                                    View Details <ArrowRight size={10} />
-                                                </span>
+                                                <p className="text-xs md:text-sm text-gray-500 font-medium line-clamp-2 leading-relaxed max-w-xs">
+                                                    {mag.description}
+                                                </p>
+                                                <div className="mt-4 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.2em] text-sumo-brand uppercase">
+                                                        VIEW DETAILS <ArrowRight size={10} />
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
+                                        </Ceramic>
                                     </div>
                                 ))}
                             </div>

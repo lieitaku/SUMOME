@@ -69,18 +69,10 @@ const AboutService = () => {
       {/* 2. 三本柱 (下层功能) */}
       <div className="relative z-10">
         {/* 标题区 */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-16 reveal-up border-b border-gray-200 pb-4 md:pb-8">
-          <div>
-            <p className="text-sumo-brand font-bold text-xs tracking-[0.3em] mb-2 uppercase font-sans">
-              Our Core Services
-            </p>
-            <h2 className="text-4xl md:text-5xl font-black text-sumo-text font-serif">
-              SUMOMEの<span className="text-sumo-red">三</span>本柱
-            </h2>
-          </div>
-          <p className="hidden md:block text-gray-400 text-sm font-medium tracking-wider text-right">
-            Providing value through <br /> Search, Connection, and Archive.
-          </p>
+        <div className="mb-6 md:mb-16 reveal-up border-b border-gray-200 pb-4 md:pb-8">
+          <h2 className="text-4xl md:text-5xl font-black text-sumo-text font-serif">
+            SUMOMEの<span className="text-sumo-red">三</span>本柱
+          </h2>
         </div>
 
         {/* 卡片网格 */}

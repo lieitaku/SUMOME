@@ -97,6 +97,7 @@ model Club {
   // 其他关系
   activities     Activity[]
   applications   Application[] // 关联的申请记录
+  hidden         Boolean   @default(false) // 非表示時、前台には表示・検索されない
   published      Boolean   @default(false) // 默认为 false (草稿状态)
   homePickup     HomePickupClub? // 首页「注目の相撲クラブ」槽位（最多 3 个）
   createdAt      DateTime  @default(now())

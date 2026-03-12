@@ -27,11 +27,6 @@ const Introduction = () => {
 
       {/* 右侧：叙事 (文字) */}
       <div className="w-full lg:w-1/2 flex flex-col items-start lg:pl-10 reveal-up delay-100">
-        {/* 小标：品牌蓝 */}
-        <span className="text-sumo-brand font-sans text-xs font-bold tracking-[0.2em] mb-6 block uppercase">
-          About The Project
-        </span>
-
         {/* 大标题：墨色 + 红色强调 */}
         <h2 className="text-3xl md:text-5xl font-black leading-tight tracking-wide text-sumo-text mb-8 font-serif">
           相撲の<span className="text-sumo-red">熱</span>を、
@@ -56,7 +51,7 @@ const Introduction = () => {
           className="group inline-flex items-center gap-2 mt-6 md:mt-10 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all"
         >
           <span className="text-sm font-bold tracking-widest">
-            MORE DETAILS
+            詳細を見る
           </span>
           <ArrowRight
             size={16}

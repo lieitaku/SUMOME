@@ -90,24 +90,24 @@ export async function getPickupClubsForHome() {
   const model = getHomePickupClubModel();
   if (!model) {
     return prisma.club.findMany({
-      where: { slug: { not: "official-hq" } },
+      where: { slug: { not: "official-hq" }, hidden: false },
       orderBy: { createdAt: "desc" },
       take: PICKUP_SLOTS,
     });
   }
   const rows = await model.findMany({
     orderBy: { sortOrder: "asc" },
-    include: { club: true },
+      include: { club: true },
   });
   const configured = rows
-    .filter((r) => r.club != null)
+    .filter((r) => r.club != null && !r.club.hidden)
     .map((r) => r.club!);
   if (configured.length >= PICKUP_SLOTS) {
     return configured.slice(0, PICKUP_SLOTS);
   }
   const ids = new Set(configured.map((c) => c.id));
   const newest = await prisma.club.findMany({
-    where: { slug: { not: "official-hq" }, id: { notIn: [...ids] } },
+    where: { slug: { not: "official-hq" }, id: { notIn: [...ids] }, hidden: false },
     orderBy: { createdAt: "desc" },
     take: PICKUP_SLOTS - configured.length,
   });

@@ -2,7 +2,7 @@
 
 import React, { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, X, Trash2, EyeOff } from "lucide-react";
 
 interface AdminFormLayoutProps {
     title: string;
@@ -11,6 +11,9 @@ interface AdminFormLayoutProps {
     isSubmitting: boolean;
     onDelete?: () => Promise<void> | void;
     isDeleting?: boolean;
+    onToggleHidden?: () => Promise<void> | void;
+    isHidden?: boolean;
+    isTogglingHidden?: boolean;
     children: ReactNode;
     headerActions?: ReactNode;
 }
@@ -22,6 +25,9 @@ export default function AdminFormLayout({
     isSubmitting,
     onDelete,
     isDeleting = false,
+    onToggleHidden,
+    isHidden = false,
+    isTogglingHidden = false,
     children,
     headerActions
 }: AdminFormLayoutProps) {
@@ -90,6 +96,22 @@ export default function AdminFormLayout({
                             >
                                 {isDeleting ? <Loader2 className="animate-spin" size={14} /> : <Trash2 size={14} />}
                                 削除
+                            </button>
+                        )}
+
+                        {onToggleHidden && (
+                            <button
+                                type="button"
+                                onClick={onToggleHidden}
+                                disabled={isSubmitting || isDeleting || isTogglingHidden}
+                                className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-gray-900 transition-all disabled:opacity-30"
+                            >
+                                {isTogglingHidden ? (
+                                    <Loader2 className="animate-spin" size={14} />
+                                ) : (
+                                    <EyeOff size={14} />
+                                )}
+                                {isHidden ? "表示する" : "非表示"}
                             </button>
                         )}
                     </div>

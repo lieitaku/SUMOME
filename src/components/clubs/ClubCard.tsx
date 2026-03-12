@@ -177,7 +177,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
           </div>
 
           <Link href={detailLink} className="text-[10px] font-black text-gray-300 group-hover:text-[var(--theme-color)] transition-colors uppercase tracking-widest">
-            Details
+            詳細
           </Link>
         </div>
       </div>

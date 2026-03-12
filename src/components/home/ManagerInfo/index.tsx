@@ -8,15 +8,10 @@ import Section from "@/components/ui/Section";
 
 const ManagerInfo = () => {
   return (
-    <Section background="white" id="manager-info">
+    <Section background="white" id="manager-info" className="pt-6 md:pt-28">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16 items-start relative z-10">
         {/* --- 左侧：固定介绍区域 (Sticky) --- */}
         <div className="lg:col-span-5 lg:sticky lg:top-32 reveal-up">
-          <span className="text-sumo-brand text-xs font-bold tracking-[0.2em] mb-6 block uppercase flex items-center gap-3 font-sans">
-            <span className="w-8 h-[2px] bg-sumo-brand"></span>
-            For Club Managers
-          </span>
-
           <h2 className="text-4xl md:text-5xl font-serif font-black mb-8 leading-tight text-sumo-text">
             あなたのクラブを、
             <br />

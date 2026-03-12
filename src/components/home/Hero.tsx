@@ -94,7 +94,6 @@ function HeroContent() {
             >
               伝統を未来へ
             </p>
-            <p className="hidden md:block font-sans text-xs text-gray-500 font-medium tracking-wider uppercase text-right">Tradition & Future</p>
           </div>
         </div>
         <div className="absolute bottom-2 right-3 flex gap-1 opacity-20 pointer-events-none">

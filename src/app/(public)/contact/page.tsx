@@ -159,29 +159,6 @@ const ContactPage = () => {
                         </div>
                       </div>
                     </div>
-
-                    {/* Phone */}
-                    <div className="group">
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded bg-white border border-gray-200 flex items-center justify-center text-sumo-brand shadow-sm">
-                          <Phone size={18} />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-sumo-dark mb-2">
-                            電話番号
-                          </h4>
-                          <a
-                            href="tel:03-1234-5678"
-                            className="text-gray-500 hover:text-sumo-brand transition-colors text-sm font-mono border-b border-transparent hover:border-sumo-brand pb-0.5"
-                          >
-                            000-1234-5678
-                          </a>
-                          <p className="text-[10px] text-gray-400 mt-1 font-bold">
-                            平日 10:00 - 18:00
-                          </p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
 

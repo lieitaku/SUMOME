@@ -37,9 +37,6 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
       {/* 头部标题区 - 与 PickupClubs 保持一致 */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-16 border-b border-gray-200 pb-8 reveal-up">
         <div>
-          <span className="text-sumo-brand text-xs font-bold tracking-[0.3em] mb-3 block uppercase font-sans">
-            Activity Report
-          </span>
           <h2 className="text-3xl md:text-5xl font-black font-serif text-sumo-text">
             普及・広報活動
           </h2>
@@ -130,7 +127,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold tracking-widest text-gray-400 group-hover:text-sumo-brand transition-colors uppercase">
-                      View Details
+                      詳細を見る
                     </span>
                     <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-brand group-hover:bg-sumo-brand transition-all duration-300">
                       <ArrowRight

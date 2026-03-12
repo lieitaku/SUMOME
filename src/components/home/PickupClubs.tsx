@@ -21,13 +21,10 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
   }, [clubs]);
 
   return (
-    <Section background="gray" id="pickup-clubs">
+    <Section background="gray" id="pickup-clubs" className="pt-6 md:pt-28">
       {/* 头部标题区 */}
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-6 md:mb-16 border-b border-gray-200 pb-4 md:pb-8 reveal-up">
         <div>
-          <span className="text-sumo-brand text-xs font-bold tracking-[0.3em] mb-3 block uppercase font-sans">
-            Pick Up Clubs
-          </span>
           <h2 className="text-3xl md:text-5xl font-black font-serif text-sumo-text">
             注目の相撲クラブ
           </h2>

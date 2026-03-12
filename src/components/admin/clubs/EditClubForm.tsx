@@ -25,7 +25,8 @@ import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
 import MainImagePositionEditor, { parsePositionString, formatPositionString, parseScaleValue, parseRotationValue } from "./MainImagePositionEditor";
 
 // ✨ 2. 引入 Server Actions
-import { updateClub, deleteClub } from "@/lib/actions/clubs";
+import { updateClub, deleteClub, toggleClubHidden } from "@/lib/actions/clubs";
+import { useRouter } from "next/navigation";
 
 // ==============================================================================
 // 📜 Zod Schema 定义
@@ -80,6 +81,7 @@ interface EditClubFormProps {
 }
 
 export default function EditClubForm({ initialData, canEditSlug = false }: EditClubFormProps) {
+    const router = useRouter();
     // 用于控制副图上传时的 Loading 状态
     const [isUploadingSub, setIsUploadingSub] = useState(false);
     // 郵便番号から住所を取得中かどうか
@@ -130,6 +132,8 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
         successMessage: "クラブを削除しました",
         redirectUrl: "/admin/clubs"
     });
+
+    const [isTogglingHidden, setIsTogglingHidden] = useState(false);
 
     // --- 3. 多图上传逻辑 (Supabase) ---
     const currentSubImages = form.watch("subImages");
@@ -242,6 +246,30 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
         await handleDeleteAction(deleteClub, initialData.id);
     };
 
+    // --- 5-2. 非表示 切り替え处理 ---
+    const onToggleHidden = async () => {
+        const confirmMessage = initialData.hidden
+            ? "このクラブを「表示中」に戻しますか？"
+            : "このクラブを「非表示」にしますか？\n前台からは表示・検索されなくなります。";
+        if (!confirm(confirmMessage)) return;
+
+        setIsTogglingHidden(true);
+        try {
+            const result = await toggleClubHidden(initialData.id);
+            if ((result as any)?.error) {
+                alert((result as any).error);
+            } else {
+                // 状態変更が反映されるように再読み込み
+                router.refresh();
+            }
+        } catch (e) {
+            console.error(e);
+            alert("非表示ステータスの更新に失敗しました。");
+        } finally {
+            setIsTogglingHidden(false);
+        }
+    };
+
     // --- 6. 样式常量 ---
     const sectionHeading = "text-lg font-bold flex items-center gap-2 pb-3 border-b border-gray-100 mb-6 text-gray-800";
     const labelClass = "block text-xs font-bold mb-1.5 uppercase tracking-wide text-gray-400";
@@ -255,6 +283,9 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                 backLink="/admin/clubs"
                 isSubmitting={isSubmitting}
                 isDeleting={isDeleting}
+                onToggleHidden={onToggleHidden}
+                isHidden={initialData.hidden ?? false}
+                isTogglingHidden={isTogglingHidden}
                 onDelete={onDelete}
                 headerActions={
                     <button

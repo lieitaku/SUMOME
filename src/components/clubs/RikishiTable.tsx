@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Medal } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,31 @@ type RikishiTableProps = {
   accentColor?: string; // ✨ 主题色 (用于动态配色)
 };
 
+// 段位层级（越高越靠前）：横綱 > 大関 > 関脇 > 小結 > 前頭 > 十両 > 幕下 > 三段目 > 序二段 > 序ノ口 > 前相撲
+const RANK_TIER: Record<string, number> = {
+  横綱: 10,
+  大関: 9,
+  関脇: 8,
+  小結: 7,
+  前頭: 6,
+  十両: 5,
+  幕下: 4,
+  三段目: 3,
+  序二段: 2,
+  序ノ口: 1,
+  前相撲: 0,
+};
+
+/** 将 rank 字符串转为可比较的数值，数值越大段位越高。带数字的段位（如 前頭 12）中数字越小段位越高。 */
+function getRankSortKey(rank: string): number {
+  const match = rank.match(/\s+(\d+)$/);
+  const num = match ? parseInt(match[1], 10) : null;
+  const prefix = match ? rank.slice(0, match.index).trim() : rank;
+  const tier = RANK_TIER[prefix] ?? -1;
+  const sub = num != null ? Math.max(0, 100 - num) : 100;
+  return tier * 1000 + sub;
+}
+
 // ==============================================================================
 // 2. 组件实现 (Component Implementation)
 // ==============================================================================
@@ -37,10 +62,18 @@ const RikishiTable = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const INITIAL_COUNT = 10; // 默认显示前 10 条
 
+  // 现役在上、退役在下；同组内按最高段位降序
+  const sortedList = useMemo(() => {
+    return [...rikishiList].sort((a, b) => {
+      if (a.active !== b.active) return a.active ? -1 : 1;
+      return getRankSortKey(b.rank) - getRankSortKey(a.rank);
+    });
+  }, [rikishiList]);
+
   // 计算当前显示的列表数据
   const visibleList = isExpanded
-    ? rikishiList
-    : rikishiList.slice(0, INITIAL_COUNT);
+    ? sortedList
+    : sortedList.slice(0, INITIAL_COUNT);
 
   // 是否显示“展开更多”按钮
   const showExpandButton = rikishiList.length > INITIAL_COUNT;
@@ -168,7 +201,7 @@ const RikishiTable = ({
                   <td className="px-6 py-4 text-gray-400 font-mono text-xs tracking-wide group-hover:bg-[var(--hover-bg)]">
                     {rikishi.end || (
                       <span className="inline-block px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-700 font-bold">
-                        ACTIVE
+                        現役
                       </span>
                     )}
                   </td>
@@ -193,7 +226,7 @@ const RikishiTable = ({
                 {/* 上半部分：名字与排名 */}
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex flex-col">
-                    <span className="text-lg font-serif font-black text-gray-800 flex items-center gap-2">
+                    <span className="text-xl font-serif font-black text-gray-800 flex items-center gap-2">
                       {rikishi.name}
                       {rikishi.active && (
                         <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
@@ -204,8 +237,8 @@ const RikishiTable = ({
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="block text-[9px] text-gray-300 font-bold tracking-widest uppercase mb-0.5">
-                      Highest Rank
+                    <span className="block text-[9px] text-gray-300 font-bold tracking-wider mb-0.5">
+                      最高位
                     </span>
                     {/* ✨ 排名标签：手机端也要跟随主题色 */}
                     <span
@@ -226,16 +259,16 @@ const RikishiTable = ({
                 {/* 下半部分：时间数据 */}
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">
-                      Debut
+                    <span className="block text-[9px] text-gray-400 font-bold tracking-wider mb-1">
+                      初土俵
                     </span>
                     <span className="font-mono text-gray-600 font-medium">
                       {rikishi.start}
                     </span>
                   </div>
                   <div>
-                    <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">
-                      Retire
+                    <span className="block text-[9px] text-gray-400 font-bold tracking-wider mb-1">
+                      引退
                     </span>
                     <span
                       className={cn(
@@ -243,7 +276,7 @@ const RikishiTable = ({
                         rikishi.active ? "text-green-600" : "text-gray-600",
                       )}
                     >
-                      {rikishi.end || "ACTIVE"}
+                      {rikishi.end || "現役"}
                     </span>
                   </div>
                 </div>

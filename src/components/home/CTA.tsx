@@ -4,7 +4,6 @@ import React from "react";
 import Link from "@/components/ui/TransitionLink";
 import { ArrowRight, Search, Plus } from "lucide-react";
 import Section from "@/components/ui/Section";
-import { cn } from "@/lib/utils";
 
 const CTA = () => {
   return (
@@ -12,9 +11,6 @@ const CTA = () => {
       <div className="max-w-5xl mx-auto reveal-up">
         {/* --- 顶部文案区 --- */}
         <div className="text-center mb-10 md:mb-20">
-          <span className="text-sumo-brand font-bold tracking-[0.3em] uppercase text-xs md:text-sm mb-6 block font-sans">
-            Join The Community
-          </span>
           <h2 className="text-5xl md:text-7xl font-black text-sumo-text font-serif leading-tight">
             将来の横綱を、
             <br className="md:hidden" />
@@ -26,22 +22,18 @@ const CTA = () => {
         </div>
 
         {/* --- 双子星行动条 (Dual Action Bar) --- */}
-        <div className="flex flex-col md:flex-row w-full gap-4 md:gap-0">
+        <div className="flex flex-col md:flex-row w-full gap-4 md:gap-6">
           {/* === 左侧：寻找道场 (Search) === */}
           <Link
             href="/clubs/map"
             className="group relative flex-1 md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
             
-            /* Mobile Style: 独立白卡片 */
+            /* Mobile: 白卡片，左侧色条，无描边 */
             bg-white border border-gray-100 rounded-sm shadow-sm
             
-            /* Desktop Style: 
-               1. bg-white: 电脑端也是纯白
-               2. border-r-0: 去掉右边框，为了和右边的卡片无缝拼接
-            */
-            md:bg-white md:rounded-none md:shadow-none md:border-y md:border-l md:border-r-0 md:border-gray-100
+            /* Desktop: 极淡红底 + 左侧色条 + 圆角阴影 */
+            md:bg-sumo-red/5 md:rounded-sm md:shadow-sm md:border md:border-gray-100
 
-            /* 按下时变红：桌面 hover / 手机 touch 时 active 会触发 */
             hover:bg-sumo-red hover:border-sumo-red
             active:bg-sumo-red active:border-sumo-red
             "
@@ -52,13 +44,9 @@ const CTA = () => {
                 <Search size={48} strokeWidth={1.5} />
               </div>
 
-              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white [.group:active_&]:text-white tracking-tight mb-2 transition-colors duration-200">
+              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white [.group:active_&]:text-white tracking-tight transition-colors duration-200">
                 近くの道場を探す
               </h3>
-
-              <p className="text-xs font-bold tracking-[0.2em] text-gray-400 group-hover:text-white/80 [.group:active_&]:text-white/80 uppercase transition-colors duration-200">
-                Find A Club
-              </p>
             </div>
 
             {/* 2. 视觉锚点 (Magic Button)：按下时圆圈变白 */}
@@ -71,8 +59,8 @@ const CTA = () => {
               <ArrowRight size={24} />
             </div>
 
-            {/* 左侧色条 (Mobile Only) */}
-            <div className="md:hidden absolute left-0 top-4 bottom-4 w-[4px] bg-sumo-red rounded-r"></div>
+            {/* 左侧色条：移动端 + 桌面端均显示 */}
+            <div className="absolute left-0 top-4 bottom-4 w-[4px] bg-sumo-red rounded-r"></div>
           </Link>
 
           {/* === 右侧：管理者入口 (Manager) === */}
@@ -80,16 +68,12 @@ const CTA = () => {
             href="/manager/entry"
             className="group relative flex-1 md:h-[380px] flex flex-col items-center justify-center p-8 transition-all duration-200
             
-            /* Mobile Style */
+            /* Mobile: 白卡片，左侧色条，无描边 */
             bg-white border border-gray-100 rounded-sm shadow-sm
             
-            /* Desktop Style: 
-               1. md:bg-white: 这里改成了纯白！和左边统一
-               2. md:border: 四周有边框 (左边框会自动补上左卡片缺的那一块)
-            */
-            md:bg-white md:rounded-none md:shadow-none md:border md:border-gray-100
-            
-            /* 按下时变蓝：桌面 hover / 手机 touch 时 active 会触发 */
+            /* Desktop: 极淡蓝底 + 左侧色条 + 圆角阴影 */
+            md:bg-sumo-brand/5 md:rounded-sm md:shadow-sm md:border md:border-gray-100
+
             hover:bg-sumo-brand hover:border-sumo-brand
             active:bg-sumo-brand active:border-sumo-brand
             "
@@ -99,13 +83,9 @@ const CTA = () => {
                 <Plus size={48} strokeWidth={1.5} />
               </div>
 
-              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white [.group:active_&]:text-white tracking-tight mb-2 transition-colors duration-200">
+              <h3 className="text-2xl md:text-3xl font-black text-sumo-text group-hover:text-white [.group:active_&]:text-white tracking-tight transition-colors duration-200">
                 クラブを掲載する
               </h3>
-
-              <p className="text-xs font-bold tracking-[0.2em] text-gray-400 group-hover:text-white/80 [.group:active_&]:text-white/80 uppercase transition-colors duration-200">
-                For Managers
-              </p>
             </div>
 
             {/* 视觉锚点 (Magic Button)：按下时圆圈变白 */}
@@ -118,8 +98,8 @@ const CTA = () => {
               <ArrowRight size={24} />
             </div>
 
-            {/* 左侧色条 (Mobile Only) */}
-            <div className="md:hidden absolute left-0 top-4 bottom-4 w-[4px] bg-sumo-brand rounded-r"></div>
+            {/* 左侧色条：移动端 + 桌面端均显示 */}
+            <div className="absolute left-0 top-4 bottom-4 w-[4px] bg-sumo-brand rounded-r"></div>
           </Link>
         </div>
         {/* 底部补充文案 */}

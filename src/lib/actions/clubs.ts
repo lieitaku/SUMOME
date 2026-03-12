@@ -302,3 +302,49 @@ export async function deleteClub(id: string) {
     return { error: "削除に失敗しました。" };
   }
 }
+
+// ==============================================================================
+// 4. 表示 / 非表示 切り替え用 (Toggle Hidden)
+// ==============================================================================
+export async function toggleClubHidden(id: string) {
+  const [currentUser, club] = await Promise.all([
+    getCurrentUser(),
+    prisma.club.findUnique({
+      where: { id },
+      select: { slug: true, ownerId: true, hidden: true },
+    }),
+  ]);
+
+  if (!currentUser) {
+    return { error: "ログインしてください。" };
+  }
+
+  const isAdmin = currentUser.role === "ADMIN";
+  if (!isAdmin && club?.ownerId !== currentUser.id) {
+    return { error: "このクラブの編集権限がありません。" };
+  }
+
+  if (!club) {
+    return { error: "クラブが見つかりません。" };
+  }
+
+  try {
+    await prisma.club.update({
+      where: { id },
+      data: { hidden: !club.hidden },
+    });
+
+    // 一覧・マイページ・詳細・トップなどを更新
+    revalidatePath("/admin/clubs");
+    revalidatePath("/admin/my-club");
+    revalidatePath(`/clubs/${club.slug}`);
+    revalidateTag("clubs");
+    revalidateTag("admin-stats");
+    revalidateTag("home-pickup");
+
+    return { success: true };
+  } catch (error) {
+    console.error("非表示切り替え失敗:", error);
+    return { error: "非表示ステータスの更新に失敗しました。" };
+  }
+}

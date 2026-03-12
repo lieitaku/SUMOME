@@ -63,7 +63,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#faf9f6] text-sumo-dark pt-16 pb-10 md:pt-24 md:pb-12 relative overflow-hidden border-t border-gray-100">
+    <footer className="bg-[#faf9f6] text-sumo-dark pt-8 pb-10 md:pt-24 md:pb-12 relative overflow-hidden border-t border-gray-100">
       {/* Background Texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03]"
@@ -82,7 +82,7 @@ const Footer = () => {
             {isHomePage ? (
               <button
                 onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="flex items-center gap-4 mb-6 group cursor-pointer"
+                className="flex items-center gap-3 mb-4 md:mb-6 group cursor-pointer"
               >
                 {/* 竖线：保持跟随主题色，体现地区差异 */}
                 <div
@@ -103,7 +103,7 @@ const Footer = () => {
                 </div>
               </button>
             ) : (
-              <Link href="/" className="flex items-center gap-4 mb-6 group">
+              <Link href="/" className="flex items-center gap-3 mb-4 md:mb-6 group">
                 {/* 竖线：保持跟随主题色，体现地区差异 */}
                 <div
                   className="w-1 h-8 transition-transform duration-300 group-hover:scale-y-110"
@@ -124,10 +124,10 @@ const Footer = () => {
               </Link>
             )}
 
-            <p className="text-sm text-gray-500 mb-6 md:mb-8 leading-loose font-medium font-sans">
+            <p className="text-sm text-gray-500 mb-4 md:mb-8 leading-loose font-medium font-sans">
               相撲クラブ検索・応援プラットフォーム
               <br />
-              <span className="text-xs opacity-70 mt-2 block">
+              <span className="text-xs opacity-70 mt-2 md:mb-0 md:mt-2 block">
                 Connecting the spirits of Sumo to the future.
               </span>
             </p>
