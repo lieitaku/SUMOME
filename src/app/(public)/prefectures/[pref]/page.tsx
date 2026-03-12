@@ -222,22 +222,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
               }}
             >
               <div className="px-2 md:px-4 pt-8 md:pt-12 pb-0 text-center">
-                <div className="mb-8 flex justify-center">
-                  <span
-                    className="inline-flex items-center gap-2 py-1.5 px-4 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase border"
-                    style={{
-                      backgroundColor: `${theme.color}0D`,
-                      color: theme.color,
-                      borderColor: `${theme.color}33`,
-                    }}
-                  >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: theme.color }}
-                    ></span>
-                    トップスポンサー
-                  </span>
-                </div>
                 <div
                   className="w-full relative overflow-visible"
                   style={{
