@@ -193,7 +193,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
             <main className="flex-grow">
 
                 {/* --- Header Section (品牌视觉区) --- */}
-                <section className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+                <section className="relative bg-sumo-brand text-white pt-32 pb-32 md:pb-48 overflow-hidden shadow-xl">
                     {/* 背景渐变 */}
                     <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${BRAND_BLUE}, #1a3a7a)` }}></div>
                     {/* 背景网格装饰 */}
@@ -220,14 +220,12 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                             <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-[10px] uppercase tracking-widest border border-white/10">
                                 <MapPin size={12} /> {club.area} {club.city && `· ${club.city}`}
                             </span>
-                            <span className="hidden md:inline w-px h-4 bg-white/20"></span>
-                            <span className="text-[10px] uppercase tracking-[0.2em] opacity-80">ESTABLISHED DOJO</span>
                         </div>
                     </div>
                 </section>
 
                 {/* --- Main Content Section (卡片容器) --- */}
-                <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
+                <section className="relative px-4 md:px-6 z-20 -mt-20 md:-mt-24 pb-32">
                     <div className="container mx-auto max-w-6xl">
                         <Ceramic interactive={false} className="bg-white border-b-[6px] shadow-[0_30px_60px_-15px_rgba(36,84,164,0.15)] overflow-hidden p-0 border-b-sumo-brand">
                             <div className="flex flex-col lg:flex-row min-h-[800px]">

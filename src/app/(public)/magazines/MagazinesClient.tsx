@@ -228,7 +228,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 <input
                                     type="text"
                                     placeholder="タイトル、キーワードで検索..."
-                                    className="flex-1 min-w-0 h-full px-4 md:px-6 bg-transparent text-lg md:text-xl font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
+                                    className="flex-1 min-w-0 h-full px-4 md:px-6 bg-transparent text-sm md:text-lg font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
