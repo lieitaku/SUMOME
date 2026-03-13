@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { deleteInquiry } from "@/lib/actions/inquiries";
 
 interface Props {
@@ -9,12 +11,19 @@ interface Props {
 }
 
 export default function DeleteInquiryButton({ id }: Props) {
+    const router = useRouter();
     const [showConfirm, setShowConfirm] = useState(false);
     const [isPending, startTransition] = useTransition();
 
     const handleDelete = () => {
         startTransition(async () => {
-            await deleteInquiry(id);
+            const res = await deleteInquiry(id);
+            if ((res as { success?: boolean })?.success !== false) {
+                router.refresh();
+            } else {
+                toast.error((res as { error?: string })?.error ?? "削除に失敗しました");
+                setShowConfirm(false);
+            }
         });
     };
 

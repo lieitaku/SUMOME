@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { CalendarDays, User, Mail, MessageSquare, Phone } from "lucide-react";
+import { CalendarDays, User, Mail, MessageSquare, Phone, Building2 } from "lucide-react";
 import StatusSelect from "@/components/admin/applications/StatusSelect";
 import DeleteApplicationButton from "@/components/admin/applications/DeleteApplicationButton";
 
@@ -20,8 +20,8 @@ export type ApplicationListItem = {
 function Fallback() {
     return (
         <>
-            <div className="grid grid-cols-3 gap-4">
-                {[1, 2, 3].map((i) => (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="bg-white border border-gray-200 rounded-xl p-4 text-center animate-pulse">
                         <div className="h-8 w-12 bg-gray-200 rounded mx-auto mb-2" />
                         <div className="h-4 w-16 bg-gray-100 rounded mx-auto" />
@@ -41,23 +41,28 @@ function Content({ apps }: { apps: ApplicationListItem[] }) {
     const statusCounts = {
         pending: apps.filter(a => a.status === "pending").length,
         contacted: apps.filter(a => a.status === "contacted").length,
-        completed: apps.filter(a => a.status === "completed").length,
+        joined: apps.filter(a => a.status === "joined").length,
+        rejected: apps.filter(a => a.status === "rejected").length,
     };
 
     return (
         <>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-black text-yellow-500">{statusCounts.pending}</div>
+                    <div className="text-2xl font-black text-red-500">{statusCounts.pending}</div>
                     <div className="text-xs text-gray-400 font-bold">未対応</div>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-black text-blue-500">{statusCounts.contacted}</div>
+                    <div className="text-2xl font-black text-yellow-500">{statusCounts.contacted}</div>
                     <div className="text-xs text-gray-400 font-bold">連絡済み</div>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
-                    <div className="text-2xl font-black text-green-500">{statusCounts.completed}</div>
-                    <div className="text-xs text-gray-400 font-bold">対応完了</div>
+                    <div className="text-2xl font-black text-blue-500">{statusCounts.joined}</div>
+                    <div className="text-xs text-gray-400 font-bold">入会完了</div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl p-4 text-center">
+                    <div className="text-2xl font-black text-green-500">{statusCounts.rejected}</div>
+                    <div className="text-xs text-gray-400 font-bold">キャンセル</div>
                 </div>
             </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -72,12 +77,18 @@ function Content({ apps }: { apps: ApplicationListItem[] }) {
                                 <div className="flex flex-col lg:flex-row justify-between gap-6">
                                     <div className="flex-1 space-y-4">
                                         <div className="flex items-center gap-3 flex-wrap">
-                                            <span className="bg-sumo-brand text-white text-[10px] font-black px-2 py-1 rounded tracking-widest uppercase">
+                                            <span className="bg-sumo-brand text-white text-[10px] font-black px-2 py-1 rounded tracking-widest uppercase flex items-center gap-1">
+                                                <Building2 size={10} />
                                                 {app.clubName}
                                             </span>
                                             <span className="text-[10px] font-normal text-gray-400 px-1.5 py-0.5 border rounded">
                                                 {app.experience === "beginner" ? "未経験者" : "経験者"}
                                             </span>
+                                            {app.status === "pending" && (
+                                                <span className="bg-red-500 text-white text-[10px] font-black px-2 py-1 rounded tracking-widest uppercase">
+                                                    NEW
+                                                </span>
+                                            )}
                                             <div className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
                                                 <CalendarDays size={14} />
                                                 {new Date(app.createdAt).toLocaleString("ja-JP")}
@@ -90,21 +101,25 @@ function Content({ apps }: { apps: ApplicationListItem[] }) {
                                             </div>
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                                 <Mail size={16} className="text-gray-400" />
-                                                {app.email}
+                                                <a href={`mailto:${app.email}`} className="hover:text-sumo-brand transition-colors">
+                                                    {app.email}
+                                                </a>
                                             </div>
                                             {app.phone && (
                                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                                     <Phone size={16} className="text-gray-400" />
-                                                    {app.phone}
+                                                    <a href={`tel:${app.phone}`} className="hover:text-sumo-brand transition-colors">
+                                                        {app.phone}
+                                                    </a>
                                                 </div>
                                             )}
                                         </div>
-                                        {app.message && (
+                                        {(app.message ?? "").trim() ? (
                                             <div className="flex gap-2 p-4 bg-gray-50 rounded-lg border border-gray-100 text-sm text-gray-500">
                                                 <MessageSquare size={16} className="shrink-0 mt-1 text-gray-400" />
-                                                <p>{app.message}</p>
+                                                <p className="whitespace-pre-wrap">{app.message}</p>
                                             </div>
-                                        )}
+                                        ) : null}
                                     </div>
                                     <div className="lg:w-48 flex flex-col justify-between items-end gap-4 lg:border-l lg:border-gray-100 lg:pl-6">
                                         <div className="text-right w-full">
@@ -155,6 +170,10 @@ export default function ApplicationsListClient({ initialData }: Props) {
             })
             .finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        if (initialData) setList(initialData);
+    }, [initialData]);
 
     if (error) {
         return (

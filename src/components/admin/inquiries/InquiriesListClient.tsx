@@ -171,6 +171,10 @@ export default function InquiriesListClient({ initialData }: Props) {
             .finally(() => setLoading(false));
     }, []);
 
+    useEffect(() => {
+        if (initialData) setList(initialData);
+    }, [initialData]);
+
     if (error) {
         return (
             <div className="py-12 text-center text-red-500 text-sm">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { updateInquiryStatus } from "@/lib/actions/inquiries";
 import { InquiryStatus } from "@prisma/client";
 
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function InquiryStatusSelect({ id, initialStatus }: Props) {
+    const router = useRouter();
     const [status, setStatus] = useState<InquiryStatus>(initialStatus);
     const [isPending, startTransition] = useTransition();
 
@@ -25,7 +27,12 @@ export default function InquiryStatusSelect({ id, initialStatus }: Props) {
         setStatus(newStatus);
 
         startTransition(async () => {
-            await updateInquiryStatus(id, newStatus);
+            const res = await updateInquiryStatus(id, newStatus);
+            if ((res as { success?: boolean })?.success !== false) {
+                router.refresh();
+            } else {
+                setStatus(initialStatus);
+            }
         });
     };
 

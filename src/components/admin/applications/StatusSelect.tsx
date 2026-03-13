@@ -1,68 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { ApplicationStatus } from "@prisma/client";
 import { updateApplicationStatusAction } from "@/lib/actions/recruit";
-import { Loader2, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-// 定义状态对应的颜色样式
-const statusStyles: Record<ApplicationStatus, string> = {
-    pending: "bg-gray-100 text-gray-600 border-gray-200",
-    contacted: "bg-blue-50 text-blue-700 border-blue-200",
-    joined: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    rejected: "bg-red-50 text-red-700 border-red-200",
-};
+const STATUS_OPTIONS: { value: ApplicationStatus; label: string; color: string }[] = [
+    { value: "pending", label: "未対応", color: "bg-red-100 text-red-700 border-red-200" },
+    { value: "contacted", label: "連絡済み", color: "bg-yellow-100 text-yellow-700 border-yellow-200" },
+    { value: "joined", label: "入会完了", color: "bg-blue-100 text-blue-700 border-blue-200" },
+    { value: "rejected", label: "キャンセル", color: "bg-gray-100 text-gray-700 border-gray-200" },
+];
 
-export default function StatusSelect({ id, initialStatus }: { id: string; initialStatus: ApplicationStatus }) {
-    const [loading, setLoading] = useState(false);
-    const [currentStatus, setCurrentStatus] = useState<ApplicationStatus>(initialStatus);
-    const [showSuccess, setShowSuccess] = useState(false);
+interface Props {
+    id: string;
+    initialStatus: ApplicationStatus;
+}
 
-    const handleChange = async (newStatus: string) => {
-        const status = newStatus as ApplicationStatus;
-        setLoading(true);
+export default function StatusSelect({ id, initialStatus }: Props) {
+    const router = useRouter();
+    const [status, setStatus] = useState<ApplicationStatus>(initialStatus);
+    const [isPending, startTransition] = useTransition();
 
-        const result = await updateApplicationStatusAction(id, status);
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newStatus = e.target.value as ApplicationStatus;
+        setStatus(newStatus);
 
-        if (result.success) {
-            setCurrentStatus(status);
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 2000); // 2秒后消失
-        } else {
-            alert(result.error);
-        }
-        setLoading(false);
+        startTransition(async () => {
+            const res = await updateApplicationStatusAction(id, newStatus);
+            if (res?.success) {
+                router.refresh();
+            } else {
+                setStatus(initialStatus);
+            }
+        });
     };
 
-    return (
-        <div className="relative w-full group">
-            <select
-                value={currentStatus}
-                onChange={(e) => handleChange(e.target.value)}
-                disabled={loading}
-                className={cn(
-                    "w-full text-[11px] font-black uppercase tracking-tighter border-2 rounded-xl p-2.5 outline-none transition-all cursor-pointer appearance-none",
-                    statusStyles[currentStatus],
-                    loading && "opacity-50 cursor-not-allowed"
-                )}
-            >
-                <option value="pending">未対応 (Pending)</option>
-                <option value="contacted">連絡済み (Contacted)</option>
-                <option value="joined">入会完了 (Joined)</option>
-                <option value="rejected">キャンセル (Rejected)</option>
-            </select>
+    const currentOption = STATUS_OPTIONS.find((opt) => opt.value === status);
 
-            {/* 状态指示图标 */}
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                {loading ? (
-                    <Loader2 size={14} className="animate-spin opacity-50" />
-                ) : showSuccess ? (
-                    <Check size={14} className="text-emerald-500" />
-                ) : (
-                    <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-current opacity-30" />
-                )}
-            </div>
-        </div>
+    return (
+        <select
+            value={status}
+            onChange={handleChange}
+            disabled={isPending}
+            className={`w-full px-3 py-2 rounded-lg border text-xs font-bold transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-sumo-brand/20 ${currentOption?.color || ""} ${isPending ? "opacity-50" : ""}`}
+        >
+            {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                </option>
+            ))}
+        </select>
     );
 }

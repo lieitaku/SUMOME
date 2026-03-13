@@ -8,7 +8,17 @@ export default async function AdminApplicationsPage() {
     const user = await getCurrentUser();
     if (!user) redirect("/login");
 
-    let apps;
+    let apps: {
+        id: string;
+        clubName: string;
+        name: string;
+        email: string;
+        phone: string | null;
+        experience: string | null;
+        message: string | null;
+        status: string;
+        createdAt: Date;
+    }[] = [];
     if (user.role === "ADMIN") {
         apps = await prisma.application.findMany({
             orderBy: { createdAt: "desc" },
@@ -66,7 +76,15 @@ export default async function AdminApplicationsPage() {
                     </p>
                 </div>
             </div>
-            <ApplicationsListClient initialData={serializedApps} />
+            <ApplicationsListClient
+                initialData={
+                    serializedApps.map(app => ({
+                        ...app,
+                        // Ensure experience is always a string (not null)
+                        experience: app.experience ?? "",
+                    }))
+                }
+            />
         </div>
     );
 }
