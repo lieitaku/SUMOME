@@ -1,5 +1,6 @@
 import React from "react";
 import { prisma } from "@/lib/db";
+import type { BannerSponsorTier } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
@@ -61,19 +62,28 @@ export default async function Home({
     const p = preview.payload as { banner?: { id?: string; name?: string; image?: string; alt?: string; link?: string; category?: string; sponsorTier?: string | null } };
     const single = p.banner;
     if (single?.image) {
+      const validTier: BannerSponsorTier | null =
+        single.sponsorTier === "OFFICIAL" || single.sponsorTier === "LOCAL"
+          ? single.sponsorTier
+          : null;
       const previewBanner = {
         id: single.id ?? "preview-banner",
         name: single.name ?? "プレビュー",
         image: single.image,
         alt: single.alt ?? single.name ?? "",
-        link: single.link ?? "",
+        link: single.link ?? null,
         category: (single.category === "sponsor" ? "sponsor" : "club") as "club" | "sponsor",
-        sponsorTier: single.sponsorTier ?? null,
+        sponsorTier: validTier,
         sortOrder: 0,
         isActive: true,
+        // 填补 DB 类型缺失的字段
+        updatedAt: new Date(),
+        createdAt: new Date(),
       };
       const rest = bannersFromDb.filter((b) => b.id !== previewBanner.id);
-      banners = [previewBanner, ...rest].sort((a, b) => a.sortOrder - b.sortOrder);
+      banners = [previewBanner, ...rest].sort(
+        (a, b) => a.sortOrder - b.sortOrder
+      );
     }
   }
 
@@ -107,12 +117,12 @@ export default async function Home({
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        {/* 桌面横屏 16:9 / 手机竖屏 9:16：传 videoWebmSrc + videoWebmSrcMobile，可选 posterSrcMobile */}
+        {/* 桌面横屏 16:9 / 手机竖屏 9:16：MP4 用 videoSrc，WebM 用 videoWebmSrc */}
         <Hero
           sponsors={sponsors}
           displayMode={displaySettings.homeDisplayMode}
-          videoWebmSrc="/videos/hero-bg-landscape.webm"
-          videoWebmSrcMobile="/videos/hero-bg-portrait.webm"
+          videoSrc="/videos/hero-bg.mp4"
+          videoSrcMobile="/videos/hero-bg.mp4"
           posterSrc="/images/hero/hero-poster.webp"
           posterSrcMobile="/images/hero/hero-poster-portrait.webp"
         />
