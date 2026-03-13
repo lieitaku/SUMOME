@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { authErrorToJapanese } from "@/lib/auth-error-messages";
 
 export type SignUpState = {
   message?: string;
@@ -67,7 +68,7 @@ export async function signUp(
 
   if (authError) {
     return {
-      message: authError.message,
+      message: authErrorToJapanese(authError.message),
       inputs: { clubName, name, email },
     };
   }
@@ -97,6 +98,7 @@ export async function signUp(
         area: "未設定",
         address: "未設定",
         published: false,
+        hidden: true, // ✨ デフォルトで非公開（審査制）
         ownerId: authData.user.id,
       },
     });

@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useTransition } from "react";
-import { Save, UserPlus } from "lucide-react";
+import React, { useState, useTransition } from "react";
+import { Save, UserPlus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { createStaffAccount, updateMyProfile, updatePassword } from "@/lib/actions/users";
+import { createStaffAccount, updateMyProfile, updatePassword, deleteMyAccount } from "@/lib/actions/users";
 
 // --- Profile Form ---
 export function ProfileForm({ initialName }: { initialName: string }) {
@@ -91,6 +91,71 @@ export function CreateStaffForm() {
             <button disabled={isPending} className="w-full bg-sumo-brand text-white py-3.5 rounded-xl font-bold hover:bg-sumo-dark transition-all shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 <UserPlus size={18} />
                 {isPending ? "作成中..." : "管理者アカウントを作成"}
+            </button>
+        </form>
+    );
+}
+
+const CONFIRM_WORD = "削除";
+
+// --- Delete Account Form ---
+export function DeleteAccountForm({
+    role,
+    canDelete,
+    blockReason,
+}: {
+    role: "ADMIN" | "OWNER";
+    canDelete: boolean;
+    blockReason?: string;
+}) {
+    const [confirmValue, setConfirmValue] = useState("");
+    const [isPending, startTransition] = useTransition();
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!canDelete || confirmValue !== CONFIRM_WORD) {
+            if (confirmValue !== CONFIRM_WORD) toast.error(`「${CONFIRM_WORD}」と入力して確認してください。`);
+            return;
+        }
+        startTransition(async () => {
+            const res = await deleteMyAccount();
+            if (res?.error) {
+                toast.error(res.error);
+            }
+            // 成功時は deleteMyAccount 内で redirect される
+        });
+    };
+
+    if (!canDelete && blockReason) {
+        return (
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                <p className="text-sm font-bold text-amber-800">{blockReason}</p>
+            </div>
+        );
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="text-xs font-bold text-gray-400 uppercase ml-1 mb-1 block">
+                    確認のため「{CONFIRM_WORD}」と入力
+                </label>
+                <input
+                    type="text"
+                    value={confirmValue}
+                    onChange={(e) => setConfirmValue(e.target.value)}
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium placeholder-gray-400"
+                    placeholder={CONFIRM_WORD}
+                    disabled={isPending}
+                />
+            </div>
+            <button
+                type="submit"
+                disabled={isPending || confirmValue !== CONFIRM_WORD}
+                className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                {isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                {isPending ? "削除中..." : "アカウントを削除する"}
             </button>
         </form>
     );

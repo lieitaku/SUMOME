@@ -1,14 +1,12 @@
 import React from "react";
-import { UserPlus, Shield, Lock, User, Save, Store, HelpCircle, Mail, Zap } from "lucide-react";
-import { toast } from "sonner"; // 假设你是用 Sonner，如果是客户端组件里用
+import { UserPlus, Shield, Lock, User, Zap, Trash2 } from "lucide-react";
 import { createStaffAccount, updateMyProfile, updatePassword } from "@/lib/actions/users";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-// 这里引入客户端组件 (Form 需要是 'use client')
-import { ProfileForm, PasswordForm, CreateStaffForm } from "./components"; // 下面我会把组件代码给你，建议拆分，或者像之前一样放在同一个文件底部
+import { ProfileForm, PasswordForm, CreateStaffForm, DeleteAccountForm } from "./components";
 
 // ==============================================================================
 // 🟢 Server Component: 页面入口
@@ -30,6 +28,23 @@ export default async function SettingsPage() {
     if (!dbUser) redirect("/login");
 
     const isAdmin = dbUser.role === "ADMIN";
+
+    let deleteCanDelete = true;
+    let deleteBlockReason: string | undefined;
+    if (dbUser.role === "ADMIN") {
+        const [adminCount, activityCount] = await Promise.all([
+            prisma.user.count({ where: { role: "ADMIN" } }),
+            prisma.activity.count({ where: { authorId: session.user.id } }),
+        ]);
+        if (adminCount <= 1) {
+            deleteCanDelete = false;
+            deleteBlockReason = "最後の管理者のため削除できません。";
+        } else if (activityCount > 0) {
+            deleteCanDelete = false;
+            deleteBlockReason =
+                "投稿した活動・ニュースがあるため削除できません。別の管理者に譲渡するか、該当コンテンツを削除してください。";
+        }
+    }
 
     return (
         <div className="max-w-6xl mx-auto space-y-10 pb-20">
@@ -79,6 +94,28 @@ export default async function SettingsPage() {
                             </div>
                         </div>
                         <PasswordForm />
+                    </div>
+
+                    {/* 3. アカウント削除（全员） */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                            <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                                <Trash2 size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">アカウント削除</h2>
+                                <p className="text-xs text-gray-400">
+                                    {isAdmin
+                                        ? "管理者アカウントを削除します。最後の管理者の場合は削除できません。"
+                                        : "クラブとアカウントを削除し、登録を解除します。削除後は同じメールで再登録可能です。"}
+                                </p>
+                            </div>
+                        </div>
+                        <DeleteAccountForm
+                            role={dbUser.role}
+                            canDelete={deleteCanDelete}
+                            blockReason={deleteBlockReason}
+                        />
                     </div>
                 </div>
 
@@ -132,41 +169,7 @@ export default async function SettingsPage() {
                                 </Link>
                             </div>
                         </div>
-                    ) : (
-                        /* ================== OWNER 专属视图 ================== */
-                        /* Owner 不需要加人，给他们显示帮助信息或俱乐部快捷方式 */
-                        <div className="space-y-8">
-                            {/* 帮助卡片 */}
-                            <div className="bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-3xl shadow-lg text-white">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-2 bg-white/10 rounded-lg text-white">
-                                        <HelpCircle size={20} />
-                                    </div>
-                                    <h2 className="text-lg font-bold">サポートセンター</h2>
-                                </div>
-                                <p className="text-sm text-white/70 leading-relaxed mb-6">
-                                    システムの操作方法や、掲載内容の修正依頼についてご不明な点がございましたら、本部事務局までお問い合わせください。
-                                </p>
-                                <a
-                                    href="mailto:support@sumo-cms.com"
-                                    className="flex items-center justify-center gap-2 w-full py-3 bg-white text-gray-900 rounded-xl font-bold text-xs hover:bg-gray-100 transition-colors"
-                                >
-                                    <Mail size={16} /> 事務局へ問い合わせる
-                                </a>
-                            </div>
-
-                            {/* 俱乐部信息提示 */}
-                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <Store size={20} className="text-sumo-brand" />
-                                    <h3 className="font-bold text-gray-900">クラブ情報の編集</h3>
-                                </div>
-                                <p className="text-xs text-gray-500 mb-6">
-                                    ご自身の道場・クラブの情報を更新する場合は、左側メニューの「My Club」から編集画面へ移動してください。
-                                </p>
-                            </div>
-                        </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>

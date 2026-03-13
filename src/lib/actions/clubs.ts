@@ -324,6 +324,11 @@ export async function toggleClubHidden(id: string) {
     return { error: "このクラブの編集権限がありません。" };
   }
 
+  // ✨ 審査制ロジック：一般ユーザー(OWNER)は「非公開→公開」への変更不可
+  if (!isAdmin && club.hidden === true) {
+    return { error: "公開するには管理者の承認が必要です。事務局へご連絡ください。" };
+  }
+
   if (!club) {
     return { error: "クラブが見つかりません。" };
   }

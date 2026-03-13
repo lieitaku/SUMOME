@@ -162,7 +162,7 @@ const RegistrationForm = () => {
                                             アカウント作成
                                         </h3>
                                         <p className="text-xs text-gray-400 font-bold tracking-widest uppercase">
-                                            Create New Account
+                                            新規アカウント作成
                                         </p>
                                     </div>
                                     <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 border border-gray-100">
@@ -282,11 +282,11 @@ const RegistrationForm = () => {
                                         >
                                             {isPending ? (
                                                 <>
-                                                    <Loader2 size={16} className="animate-spin" /> Processing...
+                                                    <Loader2 size={16} className="animate-spin" /> 登録中...
                                                 </>
                                             ) : (
                                                 <>
-                                                    Create Account
+                                                    アカウントを作成
                                                     <ArrowRight
                                                         size={14}
                                                         className="group-hover:translate-x-1 transition-transform duration-300"

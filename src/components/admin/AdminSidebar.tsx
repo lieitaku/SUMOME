@@ -129,12 +129,10 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         </>
                     )}
 
-                    {/* 系统：設定（仅管理员）、操作ガイド（全员） */}
+                    {/* 系统：設定（全员）、操作ガイド（全员） */}
                     <>
                         <SectionLabel label="System" />
-                        {role === "ADMIN" && (
-                            <NavItem href="/admin/settings" icon={<Settings size={18} />} label="設定" activePath={pathname} onClick={closeMenu} />
-                        )}
+                        <NavItem href="/admin/settings" icon={<Settings size={18} />} label="設定" activePath={pathname} onClick={closeMenu} />
                         <NavItem href="/admin/guide" icon={<HelpCircle size={18} />} label="操作ガイド" activePath={pathname} onClick={closeMenu} />
                     </>
                 </nav>

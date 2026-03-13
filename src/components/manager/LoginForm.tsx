@@ -18,6 +18,7 @@ import {
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+import { loginErrorToJapanese } from "@/lib/auth-error-messages";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -61,10 +62,9 @@ const LoginForm = () => {
         } else if (error.message.includes("Email not confirmed")) {
           setErrorMsg("メールアドレスの確認が完了していません。受信トレイを確認してください。");
         } else if (error.message.includes("missing email")) {
-          // 捕获具体的 missing email 错误
           setErrorMsg("メールアドレスが入力されていません。");
         } else {
-          setErrorMsg(`ログインに失敗しました: ${error.message}`);
+          setErrorMsg(loginErrorToJapanese(error.message));
         }
       } else {
         router.refresh();
@@ -110,7 +110,7 @@ const LoginForm = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 mt-8 md:mt-0">
             <KeyRound size={12} className="text-sumo-gold" />
             <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-              Secure Access
+              セキュアアクセス
             </span>
           </div>
 
@@ -143,7 +143,7 @@ const LoginForm = () => {
                 <div className="relative z-10 mt-12 md:mt-0">
                   <div className="w-8 h-1 bg-gray-200 mb-4"></div>
                   <Link href="#" className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-sumo-brand transition-colors">
-                    <HelpCircle size={12} /> Help Center
+                    <HelpCircle size={12} /> ヘルプ
                   </Link>
                 </div>
               </div>
@@ -215,9 +215,9 @@ const LoginForm = () => {
                         <input type="checkbox" className="peer appearance-none w-3.5 h-3.5 border border-gray-300 rounded-[2px] checked:bg-sumo-brand checked:border-sumo-brand transition-all" />
                         <svg className="absolute inset-0 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity" viewBox="0 0 14 14" fill="none"><path d="M3 7L5.5 9.5L11 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
                       </div>
-                      <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-dark transition-colors uppercase tracking-wider">Remember Me</span>
+                      <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-dark transition-colors uppercase tracking-wider">ログイン状態を保持</span>
                     </label>
-                    <a href="#" className="text-[10px] font-bold text-gray-400 hover:text-sumo-brand transition-colors uppercase tracking-wider">Forgot Password?</a>
+                    <a href="#" className="text-[10px] font-bold text-gray-400 hover:text-sumo-brand transition-colors uppercase tracking-wider">パスワードをお忘れですか？</a>
                   </div>
 
                   <div className="pt-6">
@@ -232,9 +232,9 @@ const LoginForm = () => {
                     >
                       <span className="relative z-10 flex items-center justify-center gap-3">
                         {isLoading ? (
-                          <><Loader2 size={14} className="animate-spin" /> Authenticating...</>
+                          <><Loader2 size={14} className="animate-spin" /> ログイン中...</>
                         ) : (
-                          <>Login <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" /></>
+                          <>ログイン <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform duration-300" /></>
                         )}
                       </span>
                     </Button>

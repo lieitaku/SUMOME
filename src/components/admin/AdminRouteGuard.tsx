@@ -11,7 +11,6 @@ const ADMIN_ONLY_PREFIXES = [
   "/admin/banners",
   "/admin/prefecture-banners",
   "/admin/inquiries",
-  "/admin/settings",
 ];
 
 function isAdminOnlyPath(pathname: string): boolean {

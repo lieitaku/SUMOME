@@ -288,9 +288,17 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                 isTogglingHidden={isTogglingHidden}
                 onDelete={onDelete}
                 headerActions={
-                    <button
-                        type="button"
-                        disabled={isPreviewing}
+                    <div className="flex items-center gap-2">
+                        {/* ✨ 審査待ちステータスの表示 */}
+                        {!canEditSlug && initialData.hidden && (
+                            <div className="hidden md:flex items-center gap-2 px-3 py-2 bg-amber-50 text-amber-700 rounded-lg border border-amber-200 text-xs font-bold">
+                                <Info size={14} />
+                                <span>公開承認待ち</span>
+                            </div>
+                        )}
+                        <button
+                            type="button"
+                            disabled={isPreviewing}
                         onClick={async () => {
                             setIsPreviewing(true);
                             try {
@@ -321,6 +329,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                         {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
                         プレビュー
                     </button>
+                    </div>
                 }
             >
                 <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="クラブ プレビュー" />

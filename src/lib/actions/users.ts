@@ -4,6 +4,8 @@ import { supabaseAdmin } from "@/lib/supabase/admin"; // 用于管理员操作 (
 import { createClient } from "@/lib/supabase/server"; // 用于当前用户操作 (修改自己)
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { authErrorToJapanese } from "@/lib/auth-error-messages";
 
 /**
  * ==============================================================================
@@ -35,7 +37,7 @@ export async function createStaffAccount(formData: FormData) {
 
     if (authError) {
       console.error("Auth Error:", authError.message);
-      return { error: `Auth Error: ${authError.message}` };
+      return { error: authErrorToJapanese(authError.message) };
     }
 
     if (!authUser.user) {
@@ -148,4 +150,72 @@ export async function updatePassword(formData: FormData) {
     console.error("System Error:", error);
     return { error: "システムエラーが発生しました。" };
   }
+}
+
+/**
+ * ==============================================================================
+ * 4. 注销当前账户 (Delete My Account)
+ * ------------------------------------------------------------------------------
+ * 权限：登录用户 (ADMIN / OWNER)
+ * 逻辑：OWNER 先删俱乐部（级联活动/申请）再删 User；ADMIN 校验最后一名及是否有投稿。
+ *       然后删除 Prisma User、Supabase Auth 用户，登出并跳转首页。
+ * ==============================================================================
+ */
+export async function deleteMyAccount(): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user: authUser },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !authUser) {
+    return { error: "認証されていません。" };
+  }
+
+  const userId = authUser.id;
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      role: true,
+      _count: { select: { activities: true } },
+    },
+  });
+
+  if (!dbUser) {
+    return { error: "ユーザーが見つかりません。" };
+  }
+
+  if (dbUser.role === "ADMIN") {
+    const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
+    if (adminCount <= 1) {
+      return { error: "最後の管理者のため削除できません。" };
+    }
+    if (dbUser._count.activities > 0) {
+      return {
+        error:
+          "投稿した活動・ニュースがあるため削除できません。別の管理者に譲渡するか、該当コンテンツを削除してください。",
+      };
+    }
+  }
+
+  try {
+    if (dbUser.role === "OWNER") {
+      await prisma.club.deleteMany({ where: { ownerId: userId } });
+    }
+    await prisma.user.delete({ where: { id: userId } });
+
+    const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+    if (deleteAuthError) {
+      console.error("Auth deleteUser Error:", deleteAuthError);
+      return { error: "アカウントの削除に失敗しました。しばらくしてからお試しください。" };
+    }
+
+    await supabase.auth.signOut();
+    revalidatePath("/", "layout");
+  } catch (err) {
+    console.error("deleteMyAccount Error:", err);
+    return { error: "アカウントの削除に失敗しました。" };
+  }
+
+  redirect("/account-deleted");
 }
