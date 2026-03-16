@@ -154,12 +154,12 @@ const Hero = ({
   if (useVideo) {
     return (
       <section className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]">
-        {/* 背景层：poster 立即显示 → 视频加载后淡入 */}
-        <div className="absolute inset-0 z-0">
+        {/* 背景层：poster 立即显示 → 视频加载后淡入；视频用 min-w/min-h + 居中确保填满无黑边 */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src={effectivePoster}
             alt=""
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
               videoPlaying ? "opacity-0" : "opacity-100"
             }`}
             aria-hidden
@@ -169,7 +169,7 @@ const Hero = ({
             <video
               key={isMobileView ? "mobile" : "desktop"}
               ref={videoRef}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="absolute top-1/2 left-1/2 block min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 scale-[1.02] object-cover"
               autoPlay
               muted
               loop
