@@ -362,7 +362,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 {/* 排序：PC + SP 共通 UI */}
                                 <div className="inline-flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                                        ソート
+                                        並び替え
                                     </span>
                                     <div className="inline-flex rounded-full bg-gray-100 p-1">
                                         <button

@@ -255,7 +255,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                     {galleryImages.length > 1 && (
                                         <div>
                                             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <Sparkles size={12} /> Dojo Scenery
+                                                <Sparkles size={12} /> 道場風景
                                             </h3>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {/* 切片：跳过第一张主图，显示剩下的副图 */}
