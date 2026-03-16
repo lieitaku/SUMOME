@@ -136,7 +136,7 @@ export default function ActivitiesListClient({
                     <div className="w-full h-px bg-gray-100 mb-4"></div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold tracking-[0.1em] text-gray-400 group-hover:text-sumo-brand transition-colors uppercase">
-                        View Details
+                        詳細を見る
                       </span>
                       <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-brand group-hover:bg-sumo-brand transition-all duration-300">
                         <ArrowRight size={14} className="text-gray-400 group-hover:text-white transition-colors" />

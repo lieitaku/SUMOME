@@ -10,10 +10,10 @@ import {
   Mail,
   ChevronLeft,
   ShieldCheck,
-  KeyRound,
   HelpCircle,
   Loader2,
   AlertCircle,
+  X,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
@@ -29,6 +29,7 @@ const LoginForm = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,7 +83,7 @@ const LoginForm = () => {
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
       {/* ==================== 1. Header ==================== */}
       <header className="relative bg-sumo-brand text-white pt-24 pb-40 md:pt-32 md:pb-48 overflow-hidden shadow-xl">
-        <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
+        <div className="absolute inset-0 bg-linear-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
           style={{
@@ -96,14 +97,14 @@ const LoginForm = () => {
           LOGIN
         </div>
 
-          <div className="container mx-auto max-w-5xl relative z-10 px-6 text-center">
-          <div className="absolute top-0 left-6">
+          <div className="container mx-auto max-w-5xl relative z-10 px-6 flex flex-col items-start text-left">
+          <div className="mb-6">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
             >
               <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-              <span className="text-xs font-bold tracking-widest uppercase">Home</span>
+              <span className="text-xs font-bold tracking-widest uppercase">ホームへ戻る</span>
             </Link>
           </div>
 
@@ -135,9 +136,13 @@ const LoginForm = () => {
 
                 <div className="relative z-10 mt-12 md:mt-0">
                   <div className="w-8 h-1 bg-gray-200 mb-4"></div>
-                  <Link href="#" className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-sumo-brand transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => setShowHelp(true)}
+                    className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-sumo-brand transition-colors"
+                  >
                     <HelpCircle size={12} /> ヘルプ
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -245,6 +250,54 @@ const LoginForm = () => {
           </Ceramic>
         </div>
       </section>
+
+      {/* Help Modal */}
+      {showHelp && (
+        <div
+          className="fixed inset-0 z-9999 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          onClick={() => setShowHelp(false)}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-gray-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-serif font-bold text-sumo-dark flex items-center gap-2">
+                <HelpCircle size={20} className="text-sumo-brand" />
+                ログインのヘルプ
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowHelp(false)}
+                className="p-2 rounded-xl text-gray-500 hover:bg-sumo-brand/10 hover:text-sumo-brand transition-colors"
+                aria-label="閉じる"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-4 text-sm text-gray-600">
+              <p className="leading-relaxed">
+                管理画面にログインするには、登録済みのメールアドレスとパスワードを入力してください。
+              </p>
+              <p className="leading-relaxed">
+                パスワードをお忘れの場合は、「パスワードをお忘れですか？」のリンクからパスワード再設定を行ってください。
+              </p>
+              <p className="leading-relaxed">
+                アカウントをお持ちでない方は、新規登録ページからアカウントを作成してください。
+              </p>
+            </div>
+            <div className="mt-6 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowHelp(false)}
+                className="px-5 py-2.5 bg-sumo-brand text-white text-sm font-bold rounded-xl hover:brightness-110 transition-all"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

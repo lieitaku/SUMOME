@@ -6,9 +6,9 @@ import { getCachedActivitiesPage } from "@/lib/cached-queries";
 export default async function ActivitiesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams?: { page?: string };
 }) {
-  const { page: pageParam } = await searchParams;
+  const pageParam = searchParams?.page;
   const initialPage = Math.max(1, Number(pageParam) || 1);
   const initialData = await getCachedActivitiesPage(initialPage);
 
@@ -41,7 +41,16 @@ export default async function ActivitiesPage({
         </section>
 
         {/* ==================== 2. Activity Grid (client, from API) ==================== */}
-        <ActivitiesListClient initialPage={initialPage} initialData={initialData} />
+        <ActivitiesListClient 
+          initialPage={initialPage} 
+          initialData={{
+            ...initialData,
+            activities: initialData.activities.map(act => ({
+              ...act,
+              date: act.date.toISOString(),
+            })),
+          }} 
+        />
       </main>
     </div>
   );
