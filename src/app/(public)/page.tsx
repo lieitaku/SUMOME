@@ -117,12 +117,12 @@ export default async function Home({
       <ScrollInitializer />
 
       <main className="flex-grow w-full">
-        {/* 桌面横屏 16:9 / 手机竖屏 9:16：MP4 用 videoSrc，WebM 用 videoWebmSrc */}
+        {/* 桌面横屏用 landscape，手机竖屏用 portrait；暂不显示 hero-bg.mp4 */}
         <Hero
           sponsors={sponsors}
           displayMode={displaySettings.homeDisplayMode}
-          videoSrc="/videos/hero-bg.mp4"
-          videoSrcMobile="/videos/hero-bg.mp4"
+          videoWebmSrc="/videos/hero-bg-landscape.webm"
+          videoWebmSrcMobile="/videos/hero-bg-portrait.webm"
           posterSrc="/images/hero/hero-poster.webp"
           posterSrcMobile="/images/hero/hero-poster-portrait.webp"
         />

@@ -28,27 +28,25 @@ const Introduction = () => {
       {/* 右侧：叙事 (文字) */}
       <div className="w-full lg:w-1/2 flex flex-col items-start lg:pl-10 reveal-up delay-100">
         {/* 大标题：墨色 + 红色强调 */}
-        <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-wide text-sumo-text mb-6 font-serif">
+        <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-wide text-sumo-text font-serif mb-2 pt-2">
           相撲の<span className="text-sumo-red">熱</span>を、
           <br />
           世界へ<span className="text-sumo-brand">届</span>ける。
         </h2>
 
         {/* 正文：深灰，易读 */}
-        <div className="text-sumo-text/80 text-base leading-loose tracking-wide font-medium space-y-4">
-          <p>
-            SUMOMEは、国技「相撲」の魅力をテクノロジーの力で最大化する次世代プラットフォームです。
-          </p>
-          <p>
+        <div className="text-sumo-text/80 text-base leading-loose tracking-wide font-medium space-y-4 mb-1">
+
+            SUMOMEは、国技「相撲」の魅力をテクノロジーの力で最大化する次世代プラットフォームです。<br />
             地域に根付くクラブと相撲を愛するすべての人を繋ぎ、未来の土俵を守るために、
             私たちは伝統と革新の架け橋となります。
-          </p>
+
         </div>
 
         {/* 链接：与正文保持 24px，与下方图片由父级 gap-6 控制 */}
         <Link
           href="/about"
-          className="group inline-flex items-center gap-2 mt-6 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all md:mt-10"
+          className="group inline-flex items-center gap-2 mt-3 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all md:mt-10"
         >
           <span className="text-sm font-bold tracking-widest">
             詳細を見る
