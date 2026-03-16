@@ -170,7 +170,7 @@ const Footer = () => {
             <div>
               <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                運営者の皆さまへ
+                クラブ運営者へ
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>

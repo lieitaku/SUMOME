@@ -81,7 +81,7 @@ const ContactPage = () => {
         />
 
         <div className="absolute top-1/2 right-10 -translate-y-1/2 text-[15vw] font-black text-white opacity-[0.03] select-none pointer-events-none leading-none mix-blend-overlay tracking-tighter font-sans">
-          CONTACT
+          お問い合わせ
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">

@@ -129,7 +129,7 @@ export default async function ActivityDetailPage({
             <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-sumo-brand transition-all">
               <ArrowLeft size={14} />
             </div>
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to List</span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">イベント一覧へ戻る</span>
           </Link>
 
           <div className="flex flex-wrap items-center gap-6 mb-8 opacity-90">
@@ -212,7 +212,7 @@ export default async function ActivityDetailPage({
               <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-sumo-brand group-hover:text-sumo-brand group-hover:-translate-x-1 transition-all">
                 <ArrowLeft size={16} />
               </div>
-              <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-brand uppercase tracking-widest transition-colors">Back to List</span>
+              <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-brand uppercase tracking-widest transition-colors">イベント一覧へ戻る</span>
             </Link>
           </div>
         </div>

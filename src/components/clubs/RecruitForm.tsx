@@ -71,7 +71,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                     <div className="flex justify-center mb-8">
                         <Link href={`/clubs/${club.slug}`} className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-colors text-white group">
                             <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to Detail</span>
+                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">詳細ページへ戻る</span>
                         </Link>
                     </div>
                     <div className="reveal-up delay-100">

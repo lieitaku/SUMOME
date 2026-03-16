@@ -206,7 +206,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                         <div className="flex justify-center mb-8">
                             <Link href="/clubs" className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group">
                                 <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to List</span>
+                                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">クラブ一覧へ戻る</span>
                             </Link>
                         </div>
 
@@ -270,7 +270,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                                     {/* 底部：官方链接 (SNS) */}
                                     <div className="mt-auto pt-8 border-t border-gray-200/50">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Official Links</h3>
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">公式リンク</h3>
                                         <div className="flex gap-4">
                                             {club.phone && (
                                                 <a href={`tel:${club.phone}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-emerald-100" title="電話をかける">
@@ -332,7 +332,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {/* 1. 稽古日程表 (设计感排版) */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                                <CalendarDays size={14} className="text-sumo-brand" /> Practice Schedule
+                                                <CalendarDays size={14} className="text-sumo-brand" /> 稽古日時
                                             </h4>
 
                                             <div className="flex flex-col gap-3">
@@ -401,7 +401,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {/* 2. 地址与地图 (名片风格) */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <MapPin size={14} className="text-sumo-brand" /> Access
+                                                <MapPin size={14} className="text-sumo-brand" /> アクセス
                                             </h4>
                                             <div className="relative group bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
                                                 <div className="flex items-start justify-between">
@@ -436,7 +436,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {club.phone && (
                                             <div className="col-span-1 md:col-span-2">
                                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                    <Phone size={14} className="text-sumo-brand" /> Contact
+                                                    <Phone size={14} className="text-sumo-brand" /> お問い合わせ
                                                 </h4>
                                                 <a
                                                     href={`tel:${club.phone}`}
@@ -461,7 +461,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {/* 4. 募集对象信息 */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
-                                                <Target size={14} className="text-sumo-brand" /> Target
+                                                <Target size={14} className="text-sumo-brand" /> 募集対象
                                             </h4>
                                             <div className="bg-sumo-brand/5 p-5 rounded-xl border border-sumo-brand/10 flex items-center justify-between">
                                                 <div>
@@ -484,7 +484,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                 <Users size={20} /> 入会を申し込む
                                             </span>
                                         </Button>
-                                        <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">Feel free to visit us anytime.</p>
+                                        <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">いつでもお気軽にお立ち寄りください。</p>
                                     </div>
                                 </div>
                             </div>

@@ -137,7 +137,7 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
                     onClick={() => window.history.back()}
                     className="text-xs font-black tracking-widest text-gray-400 hover:text-sumo-brand transition-colors uppercase"
                 >
-                    ← Back to Activities
+                    ← イベント一覧へ戻る
                 </button>
             </footer>
         </article>

@@ -171,7 +171,7 @@ export default async function MagazineDetailPage({
               className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group"
             >
               <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to List</span>
+              <span className="text-[10px] font-bold tracking-[0.2em] uppercase">フォトブック一覧へ戻る</span>
             </Link>
           </div>
 
