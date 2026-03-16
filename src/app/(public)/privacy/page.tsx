@@ -37,13 +37,6 @@ const PrivacyPage = () => {
         </div>
 
         <div className="container mx-auto max-w-4xl relative z-10 px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up mt-8 md:mt-0">
-            <ShieldCheck size={12} className="text-white" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-              Legal Document
-            </span>
-          </div>
-
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-4 text-white drop-shadow-sm reveal-up delay-100">
             プライバシーポリシー
           </h1>
@@ -203,7 +196,7 @@ const PrivacyPage = () => {
                         </div>
                         <div className="min-w-0 flex flex-col gap-0.5">
                           <span className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
-                            Contact Email
+                            お問い合わせ用メールアドレス
                           </span>
                           <a
                             href="mailto:privacy@sumome.jp"

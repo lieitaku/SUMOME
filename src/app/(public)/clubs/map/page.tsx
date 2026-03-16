@@ -30,7 +30,7 @@ const ClubsPage = () => {
               <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 bg-white rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100">
                 <MapPin size={12} className="text-sumo-brand" />
                 <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
-                  Area Search
+                  地域から探す
                 </span>
               </div>
               <h1 className="text-4xl md:text-6xl font-serif font-black text-gray-900 mb-6 tracking-tight">
@@ -68,9 +68,6 @@ const ClubsPage = () => {
 
                 {/* 2. 文字内容 */}
                 <div className="flex flex-col items-start text-left">
-                  <span className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-0.5 group-hover:text-sumo-brand transition-colors">
-                    Advanced Search
-                  </span>
                   <span className="text-lg md:text-xl font-bold text-gray-800 tracking-wide">
                     条件・キーワードで詳しく検索
                   </span>

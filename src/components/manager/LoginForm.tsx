@@ -96,7 +96,7 @@ const LoginForm = () => {
           LOGIN
         </div>
 
-        <div className="container mx-auto max-w-5xl relative z-10 px-6 text-center">
+          <div className="container mx-auto max-w-5xl relative z-10 px-6 text-center">
           <div className="absolute top-0 left-6">
             <Link
               href="/"
@@ -107,14 +107,7 @@ const LoginForm = () => {
             </Link>
           </div>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 mt-8 md:mt-0">
-            <KeyRound size={12} className="text-sumo-gold" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-              セキュアアクセス
-            </span>
-          </div>
-
-          <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm">
+          <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm mt-12 md:mt-8">
             管理画面ログイン
           </h1>
         </div>

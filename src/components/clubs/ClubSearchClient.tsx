@@ -353,7 +353,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     </span>
                                     {activeRegion !== "all" && (
                                         <span className="ml-2 px-2 py-0.5 bg-sumo-brand/10 text-sumo-brand text-[10px] font-bold rounded-full">
-                                            Active
+                                            選択中
                                         </span>
                                     )}
                                 </div>
@@ -405,7 +405,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     {activeRegion !== "all" && (
                                         <div className="relative pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
-                                                Select Prefecture
+                                                都道府県を選択
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
@@ -445,8 +445,8 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
                                     {filteredClubs.length}
                                 </span>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                                    Results Found
+                                <span className="text-xs font-bold text-gray-400 tracking-widest mb-1">
+                                    件のクラブが見つかりました
                                 </span>
                             </div>
 
@@ -559,7 +559,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     <Search size={40} className="text-gray-300" />
                                 </div>
                                 <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">
-                                    No Clubs Found
+                                    該当するクラブは見つかりませんでした
                                 </h3>
                                 <p className="text-gray-500 text-sm max-w-xs mx-auto mb-8 leading-relaxed">
                                     条件に一致するクラブが見つかりませんでした。
@@ -568,7 +568,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     onClick={handleReset}
                                     className="px-8 py-3 bg-sumo-dark text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-colors shadow-lg hover:-translate-y-1"
                                 >
-                                    Clear Filters
+                                    条件をリセット
                                 </button>
                             </div>
                         )}

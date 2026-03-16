@@ -37,13 +37,6 @@ const TermsPage = () => {
         </div>
 
         <div className="container mx-auto max-w-4xl relative z-10 px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up mt-8 md:mt-0">
-            <Scale size={12} className="text-white" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-              Terms of Service
-            </span>
-          </div>
-
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-4 text-white drop-shadow-sm reveal-up delay-100">
             利用規約
           </h1>

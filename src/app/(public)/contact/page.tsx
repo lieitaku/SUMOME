@@ -85,13 +85,6 @@ const ContactPage = () => {
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up">
-            <Send size={12} className="text-white" />
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-              Get in Touch
-            </span>
-          </div>
-
           <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
             お問い合わせ
           </h1>
@@ -115,7 +108,7 @@ const ContactPage = () => {
                 <div className="relative z-10">
                   {/* 标题 */}
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
-                    Contact Info
+                    お問い合わせ先
                   </h3>
 
                   <div className="space-y-10">
@@ -166,7 +159,7 @@ const ContactPage = () => {
                 <div className="relative z-10 mt-12 lg:mt-0">
                   <div className="w-8 h-1 bg-sumo-gold mb-3"></div>
                   <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                    Sumome Official
+                    SUMOME公式
                   </p>
                 </div>
               </div>

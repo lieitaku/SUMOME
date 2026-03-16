@@ -66,14 +66,7 @@ const RegistrationForm = () => {
                         </Link>
                     </div>
 
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up mt-8 md:mt-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-sumo-bg"></span>
-                        <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-                            Partnership Program
-                        </span>
-                    </div>
-
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100 mt-12 md:mt-8">
                         新規クラブ登録
                     </h1>
 
@@ -99,7 +92,7 @@ const RegistrationForm = () => {
                             <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col">
                                 <div className="relative z-10 flex-grow">
                                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
-                                        Benefits
+                                        メリット
                                     </h3>
 
                                     <h2 className="text-3xl font-serif font-bold text-sumo-dark mb-8 leading-tight">
@@ -148,7 +141,7 @@ const RegistrationForm = () => {
                                     <div className="flex items-center gap-3 opacity-60">
                                         <ShieldCheck size={16} className="text-gray-400" />
                                         <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                                            Secure & Private
+                                            安全・プライバシー保護
                                         </span>
                                     </div>
                                 </div>

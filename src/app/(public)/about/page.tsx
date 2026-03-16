@@ -31,14 +31,6 @@ const AboutPage = () => {
           </div>
 
           <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
-            {/* 顶部胶囊 */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8 reveal-up">
-              <Sparkles size={12} className="text-white" />
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-                Our Mission
-              </span>
-            </div>
-
             <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
               SUMOMEについて
             </h1>
@@ -83,10 +75,10 @@ const AboutPage = () => {
                       </div>
                     </div>
 
-                    {/* 底部英文装饰 */}
+                    {/* 底部装饰テキスト */}
                     <div className="mt-auto">
                       <p className="text-[10px] text-gray-400 font-bold tracking-[0.3em] uppercase">
-                        Tradition & Innovation
+                        伝統 × 革新
                       </p>
                     </div>
                   </div>
@@ -114,7 +106,7 @@ const AboutPage = () => {
                     <div className="absolute -inset-1 bg-gradient-to-r from-sumo-brand to-sumo-dark rounded-xl opacity-10 group-hover:opacity-20 transition duration-500 blur-sm"></div>
                     <div className="relative bg-[#F8F9FA] rounded-xl border border-gray-200 p-8 md:p-10 transition-all duration-300 hover:bg-white hover:shadow-xl">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-sumo-dark text-white text-[10px] font-bold tracking-widest uppercase rounded-sm mb-6">
-                        For Club Owners
+                        クラブ運営者の方へ
                       </div>
 
                       <h3 className="text-xl font-serif font-bold text-sumo-dark mb-4 flex items-center gap-3">

@@ -55,7 +55,7 @@ const PartnersPage = () => {
                         <div className="animate-fade-in-up">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase mb-6 border border-blue-100">
                                 <Sparkles size={12} />
-                                For Club Owners
+                                クラブ運営者の方へ
                             </div>
 
                             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-black text-gray-900 leading-[1.1] mb-6">

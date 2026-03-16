@@ -31,12 +31,6 @@ export default async function ActivitiesPage({
           </div>
 
           <div className="container mx-auto px-6 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8">
-              <Calendar size={12} className="text-white" />
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-                Activity Report
-              </span>
-            </div>
             <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm">
               活動記録
             </h1>

@@ -191,13 +191,6 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                     </div>
 
                     <div className="container mx-auto px-6 relative z-10 text-center">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-8">
-                            <BookOpen size={12} className="text-white" />
-                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white">
-                                Official Publications
-                            </span>
-                        </div>
-
                         <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm">
                             冊子一覧
                         </h1>
@@ -324,7 +317,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     {activeRegion !== "all" && (
                                         <div className="relative pt-8 border-t border-gray-100">
                                             <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
-                                                Select Prefecture
+                                                都道府県を選択
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
@@ -360,8 +353,8 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
                                     {filteredMagazines.length}
                                 </span>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
-                                    Issues Found
+                                <span className="text-xs font-bold text-gray-400 tracking-widest mb-1">
+                                    件の冊子が見つかりました
                                 </span>
                             </div>
 
@@ -542,8 +535,8 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                                     </p>
                                                 )}
                                                 <div className="mt-4 opacity-0 transform translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 hidden md:block">
-                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.2em] text-sumo-brand uppercase">
-                                                        VIEW DETAILS <ArrowRight size={10} />
+                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.2em] text-sumo-brand">
+                                                        詳細を見る <ArrowRight size={10} />
                                                     </span>
                                                 </div>
                                             </div>
@@ -556,7 +549,9 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                                     <Search size={24} />
                                 </div>
-                                <h3 className="text-lg font-serif font-bold text-gray-700 mb-2">No Magazines Found</h3>
+                                <h3 className="text-lg font-serif font-bold text-gray-700 mb-2">
+                                    該当する冊子は見つかりませんでした
+                                </h3>
                                 <button
                                     onClick={() => {
                                         setActiveRegion("all");

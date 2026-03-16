@@ -128,7 +128,7 @@ const Footer = () => {
               相撲クラブ検索・応援プラットフォーム
               <br />
               <span className="text-xs opacity-70 mt-2 md:mb-0 md:mt-2 block">
-                Connecting the spirits of Sumo to the future.
+                相撲の魂を、未来へつなぐ。
               </span>
             </p>
 
@@ -140,7 +140,7 @@ const Footer = () => {
             <div>
               <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                SITEMAP
+                サイトマップ
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
@@ -170,7 +170,7 @@ const Footer = () => {
             <div>
               <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                FOR MANAGERS
+                運営者の皆さまへ
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
@@ -195,7 +195,7 @@ const Footer = () => {
             <div>
               <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                SUPPORT
+                サポート
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
