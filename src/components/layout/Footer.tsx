@@ -63,7 +63,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#faf9f6] text-sumo-dark pt-8 pb-10 md:pt-24 md:pb-12 relative overflow-hidden border-t border-gray-100">
+    <footer className="bg-[#faf9f6] text-sumo-dark pt-8 pb-10 md:pt-24 md:pb-12 relative overflow-hidden border-t border-gray-100 selection:bg-sumo-brand selection:text-white">
       {/* Background Texture */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.03]"
