@@ -86,9 +86,10 @@ interface MagazinesClientProps {
 
 export default function MagazinesClient({ initialMagazines: initialMagazinesProp, regions: regionsProp }: MagazinesClientProps = {}) {
     const [magazinesFromApi, setMagazinesFromApi] = useState<Magazine[] | null>(null);
-    const [magazinesLoading, setMagazinesLoading] = useState(typeof initialMagazinesProp === "undefined");
+    const [magazinesLoading, setMagazinesLoading] = useState(true);
     const [magazinesError, setMagazinesError] = useState<string | null>(null);
-    const initialMagazines = initialMagazinesProp ?? magazinesFromApi ?? [];
+    // 优先使用 API 返回的实时数据，确保卡片能随后台变更而更新；API 未返回前用服务端 initialMagazines 占位
+    const initialMagazines = magazinesFromApi ?? initialMagazinesProp ?? [];
 
     const regions = useMemo(() => {
         if (regionsProp && regionsProp.length > 0) return regionsProp;
@@ -96,7 +97,6 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     }, [regionsProp, initialMagazines]);
 
     useEffect(() => {
-        if (typeof initialMagazinesProp !== "undefined") return;
         setMagazinesLoading(true);
         setMagazinesError(null);
         fetch("/api/magazines")
@@ -107,7 +107,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
             .then((data: Magazine[]) => setMagazinesFromApi(data))
             .catch(() => setMagazinesError("読み込みに失敗しました。"))
             .finally(() => setMagazinesLoading(false));
-    }, [initialMagazinesProp]);
+    }, []);
 
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all");
     const [activePref, setActivePref] = useState<string | "all">("all");

@@ -120,12 +120,12 @@ type SortMode = "area" | "time";
 
 const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientProps = {}) => {
     const [clubsFromApi, setClubsFromApi] = useState<Club[] | null>(null);
-    const [clubsLoading, setClubsLoading] = useState(typeof initialClubsProp === "undefined");
+    const [clubsLoading, setClubsLoading] = useState(true);
     const [clubsError, setClubsError] = useState<string | null>(null);
-    const initialClubs = initialClubsProp ?? clubsFromApi ?? [];
+    // 优先使用 API 返回的实时数据，确保卡片能随后台变更而更新；API 未返回前用服务端 initialClubs 占位
+    const initialClubs = clubsFromApi ?? initialClubsProp ?? [];
 
     useEffect(() => {
-        if (typeof initialClubsProp !== "undefined") return;
         setClubsLoading(true);
         setClubsError(null);
         fetch("/api/clubs")
@@ -136,7 +136,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
             .then((data: Club[]) => setClubsFromApi(data))
             .catch(() => setClubsError("読み込みに失敗しました。"))
             .finally(() => setClubsLoading(false));
-    }, [initialClubsProp]);
+    }, []);
 
     // --- 状态管理 (State Management) ---
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all"); // 当前选中的大区
