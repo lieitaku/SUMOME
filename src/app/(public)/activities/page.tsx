@@ -47,7 +47,7 @@ export default async function ActivitiesPage({
             ...initialData,
             activities: initialData.activities.map(act => ({
               ...act,
-              date: act.date.toISOString(),
+              date: act.date instanceof Date ? act.date.toISOString() : act.date,
             })),
           }} 
         />

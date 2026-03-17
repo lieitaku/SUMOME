@@ -26,7 +26,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                Date
+                日付
               </span>
               <span className="text-xs font-bold text-sumo-dark tracking-wide">
                 2025.11.15 - 16
@@ -42,7 +42,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                Location
+                場所
               </span>
               <span className="text-xs font-bold text-sumo-dark tracking-wide">
                 Yokohama Red Brick
@@ -58,10 +58,10 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                Weather
+                天気
               </span>
               <span className="text-xs font-bold text-sumo-dark tracking-wide">
-                Sunny
+                晴れ
               </span>
             </div>
           </div>
@@ -92,7 +92,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-gray-100 group shadow-lg">
           <Image
             src={galleryImages[0]}
-            alt="Event Scene Left"
+            alt="イベント会場（左）"
             fill
             className="object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.1] group-hover:grayscale-0"
           />
@@ -103,7 +103,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-gray-100 group mt-24 md:mt-32 shadow-lg">
           <Image
             src={galleryImages[1]}
-            alt="Event Scene Right"
+            alt="イベント会場（右）"
             fill
             className="object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.1] group-hover:grayscale-0"
           />
@@ -119,7 +119,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
         <div className="flex flex-col mb-12">
           <span className="text-[10px] font-bold tracking-[0.2em] text-sumo-gold uppercase mb-3 flex items-center gap-2">
             <div className="w-6 h-px bg-sumo-gold"></div>
-            Feedback
+            フィードバック
           </span>
           <h3 className="text-3xl font-serif font-bold text-sumo-dark">
             予想を上回る反響と、
@@ -158,7 +158,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
               <div className="relative w-full h-full overflow-hidden rounded-sm">
                 <Image
                   src={galleryImages[2]}
-                  alt="Focus Moment"
+                  alt="メインシーン"
                   fill
                   className="object-cover"
                 />
@@ -201,7 +201,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm shadow-md group">
             <Image
               src={galleryImages[3]}
-              alt="Smile 01"
+              alt="笑顔の瞬間 1"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -210,7 +210,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm shadow-md mt-12 md:mt-24 group">
             <Image
               src={galleryImages[4]}
-              alt="Smile 02"
+              alt="笑顔の瞬間 2"
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -220,7 +220,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
         <div className="text-center mt-8">
           <div className="inline-flex items-center gap-3 text-[9px] font-bold tracking-[0.3em] text-gray-300 uppercase">
             <div className="w-8 h-px bg-gray-200"></div>
-            Smiles & Memories
+            笑顔と記憶
             <div className="w-8 h-px bg-gray-200"></div>
           </div>
         </div>
@@ -243,7 +243,7 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
           {/* 签名档 */}
           <div className="flex flex-col items-center">
             <p className="font-serif font-bold text-sumo-dark text-lg tracking-wide">
-              Memory Team
+              Memoryチーム
             </p>
             <p className="text-[10px] text-gray-400 tracking-[0.2em] uppercase mt-2">
               2025.11.20

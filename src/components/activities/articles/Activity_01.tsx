@@ -33,7 +33,7 @@ const Activity_01 = ({ activity }: CustomActivityProps) => {
             <div className="w-1 h-auto bg-sumo-gold self-stretch rounded-full"></div>
             <div>
               <span className="block text-xs font-bold text-gray-400 tracking-[0.2em] uppercase mb-3">
-                Important Note
+                ご注意
               </span>
               <p className="text-gray-700 text-sm md:text-base leading-relaxed font-medium">
                 なお、本大会の企画・運営は、相撲エンターテインメント部門SUMOMEではなく、弊社のスポーツイベント事業部である
@@ -59,7 +59,7 @@ const Activity_01 = ({ activity }: CustomActivityProps) => {
         {/* 标题 */}
         <div className="mb-10 text-center md:text-left">
           <span className="inline-block py-1 px-3 border border-sumo-gold/30 text-sumo-gold text-[10px] font-bold tracking-[0.2em] uppercase rounded-full mb-4">
-            About Service
+            サービスについて
           </span>
           <h3 className="text-2xl md:text-3xl font-serif font-bold text-sumo-dark">
             新感覚フォトブック「MEMORY」について
@@ -86,7 +86,7 @@ const Activity_01 = ({ activity }: CustomActivityProps) => {
       {/* --- 3. 特性列表 (Features Grid) --- */}
       <section>
         <h4 className="text-sm font-bold text-gray-400 tracking-widest uppercase mb-8 border-b border-gray-100 pb-2">
-          Features of MEMORY
+          MEMORYの特徴
         </h4>
 
         <div className="grid gap-6">

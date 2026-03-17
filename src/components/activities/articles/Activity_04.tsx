@@ -13,7 +13,7 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
         <div className="absolute top-0 right-0 hidden md:block">
           <div className="border border-sumo-gold/30 p-2 text-center">
             <span className="block text-[10px] text-gray-400 uppercase tracking-widest">
-              Sep
+              9月
             </span>
             <span className="block text-xl font-serif font-bold text-sumo-dark">
               27-28
@@ -25,7 +25,7 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
           <div className="flex items-center gap-3 mb-6">
             <div className="w-2 h-2 bg-sumo-gold rounded-full"></div>
             <span className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
-              Event Report
+              イベントレポート
             </span>
           </div>
 
@@ -91,7 +91,7 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
       <section className="border-t border-gray-100 pt-16 text-center">
         <div className="inline-block mb-6">
           <span className="text-[10px] font-bold tracking-[0.2em] text-gray-300 uppercase border-b border-gray-200 pb-1">
-            Message from Team
+            チームからのメッセージ
           </span>
         </div>
 

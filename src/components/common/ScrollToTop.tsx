@@ -33,6 +33,7 @@ const ScrollToTop = () => {
     <div
       data-embedded-hide
       className={cn(
+        "print:hidden",
         "fixed bottom-8 right-6 z-50 transition-all duration-500 cubic-bezier(0.34, 1.56, 0.64, 1)",
         isVisible
           ? "translate-y-0 opacity-100"

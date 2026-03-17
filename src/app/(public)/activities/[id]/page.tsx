@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import React from "react";
-import { ArrowLeft, Share2, Printer, MapPin, Calendar, Hash, ImageIcon } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Hash } from "lucide-react";
 import { Activity, Club } from "@prisma/client";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActivityWithClub } from "@/lib/cached-queries";
@@ -20,6 +20,7 @@ import { ArticleRegistry } from "@/lib/article-registry";
 import StandardTemplate from "@/components/activities/StandardTemplate";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
+import ActivityActions from "@/components/activities/ActivityActions";
 
 function normalizePreviewActivity(
   p: Record<string, unknown>,
@@ -100,7 +101,7 @@ export default async function ActivityDetailPage({
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
       {usePreview && !isEmbedded ? (
-        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
+        <div className="print:hidden bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
           <span>プレビュー — 未保存の内容を表示しています。</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
             編集に戻る
@@ -124,7 +125,7 @@ export default async function ActivityDetailPage({
         <div className="container mx-auto max-w-5xl relative z-10 px-6">
           <Link
             href="/activities"
-            className="inline-flex items-center gap-3 text-white/70 hover:text-white transition-colors group mb-12"
+            className="print:hidden inline-flex items-center gap-3 text-white/70 hover:text-white transition-colors group mb-12"
           >
             <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-sumo-brand transition-all">
               <ArrowLeft size={14} />
@@ -159,23 +160,20 @@ export default async function ActivityDetailPage({
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 bg-white min-h-[600px]">
               {/* --- Sidebar --- */}
-              <aside className="hidden lg:block lg:col-span-3 border-r border-gray-100 bg-white">
+              <aside className="print:hidden hidden lg:block lg:col-span-3 border-r border-gray-100 bg-white">
                 <div className="sticky top-0 px-8 py-12 flex flex-col gap-10">
                   <div>
-                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">Actions</div>
-                    <div className="flex flex-col gap-2">
-                      <button className="flex items-center justify-between px-3 py-2 -ml-3 rounded hover:bg-gray-50 text-xs font-bold text-gray-500 hover:text-sumo-brand transition-colors">
-                        <span className="flex items-center gap-3"><Share2 size={14} /> Share</span>
-                      </button>
-                      <button className="flex items-center justify-between px-3 py-2 -ml-3 rounded hover:bg-gray-50 text-xs font-bold text-gray-500 hover:text-sumo-dark transition-colors">
-                        <span className="flex items-center gap-3"><Printer size={14} /> Print</span>
-                      </button>
-                    </div>
+                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">アクション</div>
+                    <ActivityActions
+                      activityId={activity.id}
+                      title={activity.title}
+                      variant="sidebar"
+                    />
                   </div>
                   <div>
-                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">Keywords</div>
+                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">キーワード</div>
                     <div className="flex flex-wrap gap-2">
-                      {Array.from(new Set(["Event", activity.category, "Sumo"])).map((tag) => (
+                      {Array.from(new Set(["イベント", activity.category, "相撲"])).map((tag) => (
                         <span key={tag} className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded">
                           <Hash size={9} className="opacity-50" /> {tag}
                         </span>
@@ -197,17 +195,19 @@ export default async function ActivityDetailPage({
                 )}
 
                 {/* 移动端分享按钮 */}
-                <div className="mt-20 pt-8 border-t border-gray-100 lg:hidden">
-                  <button className="w-full flex items-center justify-center gap-2 py-4 bg-gray-50 text-gray-600 text-xs font-bold uppercase tracking-widest">
-                    <Share2 size={14} /> Share Report
-                  </button>
+                <div className="print:hidden mt-20 pt-8 border-t border-gray-100 lg:hidden">
+                  <ActivityActions
+                    activityId={activity.id}
+                    title={activity.title}
+                    variant="mobile"
+                  />
                 </div>
               </article>
             </div>
           </Ceramic>
 
           {/* 返回列表 */}
-          <div className="mt-16 text-center pb-20">
+          <div className="print:hidden mt-16 text-center pb-20">
             <Link href="/activities" className="group inline-flex flex-col items-center gap-2">
               <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-sumo-brand group-hover:text-sumo-brand group-hover:-translate-x-1 transition-all">
                 <ArrowLeft size={16} />

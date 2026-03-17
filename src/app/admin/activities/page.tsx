@@ -43,7 +43,7 @@ export default async function AdminActivitiesPage({
 
     const serializedActivities = initialActivities.map(act => ({
         ...act,
-        date: act.date.toISOString(),
+        date: act.date instanceof Date ? act.date.toISOString() : act.date,
     }));
 
     return (

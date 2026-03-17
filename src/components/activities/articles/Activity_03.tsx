@@ -11,7 +11,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
       <section className="border-b border-gray-100 pb-12">
         <div className="flex items-center gap-4 mb-8">
           <span className="bg-sumo-dark text-white text-[10px] font-bold px-3 py-1 tracking-widest uppercase rounded-sm shadow-sm">
-            Press Release
+            プレスリリース
           </span>
           <div className="h-4 w-px bg-gray-200"></div>
           <span className="text-gray-400 text-xs font-bold tracking-widest uppercase">
@@ -94,7 +94,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
             <div className="flex items-center gap-3 text-sumo-gold mb-2 md:mb-0">
               <Ticket size={24} />
               <span className="text-xs font-bold tracking-[0.3em] uppercase">
-                Invitation
+                ご招待
               </span>
             </div>
             <div className="text-sumo-dark font-serif font-bold text-xl md:text-3xl tracking-tight">
@@ -109,9 +109,9 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { icon: "📱", text: "Smartphone OK" },
-                  { icon: "👨‍👩‍👧", text: "Family Welcome" },
-                  { icon: "✨", text: "Free Charge" },
+                  { icon: "📱", text: "スマホ対応" },
+                  { icon: "👨‍👩‍👧", text: "ご家族で歓迎" },
+                  { icon: "✨", text: "無料" },
                 ].map((tag, idx) => (
                   <span
                     key={idx}
@@ -126,7 +126,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
               {/* 价格展示 */}
               <div className="text-center group-hover:scale-110 transition-transform duration-500">
                 <p className="text-[10px] text-gray-400 mb-1 font-bold tracking-widest uppercase">
-                  Visit Our Booth
+                  ブースへお越しください
                 </p>
                 <p className="text-sumo-dark font-serif font-bold text-5xl">
                   ¥0
@@ -144,7 +144,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           {/* Row 1 */}
           <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
-              <Info size={12} /> Event Name
+              <Info size={12} /> イベント名
             </div>
             <div className="text-sm font-bold text-sumo-dark md:col-span-3 font-serif tracking-wide">
               YOKOHAMA URBAN SPORTS FESTIVAL ’25 <br />
@@ -157,7 +157,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           {/* Row 2 */}
           <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
-              <Calendar size={12} /> Date
+              <Calendar size={12} /> 日付
             </div>
             <div className="text-sm font-medium text-gray-700 md:col-span-3">
               2025年11月15日(土)・16日(日)
@@ -167,7 +167,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           {/* Row 3 */}
           <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
-              <MapPin size={12} /> Venue
+              <MapPin size={12} /> 会場
             </div>
             <div className="text-sm font-medium text-gray-700 md:col-span-3">
               横浜赤レンガ倉庫 イベント広場・赤レンガパーク
@@ -177,7 +177,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           {/* Row 4 */}
           <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
-              <Ticket size={12} /> Exhibition
+              <Ticket size={12} /> 出展内容
             </div>
             <div className="text-sm font-medium text-gray-700 md:col-span-3">
               フォトブック「MEMORY」の展示および無料作成体験
@@ -195,8 +195,8 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           <br />
           ぜひお気軽に弊社ブースへお立ち寄りください。
         </p>
-        <button className="flex items-center gap-2 text-sumo-dark text-xs font-bold tracking-widest uppercase cursor-pointer hover:text-sumo-gold transition-colors border-b border-sumo-dark pb-1 hover:border-sumo-gold group">
-          Official Site{" "}
+        <button className="inline-flex items-center gap-1.5 whitespace-nowrap text-sumo-dark text-xs font-bold tracking-widest uppercase cursor-pointer hover:text-sumo-gold transition-colors border-b border-sumo-dark pb-1 hover:border-sumo-gold group">
+          公式サイト
           <ArrowUpRight
             size={14}
             className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"
