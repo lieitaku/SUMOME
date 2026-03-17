@@ -38,7 +38,7 @@ export function ShareButton() {
             className="flex flex-col items-center justify-center gap-2 py-3 bg-white border border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl hover:bg-gray-50 transition-all group active:scale-95 w-full"
         >
             {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} className="group-hover:scale-110 transition-transform text-gray-400 group-hover:text-gray-900" />}
-            <span className="text-[10px] font-bold uppercase tracking-wider">{copied ? "Copied" : "Share"}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">{copied ? "コピーしました" : "共有"}</span>
         </button>
     );
 }
@@ -58,7 +58,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>((props, ref) => {
             <div className="relative w-full h-full">
                 <Image
                     src={props.src}
-                    alt={`Page ${props.pageNumber}`}
+                    alt={`ページ ${props.pageNumber}`}
                     fill
                     className="object-contain"
                     quality={100}
@@ -230,17 +230,17 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
                                 className="flex shadow-lg rounded-sm overflow-hidden border border-gray-100 bg-white relative cursor-pointer transition-transform hover:scale-[1.01] duration-500"
                             >
                                 <div className="flex-1 relative aspect-[3/4] border-r border-gray-200">
-                                    <Image src={spread.left} alt={`Page ${startPage}`} fill className="object-cover" />
+                                    <Image src={spread.left} alt={`ページ ${startPage}`} fill className="object-cover" />
                                     <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none"></div>
                                 </div>
                                 <div className="flex-1 relative aspect-[3/4] bg-gray-50">
                                     {spread.right ? (
                                         <>
-                                            <Image src={spread.right} alt={`Page ${endPage}`} fill className="object-cover" />
+                                            <Image src={spread.right} alt={`ページ ${endPage}`} fill className="object-cover" />
                                             <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black/5 to-transparent pointer-events-none"></div>
                                         </>
                                     ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-300 text-xs font-mono uppercase tracking-widest">End</div>
+                                        <div className="flex items-center justify-center h-full text-gray-300 text-xs font-mono uppercase tracking-widest">終</div>
                                     )}
                                 </div>
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
@@ -250,7 +250,7 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
                                 </div>
                             </div>
                             <div className="text-center mt-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest">
-                                Pages {startPage} - {spread.right ? endPage : "End"}
+                                ページ {startPage} - {spread.right ? endPage : "終"}
                             </div>
                         </div>
                     )
@@ -267,7 +267,7 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
                     {/* Top Bar */}
                     <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-[100002] bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
                         <div className="text-white/80 text-xs font-bold tracking-widest px-4 pointer-events-auto">
-                            DIGITAL VIEWER
+                            デジタルビューア
                         </div>
                         <button
                             onClick={closeBook}
@@ -334,13 +334,13 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
                         ) : (
                             // Loading 占位，防止闪烁
                             <div className="text-white/50 text-xs tracking-widest animate-pulse">
-                                LOADING BOOK...
+                                読み込み中...
                             </div>
                         )}
                     </div>
 
                     <div className="absolute bottom-6 text-white/50 text-[10px] uppercase tracking-widest font-medium pointer-events-none">
-                        Swipe or Drag corners to Flip
+                        スワイプまたは角をドラッグしてめくる
                     </div>
                 </div>,
                 document.body

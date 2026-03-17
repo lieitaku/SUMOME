@@ -221,8 +221,8 @@ export default async function MagazineDetailPage({
                         <div className="relative flex items-center gap-3">
                           <BookOpen size={20} className="text-sumo-gold" />
                           <div className="flex flex-col items-start">
-                            <span className="text-xs font-bold text-white/50 uppercase tracking-widest leading-none mb-1">Digital Edition</span>
-                            <span className="text-sm font-bold tracking-widest">READ NOW</span>
+                            <span className="text-xs font-bold text-white/50 uppercase tracking-widest leading-none mb-1">デジタル版</span>
+                            <span className="text-sm font-bold tracking-widest">今すぐ読む</span>
                           </div>
                         </div>
                         <ArrowRight size={18} className="relative group-hover:translate-x-1 transition-transform" />
@@ -244,7 +244,7 @@ export default async function MagazineDetailPage({
                 <div className="mb-20 max-w-2xl">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-[2px] bg-sumo-brand"></div>
-                    <h3 className="text-xs font-black text-sumo-brand uppercase tracking-[0.25em]">Issue Highlight</h3>
+                    <h3 className="text-xs font-black text-sumo-brand uppercase tracking-[0.25em]">概要</h3>
                   </div>
                   <p className="text-lg md:text-xl font-medium text-gray-800 leading-relaxed font-serif text-justify">
                     {magazine.description || "この号に関する詳細な説明はまだありません。"}
@@ -255,9 +255,9 @@ export default async function MagazineDetailPage({
                 <div>
                   <div className="flex items-end justify-between mb-8 border-b border-gray-100 pb-4">
                     <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2">
-                      <Layers size={14} /> Inside Look
+                      <Layers size={14} /> 誌面紹介
                     </h3>
-                    <span className="text-[10px] font-mono text-gray-400">Preview {spreads.length} Spreads</span>
+                    <span className="text-[10px] font-mono text-gray-400">プレビュー {spreads.length} 見開き</span>
                   </div>
 
                   {spreads.length > 0 ? (
@@ -269,17 +269,17 @@ export default async function MagazineDetailPage({
                   ) : (
                     <div className="py-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                       <Layers size={32} className="mx-auto text-gray-300 mb-4" />
-                      <p className="text-sm font-bold text-gray-400">Preview pages are not available.</p>
-                      <p className="text-xs text-gray-400 mt-1">Please read the full version via the button on the left.</p>
+                      <p className="text-sm font-bold text-gray-400">プレビューページはご利用いただけません。</p>
+                      <p className="text-xs text-gray-400 mt-1">左のボタンから全文をお読みください。</p>
                     </div>
                   )}
 
                   {/* 底部引导链接 */}
                   {spreads.length > 0 && magazine.readLink && (
                     <div className="mt-16 text-center">
-                      <p className="text-xs font-medium text-gray-400 mb-4">You've reached the end of preview</p>
+                      <p className="text-xs font-medium text-gray-400 mb-4">プレビューはここまでです</p>
                       <a href={magazine.readLink} target="_blank" className="inline-flex items-center gap-2 text-sumo-brand font-bold text-sm hover:underline underline-offset-4">
-                        Read Full Issue <ArrowRight size={14} />
+                        全文を読む <ArrowRight size={14} />
                       </a>
                     </div>
                   )}
