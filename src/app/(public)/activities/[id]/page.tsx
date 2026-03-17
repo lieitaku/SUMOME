@@ -152,7 +152,7 @@ export default async function ActivityDetailPage({
       </header>
 
       {/* --- 内容区域 --- */}
-      <section className="relative px-4 md:px-6 -mt-10 md:-mt-24 z-20 pb-32">
+      <section className="relative px-4 md:px-6 -mt-10 md:-mt-24 z-20 pb-6 md:pb-20">
         <div className="container mx-auto max-w-5xl">
           <Ceramic
             interactive={false}
@@ -184,7 +184,7 @@ export default async function ActivityDetailPage({
               </aside>
 
               {/* --- Article Content --- */}
-              <article className="lg:col-span-9 p-8 md:p-16 lg:p-20">
+              <article className="lg:col-span-9 p-4 md:p-16 lg:p-20">
                 {/* 5. ✨ 类型对齐后的逻辑分发 */}
                 {CustomComponent ? (
                   // A. 如果是大神自定义模式
@@ -195,7 +195,7 @@ export default async function ActivityDetailPage({
                 )}
 
                 {/* 移动端分享按钮 */}
-                <div className="print:hidden mt-20 pt-8 border-t border-gray-100 lg:hidden">
+                <div className="print:hidden mt-8 md:mt-20 pt-4 md:pt-8 border-t border-gray-100 lg:hidden">
                   <ActivityActions
                     activityId={activity.id}
                     title={activity.title}
@@ -207,7 +207,7 @@ export default async function ActivityDetailPage({
           </Ceramic>
 
           {/* 返回列表 */}
-          <div className="print:hidden mt-16 text-center pb-20">
+          <div className="print:hidden mt-8 md:mt-16 text-center pb-4 md:pb-12">
             <Link href="/activities" className="group inline-flex flex-col items-center gap-2">
               <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-sumo-brand group-hover:text-sumo-brand group-hover:-translate-x-1 transition-all">
                 <ArrowLeft size={16} />

@@ -6,7 +6,7 @@ import type { CustomActivityProps } from "@/lib/article-registry";
 // 自定义文章组件 - 内容为精心设计的硬编码排版
 const Activity_04 = ({ activity }: CustomActivityProps) => {
   return (
-    <div className="max-w-3xl mx-auto space-y-20">
+    <div className="max-w-3xl mx-auto space-y-6 md:space-y-20">
       {/* --- 1. Header (纯净标题) --- */}
       <section className="relative">
         {/* 装饰性日期章 */}
@@ -21,15 +21,15 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
           </div>
         </div>
 
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-6">
+        <div className="mb-4 md:mb-10">
+          <div className="flex items-center gap-3 mb-3 md:mb-6">
             <div className="w-2 h-2 bg-sumo-gold rounded-full"></div>
             <span className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
               イベントレポート
             </span>
           </div>
 
-          <h2 className="font-serif text-3xl md:text-4xl text-sumo-dark font-bold leading-tight mb-8">
+          <h2 className="font-serif text-3xl md:text-4xl text-sumo-dark font-bold leading-tight mb-3 md:mb-8">
             MEMORYへのご来場、
             <br />
             誠にありがとうございました
@@ -44,14 +44,14 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
 
       {/* --- 2. Feedback Section (带装饰的引用块) --- */}
       <section>
-        <div className="bg-[#FAFAFA] border-l-4 border-sumo-brand p-8 md:p-12 relative rounded-r-sm group hover:bg-[#F5F7FA] transition-colors duration-500">
+        <div className="bg-[#FAFAFA] border-l-4 border-sumo-brand p-4 md:p-12 relative rounded-r-sm group hover:bg-[#F5F7FA] transition-colors duration-500">
           <MessageSquareQuote className="absolute top-6 right-6 text-gray-200 w-12 h-12 group-hover:text-sumo-brand/10 transition-colors" />
 
-          <h3 className="font-serif text-xl font-bold text-sumo-dark mb-6 relative z-10">
+          <h3 className="font-serif text-xl font-bold text-sumo-dark mb-3 md:mb-6 relative z-10">
             予想を遥かに超える反響
           </h3>
 
-          <div className="space-y-6 relative z-10">
+          <div className="space-y-3 md:space-y-6 relative z-10">
             <p className="text-gray-600 leading-[2.2] text-justify">
               当日は、BMXやパルクールなどのパフォーマンスに沸く会場の中で、予想を遥かに超える多くのお客様に弊社ブースへ足をお運びいただきました。
             </p>
@@ -64,7 +64,7 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
 
       {/* --- 3. Concept Section (极简排版) --- */}
       <section>
-        <div className="flex items-start gap-4 mb-6">
+        <div className="flex items-start gap-4 mb-3 md:mb-6">
           <Sparkles className="text-sumo-gold mt-1 flex-shrink-0" size={20} />
           <h3 className="font-serif text-xl font-bold text-sumo-dark">
             「躍動する一瞬」を
@@ -74,7 +74,7 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
         </div>
 
         <div className="pl-0 md:pl-9 border-l-0 md:border-l border-gray-100 md:ml-2.5">
-          <p className="text-gray-600 leading-[2.2] mb-8 text-justify">
+            <p className="text-gray-600 leading-[2.2] mb-3 md:mb-8 text-justify">
             アクションスポーツという、まさに「一瞬の輝き」が魅力のイベントにおいて、その瞬間をフォトブックという形あるものに残すことの意義を、多くの皆様と共有できたことを大変光栄に存じます。
           </p>
           <p className="text-gray-600 leading-[2.2] text-justify">
@@ -88,14 +88,14 @@ const Activity_04 = ({ activity }: CustomActivityProps) => {
       </section>
 
       {/* --- 4. Closing (居中结语) --- */}
-      <section className="border-t border-gray-100 pt-16 text-center">
-        <div className="inline-block mb-6">
+      <section className="border-t border-gray-100 pt-6 md:pt-16 text-center">
+        <div className="inline-block mb-3 md:mb-6">
           <span className="text-[10px] font-bold tracking-[0.2em] text-gray-300 uppercase border-b border-gray-200 pb-1">
             チームからのメッセージ
           </span>
         </div>
 
-        <p className="text-gray-600 leading-[2.4] mb-10 font-medium">
+        <p className="text-gray-600 leading-[2.4] mb-4 md:mb-10 font-medium">
           皆様のあたたかい笑顔と熱気のおかげをもちまして、
           <br className="hidden md:inline" />
           今回の出展は大成功のうちに幕を閉じることができました。

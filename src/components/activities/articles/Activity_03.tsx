@@ -6,10 +6,10 @@ import type { CustomActivityProps } from "@/lib/article-registry";
 // 自定义文章组件 - 内容为精心设计的硬编码排版
 const Activity_03 = ({ activity }: CustomActivityProps) => {
   return (
-    <div className="space-y-16">
+    <div className="space-y-6 md:space-y-16">
       {/* --- 1. Lead Section: Press Release Header --- */}
-      <section className="border-b border-gray-100 pb-12">
-        <div className="flex items-center gap-4 mb-8">
+      <section className="border-b border-gray-100 pb-4 md:pb-12">
+        <div className="flex items-center gap-4 mb-3 md:mb-8">
           <span className="bg-sumo-dark text-white text-[10px] font-bold px-3 py-1 tracking-widest uppercase rounded-sm shadow-sm">
             プレスリリース
           </span>
@@ -19,7 +19,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           </span>
         </div>
 
-        <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-sumo-dark font-bold leading-tight mb-8">
+        <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl text-sumo-dark font-bold leading-tight mb-3 md:mb-8">
           フォトブック「MEMORY」
           <br className="md:hidden" />
           無料体験ブースを出展
@@ -39,34 +39,34 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
       {/* --- 2. Concept Section: Centered Editorial Style (中心聚焦式排版) --- */}
       <section>
         {/* 装饰背景框：增加版面的"厚度" */}
-        <div className="bg-[#FAFAFA] border border-gray-100 rounded-sm p-8 md:p-20 relative overflow-hidden group">
+        <div className="bg-[#FAFAFA] border border-gray-100 rounded-sm p-4 md:p-20 relative overflow-hidden group">
           {/* 背景装饰字，增加纹理感 */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 text-[12rem] font-serif font-bold text-gray-200/40 select-none pointer-events-none leading-none -mt-8 font-italic">
             &
           </div>
 
           {/* 1. 核心标题 (Slogan) - 居中展示，气场全开 */}
-          <div className="text-center mb-16 relative z-10">
+          <div className="text-center mb-6 md:mb-16 relative z-10">
             <h3 className="text-2xl md:text-4xl font-serif font-bold text-sumo-dark leading-snug tracking-wide">
               フェスティバルの熱気を、
               <br />
               その場で「一冊」に。
             </h3>
             {/* 金色装饰线 */}
-            <div className="w-16 h-[3px] bg-sumo-gold mx-auto mt-8 rounded-full"></div>
+            <div className="w-16 h-[3px] bg-sumo-gold mx-auto mt-3 md:mt-8 rounded-full"></div>
           </div>
 
           {/* 2. 正文 (Body) - 限制宽度以提升阅读体验 */}
-          <div className="max-w-2xl mx-auto relative z-10 space-y-10">
+          <div className="max-w-2xl mx-auto relative z-10 space-y-4 md:space-y-10">
             <p className="text-gray-600 leading-[2.2] text-justify md:text-center font-light">
               スケートボードやブレイキンなど、世界基準のアーバンスポーツが横浜に集結するこの2日間。会場で撮影したお気に入りの写真や、友人・家族との笑顔の瞬間を、その場で「MEMORY」にしてみませんか？
             </p>
 
             {/* 3. 卖点卡片 (Feature Box) - 像一张精致的便签 */}
-            <div className="bg-white p-8 md:p-10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] border-t-4 border-sumo-dark relative">
+            <div className="bg-white p-4 md:p-10 shadow-[0_10px_30px_-10px_rgba(0,0,0,0.05)] border-t-4 border-sumo-dark relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-100/50 backdrop-blur-sm -z-10 transform skew-x-12"></div>
 
-              <h4 className="font-serif text-sumo-dark font-bold text-lg mb-4 flex items-center justify-center gap-3">
+              <h4 className="font-serif text-sumo-dark font-bold text-lg mb-3 md:mb-4 flex items-center justify-center gap-3">
                 <span className="w-2 h-2 bg-sumo-gold rounded-full"></span>
                 「情報誌」スタイルのフォトブック
               </h4>
@@ -85,12 +85,12 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
         <div className="absolute inset-0 bg-sumo-gold/5 transform rotate-1 rounded-sm transition-transform duration-500 group-hover:rotate-0"></div>
 
         {/* 票券主体 */}
-        <div className="relative bg-white border border-sumo-gold border-dashed rounded-sm p-8 md:p-12 shadow-sm transition-transform duration-500 group-hover:-translate-y-1">
+        <div className="relative bg-white border border-sumo-gold border-dashed rounded-sm p-4 md:p-12 shadow-sm transition-transform duration-500 group-hover:-translate-y-1">
           {/* 左侧切口模拟 */}
           <div className="absolute top-1/2 -left-3 w-6 h-6 bg-[#ffffff] rounded-full transform -translate-y-1/2 border-r border-sumo-gold border-dashed hidden md:block"></div>
           <div className="absolute top-1/2 -right-3 w-6 h-6 bg-[#ffffff] rounded-full transform -translate-y-1/2 border-l border-sumo-gold border-dashed hidden md:block"></div>
 
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 border-b border-gray-100 pb-8 border-dashed">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 md:mb-10 border-b border-gray-100 pb-3 md:pb-8 border-dashed">
             <div className="flex items-center gap-3 text-sumo-gold mb-2 md:mb-0">
               <Ticket size={24} />
               <span className="text-xs font-bold tracking-[0.3em] uppercase">
@@ -102,9 +102,9 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 items-end">
             <div>
-              <p className="text-gray-600 text-sm leading-loose mb-6 text-justify">
+              <p className="text-gray-600 text-sm leading-loose mb-3 md:mb-6 text-justify">
                 今回のブースでは、実際にスマートフォンなどの写真データを使って、ご自身だけのオリジナルフォトブック作成を無料で体験いただけます。
               </p>
               <div className="flex flex-wrap gap-2">
@@ -142,7 +142,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
         <div className="border-t-2 border-sumo-dark mb-2"></div>
         <div className="border-t border-gray-200">
           {/* Row 1 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-3 md:py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
               <Info size={12} /> イベント名
             </div>
@@ -155,7 +155,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           </div>
 
           {/* Row 2 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-3 md:py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
               <Calendar size={12} /> 日付
             </div>
@@ -165,7 +165,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           </div>
 
           {/* Row 3 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-3 md:py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
               <MapPin size={12} /> 会場
             </div>
@@ -175,7 +175,7 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
           </div>
 
           {/* Row 4 */}
-          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 border-b border-gray-200 py-3 md:py-6 gap-4 hover:bg-gray-50 transition-colors px-4">
             <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest md:col-span-1 py-1 flex items-center gap-2">
               <Ticket size={12} /> 出展内容
             </div>
@@ -187,8 +187,8 @@ const Activity_03 = ({ activity }: CustomActivityProps) => {
       </section>
 
       {/* --- 5. Closing --- */}
-      <section className="flex flex-col md:flex-row justify-between items-end pt-8 bg-gray-50 p-8 rounded-sm">
-        <p className="text-gray-600 leading-loose text-sm font-medium mb-6 md:mb-0">
+      <section className="flex flex-col md:flex-row justify-between items-end pt-3 md:pt-8 bg-gray-50 p-4 md:p-8 rounded-sm">
+        <p className="text-gray-600 leading-loose text-sm font-medium mb-3 md:mb-0">
           横浜赤レンガ倉庫にて、
           <br className="md:hidden" />
           皆様の思い出づくりをお手伝いできることを楽しみにしております。
