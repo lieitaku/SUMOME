@@ -61,23 +61,16 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
 ];
 
 // ==============================================================================
-// 1.5 都道府県の北→南 順序マップ（地域順ソートに使用）
+// 1.5 地域順ソート：筛选器 REGIONS の順序に厳密に従う
 // ==============================================================================
 
-const PREFECTURE_ORDER: Record<string, number> = {
-    "北海道": 1,
-    "青森": 2, "岩手": 3, "秋田": 4, "宮城": 5, "山形": 6, "福島": 7,
-    "茨城": 8, "栃木": 9, "群馬": 10, "埼玉": 11, "千葉": 12, "東京": 13, "神奈川": 14,
-    "新潟": 15, "富山": 16, "石川": 17, "福井": 18, "山梨": 19, "長野": 20, "岐阜": 21, "静岡": 22, "愛知": 23,
-    "三重": 24, "滋賀": 25, "京都": 26, "大阪": 27, "兵庫": 28, "奈良": 29, "和歌山": 30,
-    "鳥取": 31, "島根": 32, "岡山": 33, "広島": 34, "山口": 35,
-    "徳島": 36, "香川": 37, "愛媛": 38, "高知": 39,
-    "福岡": 40, "佐賀": 41, "長崎": 42, "熊本": 43, "大分": 44, "宮崎": 45, "鹿児島": 46, "沖縄": 47,
-};
-
-function getPrefectureOrder(region: string): number {
-    for (const [pref, order] of Object.entries(PREFECTURE_ORDER)) {
-        if (region.startsWith(pref)) return order;
+function getRegionFilterIndex(region: string): number {
+    let index = 0;
+    for (const r of REGIONS) {
+        for (const pref of r.prefectures) {
+            if (region.startsWith(pref)) return index;
+            index++;
+        }
     }
     return 999;
 }
@@ -159,7 +152,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
 
         return filtered.sort((a, b) => {
             if (sortOrder === "region") {
-                const orderDiff = getPrefectureOrder(a.region) - getPrefectureOrder(b.region);
+                const orderDiff = getRegionFilterIndex(a.region) - getRegionFilterIndex(b.region);
                 if (orderDiff !== 0) return orderDiff;
                 return new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime();
             }
