@@ -9,23 +9,6 @@ export default function AdminDashboardLoading() {
         <div className="h-4 w-72 bg-gray-200 rounded-md" />
       </div>
 
-      {/* 待处理提醒横幅骨架 */}
-      <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-amber-100 rounded-lg" />
-            <div>
-              <div className="h-4 w-44 bg-amber-100 rounded-md mb-2" />
-              <div className="h-3 w-56 bg-amber-100 rounded-md" />
-            </div>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <div className="h-9 w-32 bg-amber-100 rounded-lg" />
-            <div className="hidden sm:block h-9 w-32 bg-amber-100 rounded-lg" />
-          </div>
-        </div>
-      </div>
-
       {/* 核心指标卡片骨架：与实际布局一致的 6 列响应式网格 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
         {Array.from({ length: 6 }).map((_, index) => (
