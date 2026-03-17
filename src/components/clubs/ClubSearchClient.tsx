@@ -15,7 +15,6 @@ import { type Club } from "@prisma/client";
 import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
 import Button from "@/components/ui/Button";
-import { getPrefectureIndex } from "@/lib/prefecture-order";
 
 // ==============================================================================
 // 1. 类型定义与常量配置
@@ -92,6 +91,21 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
         ],
     },
 ];
+
+/**
+ * 根据筛选器 REGIONS 的顺序，计算地区索引用于「地域順」排序
+ * 严格遵循上方筛选器的大区→县顺序
+ */
+function getRegionFilterIndex(area: string): number {
+    let index = 0;
+    for (const region of REGIONS) {
+        for (const pref of region.prefectures) {
+            if (area.startsWith(pref)) return index;
+            index++;
+        }
+    }
+    return 999; // 未匹配时排到最后
+}
 
 // ==============================================================================
 // 2. 组件定义
@@ -185,7 +199,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
             list.sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
             return list;
         }
-        list.sort((a, b) => getPrefectureIndex(a.area) - getPrefectureIndex(b.area));
+        list.sort((a, b) => getRegionFilterIndex(a.area) - getRegionFilterIndex(b.area));
         return list;
     }, [filteredClubs, sortBy]);
 
@@ -289,7 +303,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
                                 <SlidersHorizontal size={12} className="text-sumo-brand" />
                                 <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
-                                    Club Finder
+                                    クラブ検索
                                 </span>
                             </div>
                         </div>
