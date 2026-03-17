@@ -125,7 +125,7 @@ const ContactPage = () => {
                           <p className="text-gray-500 leading-relaxed text-sm font-medium">
                             〒103-0016
                             <br />
-                            東京都中央区日本橋小網町4-94-9
+                            東京都中央区日本橋小網町4-9
                             <br />
                             恵和ビル 3F
                           </p>
