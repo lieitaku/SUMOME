@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { supabase } from "@/lib/supabase";
 import sharp from "sharp";
 import { revalidatePath } from "next/cache";
+import { confirmAdmin } from "@/lib/auth-utils";
 
 /**
  * 将单个图片 URL 迁移到 WebP
@@ -65,6 +66,9 @@ async function migrateImageUrl(url: string | null | undefined, bucket: string): 
 }
 
 export async function migrateAllImages() {
+    const admin = await confirmAdmin();
+    if (!admin) return { success: false, error: "権限がありません。" };
+
     const stats = {
         clubs: 0,
         activities: 0,

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { BannerCategory, BannerDisplayMode, BannerSponsorTier } from "@prisma/client";
+import { confirmAdmin } from "@/lib/auth-utils";
 
 const BANNER_DISPLAY_SETTINGS_TAG = "banner-display-settings";
 
@@ -79,6 +80,9 @@ export async function getBannerDisplaySettings() {
 
 /** 更新旗子显示设置（后台用） */
 export async function updateBannerDisplaySettings(formData: FormData) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     const homeDisplayMode = (formData.get("homeDisplayMode") as BannerDisplayMode) || "mixed";
     const homeSponsorTierFilterRaw = formData.get("homeSponsorTierFilter") as string | null;
@@ -152,6 +156,9 @@ export async function getActiveBannersByCategory(category: BannerCategory) {
 
 // 创建 Banner（同类别内 sortOrder 自动取 max+1，新条目排到该类别最后）
 export async function createBanner(formData: FormData) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     const name = formData.get("name") as string;
     const image = formData.get("image") as string;
@@ -200,6 +207,9 @@ export async function createBanner(formData: FormData) {
 
 // 更新 Banner（sortOrder 变更时在同类别内做「插入并顺延」）
 export async function updateBanner(formData: FormData) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     const id = formData.get("id") as string;
     const name = formData.get("name") as string;
@@ -281,6 +291,9 @@ export async function updateBanner(formData: FormData) {
 
 // 切换 Banner 激活状态
 export async function toggleBannerActive(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     const banner = await prisma.banner.findUnique({ where: { id } });
     if (!banner) {
@@ -305,6 +318,9 @@ export async function toggleBannerActive(id: string) {
 
 // 更新排序（同类别内插入并顺延，与 updateBanner 一致）
 export async function updateBannerOrder(id: string, newOrder: number) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     const current = await prisma.banner.findUnique({
       where: { id },
@@ -369,6 +385,9 @@ export async function updateBannerOrder(id: string, newOrder: number) {
 
 // 删除 Banner
 export async function deleteBanner(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     await prisma.banner.delete({
       where: { id },

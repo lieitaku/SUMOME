@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { confirmAdmin } from "@/lib/auth-utils";
 import { InquiryStatus } from "@prisma/client";
 
 // 创建询问（联系表单提交）
@@ -37,6 +38,9 @@ export async function createInquiry(formData: {
 
 // 更新询问状态
 export async function updateInquiryStatus(id: string, status: InquiryStatus) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     await prisma.inquiry.update({
       where: { id },
@@ -54,6 +58,9 @@ export async function updateInquiryStatus(id: string, status: InquiryStatus) {
 
 // 删除询问
 export async function deleteInquiry(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, error: "権限がありません。" };
+
   try {
     await prisma.inquiry.delete({
       where: { id },

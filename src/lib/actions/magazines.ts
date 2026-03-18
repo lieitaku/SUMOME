@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db"; // 保持您原有的引用路径
 import { revalidatePath, revalidateTag } from "next/cache";
 import { Prisma } from "@prisma/client";
+import { confirmAdmin } from "@/lib/auth-utils";
 
 // Zod Schema
 const MagazineSchema = z.object({
@@ -42,6 +43,9 @@ function parseFormData(formData: FormData) {
  * 创建杂志
  */
 export async function createMagazine(formData: FormData) {
+    const admin = await confirmAdmin();
+    if (!admin) return { error: "権限がありません。" };
+
   try {
     const rawData = parseFormData(formData);
     const validated = MagazineSchema.safeParse(rawData);
@@ -77,6 +81,9 @@ export async function createMagazine(formData: FormData) {
  * 更新杂志
  */
 export async function updateMagazine(id: string, formData: FormData) {
+  const admin = await confirmAdmin();
+  if (!admin) return { error: "権限がありません。" };
+
   try {
     const rawData = parseFormData(formData);
     const validated = MagazineSchema.safeParse(rawData);
@@ -114,6 +121,9 @@ export async function updateMagazine(id: string, formData: FormData) {
  * 删除杂志
  */
 export async function deleteMagazine(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { success: false, message: "権限がありません。" };
+
   try {
     await prisma.magazine.delete({ where: { id } });
     revalidatePath("/admin/magazines");

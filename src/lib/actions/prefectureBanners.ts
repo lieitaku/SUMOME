@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/db";
+import { confirmAdmin } from "@/lib/auth-utils";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 /** 获取单个都道府県的 Banner 配置 */
@@ -48,6 +49,9 @@ function parseRotation(value: unknown): number | null {
 
 /** 创建或更新都道府県 Banner（有则更新，无则创建） */
 export async function upsertPrefectureBanner(formData: FormData) {
+  const admin = await confirmAdmin();
+  if (!admin) return { error: "権限がありません。" };
+
   const pref = (formData.get("pref") as string)?.trim();
   const image = (formData.get("image") as string)?.trim();
   const alt = (formData.get("alt") as string)?.trim() || null;
@@ -115,6 +119,9 @@ export async function upsertPrefectureBanner(formData: FormData) {
 
 /** 删除都道府県 Banner（恢复为静态默认） */
 export async function deletePrefectureBanner(pref: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { error: "権限がありません。" };
+
   try {
     await prisma.prefectureBanner.delete({
       where: { pref },

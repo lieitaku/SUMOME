@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { authErrorToJapanese } from "@/lib/auth-error-messages";
+import { confirmAdmin } from "@/lib/auth-utils";
 
 /**
  * ==============================================================================
@@ -16,6 +17,11 @@ import { authErrorToJapanese } from "@/lib/auth-error-messages";
  * ==============================================================================
  */
 export async function createStaffAccount(formData: FormData) {
+  const admin = await confirmAdmin();
+  if (!admin) {
+    return { error: "権限がありません。" };
+  }
+
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
