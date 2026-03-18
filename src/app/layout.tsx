@@ -43,8 +43,17 @@ const cormorant = Cormorant_Garamond({
 // 元数据配置
 // ----------------------------------------------------------------------
 export const metadata: Metadata = {
+    metadataBase: new URL("https://memory-sumo.com"),
     title: "SUMOME | 全国相撲クラブ検索",
-    description: "未来の横綱を、ここから。",
+    description: "未来の横綱を、ここから。全国の相撲クラブを探す、冊子一覧、スポーツイベント情報。",
+    icons: { icon: "/icon.svg" },
+    openGraph: {
+        title: "SUMOME | 全国相撲クラブ検索",
+        description: "未来の横綱を、ここから。全国の相撲クラブを探す、冊子一覧、スポーツイベント情報。",
+        url: "https://memory-sumo.com",
+        siteName: "SUMOME",
+        type: "website",
+    },
 };
 
 // ----------------------------------------------------------------------

@@ -1,0 +1,17 @@
+<!--
+Placeholders only.
+Next.js App Router supports file conventions for icons in `app/` (e.g. `app/icon.svg`).
+Later you can replace this file with your real SUMOME logo.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SUMOME">
+  <rect width="64" height="64" rx="12" fill="#2454a4"/>
+  <text
+    x="32"
+    y="42"
+    text-anchor="middle"
+    font-size="34"
+    font-family="Arial, Helvetica, sans-serif"
+    font-weight="700"
+    fill="#ffffff"
+  >S</text>
+</svg>
