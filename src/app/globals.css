@@ -237,3 +237,14 @@
   /* steps(1): 关键！表示瞬间切换，不要渐变，这样才有“定格动画”的力量感 */
   animation: frame-cycle 2s infinite steps(1);
 }
+
+/* 角色悬浮球拖动时禁止全页文本选中 */
+html.char-drag-no-select,
+html.char-drag-no-select *,
+body.char-drag-no-select,
+body.char-drag-no-select * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+}

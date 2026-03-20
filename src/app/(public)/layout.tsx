@@ -3,6 +3,7 @@ import ScrollRevealProvider from "@/components/layout/ScrollRevealProvider";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ScrollToTop from "@/components/common/ScrollToTop";
+import CharacterFloatingEntry from "@/components/common/CharacterFloatingEntry";
 import EmbeddedDetector from "@/components/utils/EmbeddedDetector";
 
 // 前台布局不需要 html/body，只需要包裹内容
@@ -25,6 +26,9 @@ export default function PublicLayout({
 
         {/* 全局 Footer */}
         <Footer />
+
+        {/* 全局角色悬浮球入口 */}
+        <CharacterFloatingEntry />
 
         {/* 全局回到顶部按钮 */}
         <ScrollToTop />

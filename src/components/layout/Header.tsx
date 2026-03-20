@@ -58,12 +58,58 @@ const Header = () => {
   const hideHeaderPaths = ["/manager/login", "/manager/entry"];
   if (hideHeaderPaths.includes(pathname || "")) return null;
 
+  /** デスクトップ中央ナビ（5項目同一階層） */
   const navItems = [
     { name: "SUMOMEについて", href: "/about" },
     { name: "冊子一覧", href: "/magazines" },
     { name: "イベント", href: "/activities" },
     { name: "お問い合わせ", href: "/contact" },
-  ];
+    { name: "会社概要", href: "/company" },
+  ] as const;
+
+  /** モバイルドロワー：会社概要をお問い合わせの直下に配置 */
+  const navItemsMobile = [
+    { name: "SUMOMEについて", href: "/about" },
+    { name: "冊子一覧", href: "/magazines" },
+    { name: "イベント", href: "/activities" },
+    { name: "お問い合わせ", href: "/contact" },
+    { name: "会社概要", href: "/company" },
+  ] as const;
+
+  /**
+   * 桌面顶栏导航间距（lg 及以上）
+   * ------------------------------------------------------------------
+   * 1) desktopNavGutter（中间导航容器左右的 padding）
+   *    → 控制「导航整组」与左侧 Logo、与右侧锁头/搜索按钮之间的距离。
+   *    格式：clamp(最小值, 中间随屏幕变化, 最大值)
+   *    - 想离两侧再远一点：略增大三个数字（例如最小 +0.125rem、vw 系数 +0.1～0.2、最大 +0.25rem）。
+   *    - 想离两侧近一点：三个数字略减小。
+   *
+   * 2) desktopNavGap（<nav> 的 columnGap）
+   *    → 只影响五个文字链接「彼此之间」的间距，不动和 Logo/右侧的距离。
+   *    - 五个之间要更疏：增大 vw 系数或第三个「最大值」。
+   *    - 五个之间要更密：减小最小值、vw 系数或最大值。
+   *
+   * 3) desktopNavLinkTypography 里的 paddingLeft / paddingRight
+   *    → 每个链接文字左右的内边距，也会视觉上拉开/收紧相邻两字之间的距离。
+   *    - 一般优先改 columnGap；仍觉得字贴太紧再动这里。
+   *
+   * 4) fontSize / letterSpacing
+   *    → 字号与字距；与「间距」无关时也可单独调。
+   * ------------------------------------------------------------------
+   * rem 参考：1rem ≈ 16px（随用户系统字体可能略有差异）
+   */
+  const desktopNavGutter =
+    "clamp(0.625rem, 2.15vw + 0.55rem, 2.125rem)";
+  /** 五个导航链接之间的间距（columnGap） */
+  const desktopNavGap =
+    "clamp(0.2rem, 0.42vw + 0.06rem, 0.95rem)";
+  const desktopNavLinkTypography: React.CSSProperties = {
+    fontSize: "clamp(0.5625rem, 0.85vw + 0.22rem, 0.875rem)",
+    paddingLeft: "clamp(0.22rem, 0.45vw + 0.06rem, 0.5625rem)",
+    paddingRight: "clamp(0.22rem, 0.45vw + 0.06rem, 0.5625rem)",
+    letterSpacing: "clamp(0.008em, 0.08vw, 0.04em)",
+  };
 
   const rainbowColors = [
     "#23ac47",
@@ -110,6 +156,15 @@ const Header = () => {
         .search-btn-dynamic {
           background-color: ${themeColor} !important;
           border-color: ${themeColor} !important;
+        }
+
+        /* 6. 桌面顶栏导航：单行不换行，极窄时横向轻扫（无滚动条） */
+        .header-nav-scroll {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .header-nav-scroll::-webkit-scrollbar {
+          display: none;
         }
       `}</style>
 
@@ -166,28 +221,44 @@ const Header = () => {
               <span className="text-xs sm:text-sm md:text-[9px] lg:text-[10px] xl:text-base 2xl:text-base font-serif font-bold tracking-[0.12em] sm:tracking-[0.15em] md:tracking-[0.1em] lg:tracking-[0.12em] xl:tracking-[0.2em] 2xl:tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
                 スモウメモリー
               </span>
-              <span className="text-sm sm:text-base md:text-[10px] lg:text-xs xl:text-lg 2xl:text-lg font-serif font-bold tracki  ng-normal sm:tracking-wider md:tracking-wider lg:tracking-widest xl:tracking-widest 2xl:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
+              <span className="text-sm sm:text-base md:text-[10px] lg:text-xs xl:text-lg 2xl:text-lg font-serif font-bold tracking-normal sm:tracking-wider md:tracking-wider lg:tracking-widest xl:tracking-widest 2xl:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
                 相撲の思い出
               </span>
             </div>
           </Link>
 
-          {/* --- B. 桌面端导航 --- */}
-          <nav className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 gap-8 xl:gap-10">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="nav-item-dynamic relative text-sm font-serif font-bold tracking-wide text-gray-600 transition-colors duration-300 group py-1"
-              >
-                {item.name}
-                <span className="nav-underline absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 transition-[width] duration-300 ease-out w-0 bg-gray-200"></span>
-              </Link>
-            ))}
-          </nav>
+          {/* --- B. 桌面端导航（单行・fluid 字号/间距；最小幅でも僅かな余白を維持） --- */}
+          <div
+            className={cn(
+              "header-nav-scroll hidden lg:flex flex-1 min-w-0 justify-center items-center",
+              "overflow-x-auto overflow-y-hidden overscroll-x-contain"
+            )}
+            style={{
+              paddingLeft: desktopNavGutter,
+              paddingRight: desktopNavGutter,
+            }}
+          >
+            <nav
+              className="flex flex-nowrap items-center justify-center shrink-0"
+              style={{ columnGap: desktopNavGap }}
+              aria-label="メインナビゲーション"
+            >
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  style={desktopNavLinkTypography}
+                  className="nav-item-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 group whitespace-nowrap py-1"
+                >
+                  {item.name}
+                  <span className="nav-underline absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 transition-[width] duration-300 ease-out w-0 bg-gray-200"></span>
+                </Link>
+              ))}
+            </nav>
+          </div>
 
           {/* --- C. 桌面端操作区 --- */}
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3 shrink-0">
             {/* 1. 登录按钮 */}
             <Link
               href="/manager/login"
@@ -238,7 +309,7 @@ const Header = () => {
         className={`fixed top-0 right-0 h-full w-[85%] max-w-[320px] bg-white z-[150] shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.19,1,0.22,1)] ${menuOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
-        <div className="flex flex-col h-full p-6">
+        <div className="flex flex-col h-full min-h-0 p-6">
           <div className="flex justify-end mb-8">
             <button
               onClick={() => setMenuOpen(false)}
@@ -248,8 +319,8 @@ const Header = () => {
             </button>
           </div>
 
-          <div className="flex flex-col gap-6">
-            {navItems.map((item) => (
+          <div className="flex flex-col gap-6 flex-1 min-h-0 overflow-y-auto">
+            {navItemsMobile.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
@@ -266,7 +337,7 @@ const Header = () => {
             ))}
           </div>
 
-          <div className="mt-auto mb-8 space-y-4">
+          <div className="mt-auto mb-8 space-y-4 pt-4 shrink-0">
             <Link
               href="/clubs/map"
               onClick={() => setMenuOpen(false)}
