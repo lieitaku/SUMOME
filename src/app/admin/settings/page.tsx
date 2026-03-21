@@ -62,42 +62,61 @@ export default async function SettingsPage() {
                 </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                {/* --- 左侧：通用设置 (Profile & Security) --- */}
-                {/* 无论是 Admin 还是 Owner 都要用 */}
-                <div className="space-y-8">
-                    {/* 1. 个人资料卡片 */}
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                                <User size={20} />
+            {isAdmin ? (
+                <div className="grid grid-cols-1 lg:grid-cols-2 lg:grid-rows-[auto_auto] gap-8 lg:items-stretch">
+                    {/* 行1 左：プロフィール + セキュリティ（高さの基準） */}
+                    <div className="space-y-8 lg:row-start-1 lg:col-start-1">
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                    <User size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">マイプロフィール</h2>
+                                    <p className="text-xs text-gray-400">表示名と基本情報</p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-900">マイプロフィール</h2>
-                                <p className="text-xs text-gray-400">表示名と基本情報</p>
-                            </div>
+                            <ProfileForm initialName={dbUser.name || ""} />
                         </div>
-                        {/* 传入当前数据作为默认值 */}
-                        <ProfileForm initialName={dbUser.name || ""} />
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
+                                    <Lock size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">セキュリティ</h2>
+                                    <p className="text-xs text-gray-400">パスワードの変更</p>
+                                </div>
+                            </div>
+                            <PasswordForm />
+                        </div>
                     </div>
 
-                    {/* 2. 安全设置卡片 */}
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    {/* 行1 右：チームメンバー追加（左2枚分の行の高さに合わせて伸縮・底辺揃え） */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col min-h-0 lg:h-full lg:row-start-1 lg:col-start-2">
                         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                            <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
-                                <Lock size={20} />
+                            <div className="p-2 bg-sumo-brand/10 text-sumo-brand rounded-lg">
+                                <UserPlus size={20} />
                             </div>
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">セキュリティ</h2>
-                                <p className="text-xs text-gray-400">パスワードの変更</p>
+                                <h2 className="text-lg font-bold text-gray-900">チームメンバー追加</h2>
+                                <p className="text-xs text-gray-400">新しい管理者を招待・作成します</p>
                             </div>
                         </div>
-                        <PasswordForm />
+                        <div className="bg-sumo-brand/5 p-4 rounded-xl flex items-start gap-3 border border-sumo-brand/10 mb-6">
+                            <Shield size={16} className="text-sumo-brand mt-0.5 shrink-0" />
+                            <p className="text-[11px] text-sumo-brand leading-relaxed font-bold">
+                                作成されたアカウントは「特権管理者」権限を持ちます。<br />
+                                慎重に操作してください。
+                            </p>
+                        </div>
+                        <div className="lg:flex-1 lg:min-h-0 flex flex-col">
+                            <CreateStaffForm />
+                        </div>
                     </div>
 
-                    {/* 3. アカウント削除（全员） */}
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                    {/* 行2 左：アカウント削除 */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 lg:row-start-2 lg:col-start-1">
                         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
                             <div className="p-2 bg-red-50 text-red-600 rounded-lg">
                                 <Trash2 size={20} />
@@ -105,9 +124,7 @@ export default async function SettingsPage() {
                             <div>
                                 <h2 className="text-lg font-bold text-gray-900">アカウント削除</h2>
                                 <p className="text-xs text-gray-400">
-                                    {isAdmin
-                                        ? "管理者アカウントを削除します。最後の管理者の場合は削除できません。"
-                                        : "クラブとアカウントを削除し、登録を解除します。削除後は同じメールで再登録可能です。"}
+                                    管理者アカウントを削除します。最後の管理者の場合は削除できません。
                                 </p>
                             </div>
                         </div>
@@ -117,61 +134,78 @@ export default async function SettingsPage() {
                             blockReason={deleteBlockReason}
                         />
                     </div>
-                </div>
 
-                {/* --- 右侧：根据角色不同显示不同内容 --- */}
-                <div className="space-y-8">
-
-                    {isAdmin ? (
-                        <div className="space-y-8">
-                            {/* ================== ADMIN 专属视图 ================== */}
-                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                    <div className="p-2 bg-sumo-brand/10 text-sumo-brand rounded-lg">
-                                        <UserPlus size={20} />
-                                    </div>
-                                    <div>
-                                        <h2 className="text-lg font-bold text-gray-900">チームメンバー追加</h2>
-                                        <p className="text-xs text-gray-400">新しい管理者を招待・作成します</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-sumo-brand/5 p-4 rounded-xl flex items-start gap-3 border border-sumo-brand/10 mb-6">
-                                    <Shield size={16} className="text-sumo-brand mt-0.5 shrink-0" />
-                                    <p className="text-[11px] text-sumo-brand leading-relaxed font-bold">
-                                        作成されたアカウントは「特権管理者」権限を持ちます。<br />
-                                        慎重に操作してください。
-                                    </p>
-                                </div>
-
-                                <CreateStaffForm />
+                    {/* 行2 右：システムパフォーマンス（アカウント削除と同じ行の高さ） */}
+                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col min-h-0 lg:h-full lg:row-start-2 lg:col-start-2">
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
+                                <Zap size={20} />
                             </div>
-
-                            {/* 3. 系统性能优化 (Admin 专属) */}
-                            <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-                                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                                <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                                    <Zap size={20} />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-gray-900">システムパフォーマンス</h2>
-                                    <p className="text-xs text-gray-400">画像の最適化とメンテナンス</p>
-                                </div>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                                過去にアップロードされた古い形式の画像（JPG/PNG）を、読み込みの速い WebP 形式に一括変換します。
-                            </p>
-                                <Link
-                                    href="/admin/settings/migration"
-                                    className="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-gray-800 transition-colors"
-                                >
-                                    画像フォーマット遷移ツール
-                                </Link>
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-900">システムパフォーマンス</h2>
+                                <p className="text-xs text-gray-400">画像の最適化とメンテナンス</p>
                             </div>
                         </div>
-                    ) : null}
+                        <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                            過去にアップロードされた古い形式の画像（JPG/PNG）を、読み込みの速い WebP 形式に一括変換します。
+                        </p>
+                        <Link
+                            href="/admin/settings/migration"
+                            className="lg:mt-auto flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-gray-800 transition-colors"
+                        >
+                            画像フォーマット遷移ツール
+                        </Link>
+                    </div>
                 </div>
-            </div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="space-y-8">
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                                    <User size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">マイプロフィール</h2>
+                                    <p className="text-xs text-gray-400">表示名と基本情報</p>
+                                </div>
+                            </div>
+                            <ProfileForm initialName={dbUser.name || ""} />
+                        </div>
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-orange-50 text-orange-600 rounded-lg">
+                                    <Lock size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">セキュリティ</h2>
+                                    <p className="text-xs text-gray-400">パスワードの変更</p>
+                                </div>
+                            </div>
+                            <PasswordForm />
+                        </div>
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                                    <Trash2 size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">アカウント削除</h2>
+                                    <p className="text-xs text-gray-400">
+                                        クラブとアカウントを削除し、登録を解除します。削除後は同じメールで再登録可能です。
+                                    </p>
+                                </div>
+                            </div>
+                            <DeleteAccountForm
+                                role={dbUser.role}
+                                canDelete={deleteCanDelete}
+                                blockReason={deleteBlockReason}
+                            />
+                        </div>
+                    </div>
+                    <div className="hidden lg:block" aria-hidden />
+                </div>
+            )}
         </div>
     );
 }
