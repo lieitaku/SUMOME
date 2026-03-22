@@ -2,48 +2,41 @@
 
 import React from "react";
 import Link from "@/components/ui/TransitionLink";
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
 const Introduction = () => {
   return (
-    <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-6 lg:gap-24">
-      {/* 左侧：视觉重心 (图片) */}
-      <div className="relative w-full lg:w-1/2 h-[400px] lg:h-[500px] reveal-up group">
-        {/* 装饰框：极简黑线框 */}
-        <div className="absolute top-4 left-4 w-full h-full border-2 border-gray-100 z-0 transition-transform duration-500 group-hover:translate-x-2 group-hover:translate-y-2"></div>
-
-        {/* 图片容器 */}
-        <div className="relative w-full h-full z-10 overflow-hidden bg-gray-100">
-          <Image
-            src="/images/bg/about-intro.webp"
-            alt="About Sumome"
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </div>
-      </div>
-
-      {/* 右侧：叙事 (文字) */}
-      <div className="w-full lg:w-1/2 flex flex-col items-start lg:pl-10 reveal-up delay-100">
-        {/* 大标题：墨色 + 红色强调 */}
-        <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-wide text-sumo-text font-serif mb-2 pt-2">
+    // 1. 调整主容器：移动端竖向，PC端横向（标题在左，正文在右），整体作为一个元素居中
+    <div className="flex flex-col lg:flex-row items-center justify-center gap-2 lg:gap-24 w-full lg:w-fit mx-auto">
+      
+      {/* 2. 标题区域：PC端竖排，字号放大，放在左侧 */}
+      <div className="w-full lg:w-auto flex justify-start reveal-up">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black leading-tight lg:leading-normal tracking-wide text-sumo-text font-serif vertical-title">
           相撲の<span className="text-sumo-red">熱</span>を、
           <br />
           世界へ<span className="text-sumo-brand">届</span>ける。
         </h2>
+      </div>
 
-        {/* 正文：深灰，易读 */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @media (min-width: 1024px) {
+          .vertical-title {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            height: 480px; /* 限制高度，让文字自然排版 */
+          }
+        }
+      `}} />
+
+      {/* 3. 正文与链接区域：保持横排，PC端靠右，限制合适宽度 */}
+      <div className="w-full lg:w-[500px] flex flex-col items-start reveal-up delay-100">
         <div className="text-sumo-text/80 text-base leading-loose tracking-wide font-medium space-y-4 mb-1">
-
-            SUMOMEは、国技「相撲」の魅力をテクノロジーの力で最大化する次世代プラットフォームです。<br />
-            地域に根付くクラブと相撲を愛するすべての人を繋ぎ、未来の土俵を守るために、
-            私たちは伝統と革新の架け橋となります。
-
+          SUMOMEは、国技「相撲」の魅力をテクノロジーの力で最大化する次世代プラットフォームです。<br />
+          地域に根付くクラブと相撲を愛するすべての人を繋ぎ、未来の土俵を守るために、
+          私たちは伝統と革新の架け橋となります。
         </div>
-
-        {/* 链接：与正文保持 24px，与下方图片由父级 gap-6 控制 */}
+        
+        {/* 链接 */}
         <Link
           href="/about"
           className="group inline-flex items-center gap-2 mt-3 text-sumo-brand border-b border-sumo-brand pb-1 hover:text-sumo-dark hover:border-sumo-dark transition-all md:mt-10"
