@@ -1,16 +1,15 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Character } from "@/components/characters/character-data";
 import ComicDecorations from "@/components/characters/ComicDecorations";
 
 type CharacterProfileProps = {
-  character: Character;
+  characters: Character[];
   activeIndex: number;
-  direction: number;
   onNavigate: (nextIndex: number) => void;
-  total: number;
 };
 
 const themeStyles = {
@@ -60,83 +59,100 @@ function CharacterPlaceholder({ theme }: { theme: Character["theme"] }) {
 }
 
 export default function CharacterProfile({
-  character,
+  characters,
   activeIndex,
-  direction,
   onNavigate,
-  total,
 }: CharacterProfileProps) {
-  const reduceMotion = useReducedMotion();
-  const theme = themeStyles[character.theme];
+  const n = characters.length;
+  const slideFraction = n > 0 ? 100 / n : 100;
+  /** Framer 的 x 百分比相对于轨道自身宽度；轨道 = n×视口宽，每次移动 1/n 轨道宽 = 一整屏 */
+  const xPercent = n > 0 ? -(activeIndex / n) * 100 : 0;
 
   return (
-    <div className="relative">
-      <AnimatePresence custom={direction} mode="wait">
-        <motion.article
-          key={character.id}
-          custom={direction}
-          initial={
-            reduceMotion
-              ? { opacity: 0 }
-              : { opacity: 0, x: direction >= 0 ? 120 : -120, scale: 0.96 }
+    <div className="relative w-full max-w-full overflow-x-clip overflow-y-visible py-2 md:py-4">
+      <motion.div
+        className="flex flex-nowrap"
+        style={{ width: `${n * 100}%`, touchAction: "pan-y" }}
+        animate={{ x: `${xPercent}%` }}
+        transition={{ type: "spring", stiffness: 320, damping: 32 }}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.12}
+        onDragEnd={(_, info) => {
+          const swipeThreshold = 50;
+          if (info.offset.x < -swipeThreshold) {
+            onNavigate((activeIndex + 1) % n);
+          } else if (info.offset.x > swipeThreshold) {
+            onNavigate((activeIndex - 1 + n) % n);
           }
-          animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
-          exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: direction >= 0 ? -120 : 120, scale: 0.98 }}
-          transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
-          drag={reduceMotion ? false : "x"}
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.12}
-          onDragEnd={(_, info) => {
-            if (info.offset.x < -80) onNavigate((activeIndex + 1) % total);
-            if (info.offset.x > 80) onNavigate((activeIndex - 1 + total) % total);
-          }}
-          className="relative overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_18px_45px_rgba(0,0,0,0.08)]"
-        >
-          <ComicDecorations quote={character.quote} theme={character.theme} />
-          <div className="grid items-stretch gap-0 md:grid-cols-[0.9fr_1.1fr]">
-            <div className={cn("relative aspect-[3/4] overflow-hidden bg-gradient-to-br", theme.bgSoft)}>
-              <motion.div
-                animate={reduceMotion ? {} : { y: [0, -6, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="h-full w-full p-8"
-              >
-                <CharacterPlaceholder theme={character.theme} />
-              </motion.div>
-            </div>
-
-            <div className="relative z-10 p-6 md:p-10">
-              <p className={cn("mb-2 text-xs font-bold tracking-[0.25em]", theme.text)}>{character.nameEn}</p>
-              <h2 className="font-serif text-4xl font-bold tracking-wide text-sumo-text md:text-5xl">
-                {character.name} <span className="ml-2 text-xl text-gray-400">✦</span>
-              </h2>
-              <p className={cn("mt-2 text-sm font-bold tracking-widest", theme.text)}>{character.title}</p>
-
-              <svg className="my-4 h-4 w-full" viewBox="0 0 240 20" preserveAspectRatio="none" aria-hidden>
-                <path
-                  d="M2 10 C 28 2, 46 18, 70 10 S 110 2, 140 10 S 185 18, 238 10"
-                  className={cn("fill-none stroke-2", theme.line)}
-                />
-              </svg>
-
-              <p className="text-base leading-8 text-gray-700">{character.description}</p>
-
-              <div className="mt-6 flex flex-wrap gap-2">
-                {character.traits.map((trait) => (
-                  <span
-                    key={trait}
-                    className={cn(
-                      "rounded-full px-3 py-1 text-xs font-bold tracking-wider shadow-sm",
-                      theme.badge,
+        }}
+      >
+        {characters.map((character, slideIndex) => {
+          const theme = themeStyles[character.theme];
+          return (
+            <div
+              key={character.id}
+              className="box-border shrink-0 grow-0"
+              style={{ width: `${slideFraction}%` }}
+            >
+              <article className="relative isolate overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_18px_45px_rgba(0,0,0,0.08)] [transform:translateZ(0)]">
+                <ComicDecorations quote={character.quote} theme={character.theme} />
+                <div className="grid min-h-0 items-stretch gap-0 md:grid-cols-[0.9fr_1.1fr]">
+                  <div className={cn("relative min-h-0 aspect-[3/4] overflow-hidden bg-gradient-to-br", theme.bgSoft)}>
+                    {character.imageSrc ? (
+                      <div className="relative h-full min-h-[12rem] w-full p-4 md:p-8">
+                        <Image
+                          src={character.imageSrc}
+                          alt={`${character.name}のキャラクターイラスト`}
+                          fill
+                          className="object-contain object-center"
+                          sizes="(max-width: 768px) 100vw, 42vw"
+                          priority={slideIndex === activeIndex}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-full w-full p-4 md:p-8">
+                        <CharacterPlaceholder theme={character.theme} />
+                      </div>
                     )}
-                  >
-                    {trait}
-                  </span>
-                ))}
-              </div>
+                  </div>
+
+                  <div className="relative z-10 p-4 md:p-10">
+                    <p className={cn("mb-1 text-xs font-bold tracking-[0.25em]", theme.text)}>{character.nameEn}</p>
+                    <h2 className="font-serif text-3xl font-bold tracking-wide text-sumo-text md:text-5xl">
+                      {character.name} <span className="ml-1.5 text-lg text-gray-400 md:ml-2 md:text-xl">✦</span>
+                    </h2>
+                    <p className={cn("mt-1.5 text-sm font-bold tracking-widest", theme.text)}>{character.title}</p>
+
+                    <svg className="my-3 h-4 w-full md:my-4" viewBox="0 0 240 20" preserveAspectRatio="none" aria-hidden>
+                      <path
+                        d="M2 10 C 28 2, 46 18, 70 10 S 110 2, 140 10 S 185 18, 238 10"
+                        className={cn("fill-none stroke-2", theme.line)}
+                      />
+                    </svg>
+
+                    <p className="text-sm leading-7 text-gray-700 md:text-base md:leading-8">{character.description}</p>
+
+                    <div className="mt-4 flex flex-wrap gap-1.5 md:mt-6 md:gap-2">
+                      {character.traits.map((trait) => (
+                        <span
+                          key={trait}
+                          className={cn(
+                            "rounded-full px-3 py-1 text-xs font-bold tracking-wider shadow-sm",
+                            theme.badge,
+                          )}
+                        >
+                          {trait}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </article>
             </div>
-          </div>
-        </motion.article>
-      </AnimatePresence>
+          );
+        })}
+      </motion.div>
     </div>
   );
 }

@@ -1,3 +1,8 @@
+/**
+ * 角色立绘/头像请放在：public/images/characters/
+ * 在 imageSrc 填写以 / 开头的 URL，例如："/images/characters/sumome.webp"
+ *（与站内 banner、clubs 等一致，建议用 .webp）
+ */
 export type CharacterTheme = "brand" | "gold" | "red";
 
 export type Character = {
@@ -23,7 +28,7 @@ export const CHARACTERS: Character[] = [
     traits: ["怪力", "まっすぐ", "行動派"],
     quote: "「やってみる！」",
     theme: "brand",
-    imageSrc: "",
+    imageSrc: "/images/characters/sumome.webp",
   },
   {
     id: "chanko",
@@ -35,7 +40,7 @@ export const CHARACTERS: Character[] = [
     traits: ["福運", "食いしん坊", "やさしい"],
     quote: "「おかわり、まだまだ！」",
     theme: "gold",
-    imageSrc: "",
+    imageSrc: "/images/characters/chanko.webp",
   },
   {
     id: "gottsan",
@@ -47,6 +52,6 @@ export const CHARACTERS: Character[] = [
     traits: ["礼儀正しい", "情熱", "ムードメーカー"],
     quote: "「ごっつぁんです！」",
     theme: "red",
-    imageSrc: "",
+    imageSrc: "/images/characters/gottsan.webp",
   },
 ];

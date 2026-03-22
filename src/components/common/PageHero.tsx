@@ -3,6 +3,7 @@
 
 import React from "react";
 import Link from "@/components/ui/TransitionLink";
+import { cn } from "@/lib/utils";
 
 type PageHeroProps = {
   title: string; // 显示的标题 (如: 北海道)
@@ -12,6 +13,8 @@ type PageHeroProps = {
     href: string;
     label: string;
   };
+  /** 追加到 section（如缩小与下方区块的间距：pb-6） */
+  className?: string;
 };
 
 const PageHero = ({
@@ -19,9 +22,15 @@ const PageHero = ({
   enTitle,
   subtitle,
   backLink = { href: "/", label: "TOPに戻る" },
+  className,
 }: PageHeroProps) => {
   return (
-    <section className="relative pt-40 pb-32 px-6 overflow-hidden bg-vivid-sky text-sumo-dark">
+    <section
+      className={cn(
+        "relative overflow-hidden bg-vivid-sky px-4 pt-24 pb-16 text-sumo-dark md:px-6 md:pt-40 md:pb-32",
+        className,
+      )}
+    >
       {/* 1. 背景纹理 */}
       <div
         className="absolute inset-0 opacity-15 mix-blend-multiply pointer-events-none"
@@ -41,18 +50,18 @@ const PageHero = ({
       <div className="container mx-auto text-center relative z-10 reveal-up">
         <Link
           href={backLink.href}
-          className="inline-block mb-6 text-gray-500 hover:text-sumo-brand text-xs tracking-widest border-b border-gray-300 pb-1 transition-colors font-bold"
+          className="inline-block mb-3 md:mb-6 text-gray-500 hover:text-sumo-brand text-xs tracking-widest border-b border-gray-300 pb-1 transition-colors font-bold"
         >
           ← {backLink.label}
         </Link>
 
-        <p className="text-sumo-gold text-xs font-bold tracking-[0.3em] mb-6 uppercase flex items-center justify-center gap-4">
+        <p className="text-sumo-gold text-xs font-bold tracking-[0.3em] mb-3 md:mb-6 uppercase flex items-center justify-center gap-3 md:gap-4">
           <span className="w-8 h-[2px] bg-sumo-gold"></span>
           Area Information
           <span className="w-8 h-[2px] bg-sumo-gold"></span>
         </p>
 
-        <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-wide mb-6 text-sumo-dark drop-shadow-sm">
+        <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-wide mb-3 md:mb-6 text-sumo-dark drop-shadow-sm">
           {title}
         </h1>
 

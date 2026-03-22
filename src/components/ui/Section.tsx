@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 interface SectionProps {
   children: React.ReactNode;
   className?: string; // 允许传入额外的样式
+  /** 覆盖内部 container 的 class（如手机端缩小 px） */
+  containerClassName?: string;
   id?: string; // 用于锚点跳转
   background?: "white" | "gray"; // 限制背景只能是这两种，防止乱用颜色
 }
@@ -11,6 +13,7 @@ interface SectionProps {
 const Section: React.FC<SectionProps> = ({
   children,
   className,
+  containerClassName,
   id,
   background = "white",
 }) => {
@@ -26,7 +29,7 @@ const Section: React.FC<SectionProps> = ({
       )}
     >
       {/* 居中容器：控制内容最大宽度，左右留白 */}
-      <div className="container mx-auto px-6 md:px-12 max-w-7xl">
+      <div className={cn("container mx-auto max-w-7xl px-6 md:px-12", containerClassName)}>
         {children}
       </div>
     </section>

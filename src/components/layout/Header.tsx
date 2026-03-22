@@ -67,13 +67,14 @@ const Header = () => {
     { name: "会社概要", href: "/company" },
   ] as const;
 
-  /** モバイルドロワー：会社概要をお問い合わせの直下に配置 */
+  /** モバイルドロワー：会社概要の下にキャラクター紹介 */
   const navItemsMobile = [
     { name: "SUMOMEについて", href: "/about" },
     { name: "冊子一覧", href: "/magazines" },
     { name: "イベント", href: "/activities" },
     { name: "お問い合わせ", href: "/contact" },
     { name: "会社概要", href: "/company" },
+    { name: "キャラクター紹介", href: "/characters" },
   ] as const;
 
   /**

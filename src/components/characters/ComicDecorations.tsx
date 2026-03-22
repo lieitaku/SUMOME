@@ -43,18 +43,18 @@ export default function ComicDecorations({ quote, theme }: ComicDecorationsProps
 
       <motion.div
         className={cn(
-          "absolute bottom-4 left-4 z-20 rounded-2xl border bg-white/85 px-3 py-2 text-xs font-bold backdrop-blur-sm md:text-sm",
+          "absolute top-6 left-6 z-20 rounded-2xl border bg-white/85 px-3 py-2 text-xs font-bold backdrop-blur-sm md:text-sm",
           style.border,
           style.text,
         )}
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
       >
         {quote}
         <span
           className={cn(
-            "absolute -bottom-2 left-5 block h-3 w-3 rotate-45 border-b border-r bg-white/90",
+            "absolute -bottom-1.5 left-5 block h-3 w-3 rotate-45 border-b border-r bg-white/90",
             style.border,
           )}
           aria-hidden
