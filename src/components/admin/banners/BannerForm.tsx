@@ -266,7 +266,7 @@ export default function BannerForm({ initialData }: Props) {
                             className={inputClass}
                         />
                         <p className="text-[10px] text-gray-400 mt-1">
-                            ※ 現在、旗をクリックしてもリンクには遷移しません（将来対応予定）
+                            ※ トップ・都道府県ページのウサギ旗をクリックで開きます。サイト内は <span className="font-mono">/clubs/...</span> のように先頭スラッシュ付きパス、外部は <span className="font-mono">https://</span> から始まる URL を入力してください。
                         </p>
                     </div>
 

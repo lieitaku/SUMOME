@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
+import Link from "next/link";
 import RabbitActor from "./RabbitActor";
 import {
   RABBIT_VARIANTS,
@@ -29,6 +30,43 @@ interface RabbitWalkingBannerProps {
 
 // 最小赞助商数量（确保能填满屏幕）
 const MIN_SPONSOR_COUNT = 8;
+
+function isInternalNavHref(href: string) {
+  const t = href.trim();
+  return t.startsWith("/") && !t.startsWith("//");
+}
+
+function SponsorFlagLink({
+  href,
+  ariaLabel,
+  className,
+  children,
+}: {
+  href: string;
+  ariaLabel: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const t = href.trim();
+  if (isInternalNavHref(t)) {
+    return (
+      <Link href={t} className={className} aria-label={ariaLabel}>
+        {children}
+      </Link>
+    );
+  }
+  return (
+    <a
+      href={t}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={className}
+      aria-label={ariaLabel}
+    >
+      {children}
+    </a>
+  );
+}
 
 export default function RabbitWalkingBanner({
   scale = 1,
@@ -154,8 +192,7 @@ export default function RabbitWalkingBanner({
       `}</style>
 
       <div
-        className="relative w-full overflow-hidden pointer-events-none select-none"
-        aria-hidden="true"
+        className="relative w-full overflow-hidden select-none"
         style={{
           height: containerHeight,
           zIndex: 30,
@@ -200,10 +237,13 @@ export default function RabbitWalkingBanner({
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { transform: _ignored, ...restBodyStyle } = variant.bodyStyle || {};
 
+            const flagHref = item.link?.trim();
+            const flagLinkLabel = item.alt || "スポンサー";
+
             return (
               <div
                 key={`${item.id}-${idx}`}
-                className="relative flex justify-center"
+                className="relative flex justify-center pointer-events-none"
                 style={{
                   width: UNIT_WIDTH,
                   height: UNIT_WIDTH,
@@ -254,73 +294,134 @@ export default function RabbitWalkingBanner({
                       className="origin-bottom"
                       style={{ transform: `scale(${adjustedFlagScale})` }}
                     >
-                      <div className="relative flex flex-col items-center group">
-
-                        {/* 1. Bar - 移动端简化阴影 */}
-                        <div
-                          className={`bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 border border-[#B8860B] ${isMobile ? 'shadow-sm' : 'shadow-lg'}`}
-                          style={{
-                            width: `${barW}px`,
-                            height: `${8 * scale}px`,
-                          }}
-                        ></div>
-
-                        {/* 2. Flag Face - 移动端简化阴影 */}
-                        <div
-                          className={`relative z-20 bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5 ${isMobile ? 'shadow-lg' : 'shadow-2xl'}`}
-                          style={{
-                            width: `${flagW}px`,
-                            height: `${flagH}px`,
-                            marginTop: `${-6 * scale}px`,
-                          }}
+                      {flagHref ? (
+                        <SponsorFlagLink
+                          href={flagHref}
+                          ariaLabel={flagLinkLabel}
+                          className="relative flex flex-col items-center group pointer-events-auto cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand focus-visible:ring-offset-2 rounded-sm"
                         >
+                          {/* 1. Bar */}
                           <div
-                            className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"
-                            style={{ height: `${6 * scale}px` }}
-                          ></div>
-                          <img
-                            src={item.image}
-                            alt={item.alt}
-                            loading="lazy"
-                            className="relative z-10 shadow-sm rounded-sm w-[85%] h-auto object-contain"
+                            className={`bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 border border-[#B8860B] ${isMobile ? 'shadow-sm' : 'shadow-lg'}`}
+                            style={{
+                              width: `${barW}px`,
+                              height: `${8 * scale}px`,
+                            }}
                           />
-                          <div className="absolute inset-0 bg-black/5 mix-blend-multiply z-20 pointer-events-none"></div>
-                        </div>
 
-                        {/* 3. Tassel */}
-                        <div
-                          className="relative z-10"
-                          style={{
-                            width: `${tasselW}px`,
-                            height: `${tasselH}px`,
-                            marginTop: `${-8 * scale}px`
-                          }}
-                        >
+                          {/* 2. Flag Face */}
                           <div
-                            className="w-full h-full"
+                            className={`relative z-20 bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5 ${isMobile ? 'shadow-lg' : 'shadow-2xl'}`}
                             style={{
-                              background: "linear-gradient(to bottom, #B8860B, #FFD700, #B8860B)",
-                              maskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
-                              WebkitMaskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
-                              clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)"
+                              width: `${flagW}px`,
+                              height: `${flagH}px`,
+                              marginTop: `${-6 * scale}px`,
                             }}
-                          ></div>
-                          <div
-                            className="absolute inset-0 pointer-events-none"
-                            style={{
-                              boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
-                              clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)"
-                            }}
-                          ></div>
-                        </div>
+                          >
+                            <div
+                              className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"
+                              style={{ height: `${6 * scale}px` }}
+                            />
+                            <img
+                              src={item.image}
+                              alt=""
+                              loading="lazy"
+                              className="relative z-10 shadow-sm rounded-sm w-[85%] h-auto object-contain pointer-events-none"
+                            />
+                            <div className="absolute inset-0 bg-black/5 mix-blend-multiply z-20 pointer-events-none" />
+                          </div>
 
-                      </div>
+                          {/* 3. Tassel */}
+                          <div
+                            className="relative z-10"
+                            style={{
+                              width: `${tasselW}px`,
+                              height: `${tasselH}px`,
+                              marginTop: `${-8 * scale}px`,
+                            }}
+                          >
+                            <div
+                              className="w-full h-full pointer-events-none"
+                              style={{
+                                background: "linear-gradient(to bottom, #B8860B, #FFD700, #B8860B)",
+                                maskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
+                                WebkitMaskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
+                                clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)",
+                              }}
+                            />
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
+                                clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)",
+                              }}
+                            />
+                          </div>
+                        </SponsorFlagLink>
+                      ) : (
+                        <div className="relative flex flex-col items-center group">
+                          <div
+                            className={`bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 border border-[#B8860B] ${isMobile ? 'shadow-sm' : 'shadow-lg'}`}
+                            style={{
+                              width: `${barW}px`,
+                              height: `${8 * scale}px`,
+                            }}
+                          />
+
+                          <div
+                            className={`relative z-20 bg-[#FDFBF7] flex items-center justify-center overflow-hidden border-x border-black/5 ${isMobile ? 'shadow-lg' : 'shadow-2xl'}`}
+                            style={{
+                              width: `${flagW}px`,
+                              height: `${flagH}px`,
+                              marginTop: `${-6 * scale}px`,
+                            }}
+                          >
+                            <div
+                              className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"
+                              style={{ height: `${6 * scale}px` }}
+                            />
+                            <img
+                              src={item.image}
+                              alt={item.alt}
+                              loading="lazy"
+                              className="relative z-10 shadow-sm rounded-sm w-[85%] h-auto object-contain"
+                            />
+                            <div className="absolute inset-0 bg-black/5 mix-blend-multiply z-20 pointer-events-none" />
+                          </div>
+
+                          <div
+                            className="relative z-10"
+                            style={{
+                              width: `${tasselW}px`,
+                              height: `${tasselH}px`,
+                              marginTop: `${-8 * scale}px`,
+                            }}
+                          >
+                            <div
+                              className="w-full h-full"
+                              style={{
+                                background: "linear-gradient(to bottom, #B8860B, #FFD700, #B8860B)",
+                                maskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
+                                WebkitMaskImage: "repeating-linear-gradient(90deg, black, black 3px, transparent 3px, transparent 4px)",
+                                clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)",
+                              }}
+                            />
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                boxShadow: "inset 0 4px 6px rgba(0,0,0,0.3)",
+                                clipPath: "polygon(0 0, 100% 0, 98% 100%, 2% 100%)",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Hand */}
+                  {/* Hand（装飾のためクリックは旗エリアへ透過） */}
                   <div
-                    className="absolute inset-0 z-20"
+                    className="absolute inset-0 z-20 pointer-events-none"
                     style={{
                       ...variant.handStyle,
                       transform: variant.handStyle?.transform
