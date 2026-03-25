@@ -124,10 +124,10 @@ const Footer = () => {
               </Link>
             )}
 
-            <p className="text-sm text-gray-500 mb-4 md:mb-8 leading-loose font-medium font-sans">
+            <p className="text-base md:text-sm text-gray-500 mb-4 md:mb-8 leading-loose font-medium font-sans">
               相撲クラブ検索・応援プラットフォーム
               <br />
-              <span className="text-xs opacity-70 mt-2 md:mb-0 md:mt-2 block">
+              <span className="text-sm md:text-xs opacity-70 mt-2 md:mb-0 md:mt-2 block">
                 相撲の魂を、未来へつなぐ。
               </span>
             </p>
@@ -135,10 +135,10 @@ const Footer = () => {
           </div>
 
           {/* --- Right Column: Sitemap --- */}
-          <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 text-sm">
+          <div className="md:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 text-sm md:text-sm">
             {/* Column 1 */}
             <div>
-              <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
+              <h4 className="flex items-center gap-3 font-serif font-bold text-sm md:text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
                 サイトマップ
               </h4>
@@ -168,9 +168,9 @@ const Footer = () => {
 
             {/* Column 2 */}
             <div>
-              <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
+              <h4 className="flex items-center gap-3 font-serif font-bold text-sm md:text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                クラブ運営者へ
+                クラブ運営者様へ
               </h4>
               <ul className="space-y-4 text-gray-500 font-medium">
                 <li>
@@ -193,7 +193,7 @@ const Footer = () => {
 
             {/* Column 3 */}
             <div>
-              <h4 className="flex items-center gap-3 font-serif font-bold text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
+              <h4 className="flex items-center gap-3 font-serif font-bold text-sm md:text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
                 サポート
               </h4>
@@ -219,17 +219,11 @@ const Footer = () => {
         </div>
 
         {/* --- Bottom Copyright --- */}
-        <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest">
+        <div className="pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center text-xs md:text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest">
           <p className="font-sans">
             &copy; 2025 MEMORY INC. All Rights Reserved.
           </p>
           <div className="flex items-center gap-6 mt-4 md:mt-0">
-            <span
-              className="font-serif italic normal-case tracking-normal text-xs"
-              style={{ color: `${themeColor}99` }} // 60% opacity for designer credit
-            >
-              Designed by SUMOME Creative
-            </span>
           </div>
         </div>
       </div>
