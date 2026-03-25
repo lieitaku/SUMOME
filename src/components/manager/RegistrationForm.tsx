@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useActionState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "@/components/ui/TransitionLink";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import {
     Building2,
     User,
@@ -16,27 +18,72 @@ import {
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 
-// 引入后端 Action 和类型定义
 import { signUp, type SignUpState } from "@/lib/actions/auth-signup";
 
-const initialState: SignUpState = {
-    message: "",
-    error: {},
-    inputs: {
-        clubName: "",
-        name: "",
-        email: "",
-    }
-};
-
 const RegistrationForm = () => {
-    const [state, formAction, isPending] = useActionState(signUp, initialState);
+    const router = useRouter();
+    const formRef = useRef<HTMLFormElement>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [state, setState] = useState<SignUpState>({});
+
+    const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    const handleBack = () => {
+        if (window.history.length > 1) {
+            router.back();
+        } else {
+            router.push("/partners");
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setState({});
+
+        const formData = new FormData(e.currentTarget);
+        const password = formData.get("password") as string;
+        const email = formData.get("email") as string;
+
+        try {
+            const result = await signUp({}, formData);
+
+            if (!result.success) {
+                setState(result);
+                setIsSubmitting(false);
+                return;
+            }
+
+            const { error: loginError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            });
+
+            if (loginError) {
+                setState({
+                    message: "アカウントは作成されました。ログインページからサインインしてください。",
+                    inputs: result.inputs,
+                });
+                setIsSubmitting(false);
+                return;
+            }
+
+            router.refresh();
+            router.push("/admin/clubs");
+        } catch {
+            setState({ message: "予期せぬエラーが発生しました。もう一度お試しください。" });
+            setIsSubmitting(false);
+        }
+    };
 
     return (
-        <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
+        <div className="bg-[#F4F5F7] font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
 
             {/* ==================== 1. 页头区域 (Header Area) ==================== */}
-            <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+            <header className="relative bg-sumo-brand text-white pt-20 pb-32 md:pt-32 md:pb-48 overflow-hidden shadow-xl">
                 <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
                 <div
                     className="absolute inset-0 pointer-events-none opacity-20"
@@ -51,22 +98,23 @@ const RegistrationForm = () => {
                 </div>
 
                 <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
-                    <div className="absolute top-0 left-6">
-                        <Link
-                            href="/"
-                            className="inline-flex items-center gap-2 text-white/60 hover:text-white transition-colors group"
+                    <div className="flex justify-center mb-8">
+                        <button
+                            type="button"
+                            onClick={handleBack}
+                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group"
                         >
                             <ChevronLeft
-                                size={16}
-                                className="group-hover:-translate-x-1 transition-transform"
+                                size={12}
+                                className="group-hover:-translate-x-0.5 transition-transform"
                             />
-                            <span className="text-xs font-bold tracking-widest uppercase">
-                                Home
+                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
+                                戻る
                             </span>
-                        </Link>
+                        </button>
                     </div>
 
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100 mt-12 md:mt-8">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm reveal-up delay-100">
                         新規クラブ登録
                     </h1>
 
@@ -79,29 +127,28 @@ const RegistrationForm = () => {
             </header>
 
             {/* ==================== 2. 注册卡片区域 (Registration Card) ==================== */}
-            <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
+            <section className="relative px-4 md:px-6 z-20 -mt-16 md:-mt-24 pb-12 sm:pb-16 md:pb-24">
                 <div className="container mx-auto max-w-5xl">
                     <Ceramic
                         interactive={false}
                         className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] overflow-hidden p-0"
                     >
-                        {/* 手机端：表单位于上、Benefits 于下；桌面端：左 Benefits、右表单 */}
-                        <div className="flex flex-col-reverse lg:flex-row min-h-[700px]">
+                        <div className="flex flex-col-reverse lg:flex-row min-h-0 lg:min-h-[700px]">
 
                             {/* --- A. 左侧区域（桌面）/ 下方（手机）--- */}
-                            <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col">
+                            <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-6 md:p-14 relative overflow-hidden flex flex-col">
                                 <div className="relative z-10 flex-grow">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
+                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-6 md:mb-10 border-b border-gray-200 pb-4">
                                         メリット
                                     </h3>
 
-                                    <h2 className="text-3xl font-serif font-bold text-sumo-dark mb-8 leading-tight">
+                                    <h2 className="text-2xl md:text-3xl font-serif font-bold text-sumo-dark mb-5 md:mb-8 leading-tight">
                                         クラブ運営を、
                                         <br />
                                         もっとスマートに。
                                     </h2>
 
-                                    <div className="space-y-8">
+                                    <div className="space-y-4 md:space-y-8">
                                         {[
                                             {
                                                 title: "検索に強い公式ページ",
@@ -137,7 +184,7 @@ const RegistrationForm = () => {
                                     </div>
                                 </div>
 
-                                <div className="relative z-10 mt-12 pt-8 border-t border-gray-200">
+                                <div className="relative z-10 mt-8 md:mt-12 pt-6 md:pt-8 border-t border-gray-200">
                                     <div className="flex items-center gap-3 opacity-60">
                                         <ShieldCheck size={16} className="text-gray-400" />
                                         <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
@@ -148,103 +195,96 @@ const RegistrationForm = () => {
                             </div>
 
                             {/* --- B. 右侧区域: 注册表单 (Form) --- */}
-                            <div className="lg:w-7/12 bg-white p-8 md:p-14 lg:p-16 relative">
-                                <div className="flex justify-between items-end mb-10">
-                                    <div>
-                                        <h3 className="text-2xl font-serif font-bold text-sumo-dark mb-1">
-                                            アカウント作成
-                                        </h3>
-                                        <p className="text-xs text-gray-400 font-bold tracking-widest uppercase">
-                                            新規アカウント作成
-                                        </p>
-                                    </div>
-                                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-xs font-bold text-gray-400 border border-gray-100">
-                                        1/1
-                                    </div>
+                            <div className="lg:w-7/12 bg-white p-5 md:p-14 lg:p-16 relative">
+                                <div className="mb-6 md:mb-10">
+                                    <h3 className="text-3xl font-serif font-bold text-sumo-dark">
+                                        新規アカウント作成
+                                    </h3>
                                 </div>
 
-                                <form action={formAction} className="space-y-8">
+                                <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col">
 
                                     {state?.message && (
-                                        <div className="p-4 bg-red-50 text-red-600 text-xs font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                                        <div className="mb-6 md:mb-8 p-4 bg-red-50 text-red-600 text-sm font-bold rounded-xl border border-red-100 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                                             ⚠️ {state.message}
                                         </div>
                                     )}
 
-                                    {/* 字段 1: 俱乐部名称 */}
-                                    <div className="group relative">
-                                        <label className="absolute -top-5 left-0 text-[10px] font-bold text-sumo-brand uppercase tracking-wider flex items-center gap-2">
-                                            <Building2 size={12} /> クラブ名 <span className="text-red-400">*</span>
+                                    {/* 各フィールド：ラベル＋入力は密。下線の下に pb で次のラベルまで呼吸感 */}
+                                    <div className="flex flex-col gap-1.5 pb-8 md:pb-6">
+                                        <label htmlFor="reg-clubName" className="text-xs font-bold text-sumo-brand uppercase tracking-wider flex items-center gap-2">
+                                            <Building2 size={14} /> クラブ名 <span className="text-red-400">*</span>
                                         </label>
                                         <input
+                                            id="reg-clubName"
                                             name="clubName"
                                             type="text"
                                             required
                                             defaultValue={state?.inputs?.clubName}
                                             placeholder="例：東京相撲クラブ"
-                                            className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
+                                            className="w-full py-2.5 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-base text-sumo-dark placeholder-gray-300"
                                         />
                                         {state?.error?.clubName && (
-                                            <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.clubName[0]}</p>
+                                            <p className="text-red-500 text-xs font-bold">{state.error.clubName[0]}</p>
                                         )}
                                     </div>
 
-                                    {/* 字段 2: 代表者姓名 */}
-                                    <div className="group relative">
-                                        <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                                            <User size={12} /> 代表者氏名 <span className="text-red-400">*</span>
+                                    <div className="group flex flex-col gap-1.5 pb-8 md:pb-6">
+                                        <label htmlFor="reg-name" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                                            <User size={14} /> 代表者氏名 <span className="text-red-400">*</span>
                                         </label>
                                         <input
+                                            id="reg-name"
                                             name="name"
                                             type="text"
                                             required
                                             defaultValue={state?.inputs?.name}
                                             placeholder="例：相撲 太郎"
-                                            className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
+                                            className="w-full py-2.5 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-base text-sumo-dark placeholder-gray-300"
                                         />
                                         {state?.error?.name && (
-                                            <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.name[0]}</p>
+                                            <p className="text-red-500 text-xs font-bold">{state.error.name[0]}</p>
                                         )}
                                     </div>
 
-                                    {/* 字段 3: 邮箱 */}
-                                    <div className="group relative">
-                                        <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                                            <Mail size={12} /> メールアドレス <span className="text-red-400">*</span>
+                                    <div className="group flex flex-col gap-1.5 pb-8 md:pb-7">
+                                        <label htmlFor="reg-email" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                                            <Mail size={14} /> メールアドレス <span className="text-red-400">*</span>
                                         </label>
                                         <input
+                                            id="reg-email"
                                             name="email"
                                             type="email"
                                             required
                                             defaultValue={state?.inputs?.email}
                                             placeholder="example@sumome.jp"
-                                            className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
+                                            className="w-full py-2.5 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-base text-sumo-dark placeholder-gray-300"
                                         />
                                         {state?.error?.email && (
-                                            <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.email[0]}</p>
+                                            <p className="text-red-500 text-xs font-bold">{state.error.email[0]}</p>
                                         )}
                                     </div>
 
-                                    {/* 字段 4: 密码 */}
-                                    <div className="group relative">
-                                        <label className="absolute -top-5 left-0 text-[10px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                                            <Lock size={12} /> パスワード <span className="text-red-400">*</span>
+                                    <div className="group flex flex-col gap-1.5 pb-3 md:pb-7">
+                                        <label htmlFor="reg-password" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                                            <Lock size={14} /> パスワード <span className="text-red-400">*</span>
                                         </label>
                                         <input
+                                            id="reg-password"
                                             name="password"
                                             type="password"
                                             required
                                             placeholder="8文字以上の半角英数字"
-                                            className="w-full py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-sumo-dark placeholder-gray-300"
+                                            className="w-full py-2.5 bg-transparent border-b border-gray-200 focus:outline-none focus:border-sumo-brand transition-all font-medium text-base text-sumo-dark placeholder-gray-300"
                                         />
                                         {state?.error?.password && (
-                                            <p className="text-red-500 text-[10px] mt-1 font-bold">{state.error.password[0]}</p>
+                                            <p className="text-red-500 text-xs font-bold">{state.error.password[0]}</p>
                                         )}
                                     </div>
 
-                                    {/* 条款与提交 */}
-                                    <div className="pt-8">
-                                        <p className="text-[10px] text-gray-400 mb-6 leading-relaxed">
+                                    {/* 条款与提交（モバイルは上余白を詰める） */}
+                                    <div className="pt-1 md:pt-8">
+                                        <p className="text-xs text-gray-400 mb-6 leading-relaxed">
                                             <span className="block mb-2">
                                                 ご登録の前に必ずご確認ください：
                                             </span>
@@ -266,14 +306,14 @@ const RegistrationForm = () => {
 
                                         <button
                                             type="submit"
-                                            disabled={isPending}
+                                            disabled={isSubmitting}
                                             className={cn(
-                                                "w-full py-4 rounded-xl text-xs font-bold uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3",
+                                                "w-full py-4 rounded-xl text-sm font-bold uppercase tracking-[0.2em] shadow-lg transition-all flex items-center justify-center gap-3",
                                                 "bg-sumo-dark text-white hover:bg-sumo-brand active:scale-[0.98]",
-                                                isPending ? "opacity-70 cursor-not-allowed" : ""
+                                                isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                                             )}
                                         >
-                                            {isPending ? (
+                                            {isSubmitting ? (
                                                 <>
                                                     <Loader2 size={16} className="animate-spin" /> 登録中...
                                                 </>
@@ -290,8 +330,8 @@ const RegistrationForm = () => {
                                     </div>
                                 </form>
 
-                                <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                                    <p className="text-xs font-medium text-gray-500">
+                                <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-100 text-center">
+                                    <p className="text-sm font-medium text-gray-500">
                                         アカウントをお持ちの方は
                                         <Link
                                             href="/manager/login"

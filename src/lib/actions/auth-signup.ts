@@ -2,11 +2,11 @@
 
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { prisma } from "@/lib/db";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { authErrorToJapanese } from "@/lib/auth-error-messages";
 
 export type SignUpState = {
+  success?: boolean;
   message?: string;
   error?: {
     clubName?: string[];
@@ -14,12 +14,10 @@ export type SignUpState = {
     email?: string[];
     password?: string[];
   };
-  // 新增：用于在前端回填用户之前输入的内容
   inputs?: {
     clubName?: string;
     name?: string;
     email?: string;
-    // ⚠️ 安全规范：永远不要回显密码
   };
 };
 
@@ -110,6 +108,5 @@ export async function signUp(
     };
   }
 
-  // 4. 跳转
-  redirect("/admin");
+  return { success: true, inputs: { clubName, name, email } };
 }
