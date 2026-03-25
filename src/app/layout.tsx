@@ -43,7 +43,7 @@ const cormorant = Cormorant_Garamond({
 // 元数据配置
 // ----------------------------------------------------------------------
 export const metadata: Metadata = {
-    metadataBase: new URL("https://memory-sumo.com"),
+    metadataBase: new URL("https://www.memory-sumo.com"),
     verification: {
         google: "0hQ6bhAEpUdJ_Knewca79UXs6SunCcR-CdcNelcNHJA",
     },
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
         title: "SUMOME（すもめ）| 全国の相撲クラブ検索・アマチュア相撲情報",
         description:
             "全国のアマチュア相撲クラブを検索できるポータルサイト。クラブ情報、フォトブック、イベント情報を掲載。未来の横綱を、ここから。",
-        url: "https://memory-sumo.com",
+        url: "https://www.memory-sumo.com",
         siteName: "SUMOME",
         type: "website",
         locale: "ja_JP",
@@ -83,7 +83,7 @@ export const metadata: Metadata = {
             "全国のアマチュア相撲クラブを検索できるポータルサイト。未来の横綱を、ここから。",
     },
     alternates: {
-        canonical: "https://memory-sumo.com",
+        canonical: "https://www.memory-sumo.com",
     },
 };
 

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description:
     "SUMOME（すもめ）のプライバシーポリシー。個人情報の取り扱いについてご確認いただけます。",
-  alternates: { canonical: "https://memory-sumo.com/privacy" },
+  alternates: { canonical: "https://www.memory-sumo.com/privacy" },
 };
 
 export default function PrivacyPage() {

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "活動記録・イベント情報",
   description:
     "SUMOMEが主催・参加した相撲イベント・大会の活動記録。アマチュア相撲の大会情報やイベントレポートをご覧いただけます。",
-  alternates: { canonical: "https://memory-sumo.com/activities" },
+  alternates: { canonical: "https://www.memory-sumo.com/activities" },
 };
 
 export default async function ActivitiesPage({

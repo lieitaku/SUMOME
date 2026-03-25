@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: "利用規約",
   description:
     "SUMOME（すもめ）の利用規約。サービスのご利用にあたっての注意事項をご確認ください。",
-  alternates: { canonical: "https://memory-sumo.com/terms" },
+  alternates: { canonical: "https://www.memory-sumo.com/terms" },
 };
 
 export default function TermsPage() {

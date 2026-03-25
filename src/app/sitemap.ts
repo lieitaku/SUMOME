@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 
-const DEFAULT_SITE_URL = "https://memory-sumo.com";
+const DEFAULT_SITE_URL = "https://www.memory-sumo.com";
 
 function getBaseUrl() {
   // Allow override in Vercel env vars if needed
