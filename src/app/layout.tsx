@@ -66,7 +66,17 @@ export const metadata: Metadata = {
         "相撲クラブ検索",
         "全国相撲",
     ],
-    icons: { icon: "/icon.svg" },
+    icons: {
+        icon: [
+            { url: "/favicon.ico", sizes: "32x32" },
+            { url: "/favicon.svg", type: "image/svg+xml" },
+            { url: "/icons/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+        ],
+        apple: [
+            { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
+        ],
+    },
+    manifest: "/site.webmanifest",
     openGraph: {
         title: "SUMOME（すもめ）| 全国の相撲クラブ検索・アマチュア相撲情報",
         description:
