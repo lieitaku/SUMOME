@@ -57,7 +57,7 @@ const PageHero = ({
 
         <p className="text-sumo-gold text-xs font-bold tracking-[0.3em] mb-3 md:mb-6 uppercase flex items-center justify-center gap-3 md:gap-4">
           <span className="w-8 h-[2px] bg-sumo-gold"></span>
-          Area Information
+          エリア情報
           <span className="w-8 h-[2px] bg-sumo-gold"></span>
         </p>
 

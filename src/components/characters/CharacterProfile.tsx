@@ -71,23 +71,41 @@ export default function CharacterProfile({
   return (
     <div className="relative w-full max-w-full overflow-x-clip overflow-y-visible py-2 md:py-4">
       <motion.div
-        className="flex flex-nowrap"
+        className="will-change-transform"
         style={{ width: `${n * 100}%`, touchAction: "pan-y" }}
         animate={{ x: `${xPercent}%` }}
-        transition={{ type: "spring", stiffness: 320, damping: 32 }}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.12}
-        onDragEnd={(_, info) => {
-          const swipeThreshold = 50;
-          if (info.offset.x < -swipeThreshold) {
-            onNavigate((activeIndex + 1) % n);
-          } else if (info.offset.x > swipeThreshold) {
-            onNavigate((activeIndex - 1 + n) % n);
-          }
+        transition={{ 
+          type: "spring", 
+          stiffness: 250, 
+          damping: 25,
+          mass: 0.8
         }}
       >
-        {characters.map((character, slideIndex) => {
+        <motion.div
+          className="flex flex-nowrap w-full"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          dragMomentum={false}
+          animate={{ x: 0 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 250, 
+            damping: 25,
+            mass: 0.8
+          }}
+          onDragEnd={(_, info) => {
+            const swipeThreshold = 50;
+            const velocityThreshold = 500;
+            
+            if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
+              onNavigate((activeIndex + 1) % n);
+            } else if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
+              onNavigate((activeIndex - 1 + n) % n);
+            }
+          }}
+        >
+          {characters.map((character, slideIndex) => {
           const theme = themeStyles[character.theme];
           return (
             <div
@@ -95,7 +113,7 @@ export default function CharacterProfile({
               className="box-border shrink-0 grow-0"
               style={{ width: `${slideFraction}%` }}
             >
-              <article className="relative isolate overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-[0_18px_45px_rgba(0,0,0,0.08)] [transform:translateZ(0)]">
+              <article className="relative isolate overflow-hidden rounded-3xl border border-gray-200 bg-white [transform:translateZ(0)]">
                 <ComicDecorations quote={character.quote} theme={character.theme} />
                 <div className="grid min-h-0 items-stretch gap-0 md:grid-cols-[0.9fr_1.1fr]">
                   <div className={cn("relative min-h-0 aspect-[3/4] overflow-hidden bg-gradient-to-br", theme.bgSoft)}>
@@ -105,7 +123,8 @@ export default function CharacterProfile({
                           src={character.imageSrc}
                           alt={`${character.name}のキャラクターイラスト`}
                           fill
-                          className="object-contain object-center"
+                          className="object-contain object-center pointer-events-none select-none"
+                          draggable={false}
                           sizes="(max-width: 768px) 100vw, 42vw"
                           priority={slideIndex === activeIndex}
                         />
@@ -152,6 +171,7 @@ export default function CharacterProfile({
             </div>
           );
         })}
+        </motion.div>
       </motion.div>
     </div>
   );

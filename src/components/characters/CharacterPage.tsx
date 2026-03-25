@@ -51,7 +51,7 @@ export default function CharacterPage() {
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         />
         <div className="container mx-auto max-w-7xl px-4 text-center md:px-12">
-          <p className="text-xs font-bold tracking-[0.28em] text-sumo-gold">JOIN THE STORY</p>
+          <p className="text-xs font-bold tracking-[0.28em] text-sumo-gold">-物語に参加しよう-</p>
           <h3 className="mt-2 font-serif text-2xl font-bold md:mt-3 md:text-5xl">
             お気に入りの仲間と、次の思い出へ。
           </h3>
