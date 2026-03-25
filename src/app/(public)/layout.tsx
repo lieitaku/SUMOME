@@ -6,7 +6,31 @@ import ScrollToTop from "@/components/common/ScrollToTop";
 import CharacterFloatingEntry from "@/components/common/CharacterFloatingEntry";
 import EmbeddedDetector from "@/components/utils/EmbeddedDetector";
 
-// 前台布局不需要 html/body，只需要包裹内容
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://memory-sumo.com/#organization",
+      name: "SUMOME",
+      alternateName: ["すもめ", "スモメ"],
+      url: "https://memory-sumo.com",
+      logo: "https://memory-sumo.com/icon.svg",
+      description:
+        "全国のアマチュア相撲クラブを検索できるポータルサイト。クラブ情報、フォトブック、イベント情報を掲載。",
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://memory-sumo.com/#website",
+      url: "https://memory-sumo.com",
+      name: "SUMOME（すもめ）",
+      alternateName: ["スモメ", "SUMOME"],
+      publisher: { "@id": "https://memory-sumo.com/#organization" },
+      inLanguage: "ja",
+    },
+  ],
+};
+
 export default function PublicLayout({
   children,
 }: {
@@ -15,6 +39,10 @@ export default function PublicLayout({
   return (
     <ScrollRevealProvider>
       <EmbeddedDetector />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="flex flex-col min-h-screen">
         {/* 全局 Header */}
         <Header />

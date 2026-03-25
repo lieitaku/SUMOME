@@ -17,15 +17,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/",
     "/about",
     "/activities",
+    "/characters",
     "/clubs",
     "/clubs/map",
+    "/company",
+    "/contact",
     "/magazines",
     "/partners",
-    "/contact",
     "/privacy",
     "/terms",
-    "/manager/login",
-    "/manager/entry",
   ];
 
   // Prefecture pages: /prefectures/[pref]

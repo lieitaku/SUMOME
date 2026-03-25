@@ -44,15 +44,46 @@ const cormorant = Cormorant_Garamond({
 // ----------------------------------------------------------------------
 export const metadata: Metadata = {
     metadataBase: new URL("https://memory-sumo.com"),
-    title: "SUMOME | 全国相撲クラブ検索",
-    description: "未来の横綱を、ここから。全国の相撲クラブを探す、フォトブック一覧、スポーツイベント情報。",
+    verification: {
+        google: "0hQ6bhAEpUdJ_Knewca79UXs6SunCcR-CdcNelcNHJA",
+    },
+    title: {
+        default: "SUMOME（すもめ／スモメ）| 全国の相撲クラブ検索・アマチュア相撲情報",
+        template: "%s | SUMOME（すもめ）",
+    },
+    description:
+        "SUMOME（すもめ／スモメ）は、全国のアマチュア相撲クラブを検索できるポータルサイトです。相撲クラブの情報、フォトブック、スポーツイベント情報を掲載。未来の横綱を、ここから。",
+    keywords: [
+        "すもめ",
+        "スモメ",
+        "SUMOME",
+        "相撲クラブ",
+        "アマチュア相撲",
+        "相撲教室",
+        "相撲",
+        "キッズ相撲",
+        "少年相撲",
+        "相撲クラブ検索",
+        "全国相撲",
+    ],
     icons: { icon: "/icon.svg" },
     openGraph: {
-        title: "SUMOME | 全国相撲クラブ検索",
-        description: "未来の横綱を、ここから。全国の相撲クラブを探す、フォトブック一覧、スポーツイベント情報。",
+        title: "SUMOME（すもめ）| 全国の相撲クラブ検索・アマチュア相撲情報",
+        description:
+            "全国のアマチュア相撲クラブを検索できるポータルサイト。クラブ情報、フォトブック、イベント情報を掲載。未来の横綱を、ここから。",
         url: "https://memory-sumo.com",
         siteName: "SUMOME",
         type: "website",
+        locale: "ja_JP",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "SUMOME（すもめ）| 全国の相撲クラブ検索",
+        description:
+            "全国のアマチュア相撲クラブを検索できるポータルサイト。未来の横綱を、ここから。",
+    },
+    alternates: {
+        canonical: "https://memory-sumo.com",
     },
 };
 
