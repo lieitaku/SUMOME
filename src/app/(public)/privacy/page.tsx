@@ -5,11 +5,11 @@ import Button from "@/components/ui/Button";
 import Ceramic from "@/components/ui/Ceramic";
 import {
   Scroll,
-  ShieldCheck,
   ChevronLeft,
-  Mail,
+  MessageSquare,
   Building2,
 } from "lucide-react";
+import TransitionLink from "@/components/ui/TransitionLink";
 import ScrollToTop from "@/components/common/ScrollToTop";
 
 const PrivacyPage = () => {
@@ -57,7 +57,7 @@ const PrivacyPage = () => {
             {/* 前言 */}
             <div className="mb-12 md:mb-16 leading-loose text-gray-700 font-medium text-justify text-sm sm:text-base">
               <p>
-                SUMOME事務局（以下，「当方」といいます。）は，本ウェブサイト上で提供するサービス（以下，「本サービス」といいます。）における，ユーザーの個人情報の取扱いについて，以下のとおりプライバシーポリシー（以下，「本ポリシー」といいます。）を定めます。
+                SUMOME事務局（以下、「当方」といいます。）は、本ウェブサイト上で提供するサービス（以下、「本サービス」といいます。）における、ユーザーの個人情報の取扱いについて、以下のとおりプライバシーポリシー（以下、「本ポリシー」といいます。）を定めます。
               </p>
             </div>
 
@@ -73,7 +73,7 @@ const PrivacyPage = () => {
                 </h3>
                 <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
                   <p className="text-gray-600 leading-relaxed text-justify text-sm sm:text-base">
-                    「個人情報」とは，個人情報保護法にいう「個人情報」を指すものとし，生存する個人に関する情報であって，当該情報に含まれる氏名，生年月日，住所，電話番号，連絡先その他の記述等により特定の個人を識別できる情報（個人識別情報）を指します。
+                    「個人情報」とは、個人情報保護法にいう「個人情報」を指すものとし、生存する個人に関する情報であって、当該情報に含まれる氏名、生年月日、住所、電話番号、連絡先その他の記述等により特定の個人を識別できる情報（個人識別情報）を指します。
                   </p>
                 </div>
               </section>
@@ -88,7 +88,7 @@ const PrivacyPage = () => {
                 </h3>
                 <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
                   <p className="text-gray-600 leading-relaxed mb-4 sm:mb-6 text-justify text-sm sm:text-base">
-                    当方は，ユーザーが利用登録をする際に以下の情報を収集することがあります。
+                    当方は、ユーザーが利用登録をする際に以下の情報を収集することがあります。
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {[
@@ -120,14 +120,14 @@ const PrivacyPage = () => {
                 </h3>
                 <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
                   <p className="text-gray-600 mb-4 sm:mb-6 text-justify text-sm sm:text-base">
-                    当方が個人情報を収集・利用する目的は，以下のとおりです。
+                    当方が個人情報を収集・利用する目的は、以下のとおりです。
                   </p>
                   <ul className="space-y-2 sm:space-y-4 text-gray-600 bg-gray-50/50 p-4 sm:p-6 rounded-sm border border-gray-100/50 text-sm sm:text-base">
                     {[
                       "本サービスの提供・運営のため",
                       "ユーザーからのお問い合わせに回答するため（本人確認を行うことを含む）",
-                      "メンテナンス，重要なお知らせなど必要に応じたご連絡のため",
-                      "利用規約に違反したユーザーや，不正・不当な目的でサービスを利用しようとするユーザーの特定をし，ご利用をお断りするため",
+                      "メンテナンス、重要なお知らせなど必要に応じたご連絡のため",
+                      "利用規約に違反したユーザーや、不正・不当な目的でサービスを利用しようとするユーザーの特定をし、ご利用をお断りするため",
                       "上記の利用目的に付随する目的",
                     ].map((item, i) => (
                       <li
@@ -145,7 +145,7 @@ const PrivacyPage = () => {
                 </div>
               </section>
 
-              {/* ... (第4条等，省略以保持精简，格式同上) ... */}
+              {/* ... (第4条等、省略以保持精简、格式同上) ... */}
               {/* 第4条 */}
               <section>
                 <h3 className="text-lg sm:text-xl font-serif font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
@@ -156,7 +156,7 @@ const PrivacyPage = () => {
                 </h3>
                 <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
                   <p className="text-gray-600 leading-relaxed text-justify text-sm sm:text-base">
-                    当方は，次に掲げる場合を除いて，あらかじめユーザーの同意を得ることなく，第三者に個人情報を提供することはありません。ただし，個人情報保護法その他の法令で認められる場合を除きます。
+                    当方は、次に掲げる場合を除いて、あらかじめユーザーの同意を得ることなく、第三者に個人情報を提供することはありません。ただし、個人情報保護法その他の法令で認められる場合を除きます。
                   </p>
                 </div>
               </section>
@@ -171,10 +171,10 @@ const PrivacyPage = () => {
                 </h3>
                 <div className="pl-4 sm:pl-8 border-l-2 border-gray-100">
                   <p className="text-gray-600 mb-4 sm:mb-6 text-justify text-sm sm:text-base">
-                    本ポリシーに関するお問い合わせは，下記の窓口までお願いいたします。
+                    本ポリシーに関するお問い合わせは、下記のお問い合わせフォームよりお願いいたします。
                   </p>
 
-                  {/* Contact Card - 移动端纵向紧凑，桌面端左右分栏、邮箱区标签与地址分行 */}
+                  {/* Contact Card - 移动端纵向紧凑、桌面端左右分栏；お問い合わせは /contact へ */}
                   <div className="bg-[#FAFAFA] border border-gray-200 p-4 sm:p-6 md:p-8 rounded-sm relative overflow-hidden group">
                     <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 sm:gap-6">
                       {/* 左侧：事务局信息 */}
@@ -189,23 +189,22 @@ const PrivacyPage = () => {
                           担当：個人情報保護管理責任者
                         </p>
                       </div>
-                      {/* 右侧：邮箱（标签与地址始终上下排列，桌面端不挤压） */}
-                      <div className="flex items-center gap-2 sm:gap-3 bg-white px-3 sm:px-4 py-2.5 sm:py-3 md:py-4 rounded-sm border border-gray-100 shadow-sm group-hover:border-sumo-brand transition-colors shrink-0 md:min-w-[200px]">
+                      <TransitionLink
+                        href="/contact"
+                        className="flex items-center gap-2 sm:gap-3 bg-white px-3 sm:px-4 py-2.5 sm:py-3 md:py-4 rounded-sm border border-gray-100 shadow-sm group-hover:border-sumo-brand transition-colors shrink-0 md:min-w-[200px]"
+                      >
                         <div className="w-7 h-7 sm:w-8 sm:h-8 aspect-square rounded-full bg-sumo-brand/10 flex items-center justify-center text-sumo-brand shrink-0 overflow-hidden">
-                          <Mail size={12} className="shrink-0" />
+                          <MessageSquare size={12} className="shrink-0" />
                         </div>
-                        <div className="min-w-0 flex flex-col gap-0.5">
+                        <div className="min-w-0 flex flex-col gap-0.5 text-left">
                           <span className="text-[9px] sm:text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
-                            お問い合わせ用メールアドレス
+                            お問い合わせフォーム
                           </span>
-                          <a
-                            href="mailto:privacy@sumome.jp"
-                            className="text-xs sm:text-sm font-bold text-sumo-dark hover:text-sumo-brand transition-colors font-mono break-all md:break-normal md:whitespace-nowrap"
-                          >
-                            privacy@sumome.jp
-                          </a>
+                          <span className="text-xs sm:text-sm font-bold text-sumo-dark group-hover:text-sumo-brand transition-colors">
+                            お問い合わせページへ
+                          </span>
                         </div>
-                      </div>
+                      </TransitionLink>
                     </div>
                   </div>
                 </div>

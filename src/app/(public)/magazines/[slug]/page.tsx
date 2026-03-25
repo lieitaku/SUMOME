@@ -269,8 +269,7 @@ export default async function MagazineDetailPage({
                   ) : (
                     <div className="py-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                       <Layers size={32} className="mx-auto text-gray-300 mb-4" />
-                      <p className="text-sm font-bold text-gray-400">プレビューページはご利用いただけません。</p>
-                      <p className="text-xs text-gray-400 mt-1">左のボタンから全文をお読みください。</p>
+                      <p className="text-sm font-bold text-gray-400">プレビューページの公開までしばらくお待ちください。</p>
                     </div>
                   )}
 

@@ -113,7 +113,7 @@ const CompanyPage = () => {
                     <div className="flex-1 text-gray-800 font-medium leading-relaxed text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
                       〒103-0016<br />
                       東京都中央区日本橋小網町4番9号 恵和ビル3階<br />
-                      <span className="text-gray-500 text-[clamp(0.625rem,1.35vw+0.38rem,0.75rem)] md:text-sm mt-1 inline-block">TEL：03-5244-9802 / FAX：035-244-9803</span>
+                      <span className="text-gray-500 text-[clamp(0.625rem,1.35vw+0.38rem,0.75rem)] md:text-sm mt-1 inline-block">TEL：03-5244-9802 / FAX：03-5244-9803</span>
                     </div>
                   </div>
 
@@ -124,7 +124,7 @@ const CompanyPage = () => {
                     </div>
                     <div className="flex-1 text-gray-800 font-medium leading-relaxed text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
                       〒451-0042<br />
-                      名古屋市西区那古野2丁目12-21-1スクエアオフィス名駅北５階<br />
+                      名古屋市西区那古野2丁目12-21-1スクエアオフィス名駅北5階<br />
                       <span className="text-gray-500 text-[clamp(0.625rem,1.35vw+0.38rem,0.75rem)] md:text-sm mt-1 inline-block">TEL：052-526-3377 / FAX：052-526-3378</span>
                     </div>
                   </div>
@@ -177,9 +177,9 @@ const CompanyPage = () => {
                           <span>スポンサーのメリット…営業サポートや福利厚生面での効果期待</span>
                         </h4>
                         <p className="text-gray-600 leading-relaxed text-[clamp(0.625rem,1.45vw+0.38rem,0.75rem)] md:text-sm">
-                          スポンサー候補の事業者は、様々な広告宣伝活動を展開しているが、従来の手法のみでは、期待する営業活動支援や認知度向上に限界がある。<br />
-                          特に、新規開拓の営業担当者にとって、新規アプローチの際、先方担当者のガードが固く、面談に至るまで壁が厚く、何とか突破口となるツールの提供が強く望まれている。<br />
-                          さらに自社の社員・家族等も被写体として、運動会・家族団らん・旅行他様々な祝事で活用も考えられ。福利厚生の一つとしての活用も期待できる。
+                          スポンサー候補の事業者は様々な広告宣伝活動を展開しているが、従来の手法のみでは期待する営業活動支援や認知度向上に限界がある。<br />
+                          特に新規開拓の営業担当者にとって新規アプローチの際、先方担当者のガードが固く、面談に至るまで壁が厚く、何とか突破口となるツールの提供が強く望まれている。<br />
+                          さらに自社の社員・家族等も被写体として運動会・家族団らん・旅行他様々な祝事で活用も考えられ、福利厚生の一つとしての活用も期待できる。
                         </p>
                       </div>
 
@@ -189,7 +189,7 @@ const CompanyPage = () => {
                           <span>被写体の属する組織のイメージアップの効果期待</span>
                         </h4>
                         <p className="text-gray-600 leading-relaxed text-[clamp(0.625rem,1.45vw+0.38rem,0.75rem)] md:text-sm">
-                          被写体の属する事業者(例えば幼稚園や福祉施設等)では、常に保母・保父、介護士等の人材不足に悩まされており、人材確保に有効なツール開発への期待が大きい。
+                          被写体の属する事業者(例えば幼稚園や福祉施設等)では、常に保育士・介護士等の人材不足に悩まされており、人材確保に有効なツール開発への期待が大きい。
                         </p>
                       </div>
 

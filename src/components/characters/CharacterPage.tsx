@@ -60,10 +60,10 @@ export default function CharacterPage() {
             SUMOMEの世界を体験しよう。
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2 md:mt-8 md:gap-3">
-            <Button href="/activities" variant="primary">
-              イベントを見る
-            </Button>
-            <Button href="/clubs" variant="outline" className="border-white text-white hover:bg-white/10">
+            <Button 
+              href="/clubs" 
+              className="bg-sumo-gold text-white hover:bg-[#a88b40] shadow-[0_0_15px_rgba(193,161,78,0.4)] hover:shadow-[0_0_25px_rgba(193,161,78,0.6)] border-none transition-all duration-500"
+            >
               クラブを見る
             </Button>
           </div>

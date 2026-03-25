@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Menu, X, Search, Lock, ChevronRight } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Menu, X, Search, Lock, ChevronRight, ChevronDown } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { usePathname, useParams } from "next/navigation";
 import Button from "@/components/ui/Button";
@@ -18,6 +18,8 @@ const Header = () => {
   // --- 1. 状态管理 ---
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
 
   // --- 2. 路由与主题 ---
   const pathname = usePathname();
@@ -55,22 +57,41 @@ const Header = () => {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [pathname]);
+
   const hideHeaderPaths = ["/manager/login", "/manager/entry"];
   if (hideHeaderPaths.includes(pathname || "")) return null;
 
-  /** デスクトップ中央ナビ（5項目同一階層） */
-  const navItems = [
+  /** デスクトップ中央ナビ：常時表示 */
+  const primaryNavItems = [
     { name: "SUMOMEについて", href: "/about" },
-    { name: "冊子一覧", href: "/magazines" },
+    { name: "フォトブック一覧", href: "/magazines" },
     { name: "イベント", href: "/activities" },
     { name: "お問い合わせ", href: "/contact" },
+  ] as const;
+
+  /** デスクトップ中央ナビ：xl以上で平置き、lg〜xlは「その他」に収納 */
+  const secondaryNavItems = [
     { name: "会社概要", href: "/company" },
+    { name: "キャラクター紹介", href: "/characters" },
   ] as const;
 
   /** モバイルドロワー：会社概要の下にキャラクター紹介 */
   const navItemsMobile = [
     { name: "SUMOMEについて", href: "/about" },
-    { name: "冊子一覧", href: "/magazines" },
+    { name: "フォトブック一覧", href: "/magazines" },
     { name: "イベント", href: "/activities" },
     { name: "お問い合わせ", href: "/contact" },
     { name: "会社概要", href: "/company" },
@@ -102,7 +123,7 @@ const Header = () => {
    */
   const desktopNavGutter =
     "clamp(0.625rem, 2.15vw + 0.55rem, 2.125rem)";
-  /** 五个导航链接之间的间距（columnGap） */
+  /** 导航链接之间的间距（columnGap） */
   const desktopNavGap =
     "clamp(0.2rem, 0.42vw + 0.06rem, 0.95rem)";
   const desktopNavLinkTypography: React.CSSProperties = {
@@ -159,7 +180,17 @@ const Header = () => {
           border-color: ${themeColor} !important;
         }
 
-        /* 6. 桌面顶栏导航：单行不换行，极窄时横向轻扫（无滚动条） */
+        /* 6. その他ドロップダウン項目 Hover */
+        .more-dropdown-item:hover {
+          color: ${themeColor} !important;
+          background-color: rgba(0,0,0,0.03);
+        }
+        /* 7. その他ボタン Hover */
+        .more-btn-dynamic:hover {
+          color: ${themeColor} !important;
+        }
+
+        /* 8. 桌面顶栏导航：单行不换行，极窄时横向轻扫（无滚动条） */
         .header-nav-scroll {
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -231,8 +262,7 @@ const Header = () => {
           {/* --- B. 桌面端导航（单行・fluid 字号/间距；最小幅でも僅かな余白を維持） --- */}
           <div
             className={cn(
-              "header-nav-scroll hidden lg:flex flex-1 min-w-0 justify-center items-center",
-              "overflow-x-auto overflow-y-hidden overscroll-x-contain"
+              "header-nav-scroll hidden lg:flex flex-1 min-w-0 justify-center items-center"
             )}
             style={{
               paddingLeft: desktopNavGutter,
@@ -244,7 +274,7 @@ const Header = () => {
               style={{ columnGap: desktopNavGap }}
               aria-label="メインナビゲーション"
             >
-              {navItems.map((item) => (
+              {primaryNavItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
@@ -255,6 +285,47 @@ const Header = () => {
                   <span className="nav-underline absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 transition-[width] duration-300 ease-out w-0 bg-gray-200"></span>
                 </Link>
               ))}
+
+              {/* 「その他」ドロップダウン（常駐） */}
+              <div ref={moreRef} className="relative shrink-0">
+                <button
+                  onClick={() => setMoreOpen((prev) => !prev)}
+                  style={desktopNavLinkTypography}
+                  className="more-btn-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 whitespace-nowrap py-1 gap-0.5"
+                >
+                  その他
+                  <ChevronDown
+                    size={14}
+                    className={cn(
+                      "transition-transform duration-300",
+                      moreOpen && "rotate-180"
+                    )}
+                  />
+                </button>
+
+                <div
+                  className={cn(
+                    "absolute top-full right-0 mt-2 min-w-[160px] bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-[110]",
+                    "transition-all duration-200 ease-out origin-top",
+                    moreOpen
+                      ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                      : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+                  )}
+                >
+                  {secondaryNavItems.map((item, idx) => (
+                    <React.Fragment key={item.name}>
+                      {idx > 0 && <div className="mx-3 border-t border-gray-100" />}
+                      <Link
+                        href={item.href}
+                        onClick={() => setMoreOpen(false)}
+                        className="more-dropdown-item block px-4 py-2.5 font-serif font-bold text-sm text-gray-600 transition-colors duration-200 whitespace-nowrap"
+                      >
+                        {item.name}
+                      </Link>
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
             </nav>
           </div>
 

@@ -185,7 +185,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
 
                     <div className="container mx-auto px-6 relative z-10 text-center">
                         <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm">
-                            冊子一覧
+                            フォトブック一覧
                         </h1>
                         <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed">
                             SUMOMEが発行する公式情報誌のバックナンバー。
@@ -347,7 +347,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     {filteredMagazines.length}
                                 </span>
                                 <span className="text-xs font-bold text-gray-400 tracking-widest mb-1">
-                                    件の冊子が見つかりました
+                                    件のフォトブックが見つかりました
                                 </span>
                             </div>
 
@@ -457,7 +457,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                 </section>
 
                 {/* ==================== 3. Magazine Grid ==================== */}
-                <section ref={resultsSectionRef} className="relative pb-32 px-6 z-20">
+                <section ref={resultsSectionRef} className="relative pb-16 md:pb-32 px-6 z-20">
                     <div className="container mx-auto max-w-6xl">
                         {magazinesError ? (
                             <div className="py-24 text-center text-gray-500 text-sm">{magazinesError}</div>
@@ -543,7 +543,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     <Search size={24} />
                                 </div>
                                 <h3 className="text-lg font-serif font-bold text-gray-700 mb-2">
-                                    該当する冊子は見つかりませんでした
+                                    該当するフォトブックは見つかりませんでした
                                 </h3>
                                 <button
                                     onClick={() => {
