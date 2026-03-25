@@ -15,7 +15,7 @@ const jsonLd = {
       name: "SUMOME",
       alternateName: ["すもめ", "スモメ"],
       url: "https://www.memory-sumo.com",
-      logo: "https://www.memory-sumo.com/icon.svg",
+      logo: "https://www.memory-sumo.com/icons/apple-touch-icon.png",
       description:
         "全国のアマチュア相撲クラブを検索できるポータルサイト。クラブ情報、フォトブック、イベント情報を掲載。",
     },

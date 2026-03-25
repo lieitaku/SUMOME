@@ -85,6 +85,6 @@ export const config = {
      * 匹配所有需要校验的路径
      * 排除 _next/static, _next/image, favicon.ico 等静态文件
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };
