@@ -16,7 +16,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
     Calendar, X, MapPin, ImageIcon, Plus, Info,
-    Link as LinkIcon, FileText, Layout, UploadCloud, Loader2, Trash2, AlertCircle, Eye
+    Link as LinkIcon, FileText, Layout, UploadCloud, Loader2, Trash2, AlertCircle, Eye, CheckCircle2
 } from "lucide-react";
 import { Magazine } from "@prisma/client";
 import Image from "next/image";
@@ -24,7 +24,8 @@ import Image from "next/image";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
-import { createMagazine, updateMagazine, deleteMagazine } from "@/lib/actions/magazines";
+import { createMagazine, updateMagazine, deleteMagazine, toggleMagazineHidden } from "@/lib/actions/magazines";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner"; // 确保安装了 sonner，如果没有请删除这行用 alert
 
@@ -113,10 +114,12 @@ function SortableGalleryItem({ url, index, onRemove }: { url: string; index: num
  * 主表单组件
  */
 export default function MagazineForm({ initialData, isNew = false }: { initialData?: Magazine, isNew?: boolean }) {
+    const router = useRouter();
     const [selectedRegionTab, setSelectedRegionTab] = useState<string>("関東");
     const [isUploading, setIsUploading] = useState(false);
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [isTogglingHidden, setIsTogglingHidden] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -156,6 +159,29 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
         if (!initialData) return;
         if (!confirm("本当にこの広報誌を削除しますか？\nこの操作は取り消せません。")) return;
         await handleDeleteAction(deleteMagazine, initialData.id);
+    };
+
+    const onToggleHidden = async () => {
+        if (!initialData) return;
+        const confirmMessage = initialData.hidden
+            ? "この広報誌を「表示中」に戻しますか？"
+            : "この広報誌を「非表示」にしますか？\n前台からは表示・検索されなくなります。";
+        if (!confirm(confirmMessage)) return;
+
+        setIsTogglingHidden(true);
+        try {
+            const result = await toggleMagazineHidden(initialData.id);
+            if ((result as { error?: string })?.error) {
+                alert((result as { error: string }).error);
+            } else {
+                router.refresh();
+            }
+        } catch (e) {
+            console.error(e);
+            alert("非表示ステータスの更新に失敗しました。");
+        } finally {
+            setIsTogglingHidden(false);
+        }
     };
 
     const currentImages = form.watch("images");
@@ -278,16 +304,21 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
         >
 
             <AdminFormLayout
-                title={isNew ? "広報誌登録" : "編集"}
+                title={isNew ? "新規広報誌登録" : "広報誌編集"}
+                subTitle={isNew ? "Create New Magazine" : initialData?.title}
                 backLink="/admin/magazines"
                 isSubmitting={isSubmitting}
                 isDeleting={isDeleting}
                 onDelete={!isNew ? onDelete : undefined}
+                onToggleHidden={!isNew && initialData ? onToggleHidden : undefined}
+                isHidden={!isNew && initialData ? (initialData.hidden ?? false) : false}
+                isTogglingHidden={isTogglingHidden}
                 headerActions={
-                    <button
-                        type="button"
-                        disabled={isPreviewing}
-onClick={async () => {
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            disabled={isPreviewing}
+                            onClick={async () => {
                                 setIsPreviewing(true);
                                 try {
                                     const values = form.getValues();
@@ -303,7 +334,7 @@ onClick={async () => {
                                         }),
                                     });
                                     const data = await res.json();
-if (data.redirectUrl) {
+                                    if (data.redirectUrl) {
                                         setPreviewUrl(data.bridgeUrl ?? data.redirectUrl);
                                         return;
                                     }
@@ -317,6 +348,12 @@ if (data.redirectUrl) {
                             {isPreviewing ? <Loader2 size={16} className="animate-spin" /> : <Eye size={16} />}
                             プレビュー
                         </button>
+                        {isNew && (
+                            <div className="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter flex items-center gap-1">
+                                <CheckCircle2 size={12} /> Registration Mode
+                            </div>
+                        )}
+                    </div>
                 }
             >
                 <PreviewModal url={previewUrl} onClose={() => setPreviewUrl(null)} title="広報誌 プレビュー" />

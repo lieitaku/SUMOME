@@ -2,13 +2,52 @@ import React from "react";
 import { Plus, Search } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import RegionFilter from "@/components/admin/ui/RegionFilter";
-import MagazinesListClient from "@/components/admin/magazines/MagazinesListClient";
+import MagazinesListClient, {
+    type MagazineListItem,
+} from "@/components/admin/magazines/MagazinesListClient";
 import { prisma } from "@/lib/db";
 import { REGIONS } from "@/lib/constants";
 import { Prisma } from "@prisma/client";
 import { getPrefectureIndex } from "@/lib/prefecture-order";
 
 const PAGE_SIZE = 12;
+
+/** Admin 列表用 select（含 hidden）。旧版 Prisma 型定義に hidden が無い場合でも実行時は有効。 */
+const magazineAdminListSelect = {
+    id: true,
+    title: true,
+    slug: true,
+    region: true,
+    coverImage: true,
+    pdfUrl: true,
+    issueDate: true,
+    published: true,
+    hidden: true,
+};
+
+function toMagazineListItem(mag: {
+    id: string;
+    title: string;
+    slug: string;
+    region: string;
+    coverImage: string | null;
+    pdfUrl: string | null;
+    issueDate: Date;
+    published: boolean;
+    hidden?: boolean | null;
+}): MagazineListItem {
+    return {
+        id: mag.id,
+        title: mag.title,
+        slug: mag.slug,
+        region: mag.region,
+        coverImage: mag.coverImage,
+        pdfUrl: mag.pdfUrl,
+        issueDate: mag.issueDate.toISOString(),
+        published: mag.published,
+        hidden: mag.hidden ?? false,
+    };
+}
 
 export default async function MagazineListPage({
     searchParams,
@@ -32,16 +71,7 @@ export default async function MagazineListPage({
     if (sort === "area") {
         const all = await prisma.magazine.findMany({
             where,
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                region: true,
-                coverImage: true,
-                pdfUrl: true,
-                issueDate: true,
-                published: true,
-            },
+            select: magazineAdminListSelect as Prisma.MagazineSelect,
         });
         all.sort((a, b) => getPrefectureIndex(a.region) - getPrefectureIndex(b.region));
         magazines = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -51,23 +81,13 @@ export default async function MagazineListPage({
             orderBy: { issueDate: "desc" },
             take: PAGE_SIZE,
             skip: (page - 1) * PAGE_SIZE,
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                region: true,
-                coverImage: true,
-                pdfUrl: true,
-                issueDate: true,
-                published: true,
-            },
+            select: magazineAdminListSelect as Prisma.MagazineSelect,
         });
     }
 
-    const serializedMagazines = magazines.map(mag => ({
-        ...mag,
-        issueDate: mag.issueDate.toISOString(),
-    }));
+    const serializedMagazines: MagazineListItem[] = magazines.map((mag) =>
+        toMagazineListItem(mag),
+    );
 
     const initialData = {
         magazines: serializedMagazines,

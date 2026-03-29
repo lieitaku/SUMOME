@@ -63,7 +63,7 @@ export function getCachedMagazineBySlug(slug: string) {
   return unstable_cache(
     async (s: string) =>
       prisma.magazine.findFirst({
-        where: { slug: s, published: true },
+        where: { slug: s, published: true, hidden: false },
       }),
     ["magazine-by-slug"],
     { revalidate: 60, tags: ["magazines"] }
@@ -88,7 +88,7 @@ export function getCachedAllMagazines() {
   return unstable_cache(
     () =>
       prisma.magazine.findMany({
-        where: { published: true },
+        where: { published: true, hidden: false },
         orderBy: { issueDate: "desc" },
       }),
     ["all-magazines"],

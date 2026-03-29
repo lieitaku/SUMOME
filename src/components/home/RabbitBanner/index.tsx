@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import RabbitActor from "./RabbitActor";
 import {
@@ -161,6 +161,44 @@ export default function RabbitWalkingBanner({
   const ONE_CYCLE_DISTANCE = Math.round((UNIT_WIDTH + GAP) * cycleCount);
   const DURATION = cycleCount > 0 ? ONE_CYCLE_DISTANCE / SPEED_PX_PER_SEC : 0;
 
+  const marqueeTrackRef = useRef<HTMLDivElement>(null);
+  const marqueeAnimRef = useRef<Animation | null>(null);
+
+  // 用 Web Animations API 驱动横向滚动，避免 CSS animation-play-state: paused
+  // 与 keyframes 里 translateX(var(--x)) 在部分浏览器下暂停时跳到错误位置的问题。
+  useEffect(() => {
+    const el = marqueeTrackRef.current;
+    if (!el || DURATION <= 0) return;
+
+    marqueeAnimRef.current?.cancel();
+    const anim = el.animate(
+      [
+        { transform: "translateX(0)" },
+        { transform: `translateX(-${ONE_CYCLE_DISTANCE}px)` },
+      ],
+      {
+        duration: DURATION * 1000,
+        iterations: Infinity,
+        easing: "linear",
+      }
+    );
+    marqueeAnimRef.current = anim;
+    return () => {
+      anim.cancel();
+      marqueeAnimRef.current = null;
+    };
+  }, [ONE_CYCLE_DISTANCE, DURATION]);
+
+  const pauseMarquee = useCallback(() => {
+    if (isMobile) return;
+    marqueeAnimRef.current?.pause();
+  }, [isMobile]);
+
+  const resumeMarquee = useCallback(() => {
+    if (isMobile) return;
+    marqueeAnimRef.current?.play();
+  }, [isMobile]);
+
   // 如果没有赞助商，显示空状态
   if (baseSponsors.length === 0) {
     return null;
@@ -169,25 +207,13 @@ export default function RabbitWalkingBanner({
   return (
     <>
       <style jsx>{`
-        @keyframes scrollRabbit {
-          from { transform: translateX(0); }
-          to   { transform: translateX(var(--scroll-dist)); }
-        }
-        .animate-scroll {
-          animation: scrollRabbit var(--scroll-duration) linear infinite;
-          -webkit-animation: scrollRabbit var(--scroll-duration) linear infinite;
+        .rabbit-marquee-track {
           width: max-content;
           /* 💡 will-change 已经能提升为独立合成层，不需要 translate3d / perspective 等 3D 技巧 */
           will-change: transform;
           /* 💡 Safari 抗闪烁 */
           -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
-        }
-        /* 移动端不建议 hover 暂停，因为滚动惯性可能导致卡住 */
-        @media (min-width: 768px) {
-            .animate-scroll:hover {
-                animation-play-state: paused;
-            }
         }
       `}</style>
 
@@ -201,15 +227,12 @@ export default function RabbitWalkingBanner({
              这个横向滚动区域本身就在 overflow:hidden 容器内，
              浏览器已经自动做了必要的渲染裁剪。 */
         }}
+        onMouseEnter={pauseMarquee}
+        onMouseLeave={resumeMarquee}
       >
         <div
-          className="flex absolute bottom-0 left-0 animate-scroll items-end"
-          style={
-            {
-              "--scroll-dist": `-${ONE_CYCLE_DISTANCE}px`,
-              "--scroll-duration": `${DURATION}s`,
-            } as React.CSSProperties
-          }
+          ref={marqueeTrackRef}
+          className="rabbit-marquee-track flex absolute bottom-0 left-0 items-end"
         >
           {loopData.map((item, idx) => {
             // 使用 cycleCount 而不是 RAW_SPONSORS.length 来计算索引

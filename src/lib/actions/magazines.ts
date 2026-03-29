@@ -137,3 +137,41 @@ export async function deleteMagazine(id: string) {
     return { success: false, message: "削除に失敗しました。" };
   }
 }
+
+// ==============================================================================
+// 表示 / 非表示 切り替え (Toggle Hidden) — クラブ編集と同様の管理者向けロジック
+// ==============================================================================
+export async function toggleMagazineHidden(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) {
+    return { error: "権限がありません。" };
+  }
+
+  const magazine = await prisma.magazine.findUnique({
+    where: { id },
+    select: { slug: true, hidden: true },
+  });
+
+  if (!magazine) {
+    return { error: "広報誌が見つかりません。" };
+  }
+
+  try {
+    await prisma.magazine.update({
+      where: { id },
+      data: { hidden: !magazine.hidden },
+    });
+
+    revalidatePath("/admin/magazines");
+    revalidatePath(`/admin/magazines/${id}`);
+    revalidatePath("/magazines");
+    revalidatePath(`/magazines/${magazine.slug}`);
+    revalidateTag("magazines");
+    revalidateTag("admin-stats");
+
+    return { success: true };
+  } catch (error) {
+    console.error("非表示切り替え失敗:", error);
+    return { error: "非表示ステータスの更新に失敗しました。" };
+  }
+}

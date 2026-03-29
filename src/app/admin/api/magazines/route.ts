@@ -7,6 +7,20 @@ import { getPrefectureIndex } from "@/lib/prefecture-order";
 
 const PAGE_SIZE = 12;
 
+const magazineAdminListSelect = {
+    id: true,
+    title: true,
+    slug: true,
+    region: true,
+    coverImage: true,
+    pdfUrl: true,
+    issueDate: true,
+    published: true,
+    hidden: true,
+} satisfies Prisma.MagazineSelect;
+
+type MagazineAdminListRow = Prisma.MagazineGetPayload<{ select: typeof magazineAdminListSelect }>;
+
 export async function GET(request: NextRequest) {
     const admin = await confirmAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,20 +39,11 @@ export async function GET(request: NextRequest) {
 
     const total = await prisma.magazine.count({ where });
 
-    let magazines: Awaited<ReturnType<typeof prisma.magazine.findMany>>;
+    let magazines: MagazineAdminListRow[];
     if (sort === "area") {
         const all = await prisma.magazine.findMany({
             where,
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                region: true,
-                coverImage: true,
-                pdfUrl: true,
-                issueDate: true,
-                published: true,
-            },
+            select: magazineAdminListSelect,
         });
         all.sort((a, b) => getPrefectureIndex(a.region) - getPrefectureIndex(b.region));
         magazines = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -48,16 +53,7 @@ export async function GET(request: NextRequest) {
             orderBy: { issueDate: "desc" },
             take: PAGE_SIZE,
             skip: (page - 1) * PAGE_SIZE,
-            select: {
-                id: true,
-                title: true,
-                slug: true,
-                region: true,
-                coverImage: true,
-                pdfUrl: true,
-                issueDate: true,
-                published: true,
-            },
+            select: magazineAdminListSelect,
         });
     }
 

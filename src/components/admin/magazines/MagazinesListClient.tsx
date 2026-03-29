@@ -18,6 +18,7 @@ export type MagazineListItem = {
     pdfUrl: string | null;
     issueDate: string;
     published: boolean;
+    hidden: boolean;
 };
 
 function buildSearchParams(params: { q?: string; region?: string; pref?: string; page?: number; sort?: SortMode }) {
@@ -108,6 +109,13 @@ function Content({
                             </div>
                         </div>
                         <div className="p-6">
+                            <div className="flex items-center gap-2 text-xs mb-2">
+                                {mag.hidden ? (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-bold">非表示</span>
+                                ) : (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold">表示中</span>
+                                )}
+                            </div>
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="flex items-center gap-1.5 text-sumo-brand">
                                     <Calendar size={14} />
