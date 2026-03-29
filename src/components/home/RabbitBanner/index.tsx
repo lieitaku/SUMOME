@@ -41,16 +41,26 @@ function SponsorFlagLink({
   ariaLabel,
   className,
   children,
+  onPointerEnter,
+  onPointerLeave,
 }: {
   href: string;
   ariaLabel: string;
   className?: string;
   children: React.ReactNode;
+  onPointerEnter?: React.PointerEventHandler<HTMLElement>;
+  onPointerLeave?: React.PointerEventHandler<HTMLElement>;
 }) {
   const t = href.trim();
   if (isInternalNavHref(t)) {
     return (
-      <Link href={t} className={className} aria-label={ariaLabel}>
+      <Link
+        href={t}
+        className={className}
+        aria-label={ariaLabel}
+        onPointerEnter={onPointerEnter}
+        onPointerLeave={onPointerLeave}
+      >
         {children}
       </Link>
     );
@@ -62,6 +72,8 @@ function SponsorFlagLink({
       rel="noopener noreferrer"
       className={className}
       aria-label={ariaLabel}
+      onPointerEnter={onPointerEnter}
+      onPointerLeave={onPointerLeave}
     >
       {children}
     </a>
@@ -163,6 +175,7 @@ export default function RabbitWalkingBanner({
 
   const marqueeTrackRef = useRef<HTMLDivElement>(null);
   const marqueeAnimRef = useRef<Animation | null>(null);
+  const flagResumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 用 Web Animations API 驱动横向滚动，避免 CSS animation-play-state: paused
   // 与 keyframes 里 translateX(var(--x)) 在部分浏览器下暂停时跳到错误位置的问题。
@@ -189,14 +202,32 @@ export default function RabbitWalkingBanner({
     };
   }, [ONE_CYCLE_DISTANCE, DURATION]);
 
-  const pauseMarquee = useCallback(() => {
+  useEffect(() => {
+    return () => {
+      if (flagResumeTimerRef.current) {
+        clearTimeout(flagResumeTimerRef.current);
+        flagResumeTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  // 仅在桌面端、指针落在可点击旗帜链上时暂停；短延迟恢复，避免相邻旗面间移动时闪一下继续滚。
+  const onFlagPointerEnter = useCallback(() => {
     if (isMobile) return;
+    if (flagResumeTimerRef.current) {
+      clearTimeout(flagResumeTimerRef.current);
+      flagResumeTimerRef.current = null;
+    }
     marqueeAnimRef.current?.pause();
   }, [isMobile]);
 
-  const resumeMarquee = useCallback(() => {
+  const onFlagPointerLeave = useCallback(() => {
     if (isMobile) return;
-    marqueeAnimRef.current?.play();
+    if (flagResumeTimerRef.current) clearTimeout(flagResumeTimerRef.current);
+    flagResumeTimerRef.current = setTimeout(() => {
+      marqueeAnimRef.current?.play();
+      flagResumeTimerRef.current = null;
+    }, 80);
   }, [isMobile]);
 
   // 如果没有赞助商，显示空状态
@@ -227,8 +258,6 @@ export default function RabbitWalkingBanner({
              这个横向滚动区域本身就在 overflow:hidden 容器内，
              浏览器已经自动做了必要的渲染裁剪。 */
         }}
-        onMouseEnter={pauseMarquee}
-        onMouseLeave={resumeMarquee}
       >
         <div
           ref={marqueeTrackRef}
@@ -322,6 +351,8 @@ export default function RabbitWalkingBanner({
                           href={flagHref}
                           ariaLabel={flagLinkLabel}
                           className="relative flex flex-col items-center group pointer-events-auto cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand focus-visible:ring-offset-2 rounded-sm"
+                          onPointerEnter={onFlagPointerEnter}
+                          onPointerLeave={onFlagPointerLeave}
                         >
                           {/* 1. Bar */}
                           <div
