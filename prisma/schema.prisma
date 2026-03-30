@@ -161,6 +161,8 @@ model Magazine {
   issueDate   DateTime @default(now()) // 杂志所属的期数日期
   published   Boolean  @default(true)  // 发布状态开关
   hidden      Boolean  @default(false) // 非表示（前台から隠す、データは保持）
+  /// ltr = 右開き（左→右にめくる） / rtl = 左開き（右→左にめくる）
+  readingDirection String @default("ltr")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

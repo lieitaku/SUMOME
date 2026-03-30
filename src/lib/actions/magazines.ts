@@ -21,6 +21,7 @@ const MagazineSchema = z.object({
   description: z.string().optional().nullable(),
   published: z.boolean(),
   images: z.array(z.string()),
+  readingDirection: z.enum(["ltr", "rtl"]).default("ltr"),
 });
 
 // 解析 FormData 的辅助函数
@@ -36,6 +37,8 @@ function parseFormData(formData: FormData) {
     description: (formData.get("description") as string) || null,
     published: formData.get("published") === "true",
     images: formData.getAll("images") as string[],
+    readingDirection:
+      formData.get("readingDirection") === "rtl" ? "rtl" : "ltr",
   };
 }
 

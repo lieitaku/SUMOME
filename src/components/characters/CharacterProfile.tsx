@@ -97,11 +97,11 @@ export default function CharacterProfile({
           onDragEnd={(_, info) => {
             const swipeThreshold = 50;
             const velocityThreshold = 500;
-            
+
             if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
-              onNavigate((activeIndex + 1) % n);
+              if (activeIndex < n - 1) onNavigate(activeIndex + 1);
             } else if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
-              onNavigate((activeIndex - 1 + n) % n);
+              if (activeIndex > 0) onNavigate(activeIndex - 1);
             }
           }}
         >

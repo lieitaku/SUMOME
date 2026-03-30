@@ -88,9 +88,18 @@ type Spread = {
 interface MagazineReaderProps {
     spreads: Spread[];
     coverImage?: string | null;
+    /** ltr=右開き / rtl=左開き（ビューアの操作感・見開き表示用） */
+    readingDirection?: "ltr" | "rtl";
+    /** 内页 URL 的阅读顺序（与后台 images 数组一致）；用于 FlipBook 页面顺序，避免仅依赖见開き左右互换后的 spreads */
+    innerImages?: string[];
 }
 
-export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
+export function MagazineReader({
+    spreads,
+    coverImage,
+    readingDirection = "ltr",
+    innerImages,
+}: MagazineReaderProps) {
     // 核心状态：控制 Portal 是否显示
     const [isOpen, setIsOpen] = useState(false);
     // 核心状态：✨ 新增 - 专门控制 FlipBook 组件是否开始渲染
@@ -102,31 +111,34 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
     const [isMobile, setIsMobile] = useState(false);
     const [bookDimensions, setBookDimensions] = useState({ width: 400, height: 550 });
 
-    // 1. 数据清洗 (使用 Set 强力去重)
+    const isRTL = readingDirection === "rtl";
+
+    // 1. 页面顺序：封面 + innerImages（阅读顺序）；无 innerImages 时回退为按 spreads 左→右展开
     const pages = useMemo(() => {
         const uniqueUrls = new Set<string>();
         const flatPages: string[] = [];
 
-        // 添加封面
         if (coverImage) {
             flatPages.push(coverImage);
             uniqueUrls.add(coverImage);
         }
 
-        // 添加内页 (遇到已存在的 URL 则跳过)
-        spreads.forEach(spread => {
-            if (spread.left && !uniqueUrls.has(spread.left)) {
-                flatPages.push(spread.left);
-                uniqueUrls.add(spread.left);
-            }
-            if (spread.right && !uniqueUrls.has(spread.right)) {
-                flatPages.push(spread.right);
-                uniqueUrls.add(spread.right);
+        const orderedInner =
+            innerImages && innerImages.length > 0
+                ? innerImages
+                : spreads.flatMap((s) =>
+                      [s.left, s.right].filter((u): u is string => Boolean(u))
+                  );
+
+        orderedInner.forEach((url) => {
+            if (url && !uniqueUrls.has(url)) {
+                flatPages.push(url);
+                uniqueUrls.add(url);
             }
         });
 
         return flatPages;
-    }, [spreads, coverImage]);
+    }, [spreads, coverImage, innerImages]);
 
     // 2. 客户端挂载检测
     useEffect(() => {
@@ -213,8 +225,20 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
         }
     }, [isOpen, updateDimensions]);
 
-    const nextFlip = (e: React.MouseEvent) => { e.stopPropagation(); bookRef.current?.pageFlip().flipNext(); };
-    const prevFlip = (e: React.MouseEvent) => { e.stopPropagation(); bookRef.current?.pageFlip().flipPrev(); };
+    const nextFlip = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const flip = bookRef.current?.pageFlip();
+        if (!flip) return;
+        if (isRTL) flip.flipPrev();
+        else flip.flipNext();
+    };
+    const prevFlip = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        const flip = bookRef.current?.pageFlip();
+        if (!flip) return;
+        if (isRTL) flip.flipNext();
+        else flip.flipPrev();
+    };
 
     return (
         <>
@@ -320,6 +344,7 @@ export function MagazineReader({ spreads, coverImage }: MagazineReaderProps) {
                                 swipeDistance={30}
                                 showPageCorners={true}
                                 disableFlipByClick={false}
+                                {...(isRTL ? { rtl: true } : {})}
                             >
                                 {pages.map((src, index) => (
                                     <Page

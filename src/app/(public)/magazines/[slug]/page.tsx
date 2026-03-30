@@ -103,6 +103,8 @@ export default async function MagazineDetailPage({
       readLink: p.readLink != null ? String(p.readLink) : null,
       issueDate: p.issueDate ? new Date(p.issueDate as string) : new Date(),
       published: true,
+      hidden: false,
+      readingDirection: p.readingDirection === "rtl" ? "rtl" : "ltr",
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -119,13 +121,16 @@ export default async function MagazineDetailPage({
   const day = String(publishDate.getDate()).padStart(2, '0');
 
   // 内页数据处理：将扁平图片数组转换为跨页结构 (Spread)
-  // 两个图片为一组，代表左右页
+  // ltr: 左=P(2n+1) 右=P(2n+2)；rtl（左開き）: 見開き左右を入れ替え
   const images = magazine.images || [];
+  const isRTL = magazine.readingDirection === "rtl";
   const spreads = [];
   for (let i = 0; i < images.length; i += 2) {
+    const first = images[i];
+    const second = images[i + 1];
     spreads.push({
-      left: images[i],
-      right: images[i + 1] || undefined
+      left: isRTL && second ? second : first,
+      right: isRTL && second ? first : second || undefined,
     });
   }
 
@@ -265,6 +270,10 @@ export default async function MagazineDetailPage({
                     <MagazineReader
                       spreads={spreads}
                       coverImage={magazine.coverImage}
+                      readingDirection={
+                        magazine.readingDirection === "rtl" ? "rtl" : "ltr"
+                      }
+                      innerImages={images}
                     />
                   ) : (
                     <div className="py-20 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">

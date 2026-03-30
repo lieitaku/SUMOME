@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useDropzone } from "react-dropzone";
 import {
     DndContext, closestCenter, KeyboardSensor, PointerSensor,
@@ -16,7 +16,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
     Calendar, X, MapPin, ImageIcon, Plus, Info,
-    Link as LinkIcon, FileText, Layout, UploadCloud, Loader2, Trash2, AlertCircle, Eye, CheckCircle2
+    Link as LinkIcon, FileText, Layout, UploadCloud, Loader2, Trash2, AlertCircle, Eye, CheckCircle2,
+    BookOpen, ArrowRight
 } from "lucide-react";
 import { Magazine } from "@prisma/client";
 import Image from "next/image";
@@ -56,9 +57,16 @@ const formSchema = z.object({
     description: z.string().optional(),
     published: z.boolean(),
     images: z.array(z.string()),
+    readingDirection: z.enum(["ltr", "rtl"]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+/** Prisma Client 更新后 Magazine 含 readingDirection；此处兼容类型未刷新时的读取 */
+function getMagazineReadingDirection(data: Magazine | undefined): "ltr" | "rtl" {
+    const v = (data as { readingDirection?: string } | undefined)?.readingDirection;
+    return v === "rtl" ? "rtl" : "ltr";
+}
 
 // 辅助组件：显示错误信息
 const ErrorMsg = ({ message }: { message?: string }) => {
@@ -139,6 +147,7 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
             description: initialData?.description || "",
             published: initialData?.published ?? true,
             images: initialData?.images || [],
+            readingDirection: getMagazineReadingDirection(initialData),
         },
     });
 
@@ -187,6 +196,29 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
     const currentImages = form.watch("images");
     const currentPrefecture = form.watch("region");
     const currentCover = form.watch("coverImage");
+    const readingDirection = form.watch("readingDirection");
+
+    const gallerySpreads = useMemo(() => {
+        const imgs = currentImages;
+        const rows: { left: string; right?: string; startPage: number; endPage: number }[] = [];
+        const rtl = readingDirection === "rtl";
+        for (let i = 0; i < imgs.length; i += 2) {
+            const first = imgs[i];
+            const second = imgs[i + 1];
+            const startPage = i + 1;
+            const endPage = second ? i + 2 : startPage;
+            if (second) {
+                rows.push(
+                    rtl
+                        ? { left: second, right: first, startPage, endPage }
+                        : { left: first, right: second, startPage, endPage }
+                );
+            } else {
+                rows.push({ left: first, right: undefined, startPage, endPage: startPage });
+            }
+        }
+        return rows;
+    }, [currentImages, readingDirection]);
 
     // API 上传逻辑 (WebP 转换)
     const uploadFile = async (file: File) => {
@@ -290,6 +322,7 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                     if (data.images && data.images.length > 0) {
                         data.images.forEach(img => formData.append("images", img));
                     }
+                    formData.append("readingDirection", data.readingDirection);
 
                     if (isNew) runAction(createMagazine, formData);
                     else if (initialData) runAction((fd) => updateMagazine(initialData.id, fd), formData);
@@ -499,9 +532,56 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
 
                     {/* Section 4: 画廊 */}
                     <div className={cardClass}>
-                        <div className="flex items-center gap-3 mb-8 border-b border-gray-50 pb-6">
-                            <ImageIcon size={18} className="text-sumo-brand" />
-                            <h2 className="text-sm font-black uppercase text-gray-900">内面ギャラリー ({currentImages.length})</h2>
+                        <div className="space-y-6 mb-8 border-b border-gray-50 pb-6">
+                            <div className="flex items-center gap-3">
+                                <ImageIcon size={18} className="text-sumo-brand" />
+                                <h2 className="text-sm font-black uppercase text-gray-900">内面ギャラリー ({currentImages.length})</h2>
+                            </div>
+                            <div>
+                                <label className={labelClass}>めくり方向（見開きの並び）</label>
+                                <div className="flex flex-wrap gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => form.setValue("readingDirection", "ltr", { shouldDirty: true })}
+                                        className={cn(
+                                            "inline-flex items-center gap-2 rounded-2xl border-2 px-4 py-3 text-left text-xs font-black uppercase tracking-wider transition-all",
+                                            readingDirection === "ltr"
+                                                ? "border-sumo-brand bg-sumo-brand/10 text-sumo-brand shadow-sm"
+                                                : "border-gray-100 bg-white text-gray-500 hover:border-gray-200"
+                                        )}
+                                    >
+                                        <BookOpen size={18} className="shrink-0" />
+                                        <span>
+                                            右開き（左→右）
+                                            <span className="mt-0.5 block text-[10px] font-bold normal-case tracking-normal text-gray-400">
+                                                見開き：P1 | P2
+                                            </span>
+                                        </span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => form.setValue("readingDirection", "rtl", { shouldDirty: true })}
+                                        className={cn(
+                                            "inline-flex items-center gap-2 rounded-2xl border-2 px-4 py-3 text-left text-xs font-black uppercase tracking-wider transition-all",
+                                            readingDirection === "rtl"
+                                                ? "border-sumo-brand bg-sumo-brand/10 text-sumo-brand shadow-sm"
+                                                : "border-gray-100 bg-white text-gray-500 hover:border-gray-200"
+                                        )}
+                                    >
+                                        <BookOpen size={18} className="shrink-0 scale-x-[-1]" />
+                                        <span>
+                                            左開き（右→左）
+                                            <span className="mt-0.5 block text-[10px] font-bold normal-case tracking-normal text-gray-400">
+                                                見開き：P2 | P1
+                                            </span>
+                                        </span>
+                                    </button>
+                                </div>
+                                <p className="mt-2 flex items-start gap-1.5 text-[9px] text-gray-400 px-0.5">
+                                    <Info size={10} className="shrink-0 mt-0.5" />
+                                    アップロード順はそのままです。前台の見開き表示とビューアの並びだけが切り替わります。
+                                </p>
+                            </div>
                         </div>
 
                         <div className="bg-gray-50/50 p-8 rounded-[2rem] border border-gray-100">
@@ -527,6 +607,47 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                                     </div>
                                 </SortableContext>
                             </DndContext>
+
+                            {gallerySpreads.length > 0 && (
+                                <div className="mt-10 pt-8 border-t border-gray-200">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <ArrowRight size={16} className="text-sumo-brand" />
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-700">
+                                            見開きプレビュー（{readingDirection === "rtl" ? "左開き" : "右開き"}）
+                                        </h3>
+                                    </div>
+                                    <div className="space-y-8">
+                                        {gallerySpreads.map((sp, idx) => (
+                                            <div key={`${sp.left}-${idx}`} className="space-y-2">
+                                                <div className="flex shadow-md rounded-sm overflow-hidden border border-gray-200 bg-white max-w-2xl mx-auto">
+                                                    <div className="flex-1 relative aspect-[3/4] border-r border-gray-200 min-w-0">
+                                                        <Image src={sp.left} alt={`見開き${idx + 1} 左`} fill className="object-cover" />
+                                                        <div className="absolute bottom-2 left-2 bg-white/90 px-2 py-0.5 rounded text-[9px] font-black text-sumo-brand shadow-sm">
+                                                            左
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1 relative aspect-[3/4] bg-gray-50 min-w-0">
+                                                        {sp.right ? (
+                                                            <Image src={sp.right} alt={`見開き${idx + 1} 右`} fill className="object-cover" />
+                                                        ) : (
+                                                            <div className="flex h-full items-center justify-center text-gray-300 text-xs font-mono uppercase tracking-widest">
+                                                                終
+                                                            </div>
+                                                        )}
+                                                        <div className="absolute bottom-2 right-2 bg-white/90 px-2 py-0.5 rounded text-[9px] font-black text-sumo-brand shadow-sm">
+                                                            右
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <p className="text-center text-[10px] font-mono text-gray-400 uppercase tracking-widest">
+                                                    ページ {sp.startPage}
+                                                    {sp.endPage !== sp.startPage ? ` - ${sp.endPage}` : ""}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
