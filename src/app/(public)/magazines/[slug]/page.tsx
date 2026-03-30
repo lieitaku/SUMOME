@@ -19,6 +19,13 @@ import { ShareButton, MagazineReader } from "@/components/magazine/MagazineClien
 
 const BRAND_BLUE = "#2454a4";
 
+/** ltr=右開き（めくり左→右） / rtl=左開き（めくり右→左）。DB 値の揺れを吸収 */
+function normalizeReadingDirection(value: unknown): "ltr" | "rtl" {
+  if (value == null) return "ltr";
+  const s = String(value).trim().toLowerCase();
+  return s === "rtl" ? "rtl" : "ltr";
+}
+
 /**
  * 3D 书封展示组件
  * 用于在详情页左侧展示带有立体感和光影效果的杂志封面
@@ -88,7 +95,11 @@ export default async function MagazineDetailPage({
     "slug" in preview.payload &&
     String((preview.payload as { slug: unknown }).slug) === slug;
 
-  let magazine: Awaited<ReturnType<typeof getCachedMagazineBySlug>>;
+  type MagazineBySlug = NonNullable<
+    Awaited<ReturnType<typeof getCachedMagazineBySlug>>
+  >;
+
+  let magazine: MagazineBySlug | null;
   if (usePreview && preview.payload && typeof preview.payload === "object") {
     const p = preview.payload as Record<string, unknown>;
     magazine = {
@@ -104,10 +115,10 @@ export default async function MagazineDetailPage({
       issueDate: p.issueDate ? new Date(p.issueDate as string) : new Date(),
       published: true,
       hidden: false,
-      readingDirection: p.readingDirection === "rtl" ? "rtl" : "ltr",
+      readingDirection: normalizeReadingDirection(p.readingDirection),
       createdAt: new Date(),
       updatedAt: new Date(),
-    };
+    } as MagazineBySlug;
   } else {
     magazine = await getCachedMagazineBySlug(slug);
   }
@@ -121,9 +132,12 @@ export default async function MagazineDetailPage({
   const day = String(publishDate.getDate()).padStart(2, '0');
 
   // 内页数据处理：将扁平图片数组转换为跨页结构 (Spread)
-  // ltr: 左=P(2n+1) 右=P(2n+2)；rtl（左開き）: 見開き左右を入れ替え
+  // ltr 右開き: 左=P(2n+1) 右=P(2n+2)；rtl 左開き: 見開き左右入れ替え
   const images = magazine.images || [];
-  const isRTL = magazine.readingDirection === "rtl";
+  const readingDir = normalizeReadingDirection(
+    (magazine as { readingDirection?: unknown }).readingDirection
+  );
+  const isRTL = readingDir === "rtl";
   const spreads = [];
   for (let i = 0; i < images.length; i += 2) {
     const first = images[i];
@@ -270,9 +284,7 @@ export default async function MagazineDetailPage({
                     <MagazineReader
                       spreads={spreads}
                       coverImage={magazine.coverImage}
-                      readingDirection={
-                        magazine.readingDirection === "rtl" ? "rtl" : "ltr"
-                      }
+                      readingDirection={readingDir}
                       innerImages={images}
                     />
                   ) : (

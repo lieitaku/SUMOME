@@ -7,6 +7,34 @@ import { Share2, X, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import HTMLFlipBook from "react-pageflip";
 
+type PageFlipUi = {
+    distElement: HTMLElement;
+    getMousePos: (clientX: number, clientY: number) => { x: number; y: number };
+};
+
+const patchedPageFlipUi = new WeakSet<object>();
+
+/**
+ * 左開きで親に scaleX(-1) があると、見た目と StPageFlip の座標系がずれる。
+ * getMousePos のローカル X を width - x に反転させ、角ドラッグ・スワイプの dx が鏡像と一致するようにする。
+ */
+function patchPageFlipRtlPointer(flip: unknown): void {
+    const ui = (flip as { ui?: PageFlipUi } | null)?.ui;
+    if (!ui || typeof ui.getMousePos !== "function" || !ui.distElement) return;
+    if (patchedPageFlipUi.has(ui)) return;
+
+    const orig = ui.getMousePos.bind(ui);
+    patchedPageFlipUi.add(ui);
+
+    ui.getMousePos = (clientX: number, clientY: number) => {
+        const rect = ui.distElement.getBoundingClientRect();
+        const p = orig(clientX, clientY);
+        const w = rect.width;
+        if (!(w > 0)) return p;
+        return { x: w - p.x, y: p.y };
+    };
+}
+
 // ==============================================================================
 // 组件: 社交分享按钮 (保持不变)
 // ==============================================================================
@@ -50,12 +78,23 @@ interface PageProps {
     src: string;
     pageNumber: number;
     isCover?: boolean;
+    /** 左開き（rtl＝右→左めくり）時 true：全体 scaleX(-1)＋ページ内で相殺して画像は正立 */
+    mirrorContent?: boolean;
 }
 
 const Page = forwardRef<HTMLDivElement, PageProps>((props, ref) => {
+    const unmirror = props.mirrorContent;
+    /** 外側ブックが scaleX(-1) のとき、各ページ内だけ相殺（StPageFlip が子を複製しても relative ブロック単位で効かせる） */
+    const unmirrorStyle: React.CSSProperties | undefined = unmirror
+        ? {
+              transform: "scaleX(-1)",
+              transformOrigin: "center center",
+          }
+        : undefined;
+
     return (
         <div className="bg-white h-full w-full overflow-hidden shadow-inner relative select-none" ref={ref}>
-            <div className="relative w-full h-full">
+            <div className="relative h-full w-full min-h-0" style={unmirrorStyle}>
                 <Image
                     src={props.src}
                     alt={`ページ ${props.pageNumber}`}
@@ -68,7 +107,14 @@ const Page = forwardRef<HTMLDivElement, PageProps>((props, ref) => {
             </div>
 
             {!props.isCover && (
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-gray-400 font-mono">
+                <div
+                    className="absolute bottom-4 left-1/2 text-[10px] text-gray-400 font-mono"
+                    style={{
+                        transform: unmirror
+                            ? "translateX(-50%) scaleX(-1)"
+                            : "translateX(-50%)",
+                    }}
+                >
                     - {props.pageNumber - 1} -
                 </div>
             )}
@@ -88,7 +134,10 @@ type Spread = {
 interface MagazineReaderProps {
     spreads: Spread[];
     coverImage?: string | null;
-    /** ltr=右開き / rtl=左開き（ビューアの操作感・見開き表示用） */
+    /**
+     * ltr = 右開き → めくりは左→右（StPageFlip 既定のまま、反転なし）
+     * rtl = 左開き → めくりは右→左（scaleX(-1) で既定めくりを反転）
+     */
     readingDirection?: "ltr" | "rtl";
     /** 内页 URL 的阅读顺序（与后台 images 数组一致）；用于 FlipBook 页面顺序，避免仅依赖见開き左右互换后的 spreads */
     innerImages?: string[];
@@ -112,6 +161,8 @@ export function MagazineReader({
     const [bookDimensions, setBookDimensions] = useState({ width: 400, height: 550 });
 
     const isRTL = readingDirection === "rtl";
+    /** 右開き(ltr)：左→右＝反転なし。左開き(rtl)：右→左＝全体反転＋ページ内で相殺 */
+    const flipMirror = isRTL;
 
     // 1. 页面顺序：封面 + innerImages（阅读顺序）；无 innerImages 时回退为按 spreads 左→右展开
     const pages = useMemo(() => {
@@ -227,18 +278,21 @@ export function MagazineReader({
 
     const nextFlip = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const flip = bookRef.current?.pageFlip();
-        if (!flip) return;
-        if (isRTL) flip.flipPrev();
-        else flip.flipNext();
+        bookRef.current?.pageFlip()?.flipNext();
     };
     const prevFlip = (e: React.MouseEvent) => {
         e.stopPropagation();
-        const flip = bookRef.current?.pageFlip();
-        if (!flip) return;
-        if (isRTL) flip.flipNext();
-        else flip.flipPrev();
+        bookRef.current?.pageFlip()?.flipPrev();
     };
+
+    /** 左開き：CSS 鏡像後もドラッグ・スワイプが右開きと同じ論理にならないため、page-flip の座標を補正 */
+    const onFlipBookInit = useCallback(() => {
+        if (!flipMirror) return;
+        queueMicrotask(() => {
+            const flip = bookRef.current?.pageFlip?.() as unknown;
+            patchPageFlipRtlPointer(flip);
+        });
+    }, [flipMirror]);
 
     return (
         <>
@@ -310,7 +364,7 @@ export function MagazineReader({
 
                     <div
                         className="relative shadow-2xl"
-                        style={{ perspective: '1500px' }}
+                        style={{ perspective: "1500px" }}
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* ✨ 核心修复：
@@ -319,7 +373,18 @@ export function MagazineReader({
                 从而避免了 StrictMode 下的重复挂载问题。
             */}
                         {showFlipBook ? (
+                            <div
+                                style={
+                                    flipMirror
+                                        ? {
+                                              transform: "scaleX(-1)",
+                                              transformOrigin: "center center",
+                                          }
+                                        : undefined
+                                }
+                            >
                             <HTMLFlipBook
+                                key={readingDirection}
                                 width={bookDimensions.width}
                                 height={bookDimensions.height}
                                 size="fixed"
@@ -344,7 +409,7 @@ export function MagazineReader({
                                 swipeDistance={30}
                                 showPageCorners={true}
                                 disableFlipByClick={false}
-                                {...(isRTL ? { rtl: true } : {})}
+                                onInit={onFlipBookInit}
                             >
                                 {pages.map((src, index) => (
                                     <Page
@@ -353,9 +418,11 @@ export function MagazineReader({
                                         src={src}
                                         pageNumber={index + 1}
                                         isCover={index === 0}
+                                        mirrorContent={flipMirror}
                                     />
                                 ))}
                             </HTMLFlipBook>
+                            </div>
                         ) : (
                             // Loading 占位，防止闪烁
                             <div className="text-white/50 text-xs tracking-widest animate-pulse">
@@ -365,7 +432,9 @@ export function MagazineReader({
                     </div>
 
                     <div className="absolute bottom-6 text-white/50 text-[10px] uppercase tracking-widest font-medium pointer-events-none">
-                        スワイプまたは角をドラッグしてめくる
+                        {isRTL
+                            ? "左開き：右→左の向きでめくれます（スワイプ・角）"
+                            : "右開き：左→右の向きでめくれます（スワイプ・角）"}
                     </div>
                 </div>,
                 document.body
