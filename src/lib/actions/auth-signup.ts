@@ -39,7 +39,6 @@ export async function signUp(
     password: formData.get("password") as string,
   };
 
-  // 1. 校验输入
   const validatedFields = SignUpSchema.safeParse(rawData);
 
   if (!validatedFields.success) {
@@ -54,59 +53,66 @@ export async function signUp(
   }
 
   const { email, password, name, clubName } = validatedFields.data;
+  const inputs = { clubName, name, email };
 
-  // 2. Supabase Auth 注册（用 Admin API 仅为避免发确认邮件报错；角色由下方 Prisma 的 role: "OWNER" 决定，不是管理员）
-  const { data: authData, error: authError } =
-    await supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { name },
-    });
-
-  if (authError) {
-    return {
-      message: authErrorToJapanese(authError.message),
-      inputs: { clubName, name, email },
-    };
-  }
-
-  if (!authData.user) {
-    return {
-      message: "登録に失敗しました。",
-      inputs: { clubName, name, email },
-    };
-  }
-
-  // 3. Prisma 写入 User 表
   try {
-    await prisma.user.create({
-      data: {
-        id: authData.user.id,
-        email: email,
-        name: name,
-        role: "OWNER",
-      },
-    });
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { name },
+      });
 
-    await prisma.club.create({
-      data: {
-        name: clubName,
-        slug: `club-${Date.now()}`,
-        area: "未設定",
-        address: "未設定",
-        published: false,
-        hidden: true, // ✨ デフォルトで非公開（審査制）
-        ownerId: authData.user.id,
-      },
-    });
-  } catch (dbError) {
-    console.error("DB Error:", dbError);
+    if (authError) {
+      return {
+        message: authErrorToJapanese(authError.message),
+        inputs,
+      };
+    }
+
+    if (!authData?.user) {
+      return {
+        message: "登録に失敗しました。",
+        inputs,
+      };
+    }
+
+    try {
+      await prisma.user.create({
+        data: {
+          id: authData.user.id,
+          email: email,
+          name: name,
+          role: "OWNER",
+        },
+      });
+
+      await prisma.club.create({
+        data: {
+          name: clubName,
+          slug: `club-${Date.now()}`,
+          area: "未設定",
+          address: "未設定",
+          published: false,
+          hidden: true,
+          ownerId: authData.user.id,
+        },
+      });
+    } catch (dbError) {
+      console.error("DB Error:", dbError);
+      return {
+        message: "データベースエラーが発生しました。",
+        inputs,
+      };
+    }
+
+    return { success: true, inputs };
+  } catch (unexpected) {
+    console.error("signUp unexpected error:", unexpected);
     return {
-      message: "データベースエラーが発生しました。",
-      inputs: { clubName, name, email },
+      message: "エラーが発生しました。もう一度お試しください。",
+      inputs,
     };
   }
-
-  return { success: true, inputs: { clubName, name, email } };
 }

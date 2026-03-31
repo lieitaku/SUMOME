@@ -19,6 +19,7 @@ import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 
 import { signUp, type SignUpState } from "@/lib/actions/auth-signup";
+import { loginErrorToJapanese } from "@/lib/auth-error-messages";
 
 const RegistrationForm = () => {
     const router = useRouter();
@@ -48,15 +49,25 @@ const RegistrationForm = () => {
         const password = formData.get("password") as string;
         const email = formData.get("email") as string;
 
+        let result: SignUpState;
         try {
-            const result = await signUp({}, formData);
+            result = await signUp({}, formData);
+        } catch (err) {
+            console.error("Registration signUp Server Action failed:", err);
+            setState({
+                message: "登録処理に失敗しました。ネットワークと環境設定を確認し、もう一度お試しください。",
+            });
+            setIsSubmitting(false);
+            return;
+        }
 
-            if (!result.success) {
-                setState(result);
-                setIsSubmitting(false);
-                return;
-            }
+        if (!result.success) {
+            setState(result);
+            setIsSubmitting(false);
+            return;
+        }
 
+        try {
             const { error: loginError } = await supabase.auth.signInWithPassword({
                 email,
                 password,
@@ -64,17 +75,32 @@ const RegistrationForm = () => {
 
             if (loginError) {
                 setState({
-                    message: "アカウントは作成されました。ログインページからサインインしてください。",
+                    message: `アカウントは作成されました。${loginErrorToJapanese(loginError.message)} ログインページからサインインすることもできます。`,
                     inputs: result.inputs,
                 });
                 setIsSubmitting(false);
                 return;
             }
+        } catch (err) {
+            console.error("Registration signInWithPassword failed:", err);
+            setState({
+                message:
+                    "アカウントは作成されました。自動ログインに失敗しました。ログインページからサインインしてください。",
+                inputs: result.inputs,
+            });
+            setIsSubmitting(false);
+            return;
+        }
 
+        try {
             router.refresh();
             router.push("/admin/clubs");
-        } catch {
-            setState({ message: "予期せぬエラーが発生しました。もう一度お試しください。" });
+        } catch (err) {
+            console.error("Registration navigation failed:", err);
+            setState({
+                message: "ログインに成功しましたが、画面の移動に失敗しました。ページを再読み込みしてください。",
+                inputs: result.inputs,
+            });
             setIsSubmitting(false);
         }
     };
