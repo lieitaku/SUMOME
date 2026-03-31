@@ -22,6 +22,7 @@ export default function CharacterPage() {
       <PageHero
         title="仲間を紹介"
         enTitle="CHARACTERS"
+        eyebrow="キャラクター情報"
         subtitle="SUMOMEの世界に住む3人の仲間たち"
         backLink={{ href: "/", label: "TOPに戻る" }}
         className="pb-6 md:pb-20"

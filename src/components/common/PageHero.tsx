@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 type PageHeroProps = {
   title: string; // 显示的标题 (如: 北海道)
   enTitle?: string; // 背景水印用的罗马字 (如: HOKKAIDO)
+  /** 标题上方金色小字（默认: エリア情報） */
+  eyebrow?: string;
   subtitle?: string; // 副标题
   backLink?: {
     href: string;
@@ -20,6 +22,7 @@ type PageHeroProps = {
 const PageHero = ({
   title,
   enTitle,
+  eyebrow = "エリア情報",
   subtitle,
   backLink = { href: "/", label: "TOPに戻る" },
   className,
@@ -57,7 +60,7 @@ const PageHero = ({
 
         <p className="text-sumo-gold text-xs font-bold tracking-[0.3em] mb-3 md:mb-6 uppercase flex items-center justify-center gap-3 md:gap-4">
           <span className="w-8 h-[2px] bg-sumo-gold"></span>
-          エリア情報
+          {eyebrow}
           <span className="w-8 h-[2px] bg-sumo-gold"></span>
         </p>
 
