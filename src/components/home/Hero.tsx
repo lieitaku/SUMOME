@@ -109,6 +109,126 @@ function HeroContent() {
   );
 }
 
+/** 与 Tailwind `md:` 一致：视口宽度 < 768px 时使用 HAKUHO_SIDE_MOBILE */
+const HAKUHO_SIDE_BREAKPOINT_PX = 768;
+
+function useIsHakuhoMobileLayout() {
+  const [mobile, setMobile] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${HAKUHO_SIDE_BREAKPOINT_PX - 1}px)`);
+    const update = () => setMobile(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+  return mobile;
+}
+
+type HakuhoSideLayout = {
+  maxWidthPx: number;
+  maxHeightPx: number;
+  padLeftPx: number;
+  padRightPx: number;
+  nudgeLeft: { x: number; y: number };
+  nudgeRight: { x: number; y: number };
+  verticalAlign: "center" | "start" | "end";
+};
+
+/**
+ * 左右白鹏装饰（桌面 ≥768px）
+ *
+ * 比例参考底部悬赏旗（`RabbitWalkingBanner` 旗面约 180×260×scale）；当前数值为你本机配置。
+ *
+ * 手动调整：
+ * - maxWidthPx / maxHeightPx：显示上限（object-contain，A4 竖图在框内等比缩放）
+ * - padLeftPx / padRightPx：离左/右屏幕边缘
+ * - nudgeLeft / nudgeRight：半区内平移（x 右为正、y 下为正）
+ * - verticalAlign：'center' | 'start' | 'end'
+ */
+const HAKUHO_SIDE_DESKTOP: HakuhoSideLayout = {
+  maxWidthPx: Math.round(180 * 1.2),
+  maxHeightPx: Math.round(260 * 1.2),
+  padLeftPx: 8,
+  padRightPx: 8,
+  nudgeLeft: { x: 300, y: -150 },
+  nudgeRight: { x: -300, y: -150 },
+  verticalAlign: "center",
+};
+
+/**
+ * 左右白鹏装饰（移动端，视口宽度小于 768px）——与桌面完全独立，可单独改比例与位置。
+ * 默认与桌面相同；按需改小 max* 或调整 nudge / padding。
+ */
+const HAKUHO_SIDE_MOBILE: HakuhoSideLayout = {
+  maxWidthPx: Math.round(180 * 0.8),
+  maxHeightPx: Math.round(260 * 0.8),
+  padLeftPx: 8,
+  padRightPx: 8,
+  nudgeLeft: { x: 250, y: -150 },
+  nudgeRight: { x: -250, y: -150 },
+  verticalAlign: "center",
+};
+
+function HeroHakuhoSidePanels() {
+  const isMobileLayout = useIsHakuhoMobileLayout();
+  const { maxWidthPx, maxHeightPx, padLeftPx, padRightPx, nudgeLeft, nudgeRight, verticalAlign } =
+    isMobileLayout ? HAKUHO_SIDE_MOBILE : HAKUHO_SIDE_DESKTOP;
+
+  const itemsAlign =
+    verticalAlign === "start" ? "items-start" : verticalAlign === "end" ? "items-end" : "items-center";
+
+  const imgBaseStyle: React.CSSProperties = {
+    width: "auto",
+    height: "auto",
+    maxWidth: maxWidthPx,
+    maxHeight: maxHeightPx,
+    objectFit: "contain",
+    filter:
+      "drop-shadow(0 4px 14px rgba(0,0,0,0.12)) drop-shadow(0 12px 36px rgba(0,0,0,0.18))",
+  };
+
+  return (
+    <>
+      <div
+        className={`pointer-events-none absolute inset-y-0 left-0 z-20 flex w-1/2 ${itemsAlign} justify-start`}
+        style={{ paddingLeft: padLeftPx }}
+        aria-hidden
+      >
+        <div
+          style={{
+            transform: `translate(${nudgeLeft.x}px, ${nudgeLeft.y}px)`,
+          }}
+        >
+          <img
+            src="/images/hero/hakuho1.webp"
+            alt=""
+            className="select-none object-left rounded-sm"
+            style={imgBaseStyle}
+          />
+        </div>
+      </div>
+      <div
+        className={`pointer-events-none absolute inset-y-0 right-0 z-20 flex w-1/2 ${itemsAlign} justify-end`}
+        style={{ paddingRight: padRightPx }}
+        aria-hidden
+      >
+        <div
+          style={{
+            transform: `translate(${nudgeRight.x}px, ${nudgeRight.y}px)`,
+          }}
+        >
+          <img
+            src="/images/hero/hakuho2.webp"
+            alt=""
+            className="select-none object-right rounded-sm"
+            style={imgBaseStyle}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
 const Hero = ({
   sponsors,
   displayMode,
@@ -184,6 +304,7 @@ const Hero = ({
             </video>
           )}
         </div>
+        <HeroHakuhoSidePanels />
         <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
           <HeroContent />
         </div>
@@ -243,6 +364,8 @@ const Hero = ({
           className={`transition-opacity duration-300 ${frameIndex === 3 ? "opacity-100" : "opacity-0"}`}
         />
       </svg>
+
+      <HeroHakuhoSidePanels />
 
       <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
         <HeroContent />
