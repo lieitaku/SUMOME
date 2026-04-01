@@ -552,7 +552,7 @@ const JapanMap = () => {
 
                 ></div>
 
-                <span className="text-sumo-dark font-serif font-bold tracking-widest text-sm">
+                <span className="text-sumo-dark font-serif font-bold tracking-widest text-base">
 
                   {group.region}
 
@@ -582,7 +582,7 @@ const JapanMap = () => {
 
                       className={cn(
 
-                        "flex items-center justify-center py-3 text-xs font-bold rounded-xl",
+                        "flex items-center justify-center py-3 text-sm font-bold rounded-xl",
 
                         className,
 

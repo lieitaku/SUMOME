@@ -53,7 +53,7 @@ const PartnersPage = () => {
                     <div className="flex flex-col items-center max-w-2xl mx-auto text-center">
                         {/* Hero 文案 */}
                         <div className="animate-fade-in-up">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase mb-6 border border-blue-100">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase mb-6 border border-blue-100">
                                 <Sparkles size={12} />
                                 クラブ運営者の方へ
                             </div>
@@ -88,7 +88,7 @@ const PartnersPage = () => {
                                 </Link>
                             </div>
 
-                            <p className="mt-4 text-xs text-gray-400 font-medium">
+                            <p className="mt-4 text-sm md:text-xs text-gray-400 font-medium">
                                 ※ 登録には審査があります。最短3分で申請完了。
                             </p>
                         </div>
@@ -100,10 +100,10 @@ const PartnersPage = () => {
             <section id="features" className="pt-8 pb-8 md:py-24 px-4 md:px-6 relative z-10">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-2">
+                        <h2 className="text-3xl md:text-3xl font-serif font-bold text-gray-900 mb-2">
                             選ばれる3つの理由
                         </h2>
-                        <p className="text-sm md:text-base text-gray-500 mb-2">
+                        <p className="text-base md:text-base text-gray-500 mb-2">
                             道場運営の負担を減らし、成果を最大化する機能が揃っています。
                         </p>
                     </div>
@@ -118,10 +118,10 @@ const PartnersPage = () => {
                             <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 text-[#2454a4] rounded-xl flex items-center justify-center mb-4 md:mb-6">
                                 <MousePointerClick className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
-                            <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
+                            <h3 className="text-lg md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
                                 圧倒的な集客力
                             </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <p className="text-base md:text-sm text-gray-600 leading-relaxed">
                                 相撲に関心のあるユーザーが集まるプラットフォームだから、
                                 一般的なSNSやHPよりも高い確率で入会に繋がります。
                             </p>
@@ -136,10 +136,10 @@ const PartnersPage = () => {
                             <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 text-[#2454a4] rounded-xl flex items-center justify-center mb-4 md:mb-6">
                                 <LayoutDashboard className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
-                            <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
+                            <h3 className="text-lg md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
                                 簡単ページ作成
                             </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <p className="text-base md:text-sm text-gray-600 leading-relaxed">
                                 専門知識は不要。ブログを書くような感覚で、
                                 魅力的なクラブ紹介ページや募集要項を作成・更新できます。
                             </p>
@@ -154,10 +154,10 @@ const PartnersPage = () => {
                             <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 text-[#2454a4] rounded-xl flex items-center justify-center mb-4 md:mb-6">
                                 <ShieldCheck className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
-                            <h3 className="text-base md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
+                            <h3 className="text-lg md:text-lg font-bold text-gray-900 mb-2 md:mb-3">
                                 信頼性の向上
                             </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
+                            <p className="text-base md:text-sm text-gray-600 leading-relaxed">
                                 SUMOMEの公式認証マークが付与されることで、
                                 保護者や初心者の方にも安心して選んでいただけるようになります。
                             </p>
@@ -170,10 +170,10 @@ const PartnersPage = () => {
             <section className="pt-2 pb-2 md:py-24 bg-[#F4F5F7]">
                 <div className="container mx-auto max-w-6xl px-4 md:px-6">
                     <div className="text-center mb-12 md:mb-16">
-                        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-3">
+                        <h2 className="text-3xl md:text-3xl font-serif font-bold text-gray-900 mb-3">
                             掲載までの流れ
                         </h2>
-                        <p className="text-sm md:text-base text-gray-500 font-medium">
+                        <p className="text-base md:text-base text-gray-500 font-medium">
                             わずか3ステップで、あなたのクラブページが完成します。
                         </p>
                     </div>
@@ -191,14 +191,14 @@ const PartnersPage = () => {
                                     <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2454a4] group-hover:scale-110 group-hover:bg-[#2454a4] group-hover:text-white transition-all duration-300 shadow-sm">
                                         <MousePointerClick className="w-5 h-5" />
                                     </div>
-                                    <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
+                                    <span className="text-sm md:text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
                                         ステップ 01
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
+                                <h3 className="text-xl md:text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
                                     アカウント作成
                                 </h3>
-                                <p className="text-sm text-gray-500 leading-relaxed">
+                                <p className="text-base md:text-sm text-gray-500 leading-relaxed">
                                     メールアドレスと基本情報を入力して、無料の管理者アカウントを作成します。
                                 </p>
                             </div>
@@ -215,14 +215,14 @@ const PartnersPage = () => {
                                     <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2454a4] group-hover:scale-110 group-hover:bg-[#2454a4] group-hover:text-white transition-all duration-300 shadow-sm">
                                         <PenTool className="w-5 h-5" />
                                     </div>
-                                    <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
+                                    <span className="text-sm md:text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
                                         ステップ 02
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
+                                <h3 className="text-xl md:text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
                                     クラブ情報の入力
                                 </h3>
-                                <p className="text-sm text-gray-500 leading-relaxed">
+                                <p className="text-base md:text-sm text-gray-500 leading-relaxed">
                                     道場の写真、稽古スケジュール、指導方針などを専用フォームに入力します。
                                 </p>
                             </div>
@@ -239,14 +239,14 @@ const PartnersPage = () => {
                                     <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2454a4] group-hover:scale-110 group-hover:bg-[#2454a4] group-hover:text-white transition-all duration-300 shadow-sm">
                                         <FileText className="w-5 h-5" />
                                     </div>
-                                    <span className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
+                                    <span className="text-sm md:text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
                                         ステップ 03
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
+                                <h3 className="text-xl md:text-lg font-bold text-gray-900 mb-3 group-hover:text-[#2454a4] transition-colors">
                                     審査・公開
                                 </h3>
-                                <p className="text-sm text-gray-500 leading-relaxed">
+                                <p className="text-base md:text-sm text-gray-500 leading-relaxed">
                                     運営事務局による簡単な確認後、サイトに即時公開されます。
                                 </p>
                             </div>

@@ -103,11 +103,11 @@ const ContactPage = () => {
             className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-0"
           >
             <div className="flex flex-col lg:flex-row min-h-[700px]">
-              {/* --- A. Left Side: Info Panel (改为淡雅灰白) --- */}
+              {/* --- A. Left Side: Info Panel --- */}
               <div className="lg:w-1/3 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col justify-between">
                 <div className="relative z-10">
                   {/* 标题 */}
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
+                  <h3 className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
                     お問い合わせ先
                   </h3>
 
@@ -119,10 +119,10 @@ const ContactPage = () => {
                           <MapPin size={18} />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-sumo-dark mb-2">
+                          <h4 className="text-base md:text-sm font-bold text-sumo-dark mb-2">
                             所在地
                           </h4>
-                          <p className="text-gray-500 leading-relaxed text-sm font-medium">
+                          <p className="text-gray-500 leading-relaxed text-base md:text-sm font-medium">
                             〒103-0016
                             <br />
                             東京都中央区日本橋小網町4番9号
@@ -140,14 +140,14 @@ const ContactPage = () => {
                           <Mail size={18} />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-sumo-dark mb-2">
+                          <h4 className="text-base md:text-sm font-bold text-sumo-dark mb-2">
                             メール
                           </h4>
                           <a
-                            href="mailto:info@sumome.jp"
-                            className="text-gray-500 hover:text-sumo-brand transition-colors text-sm font-mono border-b border-transparent hover:border-sumo-brand pb-0.5"
+                            href="mailto:info@memory-pb.com"
+                            className="text-gray-500 hover:text-sumo-brand transition-colors text-base md:text-sm font-mono border-b border-transparent hover:border-sumo-brand pb-0.5"
                           >
-                            info@sumome.jp
+                            info@memory-pb.com
                           </a>
                         </div>
                       </div>
@@ -158,7 +158,7 @@ const ContactPage = () => {
                 {/* 底部 Logo / 装饰 */}
                 <div className="relative z-10 mt-12 lg:mt-0">
                   <div className="w-8 h-1 bg-sumo-gold mb-3"></div>
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">
+                  <p className="text-xs md:text-[10px] text-gray-400 uppercase tracking-widest font-bold">
                     SUMOME公式
                   </p>
                 </div>
@@ -193,7 +193,7 @@ const ContactPage = () => {
                       <h3 className="text-2xl font-serif font-bold text-sumo-dark mb-2">
                         入力フォーム
                       </h3>
-                      <p className="text-sm text-gray-400 font-medium">
+                      <p className="text-base md:text-sm text-gray-400 font-medium">
                         以下の項目にご記入ください（
                         <span className="text-sumo-red">*</span>は必須項目）
                       </p>
@@ -201,7 +201,7 @@ const ContactPage = () => {
 
                     {/* Error Message */}
                     {error && (
-                      <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                      <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-base md:text-sm">
                         <AlertCircle size={16} />
                         {error}
                       </div>
@@ -210,7 +210,7 @@ const ContactPage = () => {
                     {/* Name & Furigana */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3 group">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                        <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                           <User size={12} /> お名前{" "}
                           <span className="text-sumo-red">*</span>
                         </label>
@@ -225,7 +225,7 @@ const ContactPage = () => {
                         />
                       </div>
                       <div className="space-y-3 group">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                        <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                           フリガナ
                         </label>
                         <input
@@ -242,7 +242,7 @@ const ContactPage = () => {
                     {/* Email & Phone */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3 group">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                        <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                           <AtSign size={12} /> メールアドレス{" "}
                           <span className="text-sumo-red">*</span>
                         </label>
@@ -257,7 +257,7 @@ const ContactPage = () => {
                         />
                       </div>
                       <div className="space-y-3 group">
-                        <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                        <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                           <Phone size={12} /> 電話番号
                         </label>
                         <input
@@ -273,7 +273,7 @@ const ContactPage = () => {
 
                     {/* Inquiry Type */}
                     <div className="space-y-4">
-                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                      <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
                         <Building2 size={12} /> お問い合わせ種別{" "}
                         <span className="text-sumo-red">*</span>
                       </label>
@@ -303,7 +303,7 @@ const ContactPage = () => {
                               className="w-4 h-4 accent-sumo-brand border-gray-300"
                             />
                             <span className={cn(
-                              "text-sm font-bold",
+                              "text-base md:text-sm font-bold",
                               formData.inquiryType === type ? "text-sumo-dark" : "text-gray-600"
                             )}>
                               {type}
@@ -315,7 +315,7 @@ const ContactPage = () => {
 
                     {/* Message */}
                     <div className="space-y-3 group">
-                      <label className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                      <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
                         <MessageSquare size={12} /> お問い合わせ内容{" "}
                         <span className="text-sumo-red">*</span>
                       </label>
@@ -332,7 +332,7 @@ const ContactPage = () => {
 
                     {/* Submit Action */}
                     <div className="pt-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
-                      <p className="text-xs text-gray-400 text-center md:text-left leading-relaxed">
+                      <p className="text-sm md:text-xs text-gray-400 text-center md:text-left leading-relaxed">
                         <a
                           href="/privacy"
                           className="underline decoration-gray-300 hover:text-sumo-brand hover:decoration-sumo-brand transition-all"
@@ -348,7 +348,7 @@ const ContactPage = () => {
                         type="submit"
                         disabled={isSubmitting}
                         className={cn(
-                          "group relative overflow-hidden px-10 py-4 bg-sumo-dark text-white text-xs font-bold uppercase tracking-widest rounded shadow-lg transition-all",
+                          "group relative overflow-hidden px-10 py-4 bg-sumo-dark text-white text-sm md:text-xs font-bold uppercase tracking-widest rounded shadow-lg transition-all",
                           isSubmitting
                             ? "opacity-80 cursor-not-allowed"
                             : "hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl",

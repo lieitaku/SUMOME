@@ -27,16 +27,16 @@ const ClubsPage = () => {
           <div className="container mx-auto px-6 relative z-10">
             {/* Title Section：不做 reveal-up，首屏始终可见，避免移动端 JS 未触发时整块不显示 */}
             <div className="text-center mb-10 md:mb-20">
-              <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 bg-white rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100">
-                <MapPin size={12} className="text-sumo-brand" />
-                <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
+              <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100">
+                <MapPin size={14} className="text-sumo-brand" />
+                <span className="text-xs md:text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
                   地域から探す
                 </span>
               </div>
-              <h1 className="text-4xl md:text-6xl font-serif font-black text-gray-900 mb-6 tracking-tight">
+              <h1 className="text-5xl md:text-6xl font-serif font-black text-gray-900 mb-6 tracking-tight">
                 都道府県から探す
               </h1>
-              <p className="text-gray-500 text-sm md:text-base font-medium tracking-widest max-w-lg mx-auto leading-loose">
+              <p className="text-gray-500 text-base md:text-base font-medium tracking-widest max-w-lg mx-auto leading-loose">
                 日本全国の相撲クラブ・道場を網羅。
                 <br className="hidden md:block" />
                 あなたの地域のコミュニティを見つけましょう。
@@ -68,7 +68,7 @@ const ClubsPage = () => {
 
                 {/* 2. 文字内容 */}
                 <div className="flex flex-col items-start text-left">
-                  <span className="text-lg md:text-xl font-bold text-gray-800 tracking-wide">
+                  <span className="text-xl md:text-xl font-bold text-gray-800 tracking-wide">
                     条件・キーワードで詳しく検索
                   </span>
                 </div>
