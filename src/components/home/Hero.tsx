@@ -150,8 +150,8 @@ const HAKUHO_SIDE_DESKTOP: HakuhoSideLayout = {
   maxHeightPx: Math.round(260 * 1.2),
   padLeftPx: 8,
   padRightPx: 8,
-  nudgeLeft: { x: 300, y: -150 },
-  nudgeRight: { x: -300, y: -150 },
+  nudgeLeft: { x: 300, y: -265 },
+  nudgeRight: { x: -300, y: -265 },
   verticalAlign: "center",
 };
 
