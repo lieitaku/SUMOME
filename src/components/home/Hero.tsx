@@ -275,9 +275,17 @@ function preventImgDragOnly(e: React.DragEvent<HTMLImageElement>) {
   e.preventDefault();
 }
 
-/** 手机端侧图：长按放大倍数（translate 到视口中心 + scale，仍单张 img） */
+/** 手机端侧图：长按放大（translate 到视口中心 + scale，仍单张 img） */
 const HAKUHO_LONG_PRESS_MS = 280;
-const HAKUHO_PINCH_SCALE = 2;
+/** 缩放上下限：实际倍数由「装入半屏」公式算出后再夹紧 */
+const HAKUHO_PINCH_SCALE_MIN = 2.2;
+const HAKUHO_PINCH_SCALE_MAX = 5.75;
+/** 长按后整图 `object-contain` 适配在视口宽/高的该比例框内（约半屏） */
+const HAKUHO_ZOOM_VIEWPORT_FRACTION = 0.5;
+/** 长按聚焦：弱化层模糊（px，4 的倍数） */
+const HAKUHO_ZOOM_BACKDROP_BLUR_PX = 12;
+/** 弱化层底色（略压暗，突出前景照片） */
+const HAKUHO_ZOOM_DIM_OVERLAY = "rgba(0,0,0,0.32)";
 /** 长按放大时锚点相对视口几何中心再往上（px，4 的倍数） */
 const HAKUHO_ZOOM_ANCHOR_UP_PX = 64;
 /** 手机：侧图顶边与「心技体」卡片底边的固定间距（视口 px，4 的倍数） */
@@ -317,6 +325,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
 
   const [zoomSide, setZoomSide] = useState<HakuhoSideId | null>(null);
   const [zoomPan, setZoomPan] = useState<{ x: number; y: number } | null>(null);
+  const [zoomScale, setZoomScale] = useState(HAKUHO_PINCH_SCALE_MIN);
   const [mobileHakuhoLayout, setMobileHakuhoLayout] = useState<MobileHakuhoLayout>({
     yExtra: 0,
     inwardX: 280,
@@ -625,10 +634,22 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
       const el = side === "left" ? leftImgRef.current : rightImgRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
+      const iw = Math.max(rect.width, 1);
+      const ih = Math.max(rect.height, 1);
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const boxW = vw * HAKUHO_ZOOM_VIEWPORT_FRACTION;
+      const boxH = vh * HAKUHO_ZOOM_VIEWPORT_FRACTION;
+      const fitScale = Math.min(boxW / iw, boxH / ih);
+      const nextScale = Math.min(
+        HAKUHO_PINCH_SCALE_MAX,
+        Math.max(HAKUHO_PINCH_SCALE_MIN, fitScale),
+      );
       const cx = rect.left + rect.width / 2;
       const cy = rect.top + rect.height / 2;
-      const vx = window.innerWidth / 2;
-      const vy = window.innerHeight / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
+      const vx = vw / 2;
+      const vy = vh / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
+      setZoomScale(nextScale);
       setZoomPan({
         x: Math.round(vx - cx),
         y: Math.round(vy - cy),
@@ -646,6 +667,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
     clearLongPressTimer();
     setZoomSide(null);
     setZoomPan(null);
+    setZoomScale(HAKUHO_PINCH_SCALE_MIN);
     try {
       e.currentTarget.releasePointerCapture(e.pointerId);
     } catch {
@@ -659,6 +681,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
     const zoomed = zoomSide === side;
     const panX = zoomed && zoomPan ? zoomPan.x : 0;
     const panY = zoomed && zoomPan ? zoomPan.y : 0;
+    const baseFilter = typeof imgBaseStyle.filter === "string" ? imgBaseStyle.filter : "";
     return {
       pointerEvents: "auto",
       /** none：减少浏览器把长按交给系统菜单/拖拽，仍可用 Pointer 实现放大（侧图区域小） */
@@ -667,17 +690,33 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
       WebkitUserSelect: "none",
       userSelect: "none",
       transform: zoomed
-        ? `translate(${panX}px, ${panY}px) scale(${HAKUHO_PINCH_SCALE})`
+        ? `translate(${panX}px, ${panY}px) scale(${zoomScale})`
         : "translate(0px, 0px) scale(1)",
       transformOrigin: "center center",
-      transition: zoomed
-        ? "transform 240ms cubic-bezier(0.22, 1, 0.36, 1)"
-        : "transform 360ms cubic-bezier(0.34, 1.18, 0.64, 1)",
+      transition: "transform 200ms ease-in-out, filter 200ms ease-in-out",
+      ...(zoomed && baseFilter
+        ? { filter: `${baseFilter} brightness(1.06) saturate(1.06)` }
+        : {}),
     };
   };
 
   return (
     <>
+      {isCompactHakuho && (
+        <div
+          className={`absolute inset-0 z-35 pointer-events-none ease-in-out ${
+            zoomSide ? "opacity-100" : "opacity-0"
+          }`}
+          style={{
+            transitionDuration: "200ms",
+            transitionProperty: "opacity, backdrop-filter, -webkit-backdrop-filter, background-color",
+            backgroundColor: zoomSide ? HAKUHO_ZOOM_DIM_OVERLAY : "transparent",
+            backdropFilter: zoomSide ? `blur(${HAKUHO_ZOOM_BACKDROP_BLUR_PX}px)` : "blur(0px)",
+            WebkitBackdropFilter: zoomSide ? `blur(${HAKUHO_ZOOM_BACKDROP_BLUR_PX}px)` : "blur(0px)",
+          }}
+          aria-hidden
+        />
+      )}
       <div
         className={`pointer-events-none absolute inset-y-0 left-0 flex w-1/2 ${itemsAlign} justify-start ${
           zoomSide === "left" ? "z-50" : "z-20"
