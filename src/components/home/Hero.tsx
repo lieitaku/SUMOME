@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import RabbitBanner from "@/components/home/RabbitBanner/RabbitBannerDynamic";
 import type { SponsorItem, BannerDisplayMode } from "@/components/home/RabbitBanner";
 
@@ -160,8 +160,8 @@ const HAKUHO_SIDE_DESKTOP: HakuhoSideLayout = {
  * 默认与桌面相同；按需改小 max* 或调整 nudge / padding。
  */
 const HAKUHO_SIDE_MOBILE: HakuhoSideLayout = {
-  maxWidthPx: Math.round(180 * 0.8),
-  maxHeightPx: Math.round(260 * 0.8),
+  maxWidthPx: Math.round(180 * 0.55),
+  maxHeightPx: Math.round(260 * 0.55),
   padLeftPx: 8,
   padRightPx: 8,
   nudgeLeft: { x: 250, y: -150 },
@@ -169,8 +169,30 @@ const HAKUHO_SIDE_MOBILE: HakuhoSideLayout = {
   verticalAlign: "center",
 };
 
-function HeroHakuhoSidePanels() {
+type HakuhoSideId = "left" | "right";
+
+/** 手机端侧图：长按放大倍数（translate 到视口中心 + scale，仍单张 img） */
+const HAKUHO_LONG_PRESS_MS = 280;
+const HAKUHO_PINCH_SCALE = 2;
+/** 长按放大时锚点相对视口几何中心再往上（px，4 的倍数） */
+const HAKUHO_ZOOM_ANCHOR_UP_PX = 64;
+/** 侧图顶边与「心技体」卡片底边的间距（px） */
+const HAKUHO_CARD_CLEARANCE_PX = 16;
+
+type HeroHakuhoSidePanelsProps = {
+  /** 包裹 HeroContent 的外壳，用于手机端计算侧图与卡片的避让 */
+  heroCardShellRef: React.RefObject<HTMLDivElement | null>;
+};
+
+function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
   const isMobileLayout = useIsHakuhoMobileLayout();
+  const [zoomSide, setZoomSide] = useState<HakuhoSideId | null>(null);
+  const [zoomPan, setZoomPan] = useState<{ x: number; y: number } | null>(null);
+  const [cardAvoidYOffset, setCardAvoidYOffset] = useState(0);
+  const leftImgRef = useRef<HTMLImageElement | null>(null);
+  const rightImgRef = useRef<HTMLImageElement | null>(null);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTargetSideRef = useRef<HakuhoSideId | null>(null);
   const { maxWidthPx, maxHeightPx, padLeftPx, padRightPx, nudgeLeft, nudgeRight, verticalAlign } =
     isMobileLayout ? HAKUHO_SIDE_MOBILE : HAKUHO_SIDE_DESKTOP;
 
@@ -187,41 +209,165 @@ function HeroHakuhoSidePanels() {
       "drop-shadow(0 4px 14px rgba(0,0,0,0.12)) drop-shadow(0 12px 36px rgba(0,0,0,0.18))",
   };
 
+  const measureCardOverlapAvoidance = useCallback(() => {
+    if (!isMobileLayout) {
+      setCardAvoidYOffset(0);
+      return;
+    }
+    const shell = heroCardShellRef.current;
+    const imgEl = leftImgRef.current;
+    if (!shell || !imgEl) return;
+    const card = shell.getBoundingClientRect();
+    const img = imgEl.getBoundingClientRect();
+    const needDown = Math.round(card.bottom + HAKUHO_CARD_CLEARANCE_PX - img.top);
+    setCardAvoidYOffset(Math.max(0, needDown));
+  }, [isMobileLayout, heroCardShellRef]);
+
+  useLayoutEffect(() => {
+    if (!isMobileLayout) {
+      setCardAvoidYOffset(0);
+      return;
+    }
+    measureCardOverlapAvoidance();
+    const shell = heroCardShellRef.current;
+    const imgEl = leftImgRef.current;
+    const roShell = shell ? new ResizeObserver(measureCardOverlapAvoidance) : null;
+    const roImg = imgEl ? new ResizeObserver(measureCardOverlapAvoidance) : null;
+    if (shell) roShell?.observe(shell);
+    if (imgEl) roImg?.observe(imgEl);
+    const onWin = () => measureCardOverlapAvoidance();
+    window.addEventListener("resize", onWin);
+    window.addEventListener("orientationchange", onWin);
+    return () => {
+      roShell?.disconnect();
+      roImg?.disconnect();
+      window.removeEventListener("resize", onWin);
+      window.removeEventListener("orientationchange", onWin);
+    };
+  }, [isMobileLayout, measureCardOverlapAvoidance]);
+
+  const mobileNudgeY = isMobileLayout ? cardAvoidYOffset : 0;
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current != null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    longPressTargetSideRef.current = null;
+  };
+
+  const onSidePointerDown = (side: HakuhoSideId) => (e: React.PointerEvent<HTMLImageElement>) => {
+    if (!isMobileLayout) return;
+    if (longPressTimerRef.current != null) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    longPressTargetSideRef.current = side;
+    longPressTimerRef.current = setTimeout(() => {
+      longPressTimerRef.current = null;
+      if (longPressTargetSideRef.current !== side) return;
+      const el = side === "left" ? leftImgRef.current : rightImgRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const vx = window.innerWidth / 2;
+      const vy = window.innerHeight / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
+      setZoomPan({
+        x: Math.round(vx - cx),
+        y: Math.round(vy - cy),
+      });
+      setZoomSide(side);
+    }, HAKUHO_LONG_PRESS_MS);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const onSidePointerUpEnd = (e: React.PointerEvent<HTMLImageElement>) => {
+    clearLongPressTimer();
+    setZoomSide(null);
+    setZoomPan(null);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const mobileImgStyle = (side: HakuhoSideId): React.CSSProperties | undefined => {
+    if (!isMobileLayout) return undefined;
+    const zoomed = zoomSide === side;
+    const panX = zoomed && zoomPan ? zoomPan.x : 0;
+    const panY = zoomed && zoomPan ? zoomPan.y : 0;
+    return {
+      pointerEvents: "auto",
+      touchAction: "manipulation",
+      transform: zoomed
+        ? `translate(${panX}px, ${panY}px) scale(${HAKUHO_PINCH_SCALE})`
+        : "translate(0px, 0px) scale(1)",
+      transformOrigin: "center center",
+      transition: zoomed
+        ? "transform 240ms cubic-bezier(0.22, 1, 0.36, 1)"
+        : "transform 360ms cubic-bezier(0.34, 1.18, 0.64, 1)",
+    };
+  };
+
   return (
     <>
       <div
-        className={`pointer-events-none absolute inset-y-0 left-0 z-20 flex w-1/2 ${itemsAlign} justify-start`}
+        className={`pointer-events-none absolute inset-y-0 left-0 flex w-1/2 ${itemsAlign} justify-start ${
+          zoomSide === "left" ? "z-50" : "z-20"
+        }`}
         style={{ paddingLeft: padLeftPx }}
         aria-hidden
       >
         <div
           style={{
-            transform: `translate(${nudgeLeft.x}px, ${nudgeLeft.y}px)`,
+            transform: `translate(${nudgeLeft.x}px, ${nudgeLeft.y + mobileNudgeY}px)`,
           }}
         >
           <img
+            ref={leftImgRef}
             src="/images/hero/hakuho1.webp"
             alt=""
+            draggable={false}
             className="select-none object-left rounded-sm"
-            style={imgBaseStyle}
+            style={{ ...imgBaseStyle, ...mobileImgStyle("left") }}
+            onLoad={isMobileLayout ? measureCardOverlapAvoidance : undefined}
+            onPointerDown={isMobileLayout ? onSidePointerDown("left") : undefined}
+            onPointerUp={isMobileLayout ? onSidePointerUpEnd : undefined}
+            onPointerCancel={isMobileLayout ? onSidePointerUpEnd : undefined}
+            onContextMenu={isMobileLayout ? (ev) => ev.preventDefault() : undefined}
           />
         </div>
       </div>
       <div
-        className={`pointer-events-none absolute inset-y-0 right-0 z-20 flex w-1/2 ${itemsAlign} justify-end`}
+        className={`pointer-events-none absolute inset-y-0 right-0 flex w-1/2 ${itemsAlign} justify-end ${
+          zoomSide === "right" ? "z-50" : "z-20"
+        }`}
         style={{ paddingRight: padRightPx }}
         aria-hidden
       >
         <div
           style={{
-            transform: `translate(${nudgeRight.x}px, ${nudgeRight.y}px)`,
+            transform: `translate(${nudgeRight.x}px, ${nudgeRight.y + mobileNudgeY}px)`,
           }}
         >
           <img
+            ref={rightImgRef}
             src="/images/hero/hakuho2.webp"
             alt=""
+            draggable={false}
             className="select-none object-right rounded-sm"
-            style={imgBaseStyle}
+            style={{ ...imgBaseStyle, ...mobileImgStyle("right") }}
+            onLoad={isMobileLayout ? measureCardOverlapAvoidance : undefined}
+            onPointerDown={isMobileLayout ? onSidePointerDown("right") : undefined}
+            onPointerUp={isMobileLayout ? onSidePointerUpEnd : undefined}
+            onPointerCancel={isMobileLayout ? onSidePointerUpEnd : undefined}
+            onContextMenu={isMobileLayout ? (ev) => ev.preventDefault() : undefined}
           />
         </div>
       </div>
@@ -247,6 +393,7 @@ const Hero = ({
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const heroCardShellRef = useRef<HTMLDivElement>(null);
 
   const effectiveWebm = isMobileView && videoWebmSrcMobile ? videoWebmSrcMobile : videoWebmSrc;
   const effectiveMp4 = isMobileView && videoSrcMobile ? videoSrcMobile : videoSrc;
@@ -304,8 +451,11 @@ const Hero = ({
             </video>
           )}
         </div>
-        <HeroHakuhoSidePanels />
-        <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
+        <HeroHakuhoSidePanels heroCardShellRef={heroCardShellRef} />
+        <div
+          ref={heroCardShellRef}
+          className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]"
+        >
           <HeroContent />
         </div>
         <div className="absolute bottom-0 w-full z-30">
@@ -365,9 +515,12 @@ const Hero = ({
         />
       </svg>
 
-      <HeroHakuhoSidePanels />
+      <HeroHakuhoSidePanels heroCardShellRef={heroCardShellRef} />
 
-      <div className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]">
+      <div
+        ref={heroCardShellRef}
+        className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]"
+      >
         <HeroContent />
       </div>
       <div className="absolute bottom-0 w-full z-30">
