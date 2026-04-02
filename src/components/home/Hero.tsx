@@ -270,23 +270,22 @@ function preventContextMenuOnly(e: React.MouseEvent) {
   e.preventDefault();
 }
 
-/** 拦原生拖拽；禁止 stopPropagation，否则部分 WebKit 会提前 pointercancel，导致自定义长按放大永远不触发 */
+/** 拦原生拖拽 */
 function preventImgDragOnly(e: React.DragEvent<HTMLImageElement>) {
   e.preventDefault();
 }
 
-/** 手机端侧图：长按放大（translate 到视口中心 + scale，仍单张 img） */
-const HAKUHO_LONG_PRESS_MS = 280;
+/** 手机端侧图：点击切换大图（translate 到视口中心 + scale，仍单张 img） */
 /** 缩放上下限：实际倍数由「装入半屏」公式算出后再夹紧 */
 const HAKUHO_PINCH_SCALE_MIN = 2.2;
 const HAKUHO_PINCH_SCALE_MAX = 5.75;
-/** 长按后整图 `object-contain` 适配在视口宽/高的该比例框内（约半屏） */
+/** 大图整图 `object-contain` 适配在视口宽/高的该比例框内（约半屏） */
 const HAKUHO_ZOOM_VIEWPORT_FRACTION = 0.5;
-/** 长按聚焦：弱化层模糊（px，4 的倍数） */
+/** 聚焦层模糊（px，4 的倍数） */
 const HAKUHO_ZOOM_BACKDROP_BLUR_PX = 12;
 /** 弱化层底色（略压暗，突出前景照片） */
 const HAKUHO_ZOOM_DIM_OVERLAY = "rgba(0,0,0,0.32)";
-/** 长按放大时锚点相对视口几何中心再往上（px，4 的倍数） */
+/** 大图锚点相对视口几何中心再往上（px，4 的倍数） */
 const HAKUHO_ZOOM_ANCHOR_UP_PX = 64;
 /** 手机：侧图顶边与「心技体」卡片底边的固定间距（视口 px，4 的倍数） */
 const HAKUHO_MOBILE_CARD_GAP_PX = 20;
@@ -317,6 +316,22 @@ type DesktopHakuhoLayout = {
   baseMaxH: number;
 };
 
+/**
+ * 水合首帧必须与 SSR 完全一致：`useState` 初始化函数内禁止读 `window`。
+ * 占位视口与旧版「无 window 时」分支相同；`useLayoutEffect` 里会立刻用真实视口覆盖。
+ */
+const HAKUHO_DESKTOP_LAYOUT_HYDRATE_VW = 1920;
+const HAKUHO_DESKTOP_LAYOUT_HYDRATE_VH = 1080;
+
+function createDesktopHakuhoLayoutSnapshot(vw: number, vh: number): DesktopHakuhoLayout {
+  const base = getDesktopHakuhoBaseMaxPx(vw);
+  const ty = Math.max(
+    HAKUHO_DESKTOP_TY_AEST_MIN,
+    Math.min(HAKUHO_DESKTOP_TY_AEST_MAX, Math.round(HAKUHO_DESKTOP_TY_VH_RATIO * vh)),
+  );
+  return { ty, scale: 1, baseMaxW: base.maxW, baseMaxH: base.maxH };
+}
+
 type MobileHakuhoLayout = { yExtra: number; inwardX: number };
 
 function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRef }: HeroHakuhoSidePanelsProps) {
@@ -330,20 +345,11 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
     yExtra: 0,
     inwardX: 280,
   });
-  const [desktopHakuhoLayout, setDesktopHakuhoLayout] = useState<DesktopHakuhoLayout>(() => {
-    const vw = typeof window !== "undefined" ? window.innerWidth : 1920;
-    const vh = typeof window !== "undefined" ? window.innerHeight : 1080;
-    const base = getDesktopHakuhoBaseMaxPx(vw);
-    const ty = Math.max(
-      HAKUHO_DESKTOP_TY_AEST_MIN,
-      Math.min(HAKUHO_DESKTOP_TY_AEST_MAX, Math.round(HAKUHO_DESKTOP_TY_VH_RATIO * vh)),
-    );
-    return { ty, scale: 1, baseMaxW: base.maxW, baseMaxH: base.maxH };
-  });
+  const [desktopHakuhoLayout, setDesktopHakuhoLayout] = useState<DesktopHakuhoLayout>(() =>
+    createDesktopHakuhoLayoutSnapshot(HAKUHO_DESKTOP_LAYOUT_HYDRATE_VW, HAKUHO_DESKTOP_LAYOUT_HYDRATE_VH),
+  );
   const leftImgRef = useRef<HTMLImageElement | null>(null);
   const rightImgRef = useRef<HTMLImageElement | null>(null);
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const longPressTargetSideRef = useRef<HakuhoSideId | null>(null);
   const zoomSideRef = useRef<HakuhoSideId | null>(null);
   zoomSideRef.current = zoomSide;
   const layoutRafRef = useRef<number>(0);
@@ -606,74 +612,54 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
     ? `translate(calc(-1 * ${HAKUHO_DESKTOP_SHIFT_X}), ${desktopHakuhoLayout.ty}px)`
     : `translate(${rightTranslateX}px, ${nudgeRight.y + mobileYExtra}px)`;
 
-  const clearLongPressTimer = () => {
-    if (longPressTimerRef.current != null) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    longPressTargetSideRef.current = null;
-  };
-
-  const onSidePointerDown = (side: HakuhoSideId) => (e: React.PointerEvent<HTMLImageElement>) => {
-    if (!isCompactHakuho) return;
-    /**
-     * 触摸/手写笔：默认长按会被系统拿去出「保存图片」等，常伴随提前 pointercancel。
-     * 在可取消阶段 preventDefault，保留我们的 Pointer + 定时长按放大（侧图命中区小，一般不用于拖页滚动）。
-     */
-    if (e.pointerType === "touch" || e.pointerType === "pen") {
-      if (e.cancelable) e.preventDefault();
-    }
-    if (longPressTimerRef.current != null) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    longPressTargetSideRef.current = side;
-    longPressTimerRef.current = setTimeout(() => {
-      longPressTimerRef.current = null;
-      if (longPressTargetSideRef.current !== side) return;
-      const el = side === "left" ? leftImgRef.current : rightImgRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const iw = Math.max(rect.width, 1);
-      const ih = Math.max(rect.height, 1);
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-      const boxW = vw * HAKUHO_ZOOM_VIEWPORT_FRACTION;
-      const boxH = vh * HAKUHO_ZOOM_VIEWPORT_FRACTION;
-      const fitScale = Math.min(boxW / iw, boxH / ih);
-      const nextScale = Math.min(
-        HAKUHO_PINCH_SCALE_MAX,
-        Math.max(HAKUHO_PINCH_SCALE_MIN, fitScale),
-      );
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const vx = vw / 2;
-      const vy = vh / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
-      setZoomScale(nextScale);
-      setZoomPan({
-        x: Math.round(vx - cx),
-        y: Math.round(vy - cy),
-      });
-      setZoomSide(side);
-    }, HAKUHO_LONG_PRESS_MS);
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
-    }
-  };
-
-  const onSidePointerUpEnd = (e: React.PointerEvent<HTMLImageElement>) => {
-    clearLongPressTimer();
+  const closeHakuhoZoom = useCallback(() => {
     setZoomSide(null);
     setZoomPan(null);
     setZoomScale(HAKUHO_PINCH_SCALE_MIN);
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    } catch {
-      /* ignore */
+    scheduleMobileHakuhoLayout();
+  }, [scheduleMobileHakuhoLayout]);
+
+  const openHakuhoZoom = useCallback((side: HakuhoSideId) => {
+    const el = side === "left" ? leftImgRef.current : rightImgRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const iw = Math.max(rect.width, 1);
+    const ih = Math.max(rect.height, 1);
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const boxW = vw * HAKUHO_ZOOM_VIEWPORT_FRACTION;
+    const boxH = vh * HAKUHO_ZOOM_VIEWPORT_FRACTION;
+    const fitScale = Math.min(boxW / iw, boxH / ih);
+    const nextScale = Math.min(
+      HAKUHO_PINCH_SCALE_MAX,
+      Math.max(HAKUHO_PINCH_SCALE_MIN, fitScale),
+    );
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const vx = vw / 2;
+    const vy = vh / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
+    setZoomScale(nextScale);
+    setZoomPan({
+      x: Math.round(vx - cx),
+      y: Math.round(vy - cy),
+    });
+    setZoomSide(side);
+  }, []);
+
+  const onSideImageClick = (side: HakuhoSideId) => (e: React.MouseEvent<HTMLImageElement>) => {
+    if (!isCompactHakuho) return;
+    e.stopPropagation();
+    if (zoomSide === side) {
+      closeHakuhoZoom();
+      return;
     }
-    if (isCompactHakuho) scheduleMobileHakuhoLayout();
+    openHakuhoZoom(side);
+  };
+
+  const onZoomBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isCompactHakuho || !zoomSide) return;
+    e.stopPropagation();
+    closeHakuhoZoom();
   };
 
   const mobileImgStyle = (side: HakuhoSideId): React.CSSProperties | undefined => {
@@ -684,8 +670,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
     const baseFilter = typeof imgBaseStyle.filter === "string" ? imgBaseStyle.filter : "";
     return {
       pointerEvents: "auto",
-      /** none：减少浏览器把长按交给系统菜单/拖拽，仍可用 Pointer 实现放大（侧图区域小） */
-      touchAction: "none",
+      touchAction: "manipulation",
       WebkitTouchCallout: "none",
       WebkitUserSelect: "none",
       userSelect: "none",
@@ -704,9 +689,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
     <>
       {isCompactHakuho && (
         <div
-          className={`absolute inset-0 z-35 pointer-events-none ease-in-out ${
-            zoomSide ? "opacity-100" : "opacity-0"
-          }`}
+          className={`absolute inset-0 z-35 ease-in-out ${zoomSide ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`}
           style={{
             transitionDuration: "200ms",
             transitionProperty: "opacity, backdrop-filter, -webkit-backdrop-filter, background-color",
@@ -715,6 +698,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
             WebkitBackdropFilter: zoomSide ? `blur(${HAKUHO_ZOOM_BACKDROP_BLUR_PX}px)` : "blur(0px)",
           }}
           aria-hidden
+          onClick={zoomSide ? onZoomBackdropClick : undefined}
         />
       )}
       <div
@@ -738,9 +722,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
             className="select-none object-left rounded-sm"
             style={{ ...imgBaseStyle, ...mobileImgStyle("left") }}
             onLoad={isCompactHakuho ? scheduleMobileHakuhoLayout : scheduleDesktopHakuhoLayout}
-            onPointerDown={isCompactHakuho ? onSidePointerDown("left") : undefined}
-            onPointerUp={isCompactHakuho ? onSidePointerUpEnd : undefined}
-            onPointerCancel={isCompactHakuho ? onSidePointerUpEnd : undefined}
+            onClick={isCompactHakuho ? onSideImageClick("left") : undefined}
             onContextMenu={isCompactHakuho ? preventContextMenuOnly : undefined}
             onDragStart={isCompactHakuho ? preventImgDragOnly : undefined}
           />
@@ -767,9 +749,7 @@ function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRe
             className="select-none object-right rounded-sm"
             style={{ ...imgBaseStyle, ...mobileImgStyle("right") }}
             onLoad={isCompactHakuho ? scheduleMobileHakuhoLayout : scheduleDesktopHakuhoLayout}
-            onPointerDown={isCompactHakuho ? onSidePointerDown("right") : undefined}
-            onPointerUp={isCompactHakuho ? onSidePointerUpEnd : undefined}
-            onPointerCancel={isCompactHakuho ? onSidePointerUpEnd : undefined}
+            onClick={isCompactHakuho ? onSideImageClick("right") : undefined}
             onContextMenu={isCompactHakuho ? preventContextMenuOnly : undefined}
             onDragStart={isCompactHakuho ? preventImgDragOnly : undefined}
           />
