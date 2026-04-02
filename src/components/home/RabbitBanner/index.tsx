@@ -31,6 +31,31 @@ interface RabbitWalkingBannerProps {
 // 最小赞助商数量（确保能填满屏幕）
 const MIN_SPONSOR_COUNT = 8;
 
+/** 与 marquee 单元格设计宽一致；旗+手在「设计坐标」里以此为准，再由 FlagHandScaleGroup 统一乘 finalScale */
+const RABBIT_CELL_DESIGN_PX = 320;
+
+/** 悬赏旗面 + 手部装饰：内部为设计稿 px（已含 flagScale），整体只做一次 scale(finalScale) */
+function FlagHandScaleGroup({
+  finalScale,
+  children,
+}: {
+  finalScale: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="relative isolate origin-bottom inline-flex flex-col items-center"
+      style={{
+        transform: `scale(${finalScale})`,
+        transformStyle: "preserve-3d",
+        WebkitTransformStyle: "preserve-3d",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function isInternalNavHref(href: string) {
   const t = href.trim();
   return t.startsWith("/") && !t.startsWith("//");
@@ -87,15 +112,33 @@ export default function RabbitWalkingBanner({
   displayMode = "mixed", // 默认混合模式
 }: RabbitWalkingBannerProps = {}) {
   const [isMobile, setIsMobile] = useState(false);
+  /** 相对 1920×1080 视口缩放，低分辨率笔记本上整体缩小；与外部 scale 相乘 */
+  const [adaptiveScale, setAdaptiveScale] = useState(1);
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+    const updateViewport = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const mobile = w < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setAdaptiveScale(0.9);
+      } else {
+        const scaleW = w / 1920;
+        const scaleH = h / 1080;
+        setAdaptiveScale(Math.max(0.5, Math.min(1.2, Math.min(scaleW, scaleH))));
+      }
     };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    window.addEventListener("orientationchange", updateViewport);
+    return () => {
+      window.removeEventListener("resize", updateViewport);
+      window.removeEventListener("orientationchange", updateViewport);
+    };
   }, []);
+
+  const finalScale = scale * adaptiveScale;
 
   // 处理赞助商数据：智能填充 + 模式处理
   const { baseSponsors, cycleCount } = useMemo(() => {
@@ -164,10 +207,10 @@ export default function RabbitWalkingBanner({
     return [...baseSponsors, ...baseSponsors, ...baseSponsors];
   }, [isMobile, baseSponsors]);
 
-  const UNIT_WIDTH = 320 * scale;
-  const GAP = (isMobile ? -110 : -50) * scale;
+  const UNIT_WIDTH = 320 * finalScale;
+  const GAP = (isMobile ? -110 : -50) * finalScale;
   // 移动端降低速度以减少 CPU 负担
-  const SPEED_PX_PER_SEC = (isMobile ? 35 : 50) * scale;
+  const SPEED_PX_PER_SEC = (isMobile ? 35 : 50) * finalScale;
   // 动画周期 = 基础数量 × 单位宽度（确保无缝循环）
   // 💡 取整：Safari 对亚像素值的舍入与 Chrome 不同，不取整会导致循环接缝处出现可见跳帧
   const ONE_CYCLE_DISTANCE = Math.round((UNIT_WIDTH + GAP) * cycleCount);
@@ -273,24 +316,66 @@ export default function RabbitWalkingBanner({
             const { bottom, left, scale: flagScale = 0.8, size, tassel } = variant.flagStyle;
 
             const UNIFORM_FLAG_WIDTH = 180;
-            const flagW = UNIFORM_FLAG_WIDTH * scale;
-            const flagH = (size?.height ?? 240) * scale;
-            const barW = flagW + 24 * scale;
-            const tasselW = (flagW - 4 * scale);
-            const tasselH = (tassel?.height ?? 45) * scale;
+            // 设计坐标（不含 viewport 的 finalScale）：flagScale 体现在 px 里，与手一起交给 FlagHandScaleGroup 统一缩放
+            const flagW = UNIFORM_FLAG_WIDTH * flagScale;
+            const flagH = (size?.height ?? 240) * flagScale;
+            const barW = flagW + 24 * flagScale;
+            const tasselW = flagW - 4 * flagScale;
+            const tasselH = (tassel?.height ?? 45) * flagScale;
 
-            const adjustedBottom = parseFloat(bottom) * scale;
-            const adjustedLeft = parseFloat(left) * scale;
-            const adjustedFlagScale = flagScale * scale;
+            const adjustedBottom = parseFloat(bottom) * finalScale;
+            const adjustedLeft = parseFloat(left) * finalScale;
 
             const baseTransform = variant.bodyStyle?.transform || "";
             // ⚠️ 已移除 translateZ(0)，避免在 Safari 中触发不必要的 3D 合成层
-            const finalBodyTransform = `${baseTransform} scale(${scale})`;
+            const finalBodyTransform = `${baseTransform} scale(${finalScale})`;
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { transform: _ignored, ...restBodyStyle } = variant.bodyStyle || {};
 
             const flagHref = item.link?.trim();
             const flagLinkLabel = item.alt || "スポンサー";
+
+            const {
+              transform: handOffsetTransform,
+              ...handStyleWithoutTransform
+            } = variant.handStyle || {};
+            const handInnerTransform =
+              typeof handOffsetTransform === "string" && handOffsetTransform.trim()
+                ? handOffsetTransform
+                : undefined;
+
+            const handOverlay = (
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  left: "50%",
+                  bottom: 0,
+                  width: RABBIT_CELL_DESIGN_PX,
+                  height: RABBIT_CELL_DESIGN_PX,
+                  marginLeft: -(RABBIT_CELL_DESIGN_PX / 2),
+                  ...handStyleWithoutTransform,
+                  zIndex: 80,
+                  transform: "translateZ(6px)",
+                  transformOrigin: "center bottom",
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={
+                    handInnerTransform
+                      ? { transform: handInnerTransform }
+                      : undefined
+                  }
+                >
+                  <img
+                    src={variant.hand}
+                    alt="Hand"
+                    loading="lazy"
+                    className="w-full h-full object-contain pointer-events-none"
+                  />
+                </div>
+              </div>
+            );
 
             return (
               <div
@@ -342,10 +427,8 @@ export default function RabbitWalkingBanner({
                       left: `${adjustedLeft}px`,
                     }}
                   >
-                    <div
-                      className="origin-bottom"
-                      style={{ transform: `scale(${adjustedFlagScale})` }}
-                    >
+                    <FlagHandScaleGroup finalScale={finalScale}>
+                      <div className="relative z-0">
                       {flagHref ? (
                         <SponsorFlagLink
                           href={flagHref}
@@ -359,7 +442,7 @@ export default function RabbitWalkingBanner({
                             className={`bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 border border-[#B8860B] ${isMobile ? 'shadow-sm' : 'shadow-lg'}`}
                             style={{
                               width: `${barW}px`,
-                              height: `${8 * scale}px`,
+                              height: `${8 * flagScale}px`,
                             }}
                           />
 
@@ -369,12 +452,12 @@ export default function RabbitWalkingBanner({
                             style={{
                               width: `${flagW}px`,
                               height: `${flagH}px`,
-                              marginTop: `${-6 * scale}px`,
+                              marginTop: `${-6 * flagScale}px`,
                             }}
                           >
                             <div
                               className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"
-                              style={{ height: `${6 * scale}px` }}
+                              style={{ height: `${6 * flagScale}px` }}
                             />
                             <img
                               src={item.image}
@@ -391,7 +474,7 @@ export default function RabbitWalkingBanner({
                             style={{
                               width: `${tasselW}px`,
                               height: `${tasselH}px`,
-                              marginTop: `${-8 * scale}px`,
+                              marginTop: `${-8 * flagScale}px`,
                             }}
                           >
                             <div
@@ -418,7 +501,7 @@ export default function RabbitWalkingBanner({
                             className={`bg-gradient-to-r from-[#D4AF37] via-[#F4C430] to-[#D4AF37] rounded-full relative z-30 border border-[#B8860B] ${isMobile ? 'shadow-sm' : 'shadow-lg'}`}
                             style={{
                               width: `${barW}px`,
-                              height: `${8 * scale}px`,
+                              height: `${8 * flagScale}px`,
                             }}
                           />
 
@@ -427,12 +510,12 @@ export default function RabbitWalkingBanner({
                             style={{
                               width: `${flagW}px`,
                               height: `${flagH}px`,
-                              marginTop: `${-6 * scale}px`,
+                              marginTop: `${-6 * flagScale}px`,
                             }}
                           >
                             <div
                               className="absolute top-0 left-0 w-full bg-gradient-to-b from-black/20 to-transparent z-30 pointer-events-none"
-                              style={{ height: `${6 * scale}px` }}
+                              style={{ height: `${6 * flagScale}px` }}
                             />
                             <img
                               src={item.image}
@@ -448,7 +531,7 @@ export default function RabbitWalkingBanner({
                             style={{
                               width: `${tasselW}px`,
                               height: `${tasselH}px`,
-                              marginTop: `${-8 * scale}px`,
+                              marginTop: `${-8 * flagScale}px`,
                             }}
                           >
                             <div
@@ -470,26 +553,9 @@ export default function RabbitWalkingBanner({
                           </div>
                         </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Hand（装飾のためクリックは旗エリアへ透過） */}
-                  <div
-                    className="absolute inset-0 z-20 pointer-events-none"
-                    style={{
-                      ...variant.handStyle,
-                      transform: variant.handStyle?.transform
-                        ? `${variant.handStyle.transform} scale(${scale})`
-                        : `scale(${scale})`,
-                      transformOrigin: "center bottom",
-                    }}
-                  >
-                    <img
-                      src={variant.hand}
-                      alt="Hand"
-                      loading="lazy"
-                      className="w-full h-full object-contain pointer-events-none"
-                    />
+                      </div>
+                      {handOverlay}
+                    </FlagHandScaleGroup>
                   </div>
                 </div>
               </div>

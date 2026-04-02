@@ -109,30 +109,69 @@ function HeroContent() {
   );
 }
 
-/** 与 Tailwind `md:` 一致：视口宽度 < 768px 时使用 HAKUHO_SIDE_MOBILE */
-const HAKUHO_SIDE_BREAKPOINT_PX = 768;
+/** 手机：与 Tailwind `md` 以下一致 */
+const HAKUHO_PHONE_MAX_PX = 767;
+/**
+ * 平板：768px～1366px，覆盖 iPad mini / Air / Pro 竖横典型逻辑宽度（含 Pro 12.9" 横屏约 1366）
+ */
+const HAKUHO_TABLET_MAX_PX = 1366;
 
-function useIsHakuhoMobileLayout() {
-  const [mobile, setMobile] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${HAKUHO_SIDE_BREAKPOINT_PX - 1}px)`);
-    const update = () => setMobile(mql.matches);
+type HakuhoViewportKind = "phone" | "tablet" | "desktop";
+
+/**
+ * SSR 与客户端首帧必须一致：不可在 useState 初始值里读 window（否则服务端 desktop、水合时手机 → mismatch）。
+ * 首帧统一 desktop，mount 后 useEffect 再写入真实档位（手机会有一帧桌面侧图，通常几乎无感）。
+ */
+function useHakuhoViewportKind(): HakuhoViewportKind {
+  const [kind, setKind] = useState<HakuhoViewportKind>("desktop");
+  useLayoutEffect(() => {
+    const update = () => {
+      const w = window.innerWidth;
+      if (w <= HAKUHO_PHONE_MAX_PX) setKind("phone");
+      else if (w <= HAKUHO_TABLET_MAX_PX) setKind("tablet");
+      else setKind("desktop");
+    };
     update();
-    mql.addEventListener("change", update);
-    return () => mql.removeEventListener("change", update);
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
   }, []);
-  return mobile;
+  return kind;
 }
 
 type HakuhoSideLayout = {
   maxWidthPx: number;
   maxHeightPx: number;
+  /**
+   * 左/右半区外沿留白。CSS 不支持负 padding，负值会转成对应方向的负 margin，把整块半区向外推，便于拉大两图间距。
+   */
   padLeftPx: number;
   padRightPx: number;
   nudgeLeft: { x: number; y: number };
   nudgeRight: { x: number; y: number };
   verticalAlign: "center" | "start" | "end";
+  /**
+   * 仅 phone/tablet：在公式算出的 inwardX 上再减去此项（≥0，建议 4 的倍数），两图更靠屏幕两侧、中间更空。
+   */
+  compactSpreadExtraPx?: number;
 };
+
+/** 负 pad → 负 margin；正 pad → padding（浏览器会忽略负 padding，故不能写负的 paddingLeft） */
+function hakuhoHalfOuterStyle(padPx: number, edge: "left" | "right"): React.CSSProperties {
+  if (edge === "left") {
+    return {
+      paddingLeft: Math.max(0, padPx),
+      marginLeft: Math.min(0, padPx),
+    };
+  }
+  return {
+    paddingRight: Math.max(0, padPx),
+    marginRight: Math.min(0, padPx),
+  };
+}
 
 /**
  * 左右白鹏装饰（桌面 ≥768px）
@@ -141,7 +180,7 @@ type HakuhoSideLayout = {
  *
  * 手动调整：
  * - maxWidthPx / maxHeightPx：显示上限（object-contain，A4 竖图在框内等比缩放）
- * - padLeftPx / padRightPx：离左/右屏幕边缘
+ * - padLeftPx / padRightPx：离左/右屏幕边缘（≥0 为内边距；负值会转为负 margin 外推半区）
  * - nudgeLeft / nudgeRight：半区内平移（x 右为正、y 下为正）
  * - verticalAlign：'center' | 'start' | 'end'
  */
@@ -150,51 +189,170 @@ const HAKUHO_SIDE_DESKTOP: HakuhoSideLayout = {
   maxHeightPx: Math.round(260 * 1.2),
   padLeftPx: 8,
   padRightPx: 8,
+  /** 像素 nudge 仅作文档参考；桌面实际渲染用下方 vw/vh 常量 */
   nudgeLeft: { x: 300, y: -265 },
   nudgeRight: { x: -300, y: -265 },
   verticalAlign: "center",
 };
 
 /**
- * 左右白鹏装饰（移动端，视口宽度小于 768px）——与桌面完全独立，可单独改比例与位置。
- * 默认与桌面相同；按需改小 max* 或调整 nudge / padding。
+ * 桌面端侧图：相对视口定位（以约 1920×1080 下原 300px / -265px 为基准换算），避免改窗口宽度时绝对像素错位、被裁切。
+ * 15.625vw ≈ 300px @1920；-24.5vh ≈ -265px @1080。
+ */
+const HAKUHO_DESKTOP_SHIFT_X = "clamp(200px, 15.625vw, 360px)";
+const HAKUHO_DESKTOP_EDGE_PAD = "clamp(8px, 0.42vw, 16px)";
+
+/** 桌面：与兔子横幅之间的留白（4pt 网格） */
+const HAKUHO_DESKTOP_SAFE_GAP_PX = 16;
+/**
+ * 桌面：白鹏顶边距视口顶的最小距离（仅按胶囊顶栏估算，不随滚动/顶栏展开重算）。
+ * 与 Header 非滚动态一致：marginTop 12 + 内层 max-h 80 + 与白鹏间距 16。
+ */
+const HAKUHO_DESKTOP_PILL_TOP_CLEARANCE_PX = 12 + 80 + 16;
+/** 桌面：竖直 translate 的美学范围（与历史 -24.5vh 夹紧一致；更负 = 更靠上） */
+const HAKUHO_DESKTOP_TY_AEST_MIN = -300;
+const HAKUHO_DESKTOP_TY_AEST_MAX = -200;
+const HAKUHO_DESKTOP_TY_VH_RATIO = -0.245;
+/** 桌面：再缩小的下限（略缩小） */
+const HAKUHO_DESKTOP_SCALE_MIN = 0.55;
+
+/** 桌面侧图 max 尺寸：与 `clamp(100px,11.25vw,216px)` / `clamp(144px,16.25vw,312px)` 等价，供数值缩放 */
+function getDesktopHakuhoBaseMaxPx(vw: number): { maxW: number; maxH: number } {
+  return {
+    maxW: Math.min(216, Math.max(100, (vw * 11.25) / 100)),
+    maxH: Math.min(312, Math.max(144, (vw * 16.25) / 100)),
+  };
+}
+
+function getDisplayedHakuhoSize(img: HTMLImageElement, maxW: number, maxH: number): { w: number; h: number } {
+  const nw = img.naturalWidth;
+  const nh = img.naturalHeight;
+  if (!nw || !nh) {
+    return { w: maxW, h: maxH };
+  }
+  const r = Math.min(maxW / nw, maxH / nh);
+  return { w: nw * r, h: nh * r };
+}
+
+/**
+ * 平板（iPad 等）：尺寸与位移介于手机与桌面之间；水平位移由紧凑布局动态算 inwardX。
+ */
+const HAKUHO_SIDE_TABLET: HakuhoSideLayout = {
+  maxWidthPx: Math.round(180 * 0.7),
+  maxHeightPx: Math.round(260 * 0.7),
+  padLeftPx: -100,
+  padRightPx: -100,
+  nudgeLeft: { x: 0, y: -138 },
+  nudgeRight: { x: 0, y: -138 },
+  verticalAlign: "center",
+  /** 增大可拉开两图；也可配合负的 padLeftPx/padRightPx 外推半区 */
+  compactSpreadExtraPx: 0,
+};
+
+/**
+ * 左右白鹏装饰（手机，宽度 ≤767）——与桌面完全独立，可单独改比例与位置。
  */
 const HAKUHO_SIDE_MOBILE: HakuhoSideLayout = {
   maxWidthPx: Math.round(180 * 0.55),
   maxHeightPx: Math.round(260 * 0.55),
   padLeftPx: 8,
   padRightPx: 8,
-  nudgeLeft: { x: 250, y: -150 },
-  nudgeRight: { x: -250, y: -150 },
+  /** 水平位移改由视口动态计算（向内收，缩窄两图间距）；Y 仅作基底，实际由卡片底边公式覆盖 */
+  nudgeLeft: { x: 0, y: -150 },
+  nudgeRight: { x: 0, y: -150 },
   verticalAlign: "center",
 };
 
 type HakuhoSideId = "left" | "right";
+
+/** 仅拦系统菜单，不 stopPropagation，避免打断 Pointer 长按链 */
+function preventContextMenuOnly(e: React.MouseEvent) {
+  e.preventDefault();
+}
+
+/** 拦原生拖拽；禁止 stopPropagation，否则部分 WebKit 会提前 pointercancel，导致自定义长按放大永远不触发 */
+function preventImgDragOnly(e: React.DragEvent<HTMLImageElement>) {
+  e.preventDefault();
+}
 
 /** 手机端侧图：长按放大倍数（translate 到视口中心 + scale，仍单张 img） */
 const HAKUHO_LONG_PRESS_MS = 280;
 const HAKUHO_PINCH_SCALE = 2;
 /** 长按放大时锚点相对视口几何中心再往上（px，4 的倍数） */
 const HAKUHO_ZOOM_ANCHOR_UP_PX = 64;
-/** 侧图顶边与「心技体」卡片底边的间距（px） */
-const HAKUHO_CARD_CLEARANCE_PX = 16;
+/** 手机：侧图顶边与「心技体」卡片底边的固定间距（视口 px，4 的倍数） */
+const HAKUHO_MOBILE_CARD_GAP_PX = 20;
+/** 平板：同上，略大以适配较大触控目标与阴影 */
+const HAKUHO_TABLET_CARD_GAP_PX = 24;
+/** 手机向内平移量 = clamp(round(vw * 比例), min, max) */
+const HAKUHO_MOBILE_INWARD_X_VW = 0.6;
+const HAKUHO_MOBILE_INWARD_X_MIN = 200;
+const HAKUHO_MOBILE_INWARD_X_MAX = 360;
+/** 平板：视口更宽，用略低 vw 比例 + 更大上限，避免两图过挤 */
+const HAKUHO_TABLET_INWARD_X_VW = 0.34;
+const HAKUHO_TABLET_INWARD_X_MIN = 220;
+const HAKUHO_TABLET_INWARD_X_MAX = 520;
 
 type HeroHakuhoSidePanelsProps = {
   /** 包裹 HeroContent 的外壳，用于手机端计算侧图与卡片的避让 */
   heroCardShellRef: React.RefObject<HTMLDivElement | null>;
+  /** Hero 根 section，用于与卡片、图片在同一坐标系下算垂直位置 */
+  heroSectionRef: React.RefObject<HTMLElement | null>;
+  /** 底部兔子横幅容器，桌面端用于与白鹏底部避让 */
+  rabbitBannerRef: React.RefObject<HTMLDivElement | null>;
 };
 
-function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
-  const isMobileLayout = useIsHakuhoMobileLayout();
+type DesktopHakuhoLayout = {
+  ty: number;
+  scale: number;
+  baseMaxW: number;
+  baseMaxH: number;
+};
+
+type MobileHakuhoLayout = { yExtra: number; inwardX: number };
+
+function HeroHakuhoSidePanels({ heroCardShellRef, heroSectionRef, rabbitBannerRef }: HeroHakuhoSidePanelsProps) {
+  const hakuhoViewportKind = useHakuhoViewportKind();
+  const isCompactHakuho = hakuhoViewportKind !== "desktop";
+
   const [zoomSide, setZoomSide] = useState<HakuhoSideId | null>(null);
   const [zoomPan, setZoomPan] = useState<{ x: number; y: number } | null>(null);
-  const [cardAvoidYOffset, setCardAvoidYOffset] = useState(0);
+  const [mobileHakuhoLayout, setMobileHakuhoLayout] = useState<MobileHakuhoLayout>({
+    yExtra: 0,
+    inwardX: 280,
+  });
+  const [desktopHakuhoLayout, setDesktopHakuhoLayout] = useState<DesktopHakuhoLayout>(() => {
+    const vw = typeof window !== "undefined" ? window.innerWidth : 1920;
+    const vh = typeof window !== "undefined" ? window.innerHeight : 1080;
+    const base = getDesktopHakuhoBaseMaxPx(vw);
+    const ty = Math.max(
+      HAKUHO_DESKTOP_TY_AEST_MIN,
+      Math.min(HAKUHO_DESKTOP_TY_AEST_MAX, Math.round(HAKUHO_DESKTOP_TY_VH_RATIO * vh)),
+    );
+    return { ty, scale: 1, baseMaxW: base.maxW, baseMaxH: base.maxH };
+  });
   const leftImgRef = useRef<HTMLImageElement | null>(null);
   const rightImgRef = useRef<HTMLImageElement | null>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTargetSideRef = useRef<HakuhoSideId | null>(null);
-  const { maxWidthPx, maxHeightPx, padLeftPx, padRightPx, nudgeLeft, nudgeRight, verticalAlign } =
-    isMobileLayout ? HAKUHO_SIDE_MOBILE : HAKUHO_SIDE_DESKTOP;
+  const zoomSideRef = useRef<HakuhoSideId | null>(null);
+  zoomSideRef.current = zoomSide;
+  const layoutRafRef = useRef<number>(0);
+  const lastAppliedLayoutRef = useRef<MobileHakuhoLayout>({ yExtra: NaN, inwardX: NaN });
+  const desktopLayoutRafRef = useRef<number>(0);
+  const lastDesktopLayoutRef = useRef<DesktopHakuhoLayout | null>(null);
+  const hakuhoKindRef = useRef(hakuhoViewportKind);
+  hakuhoKindRef.current = hakuhoViewportKind;
+
+  const sidePreset: HakuhoSideLayout =
+    hakuhoViewportKind === "phone"
+      ? HAKUHO_SIDE_MOBILE
+      : hakuhoViewportKind === "tablet"
+        ? HAKUHO_SIDE_TABLET
+        : HAKUHO_SIDE_DESKTOP;
+  const { maxWidthPx, maxHeightPx, padLeftPx, padRightPx, nudgeLeft, nudgeRight, verticalAlign } = sidePreset;
+
+  const isDesktopHakuho = hakuhoViewportKind === "desktop";
 
   const itemsAlign =
     verticalAlign === "start" ? "items-start" : verticalAlign === "end" ? "items-end" : "items-center";
@@ -202,51 +360,242 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
   const imgBaseStyle: React.CSSProperties = {
     width: "auto",
     height: "auto",
-    maxWidth: maxWidthPx,
-    maxHeight: maxHeightPx,
+    ...(isDesktopHakuho
+      ? {
+          maxWidth: Math.round(desktopHakuhoLayout.baseMaxW * desktopHakuhoLayout.scale),
+          maxHeight: Math.round(desktopHakuhoLayout.baseMaxH * desktopHakuhoLayout.scale),
+          transition: "max-width 200ms ease-in-out, max-height 200ms ease-in-out",
+        }
+      : {
+          maxWidth: maxWidthPx,
+          maxHeight: maxHeightPx,
+        }),
     objectFit: "contain",
     filter:
       "drop-shadow(0 4px 14px rgba(0,0,0,0.12)) drop-shadow(0 12px 36px rgba(0,0,0,0.18))",
   };
 
-  const measureCardOverlapAvoidance = useCallback(() => {
-    if (!isMobileLayout) {
-      setCardAvoidYOffset(0);
+  const leftHalfOuterStyle: React.CSSProperties = isDesktopHakuho
+    ? { paddingLeft: HAKUHO_DESKTOP_EDGE_PAD }
+    : hakuhoHalfOuterStyle(padLeftPx, "left");
+
+  const rightHalfOuterStyle: React.CSSProperties = isDesktopHakuho
+    ? { paddingRight: HAKUHO_DESKTOP_EDGE_PAD }
+    : hakuhoHalfOuterStyle(padRightPx, "right");
+
+  /**
+   * 移动端：侧图顶边 = 卡片底边 + 固定间距（相对 Hero section 的 flex 竖直居中槽位算一次 yExtra）。
+   * 不向 img 挂 ResizeObserver，避免位移 → 测量 → setState 循环导致上下抽搐。
+   */
+  const applyMobileHakuhoLayout = useCallback(() => {
+    if (hakuhoKindRef.current === "desktop") {
+      setMobileHakuhoLayout({ yExtra: 0, inwardX: 280 });
+      lastAppliedLayoutRef.current = { yExtra: NaN, inwardX: NaN };
       return;
     }
+    if (zoomSideRef.current !== null) return;
+
     const shell = heroCardShellRef.current;
+    const section = heroSectionRef.current;
     const imgEl = leftImgRef.current;
-    if (!shell || !imgEl) return;
+    if (!shell || !section || !imgEl) return;
+
     const card = shell.getBoundingClientRect();
-    const img = imgEl.getBoundingClientRect();
-    const needDown = Math.round(card.bottom + HAKUHO_CARD_CLEARANCE_PX - img.top);
-    setCardAvoidYOffset(Math.max(0, needDown));
-  }, [isMobileLayout, heroCardShellRef]);
+    const sec = section.getBoundingClientRect();
+    /**
+     * 必须用布局高度，不能用 getBoundingClientRect().height：
+     * 长按放大时 img 带 scale(2)，rect 高度会随变换/过渡变化，松手后若立刻重算 yExtra 会得到错误 slotTop，位置会「回不去」。
+     * offsetHeight / clientHeight 不受 transform 影响。
+     */
+    const imgH = Math.max(imgEl.offsetHeight, imgEl.clientHeight, 1);
+    if (sec.height < 16 || card.height < 8) return;
+
+    const vw = window.innerWidth;
+    const phone = hakuhoKindRef.current === "phone";
+    const inwardRaw = phone
+      ? Math.min(
+          HAKUHO_MOBILE_INWARD_X_MAX,
+          Math.max(HAKUHO_MOBILE_INWARD_X_MIN, Math.round(vw * HAKUHO_MOBILE_INWARD_X_VW)),
+        )
+      : Math.min(
+          HAKUHO_TABLET_INWARD_X_MAX,
+          Math.max(HAKUHO_TABLET_INWARD_X_MIN, Math.round(vw * HAKUHO_TABLET_INWARD_X_VW)),
+        );
+    const spreadExtra = phone
+      ? (HAKUHO_SIDE_MOBILE.compactSpreadExtraPx ?? 0)
+      : (HAKUHO_SIDE_TABLET.compactSpreadExtraPx ?? 0);
+    const inwardX = Math.max(0, inwardRaw - spreadExtra);
+
+    const nudgeYBase = phone ? HAKUHO_SIDE_MOBILE.nudgeLeft.y : HAKUHO_SIDE_TABLET.nudgeLeft.y;
+    const cardGap = phone ? HAKUHO_MOBILE_CARD_GAP_PX : HAKUHO_TABLET_CARD_GAP_PX;
+
+    const slotTop = sec.top + (sec.height - imgH) / 2;
+    const targetImgTop = Math.ceil(card.bottom) + cardGap;
+    const yExtra = Math.round(targetImgTop - slotTop - nudgeYBase);
+
+    const next = { yExtra, inwardX };
+    const last = lastAppliedLayoutRef.current;
+    if (last.yExtra === next.yExtra && last.inwardX === next.inwardX) return;
+    lastAppliedLayoutRef.current = next;
+    setMobileHakuhoLayout(next);
+  }, [heroCardShellRef, heroSectionRef]);
+
+  const applyDesktopHakuhoLayout = useCallback(() => {
+    if (hakuhoKindRef.current !== "desktop") return;
+    if (zoomSideRef.current !== null) return;
+
+    const section = heroSectionRef.current;
+    const imgEl = leftImgRef.current;
+    const rabbit = rabbitBannerRef.current;
+    if (!section || !imgEl || !rabbit) return;
+
+    const vw = window.innerWidth;
+    const rabbitTop = rabbit.getBoundingClientRect().top;
+    const sec = section.getBoundingClientRect();
+    const vSec = Math.max(sec.height, 1);
+
+    const safeTop = HAKUHO_DESKTOP_PILL_TOP_CLEARANCE_PX;
+    const safeBottom = rabbitTop - HAKUHO_DESKTOP_SAFE_GAP_PX;
+    let avail = safeBottom - safeTop;
+    if (!Number.isFinite(avail) || avail < 64) {
+      avail = Math.max(64, vSec * 0.35);
+    }
+
+    const base = getDesktopHakuhoBaseMaxPx(vw);
+    let scale = 1;
+    let dispH = getDisplayedHakuhoSize(imgEl, base.maxW * scale, base.maxH * scale).h;
+
+    let guard = 0;
+    while (dispH > avail * 0.98 && scale > HAKUHO_DESKTOP_SCALE_MIN + 1e-4 && guard < 16) {
+      scale *= (avail * 0.98) / dispH;
+      scale = Math.min(1, Math.max(HAKUHO_DESKTOP_SCALE_MIN, scale));
+      dispH = getDisplayedHakuhoSize(imgEl, base.maxW * scale, base.maxH * scale).h;
+      guard += 1;
+    }
+
+    const tyAest = Math.max(
+      HAKUHO_DESKTOP_TY_AEST_MIN,
+      Math.min(HAKUHO_DESKTOP_TY_AEST_MAX, Math.round(HAKUHO_DESKTOP_TY_VH_RATIO * vSec)),
+    );
+
+    let flexItemTop = sec.top + (sec.height - dispH) / 2;
+    let lo = safeTop - flexItemTop;
+    let hi = safeBottom - dispH - flexItemTop;
+    guard = 0;
+    while (lo > hi && scale > HAKUHO_DESKTOP_SCALE_MIN + 1e-4 && guard < 16) {
+      scale *= 0.92;
+      scale = Math.max(HAKUHO_DESKTOP_SCALE_MIN, scale);
+      dispH = getDisplayedHakuhoSize(imgEl, base.maxW * scale, base.maxH * scale).h;
+      flexItemTop = sec.top + (sec.height - dispH) / 2;
+      lo = safeTop - flexItemTop;
+      hi = safeBottom - dispH - flexItemTop;
+      guard += 1;
+    }
+
+    const ty = lo > hi ? lo : Math.max(lo, Math.min(hi, tyAest));
+
+    const next: DesktopHakuhoLayout = {
+      ty,
+      scale,
+      baseMaxW: base.maxW,
+      baseMaxH: base.maxH,
+    };
+
+    const last = lastDesktopLayoutRef.current;
+    if (
+      last &&
+      last.ty === next.ty &&
+      last.scale === next.scale &&
+      last.baseMaxW === next.baseMaxW &&
+      last.baseMaxH === next.baseMaxH
+    ) {
+      return;
+    }
+    lastDesktopLayoutRef.current = next;
+    setDesktopHakuhoLayout(next);
+  }, [heroSectionRef, rabbitBannerRef]);
+
+  const scheduleMobileHakuhoLayout = useCallback(() => {
+    if (layoutRafRef.current) cancelAnimationFrame(layoutRafRef.current);
+    layoutRafRef.current = requestAnimationFrame(() => {
+      layoutRafRef.current = 0;
+      applyMobileHakuhoLayout();
+    });
+  }, [applyMobileHakuhoLayout]);
+
+  const scheduleDesktopHakuhoLayout = useCallback(() => {
+    if (desktopLayoutRafRef.current) cancelAnimationFrame(desktopLayoutRafRef.current);
+    desktopLayoutRafRef.current = requestAnimationFrame(() => {
+      desktopLayoutRafRef.current = 0;
+      applyDesktopHakuhoLayout();
+    });
+  }, [applyDesktopHakuhoLayout]);
 
   useLayoutEffect(() => {
-    if (!isMobileLayout) {
-      setCardAvoidYOffset(0);
+    if (!isCompactHakuho) {
+      setMobileHakuhoLayout({ yExtra: 0, inwardX: 280 });
+      lastAppliedLayoutRef.current = { yExtra: NaN, inwardX: NaN };
       return;
     }
-    measureCardOverlapAvoidance();
+    scheduleMobileHakuhoLayout();
     const shell = heroCardShellRef.current;
-    const imgEl = leftImgRef.current;
-    const roShell = shell ? new ResizeObserver(measureCardOverlapAvoidance) : null;
-    const roImg = imgEl ? new ResizeObserver(measureCardOverlapAvoidance) : null;
+    const roShell = shell ? new ResizeObserver(() => scheduleMobileHakuhoLayout()) : null;
     if (shell) roShell?.observe(shell);
-    if (imgEl) roImg?.observe(imgEl);
-    const onWin = () => measureCardOverlapAvoidance();
+    const onWin = () => scheduleMobileHakuhoLayout();
     window.addEventListener("resize", onWin);
     window.addEventListener("orientationchange", onWin);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", onWin);
     return () => {
+      if (layoutRafRef.current) cancelAnimationFrame(layoutRafRef.current);
+      layoutRafRef.current = 0;
       roShell?.disconnect();
-      roImg?.disconnect();
       window.removeEventListener("resize", onWin);
       window.removeEventListener("orientationchange", onWin);
+      vv?.removeEventListener("resize", onWin);
     };
-  }, [isMobileLayout, measureCardOverlapAvoidance]);
+  }, [isCompactHakuho, hakuhoViewportKind, scheduleMobileHakuhoLayout]);
 
-  const mobileNudgeY = isMobileLayout ? cardAvoidYOffset : 0;
+  useLayoutEffect(() => {
+    if (!isDesktopHakuho) {
+      lastDesktopLayoutRef.current = null;
+      return;
+    }
+    scheduleDesktopHakuhoLayout();
+    const onWin = () => scheduleDesktopHakuhoLayout();
+    window.addEventListener("resize", onWin);
+    window.addEventListener("orientationchange", onWin);
+    const vv = window.visualViewport;
+    vv?.addEventListener("resize", onWin);
+    const rabbit = rabbitBannerRef.current;
+    const roRabbit = rabbit ? new ResizeObserver(onWin) : null;
+    if (rabbit) roRabbit?.observe(rabbit);
+    const section = heroSectionRef.current;
+    const roSection = section ? new ResizeObserver(onWin) : null;
+    if (section) roSection?.observe(section);
+    return () => {
+      if (desktopLayoutRafRef.current) cancelAnimationFrame(desktopLayoutRafRef.current);
+      desktopLayoutRafRef.current = 0;
+      roRabbit?.disconnect();
+      roSection?.disconnect();
+      window.removeEventListener("resize", onWin);
+      window.removeEventListener("orientationchange", onWin);
+      vv?.removeEventListener("resize", onWin);
+    };
+  }, [isDesktopHakuho, scheduleDesktopHakuhoLayout, rabbitBannerRef]);
+
+  const mobileYExtra = isCompactHakuho ? mobileHakuhoLayout.yExtra : 0;
+  const mobileInwardX = isCompactHakuho ? mobileHakuhoLayout.inwardX : 0;
+  const leftTranslateX = isCompactHakuho ? mobileInwardX : nudgeLeft.x;
+  const rightTranslateX = isCompactHakuho ? -mobileInwardX : nudgeRight.x;
+
+  const leftInnerTransform = isDesktopHakuho
+    ? `translate(${HAKUHO_DESKTOP_SHIFT_X}, ${desktopHakuhoLayout.ty}px)`
+    : `translate(${leftTranslateX}px, ${nudgeLeft.y + mobileYExtra}px)`;
+
+  const rightInnerTransform = isDesktopHakuho
+    ? `translate(calc(-1 * ${HAKUHO_DESKTOP_SHIFT_X}), ${desktopHakuhoLayout.ty}px)`
+    : `translate(${rightTranslateX}px, ${nudgeRight.y + mobileYExtra}px)`;
 
   const clearLongPressTimer = () => {
     if (longPressTimerRef.current != null) {
@@ -257,7 +606,14 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
   };
 
   const onSidePointerDown = (side: HakuhoSideId) => (e: React.PointerEvent<HTMLImageElement>) => {
-    if (!isMobileLayout) return;
+    if (!isCompactHakuho) return;
+    /**
+     * 触摸/手写笔：默认长按会被系统拿去出「保存图片」等，常伴随提前 pointercancel。
+     * 在可取消阶段 preventDefault，保留我们的 Pointer + 定时长按放大（侧图命中区小，一般不用于拖页滚动）。
+     */
+    if (e.pointerType === "touch" || e.pointerType === "pen") {
+      if (e.cancelable) e.preventDefault();
+    }
     if (longPressTimerRef.current != null) {
       clearTimeout(longPressTimerRef.current);
       longPressTimerRef.current = null;
@@ -295,16 +651,21 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
     } catch {
       /* ignore */
     }
+    if (isCompactHakuho) scheduleMobileHakuhoLayout();
   };
 
   const mobileImgStyle = (side: HakuhoSideId): React.CSSProperties | undefined => {
-    if (!isMobileLayout) return undefined;
+    if (!isCompactHakuho) return undefined;
     const zoomed = zoomSide === side;
     const panX = zoomed && zoomPan ? zoomPan.x : 0;
     const panY = zoomed && zoomPan ? zoomPan.y : 0;
     return {
       pointerEvents: "auto",
-      touchAction: "manipulation",
+      /** none：减少浏览器把长按交给系统菜单/拖拽，仍可用 Pointer 实现放大（侧图区域小） */
+      touchAction: "none",
+      WebkitTouchCallout: "none",
+      WebkitUserSelect: "none",
+      userSelect: "none",
       transform: zoomed
         ? `translate(${panX}px, ${panY}px) scale(${HAKUHO_PINCH_SCALE})`
         : "translate(0px, 0px) scale(1)",
@@ -321,12 +682,13 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
         className={`pointer-events-none absolute inset-y-0 left-0 flex w-1/2 ${itemsAlign} justify-start ${
           zoomSide === "left" ? "z-50" : "z-20"
         }`}
-        style={{ paddingLeft: padLeftPx }}
+        style={leftHalfOuterStyle}
         aria-hidden
       >
         <div
           style={{
-            transform: `translate(${nudgeLeft.x}px, ${nudgeLeft.y + mobileNudgeY}px)`,
+            transform: leftInnerTransform,
+            transition: isDesktopHakuho ? "transform 200ms ease-in-out" : undefined,
           }}
         >
           <img
@@ -336,11 +698,12 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
             draggable={false}
             className="select-none object-left rounded-sm"
             style={{ ...imgBaseStyle, ...mobileImgStyle("left") }}
-            onLoad={isMobileLayout ? measureCardOverlapAvoidance : undefined}
-            onPointerDown={isMobileLayout ? onSidePointerDown("left") : undefined}
-            onPointerUp={isMobileLayout ? onSidePointerUpEnd : undefined}
-            onPointerCancel={isMobileLayout ? onSidePointerUpEnd : undefined}
-            onContextMenu={isMobileLayout ? (ev) => ev.preventDefault() : undefined}
+            onLoad={isCompactHakuho ? scheduleMobileHakuhoLayout : scheduleDesktopHakuhoLayout}
+            onPointerDown={isCompactHakuho ? onSidePointerDown("left") : undefined}
+            onPointerUp={isCompactHakuho ? onSidePointerUpEnd : undefined}
+            onPointerCancel={isCompactHakuho ? onSidePointerUpEnd : undefined}
+            onContextMenu={isCompactHakuho ? preventContextMenuOnly : undefined}
+            onDragStart={isCompactHakuho ? preventImgDragOnly : undefined}
           />
         </div>
       </div>
@@ -348,12 +711,13 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
         className={`pointer-events-none absolute inset-y-0 right-0 flex w-1/2 ${itemsAlign} justify-end ${
           zoomSide === "right" ? "z-50" : "z-20"
         }`}
-        style={{ paddingRight: padRightPx }}
+        style={rightHalfOuterStyle}
         aria-hidden
       >
         <div
           style={{
-            transform: `translate(${nudgeRight.x}px, ${nudgeRight.y + mobileNudgeY}px)`,
+            transform: rightInnerTransform,
+            transition: isDesktopHakuho ? "transform 200ms ease-in-out" : undefined,
           }}
         >
           <img
@@ -363,11 +727,12 @@ function HeroHakuhoSidePanels({ heroCardShellRef }: HeroHakuhoSidePanelsProps) {
             draggable={false}
             className="select-none object-right rounded-sm"
             style={{ ...imgBaseStyle, ...mobileImgStyle("right") }}
-            onLoad={isMobileLayout ? measureCardOverlapAvoidance : undefined}
-            onPointerDown={isMobileLayout ? onSidePointerDown("right") : undefined}
-            onPointerUp={isMobileLayout ? onSidePointerUpEnd : undefined}
-            onPointerCancel={isMobileLayout ? onSidePointerUpEnd : undefined}
-            onContextMenu={isMobileLayout ? (ev) => ev.preventDefault() : undefined}
+            onLoad={isCompactHakuho ? scheduleMobileHakuhoLayout : scheduleDesktopHakuhoLayout}
+            onPointerDown={isCompactHakuho ? onSidePointerDown("right") : undefined}
+            onPointerUp={isCompactHakuho ? onSidePointerUpEnd : undefined}
+            onPointerCancel={isCompactHakuho ? onSidePointerUpEnd : undefined}
+            onContextMenu={isCompactHakuho ? preventContextMenuOnly : undefined}
+            onDragStart={isCompactHakuho ? preventImgDragOnly : undefined}
           />
         </div>
       </div>
@@ -389,11 +754,15 @@ const Hero = ({
   const hasAnyPoster = Boolean(posterSrc || posterSrcMobile);
   const useVideo = hasAnyPoster && hasAnyVideo;
   const isMobileView = useIsPortraitOrNarrow();
+  const hakuhoViewportKind = useHakuhoViewportKind();
+  const isHakuhoCompactTouch = hakuhoViewportKind !== "desktop";
   const [canLoadVideo, setCanLoadVideo] = useState(false);
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const heroCardShellRef = useRef<HTMLDivElement>(null);
+  const heroSectionRef = useRef<HTMLElement>(null);
+  const rabbitBannerRef = useRef<HTMLDivElement>(null);
 
   const effectiveWebm = isMobileView && videoWebmSrcMobile ? videoWebmSrcMobile : videoWebmSrc;
   const effectiveMp4 = isMobileView && videoSrcMobile ? videoSrcMobile : videoSrc;
@@ -420,17 +789,28 @@ const Hero = ({
   // ========== 视频背景模式：横屏用 16:9，竖屏用 9:16 ==========
   if (useVideo) {
     return (
-      <section className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]">
+      <section
+        ref={heroSectionRef}
+        className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]"
+      >
         {/* 背景层：poster 立即显示 → 视频加载后淡入；视频用 min-w/min-h + 居中确保填满无黑边 */}
         <div className="absolute inset-0 z-0 overflow-hidden">
           <img
             src={effectivePoster}
             alt=""
+            draggable={false}
             className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ${
               videoPlaying ? "opacity-0" : "opacity-100"
             }`}
             aria-hidden
             fetchPriority="high"
+            onContextMenu={isHakuhoCompactTouch ? preventContextMenuOnly : undefined}
+            onDragStart={isHakuhoCompactTouch ? preventImgDragOnly : undefined}
+            style={
+              isHakuhoCompactTouch
+                ? { WebkitTouchCallout: "none", WebkitUserSelect: "none", userSelect: "none" }
+                : undefined
+            }
           />
           {canLoadVideo && (effectiveWebm || effectiveMp4) && (
             <video
@@ -445,20 +825,28 @@ const Hero = ({
               preload="metadata"
               onPlaying={onVideoPlaying}
               aria-hidden
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              onContextMenu={isHakuhoCompactTouch ? preventContextMenuOnly : undefined}
+              style={isHakuhoCompactTouch ? { WebkitTouchCallout: "none" } : undefined}
             >
               {effectiveWebm && <source src={effectiveWebm} type="video/webm" />}
               {effectiveMp4 && <source src={effectiveMp4} type="video/mp4" />}
             </video>
           )}
         </div>
-        <HeroHakuhoSidePanels heroCardShellRef={heroCardShellRef} />
+        <HeroHakuhoSidePanels
+          heroCardShellRef={heroCardShellRef}
+          heroSectionRef={heroSectionRef}
+          rabbitBannerRef={rabbitBannerRef}
+        />
         <div
           ref={heroCardShellRef}
           className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px]"
         >
           <HeroContent />
         </div>
-        <div className="absolute bottom-0 w-full z-30">
+        <div ref={rabbitBannerRef} className="absolute bottom-0 w-full z-30">
           <RabbitBanner sponsors={sponsors} displayMode={displayMode} />
         </div>
       </section>
@@ -473,7 +861,10 @@ const Hero = ({
   const CHAR_X = (WORLD_W - CHAR_SIZE) / 2;
 
   return (
-    <section className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]">
+    <section
+      ref={heroSectionRef}
+      className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]"
+    >
       <svg
         className="absolute inset-0 w-full h-full z-0 pointer-events-none"
         viewBox={`0 0 ${WORLD_W} ${WORLD_H}`}
@@ -515,7 +906,11 @@ const Hero = ({
         />
       </svg>
 
-      <HeroHakuhoSidePanels heroCardShellRef={heroCardShellRef} />
+      <HeroHakuhoSidePanels
+        heroCardShellRef={heroCardShellRef}
+        heroSectionRef={heroSectionRef}
+        rabbitBannerRef={rabbitBannerRef}
+      />
 
       <div
         ref={heroCardShellRef}
@@ -523,7 +918,7 @@ const Hero = ({
       >
         <HeroContent />
       </div>
-      <div className="absolute bottom-0 w-full z-30">
+      <div ref={rabbitBannerRef} className="absolute bottom-0 w-full z-30">
         <RabbitBanner sponsors={sponsors} displayMode={displayMode} />
       </div>
     </section>

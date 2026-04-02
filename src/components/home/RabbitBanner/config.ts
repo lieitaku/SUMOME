@@ -44,11 +44,11 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
     flagStyle: {
       bottom: "60px",
       left: "-2px",
-      scale: 0.7,
+      scale: 0.66,
       size: { width: 170, height: 260 },
       tassel: { width: 165, height: 30 },
     },
-    handStyle: { transform: "translate(-5px,-5px)" },
+    handStyle: { transform: "translate(-3px,55px)" },
   },
 
   // --- Index 1: Type 2 (无耳) ---
@@ -56,7 +56,7 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   {
     rivSrc: "/assets/rabbit1.riv",
     hand: "/images/rabbit/hand-1.webp",
-    handStyle: { transform: "translate(-2px,-126px)" },
+    handStyle: { transform: "translate(-1px,-70px)" },
     flagStyle: {
       bottom: "60px",
       left: "-2px",
@@ -72,14 +72,14 @@ export const RABBIT_VARIANTS: RabbitVariant[] = [
   {
     rivSrc: "/assets/rabbit2.riv",
     hand: "/images/rabbit/hand-4.webp",
-    // 手部位置微调
-    handStyle: { transform: "translate(0,0px)" },
+    // 手部相对身体略下移（与 rabbit2 立绘对齐；外层 scale 会同比缩放此偏移）
+    handStyle: { transform: "translate(-32px, 46px)" },
     flagStyle: {
       bottom: "40px",
-      left: "34px",
-      scale: 0.7,
+      left: "33px",
+      scale: 0.68,
       size: { width: 140, height: 280 },
-      tassel: { width: 145, height: 30 },
+      tassel: { width: 140, height: 30 },
     },
   },
 ];
