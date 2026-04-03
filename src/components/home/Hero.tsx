@@ -390,6 +390,11 @@ type HeroHakuhoSidePanelsProps = {
   heroCardShellRef: React.RefObject<HTMLDivElement | null>;
   /** Hero 根 section，用于与卡片、图片在同一坐标系下算垂直位置 */
   heroSectionRef: React.RefObject<HTMLElement | null>;
+  /**
+   * 视频/海报全屏背景层（`absolute inset-0` 包住 object-cover 的那层）。
+   * 有则放大锚点与「装入半屏」的参照尺寸用该层 rect，与主画面视频几何中心一致；无则退回 section。
+   */
+  heroVideoBackdropRef?: React.RefObject<HTMLElement | null>;
   /** 底部兔子横幅容器，桌面端用于与白鹏底部避让 */
   rabbitBannerRef: React.RefObject<HTMLDivElement | null>;
   /** 默认 `cardAligned`；视频背景时建议 `videoWallPercent` */
@@ -424,6 +429,7 @@ type MobileHakuhoLayout = { yExtra: number; inwardX: number };
 function HeroHakuhoSidePanels({
   heroCardShellRef,
   heroSectionRef,
+  heroVideoBackdropRef,
   rabbitBannerRef,
   compactLayoutMode = "cardAligned",
 }: HeroHakuhoSidePanelsProps) {
@@ -823,13 +829,20 @@ function HeroHakuhoSidePanels({
   const leftTranslateX = isCompactHakuho ? mobileInwardX : nudgeLeft.x;
   const rightTranslateX = isCompactHakuho ? -mobileInwardX : nudgeRight.x;
 
-  const leftInnerTransform = isDesktopHakuho
-    ? `translate(${desktopShiftXCss}, ${desktopHakuhoLayout.ty}px)`
-    : `translate(${leftTranslateX}px, ${nudgeLeft.y + mobileYExtra}px)`;
+  /** 放大时清零内向位移，由全屏 flex 居中 + pan/scale 负责最终位置，避免与「半屏布局下量的 rect」混用导致飞出视口 */
+  const leftInnerTransform =
+    zoomSide === "left"
+      ? "translate(0px, 0px)"
+      : isDesktopHakuho
+        ? `translate(${desktopShiftXCss}, ${desktopHakuhoLayout.ty}px)`
+        : `translate(${leftTranslateX}px, ${nudgeLeft.y + mobileYExtra}px)`;
 
-  const rightInnerTransform = isDesktopHakuho
-    ? `translate(calc(-1 * ${desktopShiftXCss}), ${desktopHakuhoLayout.ty}px)`
-    : `translate(${rightTranslateX}px, ${nudgeRight.y + mobileYExtra}px)`;
+  const rightInnerTransform =
+    zoomSide === "right"
+      ? "translate(0px, 0px)"
+      : isDesktopHakuho
+        ? `translate(calc(-1 * ${desktopShiftXCss}), ${desktopHakuhoLayout.ty}px)`
+        : `translate(${rightTranslateX}px, ${nudgeRight.y + mobileYExtra}px)`;
 
   const closeHakuhoZoom = useCallback(() => {
     setZoomSide(null);
@@ -842,29 +855,51 @@ function HeroHakuhoSidePanels({
     }
   }, [scheduleMobileHakuhoLayout, scheduleDesktopHakuhoLayout]);
 
+  /**
+   * 须在「全屏居中 + 内层 translate(0)」已提交后再量 rect。
+   * 锚点用视频背景层（或 section）中心，与 window 几何中心分离，避免 iOS 工具栏/安全区与 getBoundingClientRect 混用导致 pan 过大、图飞出视效。
+   */
+  const commitHakuhoZoomLayout = useCallback(
+    (side: HakuhoSideId) => {
+      if (zoomSideRef.current !== side) return;
+      const el = side === "left" ? leftImgRef.current : rightImgRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const iw = Math.max(rect.width, 1);
+      const ih = Math.max(rect.height, 1);
+      const stageEl = heroVideoBackdropRef?.current ?? heroSectionRef.current;
+      const sr = stageEl?.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const stageW = Math.max(sr?.width ?? vw, 1);
+      const stageH = Math.max(sr?.height ?? vh, 1);
+      const boxW = stageW * HAKUHO_ZOOM_VIEWPORT_FRACTION;
+      const boxH = stageH * HAKUHO_ZOOM_VIEWPORT_FRACTION;
+      const fitScale = Math.min(boxW / iw, boxH / ih);
+      const nextScale = Math.min(HAKUHO_ZOOM_SCALE_MAX, Math.max(0.05, fitScale));
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const vx = sr ? sr.left + sr.width / 2 : vw / 2;
+      const vy = sr ? sr.top + sr.height / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX : vh / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
+      setZoomScale(nextScale);
+      setZoomPan({
+        x: Math.round(vx - cx),
+        y: Math.round(vy - cy),
+      });
+    },
+    [heroSectionRef, heroVideoBackdropRef],
+  );
+
   const openHakuhoZoom = useCallback((side: HakuhoSideId) => {
-    const el = side === "left" ? leftImgRef.current : rightImgRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const iw = Math.max(rect.width, 1);
-    const ih = Math.max(rect.height, 1);
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const boxW = vw * HAKUHO_ZOOM_VIEWPORT_FRACTION;
-    const boxH = vh * HAKUHO_ZOOM_VIEWPORT_FRACTION;
-    const fitScale = Math.min(boxW / iw, boxH / ih);
-    const nextScale = Math.min(HAKUHO_ZOOM_SCALE_MAX, Math.max(0.05, fitScale));
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const vx = vw / 2;
-    const vy = vh / 2 - HAKUHO_ZOOM_ANCHOR_UP_PX;
-    setZoomScale(nextScale);
-    setZoomPan({
-      x: Math.round(vx - cx),
-      y: Math.round(vy - cy),
-    });
+    setZoomPan(null);
+    setZoomScale(1);
     setZoomSide(side);
   }, []);
+
+  useLayoutEffect(() => {
+    if (zoomSide === null) return;
+    commitHakuhoZoomLayout(zoomSide);
+  }, [zoomSide, commitHakuhoZoomLayout]);
 
   const handleHakuhoSideTap = useCallback(
     (side: HakuhoSideId) => {
@@ -949,7 +984,7 @@ function HeroHakuhoSidePanels({
       <div
         className={
           zoomSide === "left"
-            ? `pointer-events-none absolute inset-0 z-50 flex w-full ${itemsAlign} justify-start overflow-visible`
+            ? "pointer-events-none absolute inset-0 z-50 flex w-full items-center justify-center overflow-visible"
             : `pointer-events-none absolute left-0 z-[32] flex w-1/2 ${itemsAlign} justify-start overflow-visible ${
                 useVideoWallAnchor ? "" : "inset-y-0"
               }`
@@ -988,7 +1023,7 @@ function HeroHakuhoSidePanels({
       <div
         className={
           zoomSide === "right"
-            ? `pointer-events-none absolute inset-0 z-50 flex w-full ${itemsAlign} justify-end overflow-visible`
+            ? "pointer-events-none absolute inset-0 z-50 flex w-full items-center justify-center overflow-visible"
             : `pointer-events-none absolute right-0 z-[32] flex w-1/2 ${itemsAlign} justify-end overflow-visible ${
                 useVideoWallAnchor ? "" : "inset-y-0"
               }`
@@ -1050,6 +1085,7 @@ const Hero = ({
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [frameIndex, setFrameIndex] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const heroVideoBackdropRef = useRef<HTMLDivElement>(null);
   const heroCardShellRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLElement>(null);
   const rabbitBannerRef = useRef<HTMLDivElement>(null);
@@ -1084,7 +1120,10 @@ const Hero = ({
         className="relative w-full h-screen overflow-hidden bg-sumo-bg shadow-[0_4px_30px_-12px_rgba(0,0,0,0.15)]"
       >
         {/* 背景层：poster 立即显示 → 视频加载后淡入；视频用 min-w/min-h + 居中确保填满无黑边 */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none [&_*]:pointer-events-none">
+        <div
+          ref={heroVideoBackdropRef}
+          className="absolute inset-0 z-0 overflow-hidden pointer-events-none [&_*]:pointer-events-none"
+        >
           <img
             src={effectivePoster}
             alt=""
@@ -1133,6 +1172,7 @@ const Hero = ({
         <HeroHakuhoSidePanels
           heroCardShellRef={heroCardShellRef}
           heroSectionRef={heroSectionRef}
+          heroVideoBackdropRef={heroVideoBackdropRef}
           rabbitBannerRef={rabbitBannerRef}
           compactLayoutMode="videoWallPercent"
         />
