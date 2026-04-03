@@ -1,0 +1,295 @@
+import React from "react";
+import { unstable_cache } from "next/cache";
+import { prisma } from "@/lib/db";
+import { Users, Calendar, BookOpen, Flag, UserPlus, LayoutDashboard, Inbox, AlertCircle, ArrowRight, Store } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { getCurrentUser } from "@/lib/auth-utils";
+import { getTranslations } from "next-intl/server";
+
+async function getDashboardStatsUncached() {
+    return Promise.all([
+        prisma.club.count(),
+        prisma.activity.count(),
+        prisma.magazine.count(),
+        prisma.banner.count(),
+        prisma.application.count(),
+        prisma.application.count({ where: { status: "pending" } }),
+        prisma.inquiry.count(),
+        prisma.inquiry.count({ where: { status: "unread" } }),
+    ]);
+}
+
+const getCachedDashboardStats = () =>
+    unstable_cache(getDashboardStatsUncached, ["admin-dashboard-stats"], {
+        revalidate: 60,
+        tags: ["admin-stats"],
+    })();
+
+export default async function AdminDashboardPage() {
+    const user = await getCurrentUser();
+    const isAdmin = user?.role === "ADMIN";
+
+    if (isAdmin) {
+        return <AdminDashboard />;
+    }
+    return <OwnerDashboard />;
+}
+
+async function AdminDashboard() {
+    const t = await getTranslations("Admin");
+    const [
+        clubsCount,
+        activitiesCount,
+        magazinesCount,
+        bannersCount,
+        appsCount,
+        pendingAppsCount,
+        inquiriesCount,
+        unreadInquiriesCount
+    ] = await getCachedDashboardStats();
+
+    const stats = [
+        { label: t("dashboard.statClubs"), value: clubsCount - 1, icon: <Users className="w-6 h-6 text-blue-600" />, bg: "bg-blue-50", link: "/admin/clubs" },
+        { label: t("dashboard.statActivities"), value: activitiesCount, icon: <Calendar className="w-6 h-6 text-purple-600" />, bg: "bg-purple-50", link: "/admin/activities" },
+        { label: t("dashboard.statMagazines"), value: magazinesCount, icon: <BookOpen className="w-6 h-6 text-amber-600" />, bg: "bg-amber-50", link: "/admin/magazines" },
+        { label: t("dashboard.statBanners"), value: bannersCount, icon: <Flag className="w-6 h-6 text-emerald-600" />, bg: "bg-emerald-50", link: "/admin/banners" },
+        { label: t("dashboard.statApplications"), value: appsCount, icon: <UserPlus className="w-6 h-6 text-rose-600" />, bg: "bg-rose-50", link: "/admin/applications", pending: pendingAppsCount },
+        { label: t("dashboard.statInquiries"), value: inquiriesCount, icon: <Inbox className="w-6 h-6 text-cyan-600" />, bg: "bg-cyan-50", link: "/admin/inquiries", pending: unreadInquiriesCount },
+    ];
+
+    const totalPending = pendingAppsCount + unreadInquiriesCount;
+    const unit = t("dashboard.unitCount");
+
+    return (
+        <div className="max-w-6xl mx-auto font-sans">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">{t("dashboard.title")}</h1>
+                <p className="text-gray-500 mt-2">
+                    {t("dashboard.welcomeAdmin")}
+                </p>
+            </div>
+
+            {totalPending > 0 && (
+                <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-100 rounded-lg">
+                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-amber-900">{t("dashboard.pendingTasks")}</h3>
+                                <p className="text-sm text-amber-700">
+                                    {pendingAppsCount > 0 && (
+                                        <span>{t("dashboard.pendingApps", { count: pendingAppsCount })}</span>
+                                    )}
+                                    {pendingAppsCount > 0 && unreadInquiriesCount > 0 && " / "}
+                                    {unreadInquiriesCount > 0 && (
+                                        <span>{t("dashboard.pendingInquiries", { count: unreadInquiriesCount })}</span>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex gap-2 w-full sm:w-auto">
+                            {pendingAppsCount > 0 && (
+                                <Link
+                                    href="/admin/applications"
+                                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                                >
+                                    {t("dashboard.checkApps")}
+                                    <ArrowRight size={12} />
+                                </Link>
+                            )}
+                            {unreadInquiriesCount > 0 && (
+                                <Link
+                                    href="/admin/inquiries"
+                                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                                >
+                                    {t("dashboard.checkInquiries")}
+                                    <ArrowRight size={12} />
+                                </Link>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-12">
+                {stats.map((stat, index) => (
+                    <Link
+                        key={index}
+                        href={stat.link}
+                        className="group relative block p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
+                    >
+                        {stat.pending !== undefined && stat.pending > 0 && (
+                            <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg animate-pulse">
+                                {stat.pending}
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className={`p-2.5 rounded-lg ${stat.bg}`}>
+                                {stat.icon}
+                            </div>
+                            <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest group-hover:text-sumo-brand transition-colors">
+                                {t("dashboard.view")}
+                            </span>
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{stat.label}</h3>
+                            <p className="text-2xl font-black text-gray-900 font-serif">
+                                {stat.value}
+                                {unit ? (
+                                    <span className="text-[10px] font-sans font-normal text-gray-300 ml-1">{unit}</span>
+                                ) : null}
+                            </p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
+                <div className="w-16 h-16 bg-blue-50 text-sumo-brand rounded-full flex items-center justify-center mx-auto mb-6">
+                    <LayoutDashboard size={32} />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-2">{t("dashboard.ctaTitleAdmin")}</h3>
+                <p className="text-gray-500 mb-8 max-w-md mx-auto text-sm leading-relaxed whitespace-pre-line">
+                    {t("dashboard.ctaDescAdmin")}
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                    <Link
+                        href="/admin/clubs/new"
+                        className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl text-white bg-sumo-brand hover:bg-sumo-dark shadow-lg shadow-blue-900/10 transition-all"
+                    >
+                        <Users className="w-4 h-4 mr-2" />
+                        {t("dashboard.ctaNewClub")}
+                    </Link>
+                    <Link
+                        href="/admin/applications"
+                        className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl text-sumo-brand bg-blue-50 hover:bg-blue-100 transition-all"
+                    >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        {t("dashboard.ctaCheckApps")}
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+async function OwnerDashboard() {
+    const t = await getTranslations("Admin");
+    const user = await getCurrentUser();
+    if (!user) return null;
+
+    const myClubs = await prisma.club.findMany({
+        where: { ownerId: user.id },
+        select: { id: true, name: true },
+    });
+    const clubIds = myClubs.map((c) => c.id);
+
+    const [appsCount, pendingAppsCount] = await Promise.all([
+        prisma.application.count({ where: { clubId: { in: clubIds } } }),
+        prisma.application.count({ where: { clubId: { in: clubIds }, status: "pending" } }),
+    ]);
+
+    const stats = [
+        { label: t("dashboard.statClubInfo"), value: myClubs.length, icon: <Store className="w-6 h-6 text-blue-600" />, bg: "bg-blue-50", link: "/admin/my-club" },
+        { label: t("dashboard.statApplications"), value: appsCount, icon: <UserPlus className="w-6 h-6 text-rose-600" />, bg: "bg-rose-50", link: "/admin/applications", pending: pendingAppsCount },
+    ];
+
+    const unit = t("dashboard.unitCount");
+
+    return (
+        <div className="max-w-6xl mx-auto font-sans">
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">{t("dashboard.title")}</h1>
+                <p className="text-gray-500 mt-2">
+                    {t("dashboard.welcomeOwner")}
+                </p>
+            </div>
+
+            {pendingAppsCount > 0 && (
+                <div className="mb-8 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-amber-100 rounded-lg">
+                                <AlertCircle className="w-5 h-5 text-amber-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-amber-900">{t("dashboard.pendingAppsOwner")}</h3>
+                                <p className="text-sm text-amber-700 font-black">
+                                    {t("dashboard.pendingAppsOwnerLine", { count: pendingAppsCount })}
+                                </p>
+                            </div>
+                        </div>
+                        <Link
+                            href="/admin/applications"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                        >
+                            {t("dashboard.checkApps")}
+                            <ArrowRight size={12} />
+                        </Link>
+                    </div>
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+                {stats.map((stat, index) => (
+                    <Link
+                        key={index}
+                        href={stat.link}
+                        className="group relative block p-5 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200"
+                    >
+                        {stat.pending !== undefined && stat.pending > 0 && (
+                            <div className="absolute -top-2 -right-2 min-w-[22px] h-[22px] flex items-center justify-center px-1.5 bg-red-500 text-white text-[10px] font-black rounded-full shadow-lg animate-pulse">
+                                {stat.pending}
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between mb-3">
+                            <div className={`p-2.5 rounded-lg ${stat.bg}`}>
+                                {stat.icon}
+                            </div>
+                            <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest group-hover:text-sumo-brand transition-colors">
+                                {t("dashboard.view")}
+                            </span>
+                        </div>
+                        <div className="space-y-1">
+                            <h3 className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">{stat.label}</h3>
+                            <p className="text-2xl font-black text-gray-900 font-serif">
+                                {stat.value}
+                                {unit ? (
+                                    <span className="text-[10px] font-sans font-normal text-gray-300 ml-1">{unit}</span>
+                                ) : null}
+                            </p>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+
+            <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center shadow-sm">
+                <div className="w-16 h-16 bg-blue-50 text-sumo-brand rounded-full flex items-center justify-center mx-auto mb-6">
+                    <LayoutDashboard size={32} />
+                </div>
+                <h3 className="text-xl font-black text-gray-900 mb-2">{t("dashboard.ctaTitleOwner")}</h3>
+                <p className="text-gray-500 mb-8 max-w-md mx-auto text-sm leading-relaxed whitespace-pre-line">
+                    {t("dashboard.ctaDescOwner")}
+                </p>
+                <div className="flex flex-wrap justify-center gap-4">
+                    <Link
+                        href="/admin/my-club"
+                        className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl text-white bg-sumo-brand hover:bg-sumo-dark shadow-lg shadow-blue-900/10 transition-all"
+                    >
+                        <Store className="w-4 h-4 mr-2" />
+                        {t("dashboard.editClub")}
+                    </Link>
+                    <Link
+                        href="/admin/applications"
+                        className="inline-flex items-center justify-center px-6 py-3 text-sm font-bold rounded-xl text-sumo-brand bg-blue-50 hover:bg-blue-100 transition-all"
+                    >
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        {t("dashboard.checkMembership")}
+                    </Link>
+                </div>
+            </div>
+        </div>
+    );
+}

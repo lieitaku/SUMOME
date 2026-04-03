@@ -40,3 +40,45 @@ export function loginErrorToJapanese(message: string): string {
   }
   return result;
 }
+
+export function authErrorToEnglish(message: string): string {
+  const msg = message.toLowerCase();
+  if (
+    msg.includes("already been registered") ||
+    msg.includes("user already registered") ||
+    msg.includes("already exists")
+  ) {
+    return "This email is already registered.";
+  }
+  if (msg.includes("invalid login credentials")) {
+    return "Invalid email or password.";
+  }
+  if (msg.includes("email not confirmed")) {
+    return "Please confirm your email. Check your inbox.";
+  }
+  if (msg.includes("password") && msg.includes("at least")) {
+    return "Password must be at least 8 characters.";
+  }
+  if (msg.includes("signup requires a valid password")) {
+    return "Please enter a valid password.";
+  }
+  if (msg.includes("missing email") || msg.includes("email is required")) {
+    return "Email is required.";
+  }
+  if (msg.includes("invalid email")) {
+    return "Please enter a valid email address.";
+  }
+  return "Something went wrong. Please try again.";
+}
+
+export function loginErrorToEnglish(message: string): string {
+  const result = authErrorToEnglish(message);
+  if (result === "Something went wrong. Please try again.") {
+    return "Login failed. Please try again.";
+  }
+  return result;
+}
+
+export function loginErrorForLocale(message: string, locale: string): string {
+  return locale === "en" ? loginErrorToEnglish(message) : loginErrorToJapanese(message);
+}

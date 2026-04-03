@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server"; // 假设你有这个 Supabase server client
 import { revalidatePath } from "next/cache";
 

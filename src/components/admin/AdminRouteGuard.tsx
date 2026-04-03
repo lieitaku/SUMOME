@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useEffect, type ReactNode } from "react";
 
 const ADMIN_ONLY_PREFIXES = [

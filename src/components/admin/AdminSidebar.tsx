@@ -2,7 +2,9 @@
 
 import React, { useState, useTransition } from "react";
 import Link from "@/components/ui/TransitionLink";
-import { usePathname } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import {
     LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2, ExternalLink, Inbox, Star, HelpCircle
 } from "lucide-react";
@@ -38,6 +40,7 @@ interface SectionLabelProps {
 // 主组件：管理后台侧边栏
 // ==============================================================================
 export default function AdminSidebar({ role, email }: AdminSidebarProps) {
+    const t = useTranslations("Admin.sidebar");
     const [isOpen, setIsOpen] = useState(false);
     const [isPending, startTransition] = useTransition(); // 用于处理登出加载状态
     const pathname = usePathname();
@@ -53,7 +56,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                 await signOut();
             } catch (error) {
                 console.error("Logout failed:", error);
-                toast.error("ログアウトに失敗しました"); // 可选
+                toast.error(t("logoutFailed"));
             }
         });
     };
@@ -68,7 +71,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                     <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sumo-brand">
                         <MapPin size={14} />
                     </div>
-                    <span className="font-serif font-bold text-lg tracking-widest">管理画面</span>
+                    <span className="font-serif font-bold text-lg tracking-widest">{t("title")}</span>
                 </div>
                 <button onClick={toggleMenu} className="-mr-2 p-2 hover:bg-white/10 rounded-md transition-colors">
                     {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -91,49 +94,55 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sumo-brand">
                             <MapPin size={18} />
                         </div>
-                        <span className="font-serif font-black text-xl tracking-widest">管理画面</span>
+                        <span className="font-serif font-black text-xl tracking-widest">{t("title")}</span>
                     </div>
-                    <p className="text-[10px] text-white/50 uppercase tracking-[0.2em] pl-11">
-                        {role === "ADMIN" ? "Official Admin" : "Club Manager"}
-                    </p>
+                    <div className="pl-11 flex flex-col gap-3">
+                        <p className="text-[10px] text-white/50 uppercase tracking-[0.2em]">
+                            {role === "ADMIN" ? t("roleAdmin") : t("roleOwner")}
+                        </p>
+                        <LocaleSwitcher
+                            variant="onBrand"
+                            className="w-full max-w-[200px]"
+                            onAfterSelect={closeMenu}
+                        />
+                    </div>
                 </div>
 
                 {/* 导航菜单列表 (Navigation List) */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-
                     {/* 通用区域 */}
-                    <SectionLabel label="Overview" />
-                    <NavItem href="/admin" icon={<LayoutDashboard size={18} />} label="ダッシュボード" activePath={pathname} onClick={closeMenu} />
+                    <SectionLabel label={t("sectionOverview")} />
+                    <NavItem href="/admin" icon={<LayoutDashboard size={18} />} label={t("dashboard")} activePath={pathname} onClick={closeMenu} />
 
                     {/* 管理员专属菜单 */}
                     {role === "ADMIN" && (
                         <>
-                            <SectionLabel label="Content Management" />
-                            <NavItem href="/admin/clubs" icon={<Users size={18} />} label="クラブ管理" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/pickup-clubs" icon={<Star size={18} />} label="注目クラブ" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/activities" icon={<Calendar size={18} />} label="活動・ニュース" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/magazines" icon={<BookOpen size={18} />} label="広報誌データ" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/banners" icon={<Flag size={18} />} label="バナー広告" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/prefecture-banners" icon={<MapPin size={18} />} label="都道府県バナー" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label="入会申請管理" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/inquiries" icon={<Inbox size={18} />} label="お問い合わせ" activePath={pathname} onClick={closeMenu} />
+                            <SectionLabel label={t("sectionContent")} />
+                            <NavItem href="/admin/clubs" icon={<Users size={18} />} label={t("clubs")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/pickup-clubs" icon={<Star size={18} />} label={t("pickupClubs")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/activities" icon={<Calendar size={18} />} label={t("activities")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/magazines" icon={<BookOpen size={18} />} label={t("magazines")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/banners" icon={<Flag size={18} />} label={t("banners")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/prefecture-banners" icon={<MapPin size={18} />} label={t("prefBanners")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label={t("applications")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/inquiries" icon={<Inbox size={18} />} label={t("inquiries")} activePath={pathname} onClick={closeMenu} />
                         </>
                     )}
 
                     {/* 俱乐部代表专属菜单：仅自己的俱乐部 + 本俱乐部入会申请 */}
                     {role === "OWNER" && (
                         <>
-                            <SectionLabel label="My Club" />
-                            <NavItem href="/admin/my-club" icon={<Store size={18} />} label="クラブ情報編集" activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label="入会申請管理" activePath={pathname} onClick={closeMenu} />
+                            <SectionLabel label={t("sectionMyClub")} />
+                            <NavItem href="/admin/my-club" icon={<Store size={18} />} label={t("myClub")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label={t("applications")} activePath={pathname} onClick={closeMenu} />
                         </>
                     )}
 
                     {/* 系统：設定（全员）、操作ガイド（全员） */}
                     <>
-                        <SectionLabel label="System" />
-                        <NavItem href="/admin/settings" icon={<Settings size={18} />} label="設定" activePath={pathname} onClick={closeMenu} />
-                        <NavItem href="/admin/guide" icon={<HelpCircle size={18} />} label="操作ガイド" activePath={pathname} onClick={closeMenu} />
+                        <SectionLabel label={t("sectionSystem")} />
+                        <NavItem href="/admin/settings" icon={<Settings size={18} />} label={t("settings")} activePath={pathname} onClick={closeMenu} />
+                        <NavItem href="/admin/guide" icon={<HelpCircle size={18} />} label={t("guide")} activePath={pathname} onClick={closeMenu} />
                     </>
                 </nav>
 
@@ -146,13 +155,13 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         className="flex items-center justify-center gap-2 w-full px-4 py-2.5 mb-4 text-xs font-bold text-sumo-brand bg-white hover:bg-gray-100 rounded-lg transition-colors shadow-sm"
                     >
                         <ExternalLink size={14} />
-                        サイトを確認する
+                        {t("viewSite")}
                     </Link>
 
                     <div className="flex items-center gap-3 px-2 mb-4">
                         <div className={`w-8 h-8 rounded-full border-2 border-white/20 ${role === 'ADMIN' ? 'bg-gradient-to-tr from-yellow-400 to-orange-500' : 'bg-gradient-to-tr from-blue-400 to-cyan-500'}`}></div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-bold text-white truncate">{role === "ADMIN" ? "管理者" : "代表者"}</p>
+                            <p className="text-sm font-bold text-white truncate">{role === "ADMIN" ? t("userAdmin") : t("userOwner")}</p>
                             <p className="text-xs text-white/50 truncate">{email}</p>
                         </div>
                     </div>
@@ -168,7 +177,7 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                         ) : (
                             <LogOut size={14} />
                         )}
-                        {isPending ? "ログアウト中..." : "ログアウト"}
+                        {isPending ? t("loggingOut") : t("logout")}
                     </button>
                 </div>
             </aside>

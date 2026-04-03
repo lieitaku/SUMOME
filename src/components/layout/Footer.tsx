@@ -2,7 +2,9 @@
 
 import React from "react";
 import Link from "@/components/ui/TransitionLink";
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
 
 // Component: FooterLink
@@ -43,6 +45,7 @@ const FooterLink = ({
 );
 
 const Footer = () => {
+  const t = useTranslations("Footer");
   const params = useParams();
   const pathname = usePathname();
   const prefSlug = params?.pref as string | undefined;
@@ -129,10 +132,10 @@ const Footer = () => {
             )}
 
             <p className="text-lg md:text-sm text-gray-500 mb-8 md:mb-8 leading-relaxed font-medium font-sans tracking-wide">
-              相撲クラブ検索・応援プラットフォーム
+              {t("tagline")}
               <br />
               <span className="text-base md:text-xs opacity-70 mt-2 md:mb-0 md:mt-2 block">
-                相撲の魂を、未来へつなぐ。
+                {t("taglineSub")}
               </span>
             </p>
 
@@ -144,27 +147,27 @@ const Footer = () => {
             <div className="min-w-0 max-sm:border-b max-sm:border-gray-100 max-sm:pb-8 max-sm:last:border-b-0 max-sm:last:pb-0">
               <h4 className="flex items-center gap-3 font-serif font-bold text-base md:text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-5 md:h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                <span className="min-w-0">サイトマップ</span>
+                <span className="min-w-0">{t("sitemap")}</span>
               </h4>
               <ul className="space-y-1 md:space-y-4 text-gray-500 font-medium">
                 <li>
                   <FooterLink href="/" themeColor={themeColor}>
-                    トップページ
+                    {t("top")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/clubs" themeColor={themeColor}>
-                    クラブを探す
+                    {t("findClubs")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/about" themeColor={themeColor}>
-                    SUMOMEについて
+                    {t("about")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/activities" themeColor={themeColor}>
-                    イベント一覧
+                    {t("events")}
                   </FooterLink>
                 </li>
               </ul>
@@ -174,22 +177,22 @@ const Footer = () => {
             <div className="min-w-0 max-sm:border-b max-sm:border-gray-100 max-sm:pb-8 max-sm:last:border-b-0 max-sm:last:pb-0">
               <h4 className="flex items-center gap-3 font-serif font-bold text-base md:text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-5 md:h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                <span className="min-w-0">クラブの運営者様へ</span>
+                <span className="min-w-0">{t("forOperators")}</span>
               </h4>
               <ul className="space-y-1 md:space-y-4 text-gray-500 font-medium">
                 <li>
                   <FooterLink href="/partners" themeColor={themeColor}>
-                    新規掲載登録（無料）
+                    {t("registerFree")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/manager/login" themeColor={themeColor}>
-                    管理画面ログイン
+                    {t("adminLogin")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/magazines" themeColor={themeColor}>
-                    フォトブックについて
+                    {t("aboutMagazines")}
                   </FooterLink>
                 </li>
               </ul>
@@ -199,22 +202,22 @@ const Footer = () => {
             <div className="min-w-0 max-sm:border-b max-sm:border-gray-100 max-sm:pb-8 max-sm:last:border-b-0 max-sm:last:pb-0">
               <h4 className="flex items-center gap-3 font-serif font-bold text-base md:text-xs mb-6 tracking-widest uppercase" style={{ color: themeColor }}>
                 <span className="w-1 h-5 md:h-4 shrink-0" style={{ backgroundColor: themeColor }} aria-hidden />
-                <span className="min-w-0">サポート</span>
+                <span className="min-w-0">{t("support")}</span>
               </h4>
               <ul className="space-y-1 md:space-y-4 text-gray-500 font-medium">
                 <li>
                   <FooterLink href="/contact" themeColor={themeColor}>
-                    お問い合わせ
+                    {t("contact")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/terms" themeColor={themeColor}>
-                    利用規約
+                    {t("terms")}
                   </FooterLink>
                 </li>
                 <li>
                   <FooterLink href="/privacy" themeColor={themeColor}>
-                    プライバシーポリシー
+                    {t("privacy")}
                   </FooterLink>
                 </li>
               </ul>
@@ -225,7 +228,7 @@ const Footer = () => {
         {/* --- Bottom Copyright --- */}
         <div className="pt-8 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-3 text-center md:text-left text-sm md:text-[10px] text-gray-400 border-t border-gray-200/60 uppercase tracking-widest leading-relaxed">
           <p className="font-sans max-w-prose md:max-w-none">
-            &copy; 2025 MEMORY INC. All Rights Reserved.
+            {t("copyright")}
           </p>
           <div className="flex items-center gap-6 mt-4 md:mt-0">
           </div>

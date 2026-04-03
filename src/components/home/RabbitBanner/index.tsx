@@ -292,7 +292,7 @@ export default function RabbitWalkingBanner({
       `}</style>
 
       <div
-        className="relative w-full overflow-hidden select-none"
+        className="relative w-full overflow-hidden select-none pointer-events-none"
         style={{
           height: containerHeight,
           zIndex: 30,

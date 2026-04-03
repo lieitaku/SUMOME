@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useTransition, useOptimistic } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { Filter, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { REGIONS } from "@/lib/constants";

@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import SortOrderBar, { type SortMode } from "@/components/admin/ui/SortOrderBar";
 
 const BASE_PATH = "/admin/prefecture-banners";

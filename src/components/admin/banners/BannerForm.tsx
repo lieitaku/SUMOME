@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Save, Loader2, Image as ImageIcon, Link as LinkIcon, Hash, Type, Building2, Megaphone, Eye } from "lucide-react";

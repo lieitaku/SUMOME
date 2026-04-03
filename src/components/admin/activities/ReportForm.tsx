@@ -6,7 +6,7 @@ import {
     Type, AlignLeft, ArrowUp, ArrowDown
 } from "lucide-react";
 import { createActivityAction } from "@/lib/actions/activities";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 interface Club {

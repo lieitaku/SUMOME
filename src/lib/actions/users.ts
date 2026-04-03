@@ -4,7 +4,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin"; // 用于管理员操作 (
 import { createClient } from "@/lib/supabase/server"; // 用于当前用户操作 (修改自己)
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { authErrorToJapanese } from "@/lib/auth-error-messages";
 import { confirmAdmin } from "@/lib/auth-utils";
 

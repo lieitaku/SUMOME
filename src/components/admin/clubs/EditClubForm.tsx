@@ -26,7 +26,7 @@ import MainImagePositionEditor, { parsePositionString, formatPositionString, par
 
 // ✨ 2. 引入 Server Actions
 import { updateClub, deleteClub, toggleClubHidden } from "@/lib/actions/clubs";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 // ==============================================================================
 // 📜 Zod Schema 定义

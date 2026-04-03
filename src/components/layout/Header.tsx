@@ -3,18 +3,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Menu, X, Search, Lock, ChevronRight, ChevronDown } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
-import { usePathname, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme, DEFAULT_THEME } from "@/lib/prefectureThemes";
+import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 
 /**
  * Header 组件 (最终完美版)
  * 1. 修复：搜索按钮背景色强制跟随主题色。
- * 2. 修复：锁头按钮 Hover 颜色跟随主题色。
+ * 2. 锁头按钮 Hover 与语言切换一致：浅灰底 + 图标变品牌蓝。
  * 3. 保持：Apple 风格丝滑胶囊动画 & 彩虹 Logo。
  */
 const Header = () => {
+  const tNav = useTranslations("Nav");
+  const tHeader = useTranslations("Header");
   // --- 1. 状态管理 ---
   const [isScrolled, setIsScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -76,26 +81,26 @@ const Header = () => {
 
   /** デスクトップ中央ナビ：常時表示 */
   const primaryNavItems = [
-    { name: "SUMOMEについて", href: "/about" },
-    { name: "フォトブック一覧", href: "/magazines" },
-    { name: "イベント", href: "/activities" },
-    { name: "お問い合わせ", href: "/contact" },
+    { name: tNav("about"), href: "/about" },
+    { name: tNav("magazines"), href: "/magazines" },
+    { name: tNav("activities"), href: "/activities" },
+    { name: tNav("contact"), href: "/contact" },
   ] as const;
 
   /** デスクトップ中央ナビ：xl以上で平置き、lg〜xlは「その他」に収納 */
   const secondaryNavItems = [
-    { name: "会社概要", href: "/company" },
-    { name: "キャラクター紹介", href: "/characters" },
+    { name: tNav("company"), href: "/company" },
+    { name: tNav("characters"), href: "/characters" },
   ] as const;
 
   /** モバイルドロワー：会社概要の下にキャラクター紹介 */
   const navItemsMobile = [
-    { name: "SUMOMEについて", href: "/about" },
-    { name: "フォトブック一覧", href: "/magazines" },
-    { name: "イベント", href: "/activities" },
-    { name: "お問い合わせ", href: "/contact" },
-    { name: "会社概要", href: "/company" },
-    { name: "キャラクター紹介", href: "/characters" },
+    { name: tNav("about"), href: "/about" },
+    { name: tNav("magazines"), href: "/magazines" },
+    { name: tNav("activities"), href: "/activities" },
+    { name: tNav("contact"), href: "/contact" },
+    { name: tNav("company"), href: "/company" },
+    { name: tNav("characters"), href: "/characters" },
   ] as const;
 
   /**
@@ -122,14 +127,14 @@ const Header = () => {
    * rem 参考：1rem ≈ 16px（随用户系统字体可能略有差异）
    */
   const desktopNavGutter =
-    "clamp(0.625rem, 2.15vw + 0.55rem, 2.125rem)";
+    "clamp(1rem, 2.35vw + 0.5rem, 2.5rem)";
   /** 导航链接之间的间距（columnGap） */
   const desktopNavGap =
-    "clamp(0.2rem, 0.42vw + 0.06rem, 0.95rem)";
+    "clamp(0.35rem, 0.5vw + 0.1rem, 1.125rem)";
   const desktopNavLinkTypography: React.CSSProperties = {
-    fontSize: "clamp(0.5625rem, 0.85vw + 0.22rem, 0.875rem)",
-    paddingLeft: "clamp(0.22rem, 0.45vw + 0.06rem, 0.5625rem)",
-    paddingRight: "clamp(0.22rem, 0.45vw + 0.06rem, 0.5625rem)",
+    fontSize: "clamp(0.5625rem, 0.8vw + 0.2rem, 0.8125rem)",
+    paddingLeft: "clamp(0.28rem, 0.5vw + 0.08rem, 0.625rem)",
+    paddingRight: "clamp(0.28rem, 0.5vw + 0.08rem, 0.625rem)",
     letterSpacing: "clamp(0.008em, 0.08vw, 0.04em)",
   };
 
@@ -151,46 +156,40 @@ const Header = () => {
     <>
       {/* 🚀 样式注入区域 */}
       <style jsx global>{`
-        /* 1. 桌面端：锁头按钮 Hover */
-        .login-btn-dynamic:hover {
-          background-color: ${themeColor} !important;
-          color: white !important;
-          border-color: ${themeColor} !important;
-        }
-        /* 2. 桌面端：导航文字 Hover */
+        /* 1. 桌面端：导航文字 Hover */
         .nav-item-dynamic:hover {
           color: ${themeColor} !important;
         }
-        /* 3. 桌面端：导航下划线 Hover */
+        /* 2. 桌面端：导航下划线 Hover */
         .nav-item-dynamic:hover .nav-underline {
           width: 100% !important;
           background-color: ${themeColor} !important;
         }
-        /* 4. 移动端：登录按钮 Hover */
+        /* 3. 移动端：登录按钮 Hover */
         .mobile-login-btn:hover {
           background-color: ${themeColor} !important;
           border-color: ${themeColor} !important;
           color: white !important;
         }
         
-        /* 5. 核心修复：搜索按钮强制背景色 */
+        /* 4. 核心修复：搜索按钮强制背景色 */
         /* 使用 !important 覆盖 Button 组件内部的默认颜色 */
         .search-btn-dynamic {
           background-color: ${themeColor} !important;
           border-color: ${themeColor} !important;
         }
 
-        /* 6. その他ドロップダウン項目 Hover */
+        /* 5. その他ドロップダウン項目 Hover */
         .more-dropdown-item:hover {
           color: ${themeColor} !important;
           background-color: rgba(0,0,0,0.03);
         }
-        /* 7. その他ボタン Hover */
+        /* 6. その他ボタン Hover */
         .more-btn-dynamic:hover {
           color: ${themeColor} !important;
         }
 
-        /* 8. 桌面顶栏导航：单行不换行，极窄时横向轻扫（无滚动条） */
+        /* 7. 桌面顶栏导航：单行不换行，极窄时横向轻扫（无滚动条） */
         .header-nav-scroll {
           scrollbar-width: none;
           -ms-overflow-style: none;
@@ -202,39 +201,43 @@ const Header = () => {
 
       {/* 外层定位容器 */}
       <header
-        className="fixed top-0 left-0 right-0 z-[100] flex justify-center pointer-events-none h-auto"
+        className="fixed top-0 left-0 right-0 z-[100] w-full pointer-events-none h-auto"
         style={dynamicStyle}
       >
-        {/* 内层胶囊容器 - 添加 min-h 和 max-h 防止安卓拉伸 */}
         <div
           className={cn(
-            "pointer-events-auto flex items-center justify-between flex-shrink-0",
+            "relative w-full flex justify-center",
+            !isScrolled && "pt-3"
+          )}
+        >
+        <div
+          className={cn(
+            "pointer-events-auto relative flex w-full min-w-0 flex-shrink-0 items-center gap-3 overflow-visible md:gap-4 lg:gap-4 xl:gap-6",
             "bg-white/95 backdrop-blur-md border border-white/10",
             "transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]",
             "shadow-sm",
-            "min-h-[56px] max-h-[80px]"
+            "min-h-[56px] max-h-[80px] lg:min-h-[60px] lg:max-h-[88px]"
           )}
           style={{
             width: isScrolled ? "100%" : "95%",
             maxWidth: isScrolled ? "100%" : "1280px",
-            marginTop: isScrolled ? "0px" : "12px",
+            marginTop: "0px",
             borderRadius: isScrolled ? "0px" : "50px",
-            paddingLeft: isScrolled ? "24px" : "32px",
-            paddingRight: isScrolled ? "24px" : "32px",
+            paddingLeft: isScrolled ? "clamp(16px, 2vw, 28px)" : "clamp(16px, 2.5vw, 32px)",
+            paddingRight: isScrolled ? "clamp(16px, 2vw, 28px)" : "clamp(16px, 2.5vw, 32px)",
             paddingTop: "12px",
             paddingBottom: "12px",
             borderBottomColor: isScrolled ? "rgba(0,0,0,0.05)" : "rgba(255,255,255,0.2)",
           }}
         >
 
-          {/* --- A. Logo 区域（仅 iPad md/lg 缩小，手机与桌面保持原样）--- */}
+          {/* --- A. Logo 区域：桌面侧说明字缩小，避免与导航/操作区挤在一起 --- */}
           <Link
             href="/"
-            className="group relative flex items-center gap-2 sm:gap-3 md:gap-2 lg:gap-2.5 xl:gap-4 2xl:gap-4 select-none shrink-0 min-w-0 md:max-w-[min(38%,240px)] lg:max-w-[min(38%,240px)] xl:max-w-none 2xl:max-w-none"
+            className="group relative flex min-w-0 max-w-[min(100%,19rem)] shrink-0 select-none items-center gap-2 sm:max-w-none sm:gap-3 md:gap-2 lg:gap-2.5 xl:gap-3"
             onClick={() => setMenuOpen(false)}
           >
-            {/* SUMOME 文字 - 手机/桌面原样，仅 md/lg 缩小 */}
-            <div className="flex items-baseline font-serif font-black text-2xl sm:text-2xl md:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl tracking-wider sm:tracking-widest leading-none shrink-0">
+            <div className="flex shrink-0 items-baseline font-serif font-black leading-none tracking-wider sm:tracking-widest text-2xl sm:text-2xl md:text-2xl lg:text-2xl xl:text-2xl 2xl:text-2xl">
               {["S", "U", "M", "O", "M", "E"].map((char, index) => (
                 <span
                   key={index}
@@ -245,16 +248,14 @@ const Header = () => {
               ))}
             </div>
 
-            {/* 分隔线 - 手机/桌面原样，仅 md/lg 缩小 */}
-            <span className="h-6 sm:h-6 md:h-4 lg:h-5 xl:h-8 2xl:h-8 w-px bg-gray-200 shrink-0"></span>
+            <span className="h-5 w-px shrink-0 bg-gray-200 sm:h-6 md:h-4 lg:h-8 xl:h-10 2xl:h-12" aria-hidden />
 
-            {/* 日语副标题 - 手机/桌面原样，仅 md/lg 缩小 */}
-            <div className="flex flex-col justify-center items-start pt-0.5 shrink-0">
-              <span className="text-xs sm:text-sm md:text-[9px] lg:text-[10px] xl:text-base 2xl:text-base font-serif font-bold tracking-[0.12em] sm:tracking-[0.15em] md:tracking-[0.1em] lg:tracking-[0.12em] xl:tracking-[0.2em] 2xl:tracking-[0.2em] leading-tight text-gray-600 whitespace-nowrap">
-                スモウメモリー
+            <div className="flex min-w-0 flex-col items-start justify-center pt-0.5">
+              <span className="max-w-full truncate font-serif font-bold leading-tight tracking-wide text-gray-600 text-[12px] sm:text-[12px] md:text-[12px] lg:text-[12px] xl:text-[13px] 2xl:text-[13px]">
+                {tHeader("subtitle1")}
               </span>
-              <span className="text-sm sm:text-base md:text-[10px] lg:text-xs xl:text-lg 2xl:text-lg font-serif font-bold tracking-normal sm:tracking-wider md:tracking-wider lg:tracking-widest xl:tracking-widest 2xl:tracking-widest leading-tight mt-0.5 text-gray-600 whitespace-nowrap">
-                相撲の思い出
+              <span className="mt-0.5 max-w-full truncate font-serif font-bold leading-tight tracking-wide text-gray-600 text-[12px] sm:text-[12px] md:text-[12px] lg:text-[12px] xl:text-[13px] 2xl:text-[13px]">
+                {tHeader("subtitle2")}
               </span>
             </div>
           </Link>
@@ -262,7 +263,7 @@ const Header = () => {
           {/* --- B. 桌面端导航（单行・fluid 字号/间距；最小幅でも僅かな余白を維持） --- */}
           <div
             className={cn(
-              "header-nav-scroll hidden lg:flex flex-1 min-w-0 justify-center items-center"
+              "header-nav-scroll hidden min-w-0 flex-1 justify-center overflow-x-auto lg:flex lg:items-center"
             )}
             style={{
               paddingLeft: desktopNavGutter,
@@ -272,7 +273,7 @@ const Header = () => {
             <nav
               className="flex flex-nowrap items-center justify-center shrink-0"
               style={{ columnGap: desktopNavGap }}
-              aria-label="メインナビゲーション"
+              aria-label={tHeader("navAria")}
             >
               {primaryNavItems.map((item) => (
                 <Link
@@ -293,7 +294,7 @@ const Header = () => {
                   style={desktopNavLinkTypography}
                   className="more-btn-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 whitespace-nowrap py-1 gap-0.5"
                 >
-                  その他
+                  {tNav("more")}
                   <ChevronDown
                     size={14}
                     className={cn(
@@ -329,44 +330,52 @@ const Header = () => {
             </nav>
           </div>
 
-          {/* --- C. 桌面端操作区 --- */}
-          <div className="hidden lg:flex items-center gap-3 shrink-0">
-            {/* 1. 登录按钮 */}
+          {/* --- C. 桌面端操作区：锁（40×40）→ 语言（同尺寸）→ 搜索 --- */}
+          <div className="hidden shrink-0 lg:flex lg:items-center lg:gap-3">
             <Link
               href="/manager/login"
-              title="管理者ログイン"
-              className="login-btn-dynamic w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 transition-all duration-300 border border-transparent"
+              title={tHeader("adminLoginTitle")}
+              className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-transparent bg-gray-50 text-gray-500",
+                "transition-all duration-200 ease-in-out",
+                "hover:bg-gray-100 hover:text-sumo-brand",
+                "active:scale-[0.98]",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand/35 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              )}
             >
-              <Lock size={16} strokeWidth={2.5} />
+              <Lock size={16} strokeWidth={2.5} aria-hidden />
             </Link>
 
-            {/* 2. 搜索按钮 (修复：添加 search-btn-dynamic 类名) */}
+            <LocaleSwitcher menuAlign="end" />
+
             <Button
               href="/clubs/map"
               className={cn(
-                "search-btn-dynamic", // ✨ 关键：应用强制背景色样式
+                "search-btn-dynamic shrink-0",
                 "rounded-full px-5 py-2 text-sm font-bold text-white shadow-md",
                 "transition-all duration-300 ease-out",
-                "hover:shadow-lg hover:brightness-110", // ✨ 悬停变亮，而非变色
+                "hover:shadow-lg hover:brightness-110",
                 "active:scale-[0.98]"
               )}
             >
               <span className="flex items-center gap-2">
                 <Search size={16} />
-                <span className="hidden xl:inline">全国のクラブを探す</span>
-                <span className="xl:hidden">探す</span>
+                <span className="hidden xl:inline">{tHeader("searchFull")}</span>
+                <span className="xl:hidden">{tHeader("searchShort")}</span>
               </span>
             </Button>
           </div>
 
           {/* --- D. 移动端菜单切换 --- */}
           <button
-            className="lg:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            type="button"
+            className="ml-auto shrink-0 p-2 text-gray-600 transition-colors hover:text-gray-900 lg:ml-0 lg:hidden"
             onClick={() => setMenuOpen(true)}
-            aria-label="Open Menu"
+            aria-label={tHeader("openMenu")}
           >
             <Menu size={28} />
           </button>
+        </div>
         </div>
       </header>
 
@@ -382,10 +391,13 @@ const Header = () => {
           }`}
       >
         <div className="flex flex-col h-full min-h-0 p-6">
-          <div className="flex justify-end mb-8">
+          <div className="flex shrink-0 items-center justify-between gap-4 mb-6">
+            <LocaleSwitcher onAfterSelect={() => setMenuOpen(false)} />
             <button
+              type="button"
               onClick={() => setMenuOpen(false)}
-              className="p-2 text-gray-400 hover:text-gray-900 transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-900 transition-colors duration-200 ease-in-out shrink-0"
+              aria-label={tHeader("closeMenu")}
             >
               <X size={28} />
             </button>
@@ -417,7 +429,7 @@ const Header = () => {
               style={{ backgroundColor: themeColor }}
             >
               <Search size={18} />
-              クラブを探す
+              {tHeader("mobileSearchClubs")}
             </Link>
 
             <Link
@@ -426,7 +438,7 @@ const Header = () => {
               className="mobile-login-btn flex items-center justify-center gap-2 w-full bg-white text-sumo-dark border border-gray-200 py-3 rounded-full font-bold transition-colors text-sm hover:text-white"
             >
               <Lock size={16} />
-              管理者ログイン
+              {tHeader("mobileAdminLogin")}
             </Link>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import Link from "@/components/ui/TransitionLink";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import {
     Building2,

@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { BookOpen, Calendar, Pencil, ExternalLink, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";

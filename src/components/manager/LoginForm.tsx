@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "@/components/ui/TransitionLink";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { createBrowserClient } from "@supabase/ssr";
 import {
   ArrowRight,
@@ -21,13 +22,14 @@ import {
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
-import { loginErrorToJapanese } from "@/lib/auth-error-messages";
+import { loginErrorForLocale } from "@/lib/auth-error-messages";
 import { verifyIdentity, resetPassword } from "@/lib/actions/auth-reset";
 
 type ViewState = "login" | "verify" | "reset";
 
 const LoginForm = () => {
   const router = useRouter();
+  const locale = useLocale();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -101,7 +103,7 @@ const LoginForm = () => {
         } else if (error.message.includes("missing email")) {
           setErrorMsg("メールアドレスが入力されていません。");
         } else {
-          setErrorMsg(loginErrorToJapanese(error.message));
+          setErrorMsg(loginErrorForLocale(error.message, locale));
         }
       } else {
         router.refresh();

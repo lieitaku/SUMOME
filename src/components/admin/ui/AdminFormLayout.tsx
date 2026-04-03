@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { ArrowLeft, Save, Loader2, X, Trash2, EyeOff } from "lucide-react";
 
 interface AdminFormLayoutProps {

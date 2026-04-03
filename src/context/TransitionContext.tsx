@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, Suspense } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 
 type TransitionContextType = {
     isLoading: boolean;
@@ -13,21 +14,34 @@ const TransitionContext = createContext<TransitionContextType>({
     startLoading: () => { },
 });
 
-// 内部组件：处理路由变化的监听逻辑
-// useSearchParams 需要在 Suspense 边界内使用
-function TransitionStateManager({
+/**
+ * 仅用 pathname 结束「迷雾」加载。
+ * 必须放在 Suspense 外：若与 useSearchParams 同组件并包在 Suspense 内，
+ * 在部分导航/水合场景下子树会挂起，useEffect 不跑 → isLoading 永远 true，
+ * 全屏 PageLoader 盖住 Hero 视频且无法播放。
+ */
+function PathnameLoadingReset({
     setIsLoading,
 }: {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
-
-    // 当路径发生变化时（说明新页面加载完了），取消 Loading 状态
     useEffect(() => {
         setIsLoading(false);
-    }, [pathname, searchParams, setIsLoading]);
+    }, [pathname, setIsLoading]);
+    return null;
+}
 
+/** 仅 query 变化时也要收起加载层；useSearchParams 需 Suspense */
+function SearchParamsLoadingReset({
+    setIsLoading,
+}: {
+    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
+    const searchParams = useSearchParams();
+    useEffect(() => {
+        setIsLoading(false);
+    }, [searchParams, setIsLoading]);
     return null;
 }
 
@@ -38,9 +52,9 @@ export const TransitionProvider = ({ children }: { children: React.ReactNode }) 
 
     return (
         <TransitionContext.Provider value={{ isLoading, startLoading }}>
-            {/* useSearchParams 需要被 Suspense 包裹 */}
+            <PathnameLoadingReset setIsLoading={setIsLoading} />
             <Suspense fallback={null}>
-                <TransitionStateManager setIsLoading={setIsLoading} />
+                <SearchParamsLoadingReset setIsLoading={setIsLoading} />
             </Suspense>
             {children}
         </TransitionContext.Provider>

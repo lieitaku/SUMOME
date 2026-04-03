@@ -26,7 +26,7 @@ import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { createMagazine, updateMagazine, deleteMagazine, toggleMagazineHidden } from "@/lib/actions/magazines";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner"; // 确保安装了 sonner，如果没有请删除这行用 alert
 

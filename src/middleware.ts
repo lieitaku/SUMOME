@@ -1,90 +1,103 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { createServerClient } from "@supabase/ssr";
+import { routing } from "./i18n/routing";
 
-export async function middleware(request: NextRequest) {
-  // 检查环境变量是否存在，防止构建时出错
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const handleI18nRouting = createMiddleware(routing);
 
-  if (!supabaseUrl || !supabaseAnonKey) {
-    // 环境变量未设置时，跳过认证检查
-    return NextResponse.next();
-  }
-
-  // 1. 创建初始响应
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  // 2. 初始化 Supabase 客户端并同步 Cookie
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        // 同时更新请求和响应的 Cookie，防止状态不同步
-        request.cookies.set({ name, value, ...options });
-        response = NextResponse.next({
-          request: {
-            headers: request.headers,
-          },
-        });
-        response.cookies.set({ name, value, ...options });
-      },
-      remove(name: string, options: CookieOptions) {
-        request.cookies.set({ name, value: "", ...options });
-        response = NextResponse.next({
-          request: {
-            headers: request.headers,
-          },
-        });
-        response.cookies.set({ name, value: "", ...options });
-      },
-    },
-  });
-
-  // 3. 获取当前会话（不要使用 getSession，新版推荐 getUser 保证安全性）
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  const url = request.nextUrl.clone();
-
-  // 权限控制逻辑
-  // 1. 如果访问 /admin 且未登录 -> 重定向到登录页
-  if (url.pathname.startsWith("/admin") && !user) {
-    return NextResponse.redirect(new URL("/manager/login", request.url));
-  }
-
-  // 2. 如果已登录用户尝试访问登录页 -> 重定向到后台首页
-  if (url.pathname.startsWith("/manager/login") && user) {
-    return NextResponse.redirect(new URL("/admin/magazines", request.url));
-  }
-
-  // 4. 将用户邮箱写入请求头，供 admin layout 读取，避免 layout 内再次调用 Supabase（正式环境每次 RTT 很贵）
-  if (user?.email) {
-    const requestHeaders = new Headers(request.headers);
-    requestHeaders.set("x-user-email", user.email);
-    response = NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    });
-  }
-
-  return response;
+function getLocaleFromPath(pathname: string): "ja" | "en" {
+    if (pathname === "/en" || pathname.startsWith("/en/")) {
+        return "en";
+    }
+    return "ja";
 }
 
-// ✨ Matcher 排除静态资源，提高性能
+/** `/en/...` を除いたパス（middleware 段階の URL は next-intl 済み） */
+function stripEnPrefix(pathname: string): string {
+    if (pathname === "/en") return "/";
+    if (pathname.startsWith("/en/")) return pathname.slice(3);
+    return pathname;
+}
+
+function loginUrl(request: NextRequest, locale: "ja" | "en"): URL {
+    const path = locale === "en" ? "/en/manager/login" : "/manager/login";
+    return new URL(path, request.url);
+}
+
+function adminMagazinesUrl(request: NextRequest, locale: "ja" | "en"): URL {
+    const path = locale === "en" ? "/en/admin/magazines" : "/admin/magazines";
+    return new URL(path, request.url);
+}
+
+function copyCookies(from: NextResponse, to: NextResponse) {
+    from.cookies.getAll().forEach(({ name, value, ...options }) => {
+        to.cookies.set(name, value, options);
+    });
+}
+
+export async function middleware(request: NextRequest) {
+    const intlResponse = handleI18nRouting(request);
+
+    if (intlResponse.headers.get("location")) {
+        return intlResponse;
+    }
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        return intlResponse;
+    }
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+        cookies: {
+            getAll() {
+                return request.cookies.getAll();
+            },
+            setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                    request.cookies.set(name, value)
+                );
+                cookiesToSet.forEach(({ name, value, options }) =>
+                    intlResponse.cookies.set(name, value, options)
+                );
+            },
+        },
+    });
+
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    const pathname = request.nextUrl.pathname;
+    const locale = getLocaleFromPath(pathname);
+    const normalizedPath = stripEnPrefix(pathname);
+
+    const isAdminPath = normalizedPath.startsWith("/admin");
+    const isManagerLoginPath = normalizedPath.startsWith("/manager/login");
+
+    if (isAdminPath && !user) {
+        const redirectRes = NextResponse.redirect(loginUrl(request, locale));
+        copyCookies(intlResponse, redirectRes);
+        return redirectRes;
+    }
+
+    if (isManagerLoginPath && user) {
+        const redirectRes = NextResponse.redirect(adminMagazinesUrl(request, locale));
+        copyCookies(intlResponse, redirectRes);
+        return redirectRes;
+    }
+
+    if (user?.email) {
+        intlResponse.headers.set("x-user-email", user.email);
+    }
+
+    return intlResponse;
+}
+
 export const config = {
-  matcher: [
-    /*
-     * 匹配所有需要校验的路径
-     * 排除 _next/static, _next/image, favicon.ico 等静态文件
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
-  ],
+    matcher: [
+        // 排除静态资源与 Rive（.riv）；否则 intl 中间件可能改写请求，Rive 会得到非二进制正文 → Console「Bad header」
+        "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|riv|wasm|webm|mp4|m4v|mov|ogv|ogg|woff2|webmanifest)$).*)",
+    ],
 };
