@@ -342,9 +342,11 @@ function preventImgDragOnly(e: React.DragEvent<HTMLImageElement>) {
 }
 
 /** 手机端侧图：点击切换大图（translate 到视口中心 + scale，仍单张 img） */
-/** 缩放上下限：实际倍数由「装入半屏」公式算出后再夹紧 */
-const HAKUHO_PINCH_SCALE_MIN = 2.2;
-const HAKUHO_PINCH_SCALE_MAX = 5.75;
+/**
+ * 放大倍数上界（过大影响清晰度/性能）。
+ * 下界不得强行抬高：若 `fitScale = min(半屏框/当前显示宽高)` 已 < 某常数，再 `max(常数, fitScale)` 会大于「装入半屏」所需倍数 → 超出视口被 `section` 的 overflow-hidden 裁切，表现为放大结束瞬间只看见一角。
+ */
+const HAKUHO_ZOOM_SCALE_MAX = 5.75;
 /** 大图整图 `object-contain` 适配在视口宽/高的该比例框内（约半屏） */
 const HAKUHO_ZOOM_VIEWPORT_FRACTION = 0.5;
 /** 聚焦层模糊（px，4 的倍数） */
@@ -437,7 +439,7 @@ function HeroHakuhoSidePanels({
 
   const [zoomSide, setZoomSide] = useState<HakuhoSideId | null>(null);
   const [zoomPan, setZoomPan] = useState<{ x: number; y: number } | null>(null);
-  const [zoomScale, setZoomScale] = useState(HAKUHO_PINCH_SCALE_MIN);
+  const [zoomScale, setZoomScale] = useState(1);
   const [mobileHakuhoLayout, setMobileHakuhoLayout] = useState<MobileHakuhoLayout>({
     yExtra: 0,
     inwardX: 280,
@@ -820,7 +822,7 @@ function HeroHakuhoSidePanels({
   const closeHakuhoZoom = useCallback(() => {
     setZoomSide(null);
     setZoomPan(null);
-    setZoomScale(HAKUHO_PINCH_SCALE_MIN);
+    setZoomScale(1);
     if (hakuhoKindRef.current === "desktop") {
       scheduleDesktopHakuhoLayout();
     } else {
@@ -839,10 +841,7 @@ function HeroHakuhoSidePanels({
     const boxW = vw * HAKUHO_ZOOM_VIEWPORT_FRACTION;
     const boxH = vh * HAKUHO_ZOOM_VIEWPORT_FRACTION;
     const fitScale = Math.min(boxW / iw, boxH / ih);
-    const nextScale = Math.min(
-      HAKUHO_PINCH_SCALE_MAX,
-      Math.max(HAKUHO_PINCH_SCALE_MIN, fitScale),
-    );
+    const nextScale = Math.min(HAKUHO_ZOOM_SCALE_MAX, Math.max(0.05, fitScale));
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
     const vx = vw / 2;
