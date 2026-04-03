@@ -256,6 +256,8 @@ const HAKUHO_TABLET_SIDE_MAX_H_PX = 312;
 /** 侧图阴影：挂在包裹 `<img>` 的容器上，避免 WebKit 对带 filter 的 `<img>` 出现内容不绘制（表现为色块/空白）。 */
 const HAKUHO_IMG_DROP_SHADOW =
   "drop-shadow(0 4px 14px rgba(0,0,0,0.12)) drop-shadow(0 12px 36px rgba(0,0,0,0.18))";
+/** 放大态：WebKit 会把带 filter 的盒子的绘制裁在「变换前」几何内，scale 变大后只剩一条/一角；放大时勿在包裹层使用 drop-shadow。 */
+const HAKUHO_IMG_ZOOM_FILTER = "brightness(1.06) saturate(1.06)";
 
 /** 紧凑端侧图：`sideVwMul` 乘在 vw% 与 min/max 钳制上 */
 function clampCompactSideMaxPx(
@@ -536,9 +538,8 @@ function HeroHakuhoSidePanels({
       display: "inline-block",
       lineHeight: 0,
       pointerEvents: "none",
-      filter: zoomed
-        ? `${HAKUHO_IMG_DROP_SHADOW} brightness(1.06) saturate(1.06)`
-        : HAKUHO_IMG_DROP_SHADOW,
+      overflow: zoomed ? "visible" : undefined,
+      filter: zoomed ? HAKUHO_IMG_ZOOM_FILTER : HAKUHO_IMG_DROP_SHADOW,
       transition: "filter 200ms ease-in-out",
     };
   };
@@ -806,6 +807,17 @@ function HeroHakuhoSidePanels({
     };
   }, [isDesktopHakuho, scheduleDesktopHakuhoLayout, rabbitBannerRef, tierProfile.desktopTier, tierProfile.desktopFactors.baseVwMul]);
 
+  /** 放大时子树会超出原半区；section 默认 overflow-hidden 与 WebKit+filter 组合会在真机上裁成窄条 */
+  useLayoutEffect(() => {
+    const el = heroSectionRef.current;
+    if (!el || zoomSide === null) return;
+    const prev = el.style.overflow;
+    el.style.overflow = "visible";
+    return () => {
+      el.style.overflow = prev;
+    };
+  }, [zoomSide, heroSectionRef]);
+
   const mobileYExtra = isCompactHakuho ? mobileHakuhoLayout.yExtra : 0;
   const mobileInwardX = isCompactHakuho ? mobileHakuhoLayout.inwardX : 0;
   const leftTranslateX = isCompactHakuho ? mobileInwardX : nudgeLeft.x;
@@ -935,10 +947,17 @@ function HeroHakuhoSidePanels({
         />
       ) : null}
       <div
-        className={`pointer-events-none absolute left-0 flex w-1/2 ${itemsAlign} justify-start ${
-          useVideoWallAnchor ? "" : "inset-y-0"
-        } ${zoomSide === "left" ? "z-50" : "z-[32]"}`}
-        style={{ ...compactHalfVerticalStyle, ...leftHalfOuterStyle }}
+        className={
+          zoomSide === "left"
+            ? `pointer-events-none absolute inset-0 z-50 flex w-full ${itemsAlign} justify-start overflow-visible`
+            : `pointer-events-none absolute left-0 z-[32] flex w-1/2 ${itemsAlign} justify-start overflow-visible ${
+                useVideoWallAnchor ? "" : "inset-y-0"
+              }`
+        }
+        style={{
+          ...(zoomSide === "left" ? {} : compactHalfVerticalStyle),
+          ...leftHalfOuterStyle,
+        }}
         aria-hidden
       >
         <div
@@ -946,6 +965,7 @@ function HeroHakuhoSidePanels({
             transform: leftInnerTransform,
             transition: "transform 200ms ease-in-out",
             pointerEvents: "none",
+            overflow: zoomSide === "left" ? "visible" : undefined,
           }}
         >
           <span style={hakuhoFilterWrapperStyle("left")}>
@@ -966,10 +986,17 @@ function HeroHakuhoSidePanels({
         </div>
       </div>
       <div
-        className={`pointer-events-none absolute right-0 flex w-1/2 ${itemsAlign} justify-end ${
-          useVideoWallAnchor ? "" : "inset-y-0"
-        } ${zoomSide === "right" ? "z-50" : "z-[32]"}`}
-        style={{ ...compactHalfVerticalStyle, ...rightHalfOuterStyle }}
+        className={
+          zoomSide === "right"
+            ? `pointer-events-none absolute inset-0 z-50 flex w-full ${itemsAlign} justify-end overflow-visible`
+            : `pointer-events-none absolute right-0 z-[32] flex w-1/2 ${itemsAlign} justify-end overflow-visible ${
+                useVideoWallAnchor ? "" : "inset-y-0"
+              }`
+        }
+        style={{
+          ...(zoomSide === "right" ? {} : compactHalfVerticalStyle),
+          ...rightHalfOuterStyle,
+        }}
         aria-hidden
       >
         <div
@@ -977,6 +1004,7 @@ function HeroHakuhoSidePanels({
             transform: rightInnerTransform,
             transition: "transform 200ms ease-in-out",
             pointerEvents: "none",
+            overflow: zoomSide === "right" ? "visible" : undefined,
           }}
         >
           <span style={hakuhoFilterWrapperStyle("right")}>
