@@ -32,6 +32,7 @@ import ScrollToTop from "@/components/common/ScrollToTop";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
+import { hasRealClubMainImage } from "@/lib/club-images";
 
 export const dynamic = "force-dynamic";
 
@@ -60,7 +61,15 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     preview.payload &&
     typeof preview.payload === "object" &&
     (preview.payload as { pref?: string }).pref === prefSlug
-      ? (preview.payload as { pref: string; image?: string; alt?: string; imagePosition?: string; imageScale?: string | number; imageRotation?: string | number })
+      ? (preview.payload as {
+          pref: string;
+          image?: string;
+          alt?: string;
+          imagePosition?: string;
+          imageScale?: string | number;
+          imageRotation?: string | number;
+          featuredClubId?: string | null;
+        })
       : null;
 
   // All four queries are independent — fire them in parallel with caching
@@ -101,7 +110,27 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     .map(toSponsorItem);
 
   const theme = getPrefectureTheme(prefSlug);
-  const featuredClub = filteredClubs.length > 0 ? filteredClubs[0] : null;
+
+  const prefAreaName = staticDisplay.name;
+  const previewFeaturedId =
+    prefBannerPreview?.featuredClubId != null && prefBannerPreview.featuredClubId !== ""
+      ? prefBannerPreview.featuredClubId
+      : null;
+
+  const resolveFeaturedClub = () => {
+    const tryById = (id: string | null | undefined) => {
+      if (!id) return null;
+      const c = filteredClubs.find((x) => x.id === id);
+      if (!c || c.area !== prefAreaName) return null;
+      if (!hasRealClubMainImage(c.mainImage)) return null;
+      return c;
+    };
+    const manual = tryById(previewFeaturedId ?? customBanner?.featuredClubId);
+    if (manual) return manual;
+    return filteredClubs.find((c) => hasRealClubMainImage(c.mainImage)) ?? null;
+  };
+
+  const featuredClub = resolveFeaturedClub();
   const bannerTitle = featuredClub
     ? `${featuredClub.name}の相撲風景`
     : `${displayData.name}の相撲風景`;

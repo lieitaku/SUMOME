@@ -5,6 +5,7 @@ import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { MapPin, Instagram, Twitter, ArrowUpRight, Users, Phone, Mail, Globe } from "lucide-react";
 import { cn, getMainImageObjectPosition, getMainImageScale, getMainImageRotation } from "@/lib/utils";
+import { hasRealClubMainImage, DEFAULT_CLUB_MAIN_IMAGE } from "@/lib/club-images";
 import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
 
@@ -41,7 +42,9 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
 
   const themeColor = accentColor || DEFAULT_COLOR;
   const detailLink = `/clubs/${club.slug}`;
-  const displayImage = club.mainImage || "/images/placeholder.webp";
+  const displayImage = hasRealClubMainImage(club.mainImage)
+    ? (club.mainImage as string)
+    : DEFAULT_CLUB_MAIN_IMAGE;
   const mainImagePosition = getMainImageObjectPosition(club.mainImagePosition);
   const mainImageScale = getMainImageScale(club.mainImageScale);
   const mainImageRotation = getMainImageRotation(club.mainImageRotation);

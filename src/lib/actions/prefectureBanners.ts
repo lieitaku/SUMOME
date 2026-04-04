@@ -63,12 +63,17 @@ export async function upsertPrefectureBanner(formData: FormData) {
   if (!UpsertSchema.image(image)) return { error: "画像URLは必須です。" };
   if (!UpsertSchema.alt(alt)) return { error: "alt は文字列で指定してください。" };
 
+  const featuredRaw = (formData.get("featuredClubId") as string)?.trim();
+  const featuredClubId =
+    featuredRaw && featuredRaw.length > 0 ? featuredRaw : null;
+
   const createData = {
     pref,
     image,
     alt,
     imagePosition,
     imageScale,
+    featuredClubId,
     ...(imageRotation != null ? { imageRotation } : {}),
   };
   const updateData = {
@@ -76,6 +81,7 @@ export async function upsertPrefectureBanner(formData: FormData) {
     alt,
     imagePosition,
     imageScale,
+    featuredClubId,
     ...(imageRotation != null ? { imageRotation } : {}),
   };
 
@@ -102,6 +108,19 @@ export async function upsertPrefectureBanner(formData: FormData) {
       } catch (retryErr) {
         console.error("PrefectureBanner upsert retry failed:", retryErr);
         return { error: "保存に失敗しました。" };
+      }
+    } else if (/featuredClubId/i.test(errMsg)) {
+      const { featuredClubId: _fc, ...createNoFeatured } = createData;
+      const { featuredClubId: __fc, ...updateNoFeatured } = updateData;
+      try {
+        await prisma.prefectureBanner.upsert({
+          where: { pref },
+          create: createNoFeatured,
+          update: updateNoFeatured,
+        });
+      } catch (retryErr) {
+        console.error("PrefectureBanner upsert (without featuredClubId) failed:", retryErr);
+        return { error: "保存に失敗しました。マイグレーションを確認してください。" };
       }
     } else if (/imagePosition|imageScale|does not exist|column.*not found/i.test(errMsg)) {
       return { error: "データベースのマイグレーションが未適用の可能性があります。`npx prisma migrate deploy` を実行してください。" };

@@ -7,6 +7,7 @@ import {
     CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation, Phone
 } from "lucide-react";
 import { getMainImageObjectPosition, getMainImageScale, getMainImageRotation } from "@/lib/utils";
+import { DEFAULT_CLUB_MAIN_IMAGE } from "@/lib/club-images";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedClubBySlug } from "@/lib/cached-queries";
 import Ceramic from "@/components/ui/Ceramic";
@@ -138,7 +139,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
     ].filter((img): img is string => !!img);
 
     if (galleryImages.length === 0) {
-        galleryImages.push("/images/placeholder.webp");
+        galleryImages.push(DEFAULT_CLUB_MAIN_IMAGE);
     }
 
     // 日程解析逻辑：尝试解析 JSON 字符串，兼容旧数据格式

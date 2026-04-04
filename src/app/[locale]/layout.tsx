@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { TransitionProvider } from "@/context/TransitionContext";
 import PageLoader from "@/components/ui/PageLoader";
+import { DocumentHtmlLang } from "@/components/i18n/DocumentHtmlLang";
 
 const notoSerif = Noto_Serif_JP({
     subsets: ["latin"],
@@ -31,8 +32,6 @@ const cormorant = Cormorant_Garamond({
     variable: "--font-cormorant",
     display: "swap",
 });
-
-const FAVICON_VERSION = "6";
 
 function getMetadataBase(): URL {
     if (process.env.NODE_ENV === "development") {
@@ -115,39 +114,17 @@ export default async function LocaleLayout({ children, params }: Props) {
     setRequestLocale(locale);
     const messages = await getMessages();
 
-    const v = FAVICON_VERSION;
-    const htmlLang = locale === "en" ? "en" : "ja";
-
     return (
-        <html lang={htmlLang} suppressHydrationWarning>
-            <head>
-                <link rel="icon" type="image/x-icon" href={`/favicon.ico?v=${v}`} />
-                <link
-                    rel="icon"
-                    type="image/png"
-                    sizes="96x96"
-                    href={`/icons/favicon-96x96.png?v=${v}`}
-                />
-                <link
-                    rel="icon"
-                    type="image/x-icon"
-                    href={`/icons/sumo-favicon.ico?v=${v}`}
-                    sizes="48x48"
-                />
-                <link rel="shortcut icon" href={`/icons/sumo-favicon.ico?v=${v}`} />
-                <link rel="apple-touch-icon" href={`/icons/apple-touch-icon.png?v=${v}`} />
-                <link rel="manifest" href={`/site.webmanifest?v=${v}`} />
-            </head>
-            <body
-                className={`${notoSerif.variable} ${notoSans.variable} ${cormorant.variable} font-sans bg-sumo-bg text-sumo-text antialiased selection:bg-sumo-brand selection:text-white`}
-            >
-                <NextIntlClientProvider messages={messages}>
-                    <TransitionProvider>
-                        <PageLoader />
-                        {children}
-                    </TransitionProvider>
-                </NextIntlClientProvider>
-            </body>
-        </html>
+        <div
+            className={`${notoSerif.variable} ${notoSans.variable} ${cormorant.variable} min-h-dvh font-sans bg-sumo-bg text-sumo-text antialiased selection:bg-sumo-brand selection:text-white`}
+        >
+            <NextIntlClientProvider messages={messages}>
+                <DocumentHtmlLang />
+                <TransitionProvider>
+                    <PageLoader />
+                    {children}
+                </TransitionProvider>
+            </NextIntlClientProvider>
+        </div>
     );
 }

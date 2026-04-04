@@ -333,7 +333,7 @@ const Header = () => {
           {/* --- C. 桌面端操作区：锁（40×40）→ 语言（同尺寸）→ 搜索 --- */}
           <div className="hidden shrink-0 lg:flex lg:items-center lg:gap-3">
             <Link
-              href="/manager/login"
+              href="/admin/dashboard"
               title={tHeader("adminLoginTitle")}
               className={cn(
                 "flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-transparent bg-gray-50 text-gray-500",
@@ -433,7 +433,7 @@ const Header = () => {
             </Link>
 
             <Link
-              href="/manager/login"
+              href="/admin/dashboard"
               onClick={() => setMenuOpen(false)}
               className="mobile-login-btn flex items-center justify-center gap-2 w-full bg-white text-sumo-dark border border-gray-200 py-3 rounded-full font-bold transition-colors text-sm hover:text-white"
             >

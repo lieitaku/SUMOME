@@ -14,9 +14,20 @@ export default async function EditPrefectureBannerPage({ params }: PageProps) {
   const prefData = PREFECTURE_DATABASE[pref];
   if (!prefData) notFound();
 
-  const banner = await prisma.prefectureBanner.findUnique({
-    where: { pref },
-  });
+  const [banner, clubsForFeature] = await Promise.all([
+    prisma.prefectureBanner.findUnique({
+      where: { pref },
+    }),
+    prisma.club.findMany({
+      where: {
+        area: prefData.name,
+        slug: { not: "official-hq" },
+        hidden: false,
+      },
+      select: { id: true, name: true, mainImage: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   const defaultDisplayImage = banner?.image ?? prefData.bannerImg ?? "";
 
@@ -26,6 +37,7 @@ export default async function EditPrefectureBannerPage({ params }: PageProps) {
       prefectureName={prefData.name}
       initialBanner={banner}
       defaultDisplayImage={defaultDisplayImage}
+      clubsForFeature={clubsForFeature}
     />
   );
 }

@@ -16,12 +16,14 @@ import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { upsertPrefectureBanner, deletePrefectureBanner } from "@/lib/actions/prefectureBanners";
 import { PrefectureBanner } from "@prisma/client";
 import { useState } from "react";
-import { Trash2, Loader2, Eye } from "lucide-react";
+import { Loader2, Eye } from "lucide-react";
+import { hasRealClubMainImage } from "@/lib/club-images";
 
 const formSchema = z.object({
   pref: z.string().min(1),
   image: z.string().min(1, "画像をアップロードするか、URLを入力してください"),
   alt: z.string().optional(),
+  featuredClubId: z.string().optional(),
   imagePosition: z.string().optional(),
   imageScale: z.union([z.string(), z.number()]).optional(),
   imageRotation: z.string().optional(),
@@ -29,11 +31,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+export type PrefectureFeatureClubOption = {
+  id: string;
+  name: string;
+  mainImage: string | null;
+};
+
 interface EditPrefectureBannerFormProps {
   pref: string;
   prefectureName: string;
   initialBanner: PrefectureBanner | null;
   defaultDisplayImage?: string;
+  clubsForFeature: PrefectureFeatureClubOption[];
 }
 
 export default function EditPrefectureBannerForm({
@@ -41,6 +50,7 @@ export default function EditPrefectureBannerForm({
   prefectureName,
   initialBanner,
   defaultDisplayImage = "",
+  clubsForFeature,
 }: EditPrefectureBannerFormProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -52,6 +62,7 @@ export default function EditPrefectureBannerForm({
       pref,
       image: initialBanner?.image ?? defaultDisplayImage ?? "",
       alt: initialBanner?.alt ?? "",
+      featuredClubId: initialBanner?.featuredClubId ?? "",
       imagePosition: initialBanner?.imagePosition ?? "50,50",
       imageScale: initialBanner?.imageScale != null ? String(initialBanner.imageScale) : "1",
       imageRotation: initialBanner?.imageRotation != null ? String(initialBanner.imageRotation) : "0",
@@ -71,6 +82,7 @@ export default function EditPrefectureBannerForm({
     formData.append("imagePosition", data.imagePosition ?? "50,50");
     formData.append("imageScale", String(data.imageScale ?? "1"));
     formData.append("imageRotation", data.imageRotation ?? "0");
+    formData.append("featuredClubId", data.featuredClubId?.trim() ?? "");
     handleSubmit(upsertPrefectureBanner, formData);
   };
 
@@ -128,6 +140,7 @@ export default function EditPrefectureBannerForm({
                         imagePosition: values.imagePosition ?? "50,50",
                         imageScale: values.imageScale ?? "1",
                         imageRotation: values.imageRotation ?? "0",
+                        featuredClubId: values.featuredClubId?.trim() || null,
                       },
                     }),
                   });
@@ -172,6 +185,30 @@ export default function EditPrefectureBannerForm({
                   placeholder="例：岩手県の相撲風景"
                 />
               </div>
+            </div>
+          </div>
+
+          <div className={sectionClass}>
+            <div>
+              <label className={labelClass}>「〇〇の相撲風景」で紹介するクラブ</label>
+              <select
+                {...form.register("featuredClubId")}
+                className={`${inputClass} bg-white cursor-pointer`}
+              >
+                <option value="">
+                  自動（この県の掲載クラブのうち、写真ありを優先）
+                </option>
+                {clubsForFeature.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                    {!hasRealClubMainImage(c.mainImage) ? "（写真なし・県ページでは採用されません）" : ""}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[11px] text-gray-500 mt-2">
+                手動で選んだクラブは<strong className="font-bold text-gray-700">実写真のメイン画像がある場合のみ</strong>
+                県ページの見出し・リンクに反映されます。写真がないクラブを選んでも自動候補にフォールバックします。
+              </p>
             </div>
           </div>
 

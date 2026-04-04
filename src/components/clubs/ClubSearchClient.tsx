@@ -14,6 +14,7 @@ import {
 import { type Club } from "@prisma/client";
 import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
+import { hasRealClubMainImage } from "@/lib/club-images";
 import Button from "@/components/ui/Button";
 
 // ==============================================================================
@@ -193,13 +194,28 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
     /** 在筛选结果上按「地区顺序」或「时间」排序 */
     const sortedClubs = useMemo(() => {
         const list = [...filteredClubs];
+        const photoCmp = (a: Club, b: Club) => {
+            const ar = hasRealClubMainImage(a.mainImage) ? 1 : 0;
+            const br = hasRealClubMainImage(b.mainImage) ? 1 : 0;
+            return br - ar;
+        };
         if (sortBy === "time") {
             const toTime = (d: Date | string | null | undefined) =>
                 d ? new Date(d).getTime() : 0;
-            list.sort((a, b) => toTime(b.createdAt) - toTime(a.createdAt));
+            list.sort((a, b) => {
+                const t = toTime(b.createdAt) - toTime(a.createdAt);
+                if (t !== 0) return t;
+                return photoCmp(a, b);
+            });
             return list;
         }
-        list.sort((a, b) => getRegionFilterIndex(a.area) - getRegionFilterIndex(b.area));
+        list.sort((a, b) => {
+            const r = getRegionFilterIndex(a.area) - getRegionFilterIndex(b.area);
+            if (r !== 0) return r;
+            const p = photoCmp(a, b);
+            if (p !== 0) return p;
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
         return list;
     }, [filteredClubs, sortBy]);
 

@@ -100,6 +100,7 @@ model Club {
   hidden         Boolean   @default(false) // 非表示時、前台には表示・検索されない
   published      Boolean   @default(false) // 默认为 false (草稿状态)
   homePickup     HomePickupClub? // 首页「注目の相撲クラブ」槽位（最多 3 个）
+  prefectureBannerFeatured PrefectureBanner[] @relation("PrefectureBannerFeaturedClub")
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -217,11 +218,15 @@ model PrefectureBanner {
   imagePosition  String?  @default("50,50") // "x,y" 百分比，与 Club 一致
   imageScale     Float?   @default(1) // 1–4，与 Club 一致
   imageRotation  Int?     // 旋转角度 0/90/180/270，缺省为 0
+  // 「〇〇の相撲風景」で紹介するクラブ（未設定時は写真ありクラブを優先して自動）
+  featuredClubId String?
+  featuredClub   Club?    @relation("PrefectureBannerFeaturedClub", fields: [featuredClubId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([pref])
+  @@index([featuredClubId])
 }
 
 // 旗子在各页面的显示设置（单例，供后台「显示设置」使用）
