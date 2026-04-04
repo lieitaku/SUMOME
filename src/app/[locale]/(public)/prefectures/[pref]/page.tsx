@@ -145,7 +145,9 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
 
   type BannerWithPosition = { imagePosition?: string | null; imageScale?: number | null; imageRotation?: number | null };
   const bannerRecord = customBanner as (BannerWithPosition & typeof customBanner) | null;
-  const bannerPosition = prefBannerPreview?.imagePosition ?? bannerRecord?.imagePosition ?? "50,50";
+  const bannerPositionRaw =
+    prefBannerPreview?.imagePosition ?? bannerRecord?.imagePosition ?? "50,50";
+  const bannerPosition = String(bannerPositionRaw ?? "50,50").trim();
   const [posX, posY] = bannerPosition.split(",").map((s: string) => {
     const n = Number(s.trim());
     return Number.isNaN(n) ? 50 : Math.min(100, Math.max(0, n));

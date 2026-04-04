@@ -40,10 +40,13 @@ const RANK_TIER: Record<string, number> = {
 };
 
 /** 将 rank 字符串转为可比较的数值，数值越大段位越高。带数字的段位（如 前頭 12）中数字越小段位越高。 */
-function getRankSortKey(rank: string): number {
-  const match = rank.match(/\s+(\d+)$/);
+function getRankSortKey(rank: unknown): number {
+  const r = typeof rank === "string" ? rank : rank != null ? String(rank) : "";
+  const match = r.match(/\s+(\d+)$/);
   const num = match ? parseInt(match[1], 10) : null;
-  const prefix = match ? rank.slice(0, match.index).trim() : rank;
+  const idx = match?.index;
+  const prefix =
+    match != null && typeof idx === "number" ? r.slice(0, idx).trim() : r.trim();
   const tier = RANK_TIER[prefix] ?? -1;
   const sub = num != null ? Math.max(0, 100 - num) : 100;
   return tier * 1000 + sub;

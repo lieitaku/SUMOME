@@ -40,6 +40,10 @@ export function sortClubsWithRealImagePriority<
         const ar = hasRealClubMainImage(a.mainImage) ? 1 : 0;
         const br = hasRealClubMainImage(b.mainImage) ? 1 : 0;
         if (br !== ar) return br - ar;
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        const tb = new Date(b.createdAt).getTime();
+        const ta = new Date(a.createdAt).getTime();
+        const safeB = Number.isFinite(tb) ? tb : 0;
+        const safeA = Number.isFinite(ta) ? ta : 0;
+        return safeB - safeA;
     });
 }

@@ -27,26 +27,37 @@ export function getCachedPickupClubsForHome() {
 /** Cached prefecture banner by slug. Invalidate with tag "prefecture-banners". */
 export function getCachedPrefectureBanner(prefSlug: string) {
   return unstable_cache(
-    async (pref: string) =>
-      prisma.prefectureBanner.findUnique({ where: { pref } }),
-    ["prefecture-banner"],
+    async () => {
+      try {
+        return await prisma.prefectureBanner.findUnique({ where: { pref: prefSlug } });
+      } catch (e) {
+        console.error("[getCachedPrefectureBanner]", prefSlug, e);
+        return null;
+      }
+    },
+    ["prefecture-banner", prefSlug],
     { revalidate: 60, tags: ["prefecture-banners"] }
-  )(prefSlug);
+  )();
 }
 
 /** Cached clubs by prefecture name (area). Excludes SUMOME事务局 (official-hq). Invalidate with tag "clubs". */
 export function getCachedClubsByArea(prefName: string) {
   return unstable_cache(
-    async (area: string) => {
-      const rows = await prisma.club.findMany({
-        where: { area, slug: { not: "official-hq" }, hidden: false },
-        orderBy: { createdAt: "desc" },
-      });
-      return sortClubsWithRealImagePriority(rows);
+    async () => {
+      try {
+        const rows = await prisma.club.findMany({
+          where: { area: prefName, slug: { not: "official-hq" }, hidden: false },
+          orderBy: { createdAt: "desc" },
+        });
+        return sortClubsWithRealImagePriority(rows);
+      } catch (e) {
+        console.error("[getCachedClubsByArea]", prefName, e);
+        return [];
+      }
     },
-    ["prefecture-clubs"],
+    ["prefecture-clubs", prefName],
     { revalidate: 60, tags: ["clubs"] }
-  )(prefName);
+  )();
 }
 
 /** Cached club by slug. Invalidate with tag "clubs". */
