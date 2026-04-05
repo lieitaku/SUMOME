@@ -16,6 +16,8 @@ import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
 import { hasRealClubMainImage } from "@/lib/club-images";
 import Button from "@/components/ui/Button";
+import { useLocale, useTranslations } from "next-intl";
+import { regionDisplayForLocale } from "@/lib/prefecture-en";
 
 // ==============================================================================
 // 1. 类型定义与常量配置
@@ -32,23 +34,20 @@ type RegionKey =
     | "kyushu_okinawa";
 
 /**
- * 地区与县的映射数据
- * 用于前端筛选器的 Tab 渲染
+ * 地区与县的映射数据（县名为日文，与 DB club.area 一致）
+ * 大区展示文案见 messages ClubSearch.regions.*
  */
-const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
+const REGIONS: { id: RegionKey; prefectures: string[] }[] = [
     {
         id: "hokkaido_tohoku",
-        label: "北海道・東北",
         prefectures: ["北海道", "青森", "秋田", "岩手", "山形", "宮城", "福島"],
     },
     {
         id: "kanto",
-        label: "関東",
         prefectures: ["東京", "神奈川", "千葉", "埼玉", "茨城", "栃木", "群馬"],
     },
     {
         id: "chubu",
-        label: "中部",
         prefectures: [
             "愛知",
             "静岡",
@@ -64,22 +63,18 @@ const REGIONS: { id: RegionKey; label: string; prefectures: string[] }[] = [
     },
     {
         id: "kansai",
-        label: "関西",
         prefectures: ["大阪", "兵庫", "京都", "滋賀", "奈良", "和歌山"],
     },
     {
         id: "chugoku",
-        label: "中国",
         prefectures: ["鳥取", "島根", "岡山", "広島", "山口"],
     },
     {
         id: "shikoku",
-        label: "四国",
         prefectures: ["徳島", "香川", "愛媛", "高知"],
     },
     {
         id: "kyushu_okinawa",
-        label: "九州・沖縄",
         prefectures: [
             "福岡",
             "佐賀",
@@ -120,6 +115,8 @@ interface ClubSearchClientProps {
 type SortMode = "area" | "time";
 
 const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientProps = {}) => {
+    const t = useTranslations("ClubSearch");
+    const locale = useLocale();
     const [clubsFromApi, setClubsFromApi] = useState<Club[] | null>(null);
     const [clubsLoading, setClubsLoading] = useState(true);
     const [clubsError, setClubsError] = useState<string | null>(null);
@@ -135,9 +132,9 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                 return res.json();
             })
             .then((data: Club[]) => setClubsFromApi(data))
-            .catch(() => setClubsError("読み込みに失敗しました。"))
+            .catch(() => setClubsError(t("loadError")))
             .finally(() => setClubsLoading(false));
-    }, []);
+    }, [t]);
 
     // --- 状态管理 (State Management) ---
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all"); // 当前选中的大区
@@ -165,9 +162,11 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
         return initialClubs.filter((club) => {
             // 1. 文本搜索逻辑 (不区分大小写)
             // 匹配范围：俱乐部名称 或 地区字段
+            const q = searchQuery.toLowerCase();
             const matchQuery =
                 searchQuery === "" ||
-                club.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                club.name.toLowerCase().includes(q) ||
+                (club.nameEn?.toLowerCase().includes(q) ?? false) ||
                 club.area.includes(searchQuery);
 
             // 2. 地区筛选逻辑
@@ -319,13 +318,13 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
                                 <SlidersHorizontal size={12} className="text-sumo-brand" />
                                 <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
-                                    クラブ検索
+                                    {t("badge")}
                                 </span>
                             </div>
                         </div>
 
                         <h1 className="text-center text-4xl md:text-5xl font-serif font-black text-gray-900 mb-10 tracking-tight reveal-up delay-100">
-                            相撲クラブを検索
+                            {t("title")}
                         </h1>
 
                         {/* 搜索框组件 */}
@@ -343,7 +342,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 </div>
                                 <input
                                     type="text"
-                                    placeholder="クラブ名、地域名で検索..."
+                                    placeholder={t("searchPlaceholder")}
                                     className="flex-1 min-w-0 h-full px-4 md:px-6 bg-transparent text-sm md:text-lg font-bold text-gray-800 placeholder-gray-300 focus:outline-none"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -365,7 +364,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     onClick={handleSearchClick}
                                     className="mr-4 ml-1 px-5 py-2.5 rounded-xl bg-sumo-brand text-white text-sm font-bold tracking-wide hover:bg-sumo-brand/90 active:scale-[0.98] transition-all shadow-sm shrink-0"
                                 >
-                                    検索
+                                    {t("searchButton")}
                                 </button>
                             </div>
                         </div>
@@ -379,11 +378,11 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 <div className="flex items-center gap-3">
                                     <Filter size={16} className="text-sumo-brand" />
                                     <span className="text-sm font-bold text-gray-700 tracking-wide">
-                                        エリアフィルター
+                                        {t("areaFilter")}
                                     </span>
                                     {activeRegion !== "all" && (
                                         <span className="ml-2 px-2 py-0.5 bg-sumo-brand/10 text-sumo-brand text-[10px] font-bold rounded-full">
-                                            選択中
+                                            {t("selected")}
                                         </span>
                                     )}
                                 </div>
@@ -413,7 +412,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                                 });
                                             }}
                                         >
-                                            全国
+                                            {t("allJapan")}
                                         </Button>
 
                                         {REGIONS.map((region) => (
@@ -426,7 +425,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                                     setActivePref("all");
                                                 }}
                                             >
-                                                {region.label}
+                                                {t(`regions.${region.id}`)}
                                             </Button>
                                         ))}
                                     </div>
@@ -435,7 +434,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     {activeRegion !== "all" && (
                                         <div className="relative pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
                                             <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
-                                                都道府県を選択
+                                                {t("prefPickerLabel")}
                                             </div>
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
@@ -444,7 +443,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                                     onClick={() => setActivePref("all")}
                                                     className="px-4 py-2 text-xs rounded-lg border-b-[3px]"
                                                 >
-                                                    全て
+                                                    {t("prefAll")}
                                                 </Button>
 
                                                 {currentPrefectures.map((pref) => (
@@ -455,7 +454,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                                         onClick={() => setActivePref(pref)}
                                                         className="px-4 py-2 text-xs rounded-lg border-b-[3px]"
                                                     >
-                                                        {pref}
+                                                        {regionDisplayForLocale(pref, locale)}
                                                     </Button>
                                                 ))}
                                             </div>
@@ -476,7 +475,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     {filteredClubs.length}
                                 </span>
                                 <span className="text-xs font-bold text-gray-400 tracking-widest mb-1">
-                                    件のクラブが見つかりました
+                                    {t("resultsSuffix")}
                                 </span>
                             </div>
 
@@ -485,7 +484,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 {/* 排序切换：默认按地区顺序，可切换为按时间 */}
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">
-                                        並び順
+                                        {t("sortLabel")}
                                     </span>
                                     <button
                                         type="button"
@@ -498,7 +497,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                         )}
                                     >
                                         <Map size={14} />
-                                        地域順
+                                        {t("sortArea")}
                                     </button>
                                     <button
                                         type="button"
@@ -511,7 +510,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                         )}
                                     >
                                         <Clock size={14} />
-                                        新着順
+                                        {t("sortTime")}
                                     </button>
                                 </div>
 
@@ -531,7 +530,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 {activeRegion !== "all" && (
                                     <span className="pl-3 pr-2 py-1 bg-sumo-brand text-white text-xs font-bold rounded-full flex items-center gap-1 shadow-sm shadow-sumo-brand/20">
                                         <MapPin size={10} />
-                                        {REGIONS.find((r) => r.id === activeRegion)?.label}
+                                        {t(`regions.${activeRegion}`)}
                                         <button
                                             onClick={() => {
                                                 startTransition(() => {
@@ -589,16 +588,16 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     <Search size={40} className="text-gray-300" />
                                 </div>
                                 <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">
-                                    該当するクラブは見つかりませんでした
+                                    {t("emptyTitle")}
                                 </h3>
                                 <p className="text-gray-500 text-sm max-w-xs mx-auto mb-8 leading-relaxed">
-                                    条件に一致するクラブが見つかりませんでした。
+                                    {t("emptyBody")}
                                 </p>
                                 <button
                                     onClick={handleReset}
                                     className="px-8 py-3 bg-sumo-dark text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-colors shadow-lg hover:-translate-y-1"
                                 >
-                                    条件をリセット
+                                    {t("resetFilters")}
                                 </button>
                             </div>
                         )}

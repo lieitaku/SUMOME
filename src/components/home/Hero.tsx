@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useLayoutEffect, useRef, useCallback, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 import RabbitBanner from "@/components/home/RabbitBanner/RabbitBannerDynamic";
 import type { SponsorItem, BannerDisplayMode } from "@/components/home/RabbitBanner";
 import type { HakuhoViewportKind } from "@/components/home/hakuhoDeviceTiers";
@@ -56,6 +57,9 @@ function useNarrowCard() {
 function HeroContent() {
   const narrow = useNarrowCard();
   const t = useTranslations("Hero");
+  const locale = useLocale();
+  const isEn = locale === "en";
+
   return (
     <div
       className={`relative flex flex-row items-stretch rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.1)] ${
@@ -79,23 +83,38 @@ function HeroContent() {
             narrow ? "flex-col items-start gap-2" : "flex-row items-center gap-0"
           }`}
         >
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-3 md:gap-6 shrink-0">
             <h1 className="flex items-center gap-2 md:gap-4 font-serif text-sumo-text leading-none select-none">
-              <span className="text-3xl md:text-4xl font-black tracking-tighter text-sumo-red">{t("shin")}</span>
+              <span className="font-black tracking-tighter text-sumo-red text-3xl md:text-4xl">
+                {t("shin")}
+              </span>
               <span className="w-px h-3 bg-gray-400/50 rotate-12"></span>
-              <span className="text-3xl md:text-4xl font-black tracking-tighter text-sumo-red">{t("gi")}</span>
+              <span className="font-black tracking-tighter text-sumo-red text-3xl md:text-4xl">
+                {t("gi")}
+              </span>
               <span className="w-px h-3 bg-gray-400/50 rotate-12"></span>
-              <span className="text-3xl md:text-4xl font-black tracking-tighter text-sumo-red">{t("tai")}</span>
+              <span className="font-black tracking-tighter text-sumo-red text-3xl md:text-4xl">
+                {t("tai")}
+              </span>
             </h1>
           </div>
           <div
-            className={`flex flex-col items-end border-gray-400/30 min-w-0 flex-shrink ${
+            className={`flex flex-col items-end justify-center border-gray-400/30 min-w-0 ${
               narrow ? "border-l-0 pl-0 ml-0 self-end" : "border-l pl-4 md:pl-8 ml-2"
             }`}
           >
             <p
-              className="font-serif font-bold text-sumo-text tracking-widest leading-none mb-1 text-right whitespace-nowrap"
-              style={{ fontSize: "clamp(0.875rem, 4.2vw, 1.25rem)" }}
+              className={cn(
+                "font-bold text-sumo-text leading-[1.3] text-right",
+                isEn
+                  ? "font-sans uppercase tracking-[0.15em] text-[9px] sm:text-[10px] md:text-xs max-w-[140px] sm:max-w-[160px] md:max-w-[220px] whitespace-normal break-words"
+                  : "font-serif tracking-widest whitespace-nowrap mb-1"
+              )}
+              style={
+                isEn
+                  ? undefined
+                  : { fontSize: "clamp(0.875rem, 4.2vw, 1.25rem)" }
+              }
             >
               {t("tagline")}
             </p>

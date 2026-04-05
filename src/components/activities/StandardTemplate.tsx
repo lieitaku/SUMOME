@@ -4,6 +4,12 @@ import React from "react";
 import { MapPin, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Activity, Club } from "@prisma/client";
+import { useLocale, useTranslations } from "next-intl";
+import {
+    activityDisplayContentFallback,
+    activityDisplayTitle,
+    clubDisplayName,
+} from "@/lib/i18n-db";
 
 // --- 1. 定义积木块结构 ---
 interface ReportSection {
@@ -26,9 +32,15 @@ interface ActivityWithClub extends Activity {
 }
 
 export default function StandardTemplate({ activity }: { activity: ActivityWithClub }) {
+    const locale = useLocale();
+    const t = useTranslations("ActivitiesPage");
+    const titleShown = activityDisplayTitle(activity, locale);
+    const clubNameShown = clubDisplayName(activity.club, locale);
+    const contentFallback = activityDisplayContentFallback(activity, locale);
     // 安全地将 Prisma 的 JsonValue 转换为我们的 Schema
     const contentData = activity.contentData as unknown as ContentDataSchema | null;
     const { templateType } = activity;
+    const dateLocale = locale === "en" ? "en-US" : "ja-JP";
 
     return (
         <article className="max-w-4xl mx-auto bg-white min-h-screen font-sans">
@@ -40,18 +52,18 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
                         <span className="text-gray-300">/</span>
                         <span className="flex items-center gap-1">
                             <Calendar size={12} />
-                            {new Date(activity.date).toLocaleDateString("ja-JP")}
+                            {new Date(activity.date).toLocaleDateString(dateLocale)}
                         </span>
                     </div>
 
                     <h1 className="text-3xl md:text-5xl font-serif font-black text-gray-900 leading-[1.2] tracking-tight">
-                        {activity.title}
+                        {titleShown}
                     </h1>
 
                     <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-gray-500 font-medium pt-2">
                         <div className="flex items-center gap-1.5">
                             <MapPin size={16} className="text-gray-300" />
-                            <span>{activity.club.name} ({activity.club.area})</span>
+                            <span>{clubNameShown} ({activity.club.area})</span>
                         </div>
                     </div>
                 </div>
@@ -60,7 +72,7 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
                     <div className="aspect-[21/9] w-full overflow-hidden rounded-2xl shadow-lg bg-gray-100">
                         <img
                             src={activity.mainImage}
-                            alt={activity.title}
+                            alt={titleShown}
                             className="w-full h-full object-cover"
                         />
                     </div>
@@ -69,8 +81,15 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
 
             {/* --- 2. Content Area (分模块渲染) --- */}
             <div className="py-12 md:py-16">
+                {locale === "en" && contentFallback && (
+                    <div className="max-w-2xl mx-auto mb-12 p-6 rounded-2xl bg-gray-50 border border-gray-100 text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
+                        {contentFallback}
+                    </div>
+                )}
                 {/* REPORT 渲染 */}
-                {templateType === "report" && contentData?.sections && (
+                {templateType === "report" &&
+                    contentData?.sections &&
+                    !(locale === "en" && contentFallback) && (
                     <div className="space-y-20">
                         {contentData.sections.map((section, index) => (
                             <section key={section.id} className="group animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -107,7 +126,9 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
                 {templateType === "news" && (
                     <div className="max-w-2xl mx-auto space-y-8">
                         <div className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap font-medium">
-                            {contentData?.body || activity.content}
+                            {locale === "en" && contentFallback
+                                ? contentFallback
+                                : contentData?.body || activity.content}
                         </div>
                     </div>
                 )}
@@ -117,16 +138,18 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
                     <div className="max-w-3xl mx-auto space-y-12">
                         <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-8 shadow-inner">
                             <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">開催場所</span>
-                                <p className="text-lg font-bold text-gray-900">{activity.location || "未定"}</p>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t("eventVenueLabel")}</span>
+                                <p className="text-lg font-bold text-gray-900">{activity.location || t("eventLocationTbd")}</p>
                             </div>
                             <div className="space-y-1">
-                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">費用</span>
-                                <p className="text-lg font-bold text-gray-900">{contentData?.fee || "無料"}</p>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{t("eventFeeLabel")}</span>
+                                <p className="text-lg font-bold text-gray-900">{contentData?.fee || t("eventFeeFree")}</p>
                             </div>
                         </div>
                         <div className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
-                            {contentData?.description || activity.content}
+                            {locale === "en" && contentFallback
+                                ? contentFallback
+                                : contentData?.description || activity.content}
                         </div>
                     </div>
                 )}
@@ -134,10 +157,11 @@ export default function StandardTemplate({ activity }: { activity: ActivityWithC
 
             <footer className="py-12 border-t border-gray-100 text-center">
                 <button
+                    type="button"
                     onClick={() => window.history.back()}
                     className="text-xs font-black tracking-widest text-gray-400 hover:text-sumo-brand transition-colors uppercase"
                 >
-                    ← イベント一覧へ戻る
+                    ← {t("articleBackToList")}
                 </button>
             </footer>
         </article>

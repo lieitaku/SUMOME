@@ -9,6 +9,7 @@ import { confirmAdmin } from "@/lib/auth-utils";
 // Zod Schema
 const MagazineSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
+  titleEn: z.string().optional().nullable(),
   slug: z
     .string()
     .min(1, "IDは必須です")
@@ -19,6 +20,7 @@ const MagazineSchema = z.object({
   pdfUrl: z.string().optional().nullable(),
   readLink: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
+  descriptionEn: z.string().optional().nullable(),
   published: z.boolean(),
   images: z.array(z.string()),
   readingDirection: z.enum(["ltr", "rtl"]).default("ltr"),
@@ -28,6 +30,7 @@ const MagazineSchema = z.object({
 function parseFormData(formData: FormData) {
   return {
     title: formData.get("title") as string,
+    titleEn: (formData.get("titleEn") as string) || null,
     slug: formData.get("slug") as string,
     region: formData.get("region") as string,
     issueDate: formData.get("issueDate") as string,
@@ -35,6 +38,7 @@ function parseFormData(formData: FormData) {
     pdfUrl: (formData.get("pdfUrl") as string) || null,
     readLink: (formData.get("readLink") as string) || null,
     description: (formData.get("description") as string) || null,
+    descriptionEn: (formData.get("descriptionEn") as string) || null,
     published: formData.get("published") === "true",
     images: formData.getAll("images") as string[],
     readingDirection:

@@ -3,10 +3,11 @@
 import React from "react";
 import Link from "@/components/ui/TransitionLink";
 import Ceramic from "@/components/ui/Ceramic";
-import { ArrowRight, Sparkles, Target, Users, Heart } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const AboutPage = () => {
+  const t = useTranslations("AboutPage");
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
       <main className="flex-grow">
@@ -32,13 +33,13 @@ const AboutPage = () => {
 
           <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
             <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
-              SUMOMEについて
+              {t("heroTitle")}
             </h1>
 
             <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200">
-              相撲の未来を、ここから紡ぐ。
+              {t("heroSubtitleLine1")}
               <br className="hidden md:inline" />
-              伝統と革新が交差する、新しいプラットフォーム。
+              {t("heroSubtitleLine2")}
             </p>
           </div>
         </section>
@@ -57,12 +58,12 @@ const AboutPage = () => {
                   <div className="relative z-10 sticky top-12 h-full flex flex-col">
                     {/* 核心标语 */}
                     <h2 className="text-3xl md:text-5xl font-serif font-bold text-sumo-dark leading-[1.4] tracking-wide mb-12">
-                      探す。
+                      {t("sloganLine1")}
                       <br />
-                      繋がる。
+                      {t("sloganLine2")}
                       <br />
                       <span className="text-sumo-red relative inline-block">
-                        応援する。
+                        {t("sloganLine3")}
                       </span>
                     </h2>
 
@@ -71,14 +72,14 @@ const AboutPage = () => {
                     {/* 竖排装饰文字 (Japanese Soul) */}
                     <div className="flex-grow relative">
                       <div className="writing-vertical text-gray-200 font-serif font-bold text-6xl select-none absolute top-0 left-0 tracking-widest opacity-50">
-                        相撲道
+                        {t("verticalAside")}
                       </div>
                     </div>
 
                     {/* 底部装饰テキスト */}
                     <div className="mt-auto">
                       <p className="text-[10px] text-gray-400 font-bold tracking-[0.3em] uppercase">
-                        伝統 × 革新
+                        {t("traditionInnovation")}
                       </p>
                     </div>
                   </div>
@@ -92,13 +93,9 @@ const AboutPage = () => {
                       <span className="text-5xl float-left mr-4 mt-[-8px] text-sumo-brand font-serif font-black">
                         S
                       </span>
-                      UMOMEは、全国の相撲クラブを簡単に検索できる専門サイトです。
-                      自宅や職場の近くで活動しているクラブを見つけたい方など、どなたでも目的に合ったクラブを探すことができます。
+                      {t("storyP1")}
                     </p>
-                    <p>
-                      自分に合う場所を見つけ、力士としての第一歩を踏み出したり、推しクラブを見つけて応援することも可能です。
-                      私たちは、相撲という日本の伝統文化を通じて、人々の新たな繋がりを創造します。
-                    </p>
+                    <p>{t("storyP2")}</p>
                   </div>
 
                   {/* --- Call to Action Card (For Owners) --- */}
@@ -106,20 +103,20 @@ const AboutPage = () => {
                     <div className="absolute -inset-1 bg-gradient-to-r from-sumo-brand to-sumo-dark rounded-xl opacity-10 group-hover:opacity-20 transition duration-500 blur-sm"></div>
                     <div className="relative bg-[#F8F9FA] rounded-xl border border-gray-200 p-8 md:p-10 transition-all duration-300 hover:bg-white hover:shadow-xl">
                       <div className="inline-flex items-center gap-2 px-3 py-1 bg-sumo-dark text-white text-[10px] font-bold tracking-widest uppercase rounded-sm mb-6">
-                        クラブ運営者の方へ
+                        {t("badgeForOwners")}
                       </div>
 
                       <h3 className="text-xl font-serif font-bold text-sumo-dark mb-4 flex items-center gap-3">
-                        道場・クラブ運営者様へ
+                        {t("ctaHeading")}
                       </h3>
 
                       <p className="text-sm text-gray-500 leading-loose mb-8">
-                        登録クラブはPRとしてチームの魅力を外部に発信し、ファンやスポンサーの獲得に繋げます。さらに、毎月無料でフォトブック情報誌をお届しています。
+                        {t("ctaBody")}
                       </p>
 
                       <Link href="/partners" className="inline-flex">
                         <button className="flex items-center gap-3 px-8 py-4 bg-white border border-gray-300 rounded-lg text-xs font-bold uppercase tracking-widest text-sumo-dark hover:bg-sumo-brand hover:text-white hover:border-sumo-brand transition-all duration-300 shadow-sm hover:-translate-y-1">
-                          <span>お問い合わせ・登録</span>
+                          <span>{t("ctaButton")}</span>
                           <ArrowRight size={14} />
                         </button>
                       </Link>

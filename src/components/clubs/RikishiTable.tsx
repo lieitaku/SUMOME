@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { ChevronDown, ChevronUp, Medal } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 // ==============================================================================
 // 1. 类型定义 (Type Definitions)
@@ -61,7 +62,7 @@ const RikishiTable = ({
   prefectureName,
   accentColor = "#2454a4", // 默认值：相扑蓝
 }: RikishiTableProps) => {
-  // --- 状态管理 ---
+  const t = useTranslations("RikishiTable");
   const [isExpanded, setIsExpanded] = useState(false);
   const INITIAL_COUNT = 10; // 默认显示前 10 条
 
@@ -96,19 +97,19 @@ const RikishiTable = ({
             style={{ backgroundColor: accentColor }}
           ></div>
           {/* 标题文本 */}
-          <span>【{prefectureName}】出身力士一覧</span>
+          <span>{t("title", { prefName: prefectureName })}</span>
         </h3>
 
-        {/* ✨ 计数徽章：背景色淡化，边框和文字用实色 */}
         <span
-          className="px-3 py-1 text-xs font-bold rounded-full border"
+          className="px-3 py-1 text-xs font-bold rounded-full border transition-all duration-200 ease-in-out"
           style={{
-            backgroundColor: `${accentColor}0D`, // 5% opacity
+            backgroundColor: `${accentColor}0D`,
             color: accentColor,
-            borderColor: `${accentColor}1A`, // 10% opacity
+            borderColor: `${accentColor}1A`,
           }}
         >
-          {rikishiList.length}名
+          {rikishiList.length}
+          {t("countSuffix")}
         </span>
       </div>
 
@@ -124,22 +125,22 @@ const RikishiTable = ({
                   className="px-6 py-4 font-bold tracking-widest border-b border-gray-200"
                   style={{ color: accentColor }}
                 >
-                  四股名
+                  {t("colShikona")}
                 </th>
                 <th className="px-6 py-4 font-bold tracking-widest border-b border-gray-200">
-                  部屋
+                  {t("colStable")}
                 </th>
                 <th
                   className="px-6 py-4 font-bold tracking-widest border-b border-gray-200"
                   style={{ color: accentColor }}
                 >
-                  最高位
+                  {t("colRank")}
                 </th>
                 <th className="px-6 py-4 font-bold tracking-widest border-b border-gray-200">
-                  初土俵
+                  {t("colDebut")}
                 </th>
                 <th className="px-6 py-4 font-bold tracking-widest border-b border-gray-200">
-                  引退
+                  {t("colRetire")}
                 </th>
               </tr>
             </thead>
@@ -176,8 +177,8 @@ const RikishiTable = ({
                     {rikishi.active && (
                       <span
                         className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                        title="現役"
-                      ></span>
+                        title={t("activeTitle")}
+                      />
                     )}
                   </td>
 
@@ -203,8 +204,8 @@ const RikishiTable = ({
                   {/* 引退/现役列 */}
                   <td className="px-6 py-4 text-gray-400 font-mono text-xs tracking-wide group-hover:bg-[var(--hover-bg)]">
                     {rikishi.end || (
-                      <span className="inline-block px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-700 font-bold">
-                        現役
+                      <span className="inline-block px-2 py-0.5 rounded-sm text-[10px] bg-green-100 text-green-700 font-bold">
+                        {t("active")}
                       </span>
                     )}
                   </td>
@@ -236,12 +237,13 @@ const RikishiTable = ({
                       )}
                     </span>
                     <span className="text-xs text-gray-400 mt-1 font-medium tracking-wide">
-                      {rikishi.stable}部屋
+                      {rikishi.stable}
+                      {t("stableSuffix")}
                     </span>
                   </div>
                   <div className="text-right">
                     <span className="block text-[9px] text-gray-300 font-bold tracking-wider mb-0.5">
-                      最高位
+                      {t("colRank")}
                     </span>
                     {/* ✨ 排名标签：手机端也要跟随主题色 */}
                     <span
@@ -263,7 +265,7 @@ const RikishiTable = ({
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
                     <span className="block text-[9px] text-gray-400 font-bold tracking-wider mb-1">
-                      初土俵
+                      {t("colDebut")}
                     </span>
                     <span className="font-mono text-gray-600 font-medium">
                       {rikishi.start}
@@ -271,7 +273,7 @@ const RikishiTable = ({
                   </div>
                   <div>
                     <span className="block text-[9px] text-gray-400 font-bold tracking-wider mb-1">
-                      引退
+                      {t("colRetire")}
                     </span>
                     <span
                       className={cn(
@@ -279,7 +281,7 @@ const RikishiTable = ({
                         rikishi.active ? "text-green-600" : "text-gray-600",
                       )}
                     >
-                      {rikishi.end || "現役"}
+                      {rikishi.end || t("active")}
                     </span>
                   </div>
                 </div>
@@ -332,16 +334,15 @@ const RikishiTable = ({
               >
                 {isExpanded ? (
                   <>
-                    <ChevronUp size={14} /> CLOSE LIST
+                    <ChevronUp size={14} /> {t("collapse")}
                   </>
                 ) : (
                   <>
                     <ChevronDown
                       size={14}
-                      // Hover 时箭头的小动画也可以保留
                       className="transition-transform group-hover:translate-y-0.5"
                     />
-                    VIEW ALL ({rikishiList.length})
+                    {t("viewAllWithCount", { count: rikishiList.length })}
                   </>
                 )}
               </button>
@@ -350,14 +351,12 @@ const RikishiTable = ({
 
           {/* 数据来源注脚 */}
           <div className="bg-gray-50 px-6 py-3 text-right text-[10px] text-gray-400 border-t border-gray-200">
-            Source: Sumo Reference
+            {t("sourceFooter")}
           </div>
         </div>
       ) : (
         // 空状态提示
-        <div className="p-12 text-center text-gray-400 text-sm font-medium">
-          No data available.
-        </div>
+        <div className="p-12 text-center text-gray-400 text-sm font-medium">{t("emptyState")}</div>
       )}
     </div>
   );

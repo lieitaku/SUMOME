@@ -7,18 +7,20 @@ import { ArrowRight, MapPin } from "lucide-react";
 import Section from "@/components/ui/Section";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
+import { useLocale, useTranslations } from "next-intl";
+import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
+import type { Club } from "@prisma/client";
 
 // 定义从 Prisma 传过来的数据类型
 type ActivityWithClub = {
   id: string;
   title: string;
+  titleEn: string | null;
   date: Date;
   location: string | null;
   mainImage: string | null;
   category?: string | null;
-  club: {
-    name: string;
-  } | null;
+  club: Pick<Club, "name" | "nameEn"> | null;
 };
 
 interface ActivityReportProps {
@@ -26,6 +28,9 @@ interface ActivityReportProps {
 }
 
 const ActivityReport = ({ activities }: ActivityReportProps) => {
+  const locale = useLocale();
+  const t = useTranslations("Home");
+  const tAct = useTranslations("ActivitiesPage");
   // 健壮性检查：如果没有活动，就先不渲染这个区域
   if (!activities || activities.length === 0) return null;
 
@@ -38,7 +43,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 md:mb-16 border-b border-gray-200 pb-8 reveal-up">
         <div>
           <h2 className="text-3xl md:text-5xl font-black font-serif text-sumo-text">
-            普及・広報活動
+            {t("activityReportTitle")}
           </h2>
         </div>
 
@@ -46,7 +51,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
           href="/activities"
           className="hidden md:flex items-center gap-2 text-sm font-bold text-sumo-brand hover:text-sumo-red transition-colors group tracking-widest"
         >
-          すべての活動を見る
+          {t("activityReportViewAll")}
           <ArrowRight
             size={16}
             className="group-hover:translate-x-1 transition-transform"
@@ -61,6 +66,11 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
           const month = date.getMonth() + 1;
           const day = date.getDate();
           const year = date.getFullYear();
+          const titleShown = activityDisplayTitle(activity, locale);
+          const monthLabel =
+            locale === "en"
+              ? new Intl.DateTimeFormat("en-US", { month: "short" }).format(date)
+              : `${month}月`;
 
           return (
             <div
@@ -79,7 +89,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
                 <div className="relative aspect-3/4 bg-gray-100 group overflow-hidden">
                   <Image
                     src={activity.mainImage || "/images/placeholder-activity.webp"}
-                    alt={activity.title}
+                    alt={titleShown}
                     fill
                     className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 33vw"
@@ -88,7 +98,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
                   {/* 日期贴片 - 左上角精致设计 */}
                   <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-2 text-center shadow-lg rounded-sm border-t-2 border-sumo-brand z-10">
                     <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                      {month}月
+                      {monthLabel}
                     </span>
                     <span className="block text-xl font-serif font-black text-sumo-dark leading-none">
                       {day}
@@ -106,14 +116,17 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
                 {/* 内容区域 */}
                 <div className="flex flex-col grow p-6 group">
                   <h3 className="text-xl font-serif font-bold text-gray-900 mb-4 leading-relaxed group-hover:text-sumo-brand transition-colors line-clamp-2">
-                    {activity.title}
+                    {titleShown}
                   </h3>
 
                   <div className="flex items-center gap-4 text-xs text-gray-500 font-medium mb-6 mt-auto">
                     <div className="flex items-center gap-1.5">
                       <MapPin size={14} className="text-sumo-brand" />
                       <span className="line-clamp-1">
-                        {activity.location || activity.club?.name || "SUMOME"}
+                        {activity.location ||
+                          (activity.club
+                            ? clubDisplayName(activity.club, locale)
+                            : "SUMOME")}
                       </span>
                     </div>
                     <span className="text-gray-300">|</span>
@@ -127,7 +140,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
 
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold tracking-widest text-gray-400 group-hover:text-sumo-brand transition-colors uppercase">
-                      詳細を見る
+                      {tAct("listReadMore")}
                     </span>
                     <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-brand group-hover:bg-sumo-brand transition-all duration-300">
                       <ArrowRight
@@ -146,7 +159,7 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
       {/* 移动端按钮 */}
       <div className="mt-12 text-center md:hidden reveal-up delay-100">
         <Button href="/activities" variant="outline" className="w-full md:w-auto">
-          すべての活動を見る
+          {t("activityReportViewAll")}
         </Button>
       </div>
     </Section>

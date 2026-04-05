@@ -123,28 +123,28 @@ const RegistrationForm = () => {
                     JOIN
                 </div>
 
-                <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
-                    <div className="flex justify-center mb-8">
+                <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center md:text-left">
+                    <div className="flex justify-start mb-6 md:mb-8">
                         <button
                             type="button"
                             onClick={handleBack}
-                            className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 active:scale-95 transition-all text-white group"
                         >
                             <ChevronLeft
-                                size={12}
-                                className="group-hover:-translate-x-0.5 transition-transform"
+                                size={16}
+                                className="group-hover:-translate-x-1 transition-transform"
                             />
-                            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
+                            <span className="text-xs font-bold tracking-[0.2em] uppercase">
                                 戻る
                             </span>
                         </button>
                     </div>
 
-                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm reveal-up delay-100">
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm reveal-up delay-100 text-center">
                         新規クラブ登録
                     </h1>
 
-                    <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200">
+                    <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200 text-center">
                         SUMOMEと共に、相撲の未来を創りましょう。
                         <br className="hidden md:inline" />
                         登録は無料。数分で完了します。
@@ -164,9 +164,15 @@ const RegistrationForm = () => {
                             {/* --- A. 左侧区域（桌面）/ 下方（手机）--- */}
                             <div className="lg:w-5/12 bg-[#FAFAFA] border-r border-gray-100 p-6 md:p-14 relative overflow-hidden flex flex-col">
                                 <div className="relative z-10 flex-grow">
-                                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-6 md:mb-10 border-b border-gray-200 pb-4">
-                                        メリット
-                                    </h3>
+                                    <div className="mb-6 md:mb-10 flex flex-col-reverse md:flex-col gap-4 md:gap-0 md:border-b md:border-gray-200 md:pb-4">
+                                        <span className="inline-flex w-fit items-center justify-center px-3 py-1 bg-sumo-brand/10 text-sumo-brand text-[10px] font-bold tracking-widest uppercase rounded-full">
+                                            導入のメリット
+                                        </span>
+                                        <div
+                                            className="w-full border-b border-gray-200 md:hidden"
+                                            aria-hidden
+                                        />
+                                    </div>
 
                                     <h2 className="text-2xl md:text-3xl font-serif font-bold text-sumo-dark mb-5 md:mb-8 leading-tight">
                                         クラブ運営を、
@@ -191,11 +197,11 @@ const RegistrationForm = () => {
                                         ].map((item, idx) => (
                                             <div key={idx} className="flex gap-4 group">
                                                 <div className={cn(
-                                                    "mt-1 w-6 h-6 rounded-full border flex items-center justify-center transition-all shadow-sm shrink-0",
-                                                    "border-sumo-brand text-sumo-brand bg-white",
-                                                    "md:border-gray-300 md:text-gray-300 md:bg-transparent md:group-hover:border-sumo-brand md:group-hover:text-sumo-brand md:group-hover:bg-white"
+                                                    "mt-1 w-6 h-6 rounded-full flex items-center justify-center transition-all shadow-sm shrink-0",
+                                                    "bg-sumo-brand text-white",
+                                                    "md:group-hover:scale-110 md:group-hover:shadow-md"
                                                 )}>
-                                                    <Check size={12} />
+                                                    <Check size={12} strokeWidth={3} />
                                                 </div>
                                                 <div>
                                                     <h4 className="text-sm font-bold text-gray-700 mb-1 group-hover:text-sumo-brand transition-colors">
@@ -221,11 +227,18 @@ const RegistrationForm = () => {
                             </div>
 
                             {/* --- B. 右侧区域: 注册表单 (Form) --- */}
-                            <div className="lg:w-7/12 bg-white p-5 md:p-14 lg:p-16 relative">
-                                <div className="mb-6 md:mb-10">
-                                    <h3 className="text-3xl font-serif font-bold text-sumo-dark">
+                            <div className="lg:w-7/12 bg-white p-6 md:p-14 lg:p-16 relative">
+                                <div className="mb-8 md:mb-12">
+                                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-sumo-brand rounded-md text-[10px] font-bold tracking-widest uppercase mb-4 border border-blue-100">
+                                        <User size={12} />
+                                        無料登録
+                                    </div>
+                                    <h3 className="text-2xl md:text-3xl font-serif font-black text-sumo-dark tracking-tight">
                                         新規アカウント作成
                                     </h3>
+                                    <p className="text-sm text-gray-500 mt-3 font-medium leading-relaxed">
+                                        必要な情報を入力して、クラブの登録を始めましょう。
+                                    </p>
                                 </div>
 
                                 <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col">
@@ -256,7 +269,7 @@ const RegistrationForm = () => {
                                     </div>
 
                                     <div className="group flex flex-col gap-1.5 pb-8 md:pb-6">
-                                        <label htmlFor="reg-name" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                                        <label htmlFor="reg-name" className="text-xs font-bold text-sumo-brand uppercase tracking-wider flex items-center gap-2 transition-colors">
                                             <User size={14} /> 代表者氏名 <span className="text-red-400">*</span>
                                         </label>
                                         <input
@@ -274,7 +287,7 @@ const RegistrationForm = () => {
                                     </div>
 
                                     <div className="group flex flex-col gap-1.5 pb-8 md:pb-7">
-                                        <label htmlFor="reg-email" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                                        <label htmlFor="reg-email" className="text-xs font-bold text-sumo-brand uppercase tracking-wider flex items-center gap-2 transition-colors">
                                             <Mail size={14} /> メールアドレス <span className="text-red-400">*</span>
                                         </label>
                                         <input
@@ -292,7 +305,7 @@ const RegistrationForm = () => {
                                     </div>
 
                                     <div className="group flex flex-col gap-1.5 pb-3 md:pb-7">
-                                        <label htmlFor="reg-password" className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
+                                        <label htmlFor="reg-password" className="text-xs font-bold text-sumo-brand uppercase tracking-wider flex items-center gap-2 transition-colors">
                                             <Lock size={14} /> パスワード <span className="text-red-400">*</span>
                                         </label>
                                         <input
@@ -310,25 +323,28 @@ const RegistrationForm = () => {
 
                                     {/* 条款与提交（モバイルは上余白を詰める） */}
                                     <div className="pt-1 md:pt-8">
-                                        <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-                                            <span className="block mb-2">
+                                        <div className="mb-6">
+                                            <div className="flex items-center gap-1.5 mb-2 text-gray-500 font-bold text-xs">
+                                                <ShieldCheck size={14} className="text-sumo-brand/80" />
                                                 ご登録の前に必ずご確認ください：
-                                            </span>
-                                            <Link
-                                                href="#"
-                                                className="underline hover:text-sumo-brand mx-1"
-                                            >
-                                                利用規約
-                                            </Link>
-                                            および
-                                            <Link
-                                                href="#"
-                                                className="underline hover:text-sumo-brand mx-1"
-                                            >
-                                                プライバシーポリシー
-                                            </Link>
-                                            に同意したものとみなされます。
-                                        </p>
+                                            </div>
+                                            <p className="text-xs text-gray-400 leading-relaxed pl-5">
+                                                <Link
+                                                    href="#"
+                                                    className="underline hover:text-sumo-brand transition-colors"
+                                                >
+                                                    利用規約
+                                                </Link>
+                                                <span> および </span>
+                                                <Link
+                                                    href="#"
+                                                    className="underline hover:text-sumo-brand transition-colors"
+                                                >
+                                                    プライバシーポリシー
+                                                </Link>
+                                                <span> に同意したものとみなされます。</span>
+                                            </p>
+                                        </div>
 
                                         <button
                                             type="submit"

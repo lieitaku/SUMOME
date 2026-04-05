@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActiveBanners, getCachedPickupClubsForHome } from "@/lib/cached-queries";
+import { getTranslations } from "next-intl/server";
 
 // 引入组件
 import Hero from "@/components/home/Hero";
@@ -17,9 +18,13 @@ import ScrollInitializer from "@/components/utils/ScrollInitializer";
 
 export default async function Home({
   searchParams,
+  params,
 }: {
   searchParams: Promise<{ embedded?: string }>;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+  const tHome = await getTranslations({ locale, namespace: "Home" });
   const { embedded } = await searchParams;
   const isEmbedded = embedded === "1";
   const preview = await getPreviewPayload();
@@ -108,9 +113,9 @@ export default async function Home({
     <div className="w-full flex flex-col min-h-screen">
       {isPreview && !isEmbedded && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
-          <span>プレビュー — 未保存の内容を表示しています。</span>
+          <span>{tHome("previewBanner")}</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
-            編集に戻る
+            {tHome("previewBack")}
           </a>
         </div>
       )}

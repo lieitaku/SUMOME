@@ -83,6 +83,14 @@ export default function ReportForm({ clubs }: { clubs: Club[] }) {
                             className="w-full px-0 py-2 bg-transparent border-b border-gray-200 text-xl font-bold focus:border-blue-500 outline-none transition-all placeholder:text-gray-300"
                         />
                     </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">英語タイトル（任意）</label>
+                        <input
+                            name="titleEn"
+                            placeholder="English title (optional)"
+                            className="w-full px-0 py-2 bg-transparent border-b border-gray-200 text-lg font-bold focus:border-blue-500 outline-none transition-all placeholder:text-gray-300"
+                        />
+                    </div>
 
                     <div>
                         <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">リード文 (概要)</label>
@@ -90,6 +98,15 @@ export default function ReportForm({ clubs }: { clubs: Club[] }) {
                             name="content" // 这里复用 content 字段存导语
                             rows={3}
                             placeholder="活動の全体像や、最も伝えたいメッセージをここに..."
+                            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm leading-relaxed focus:ring-2 focus:ring-blue-500/20 outline-none"
+                        ></textarea>
+                    </div>
+                    <div>
+                        <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">英語本文・概要（任意）</label>
+                        <textarea
+                            name="contentEn"
+                            rows={3}
+                            placeholder="English summary (optional)"
                             className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm leading-relaxed focus:ring-2 focus:ring-blue-500/20 outline-none"
                         ></textarea>
                     </div>

@@ -187,11 +187,14 @@ const PartnersPage = () => {
                             </div>
                             
                             <div className="relative z-10">
-                                <div className="flex items-center gap-4 mb-8">
+                                <div className="flex items-center gap-3 mb-6">
                                     <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2454a4] group-hover:scale-110 group-hover:bg-[#2454a4] group-hover:text-white transition-all duration-300 shadow-sm">
                                         <MousePointerClick className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm md:text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
+                                    <span
+                                        className="text-sm font-bold leading-tight tracking-wide uppercase"
+                                        style={{ color: BRAND_BLUE }}
+                                    >
                                         ステップ 01
                                     </span>
                                 </div>
@@ -211,11 +214,14 @@ const PartnersPage = () => {
                             </div>
                             
                             <div className="relative z-10">
-                                <div className="flex items-center gap-4 mb-8">
+                                <div className="flex items-center gap-3 mb-6">
                                     <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2454a4] group-hover:scale-110 group-hover:bg-[#2454a4] group-hover:text-white transition-all duration-300 shadow-sm">
                                         <PenTool className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm md:text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
+                                    <span
+                                        className="text-sm font-bold leading-tight tracking-wide uppercase"
+                                        style={{ color: BRAND_BLUE }}
+                                    >
                                         ステップ 02
                                     </span>
                                 </div>
@@ -235,11 +241,14 @@ const PartnersPage = () => {
                             </div>
                             
                             <div className="relative z-10">
-                                <div className="flex items-center gap-4 mb-8">
+                                <div className="flex items-center gap-3 mb-6">
                                     <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2454a4] group-hover:scale-110 group-hover:bg-[#2454a4] group-hover:text-white transition-all duration-300 shadow-sm">
                                         <FileText className="w-5 h-5" />
                                     </div>
-                                    <span className="text-sm md:text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
+                                    <span
+                                        className="text-sm font-bold leading-tight tracking-wide uppercase"
+                                        style={{ color: BRAND_BLUE }}
+                                    >
                                         ステップ 03
                                     </span>
                                 </div>

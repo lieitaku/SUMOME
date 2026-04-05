@@ -12,6 +12,8 @@ import { getPreviewPayload } from "@/lib/preview";
 import { getCachedClubBySlug } from "@/lib/cached-queries";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
+import { getTranslations } from "next-intl/server";
+import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +22,7 @@ const BRAND_BLUE = "#2454a4";
 
 // 页面参数定义 (Next.js 15+)
 interface PageProps {
-    params: Promise<{ slug: string }>;
+    params: Promise<{ slug: string; locale: string }>;
     searchParams?: Promise<{ embedded?: string }>;
 }
 
@@ -28,8 +30,10 @@ interface PageProps {
 function normalizePreviewClub(p: Record<string, unknown>): {
     id: string;
     name: string;
+    nameEn: string | null;
     slug: string;
     description: string | null;
+    descriptionEn: string | null;
     logo: string | null;
     mainImage: string | null;
     mainImagePosition: string | null;
@@ -69,8 +73,10 @@ function normalizePreviewClub(p: Record<string, unknown>): {
     return {
         id: String(p.id ?? ""),
         name: String(p.name ?? ""),
+        nameEn: p.nameEn != null ? String(p.nameEn) : null,
         slug: String(p.slug ?? ""),
         description: p.description != null ? String(p.description) : null,
+        descriptionEn: p.descriptionEn != null ? String(p.descriptionEn) : null,
         logo: p.logo != null ? String(p.logo) : null,
         mainImage: p.mainImage != null ? String(p.mainImage) : null,
         mainImagePosition: p.mainImagePosition != null ? String(p.mainImagePosition) : null,
@@ -94,7 +100,8 @@ function normalizePreviewClub(p: Record<string, unknown>): {
 
 export default async function ClubDetailPage({ params, searchParams }: PageProps) {
     // 1. 获取动态路由参数
-    const { slug } = await params;
+    const { slug, locale } = await params;
+    const t = await getTranslations({ locale, namespace: "ClubDetail" });
     const sp = searchParams ? await searchParams : {};
     const isEmbedded = sp?.embedded === "1";
 
@@ -121,6 +128,10 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
     // 如果找不到记录，返回 404 页面
     if (!club) return notFound();
+
+    const displayName = clubDisplayName(club, locale);
+    const displayDescription =
+        clubDisplayDescription(club, locale) ?? t("introFallback");
 
     // --- 数据预处理逻辑 ---
 
@@ -185,9 +196,9 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
             {(usePreview && !isEmbedded && (
                 <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
-                    <span>プレビュー — 未保存の内容を表示しています。正式に反映するには管理画面で「保存」してください。</span>
+                    <span>{t("previewBanner")}</span>
                     <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
-                        編集に戻る
+                        {t("previewBack")}
                     </a>
                 </div>
             )) as React.ReactNode}
@@ -207,13 +218,13 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                         <div className="flex justify-center mb-8">
                             <Link href="/clubs" className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group">
                                 <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">クラブ一覧へ戻る</span>
+                                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToList")}</span>
                             </Link>
                         </div>
 
                         {/* 俱乐部名称 */}
                         <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-black tracking-tight mb-6 text-white leading-tight">
-                            {club.name}
+                            {displayName}
                         </h1>
 
                         {/* 顶部简要信息 */}
@@ -248,7 +259,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                 aria-hidden
                                             />
                                         ) : (
-                                            <Image src={galleryImages[0]} alt={club.name} fill className="object-cover hover:scale-105 transition-transform duration-700" style={{ objectPosition: getMainImageObjectPosition(club.mainImagePosition), transform: `rotate(${getMainImageRotation(club.mainImageRotation)}deg)` }} priority />
+                                            <Image src={galleryImages[0]} alt={displayName} fill className="object-cover hover:scale-105 transition-transform duration-700" style={{ objectPosition: getMainImageObjectPosition(club.mainImagePosition), transform: `rotate(${getMainImageRotation(club.mainImageRotation)}deg)` }} priority />
                                         )}
                                     </div>
 
@@ -256,7 +267,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                     {galleryImages.length > 1 && (
                                         <div>
                                             <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <Sparkles size={12} /> 道場風景
+                                                <Sparkles size={12} /> {t("galleryTitle")}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {/* 切片：跳过第一张主图，显示剩下的副图 */}
@@ -271,7 +282,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                                     {/* 底部：官方链接 (SNS) */}
                                     <div className="mt-auto pt-8 border-t border-gray-200/50">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">公式リンク</h3>
+                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{t("linksTitle")}</h3>
                                         <div className="flex gap-4">
                                             {club.phone && (
                                                 <a href={`tel:${club.phone}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-emerald-100" title="電話をかける">
@@ -300,7 +311,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                             )}
                                         </div>
                                         {(!club.phone && !club.instagram && !club.twitter && !club.website && !club.email) && (
-                                            <p className="text-xs text-gray-400">SNS情報は登録されていません。</p>
+                                            <p className="text-xs text-gray-400">{t("snsEmpty")}</p>
                                         )}
                                     </div>
                                 </div>
@@ -311,10 +322,10 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                     {/* 介绍文区域 */}
                                     <div className="mb-12">
                                         <h3 className="text-2xl font-serif font-black text-gray-900 mb-6 flex items-center gap-3">
-                                            <span className="w-1.5 h-8 rounded-full bg-sumo-brand"></span> 道場紹介
+                                            <span className="w-1.5 h-8 rounded-full bg-sumo-brand"></span> {t("introHeading")}
                                         </h3>
                                         <div className="text-gray-600 leading-[2.0] text-justify font-medium text-[15px] whitespace-pre-wrap">
-                                            {club.description || "道場の詳細は現在準備中です。"}
+                                            {displayDescription}
                                         </div>
                                         {/* 标签列表 */}
                                         <div className="flex flex-wrap gap-2 mt-8">
@@ -333,7 +344,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {/* 1. 稽古日程表 (设计感排版) */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                                <CalendarDays size={14} className="text-sumo-brand" /> 稽古日時
+                                                <CalendarDays size={14} className="text-sumo-brand" /> {t("scheduleHeading")}
                                             </h4>
 
                                             <div className="flex flex-col gap-3">
@@ -393,7 +404,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                     })
                                                 ) : (
                                                     <div className="p-8 text-center border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
-                                                        <p className="text-xs font-bold text-gray-400">スケジュール情報は未登録です。</p>
+                                                        <p className="text-xs font-bold text-gray-400">{t("scheduleEmpty")}</p>
                                                     </div>
                                                 )}
                                             </div>
@@ -402,7 +413,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {/* 2. 地址与地图 (名片风格) */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <MapPin size={14} className="text-sumo-brand" /> アクセス
+                                                <MapPin size={14} className="text-sumo-brand" /> {t("accessHeading")}
                                             </h4>
                                             <div className="relative group bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
                                                 <div className="flex items-start justify-between">
@@ -426,7 +437,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                 {club.mapUrl && (
                                                     <div className="mt-6 pt-4 border-t border-gray-100">
                                                         <a href={club.mapUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full gap-2 py-2.5 bg-gray-900 text-white rounded-lg text-xs font-bold tracking-wide hover:bg-sumo-brand transition-colors">
-                                                            Google Maps で見る <ExternalLink size={12} />
+                                                            {t("mapsOpen")} <ExternalLink size={12} />
                                                         </a>
                                                     </div>
                                                 )}
@@ -437,7 +448,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {club.phone && (
                                             <div className="col-span-1 md:col-span-2">
                                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                    <Phone size={14} className="text-sumo-brand" /> お問い合わせ
+                                                    <Phone size={14} className="text-sumo-brand" /> {t("contactHeading")}
                                                 </h4>
                                                 <a
                                                     href={`tel:${club.phone}`}
@@ -462,7 +473,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                         {/* 4. 募集对象信息 */}
                                         <div className="col-span-1 md:col-span-2">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
-                                                <Target size={14} className="text-sumo-brand" /> 募集対象
+                                                <Target size={14} className="text-sumo-brand" /> {t("recruitHeading")}
                                             </h4>
                                             <div className="bg-sumo-brand/5 p-5 rounded-xl border border-sumo-brand/10 flex items-center justify-between">
                                                 <div>
@@ -470,7 +481,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                         {club.target}
                                                     </p>
                                                     <p className="text-[10px] text-gray-500 mt-1 font-bold opacity-80">
-                                                        ※ 初心者・見学大歓迎
+                                                        {t("recruitNote")}
                                                     </p>
                                                 </div>
                                                 <Users size={20} className="text-sumo-brand opacity-20" />
@@ -482,10 +493,10 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                     <div className="mt-auto">
                                         <Button href={`/clubs/${club.slug}/recruit`} className="w-full py-6 text-white shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all rounded-2xl" style={{ backgroundColor: BRAND_BLUE }}>
                                             <span className="flex items-center gap-3 text-lg font-black uppercase tracking-tighter">
-                                                <Users size={20} /> 入会を申し込む
+                                                <Users size={20} /> {t("ctaApply")}
                                             </span>
                                         </Button>
-                                        <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">いつでもお気軽にお立ち寄りください。</p>
+                                        <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">{t("ctaFootnote")}</p>
                                     </div>
                                 </div>
                             </div>

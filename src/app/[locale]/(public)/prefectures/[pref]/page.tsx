@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import type { Metadata } from "next";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import {
@@ -30,30 +31,75 @@ import ScrollToTop from "@/components/common/ScrollToTop";
 
 // Data & Utils
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
+import type { PrefectureInfo } from "@/data/types";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
 import { hasRealClubMainImage } from "@/lib/club-images";
+import { getTranslations } from "next-intl/server";
+import { regionDisplayForLocale } from "@/lib/prefecture-en";
+import { prefectureIntroForLocale } from "@/lib/prefecture-intro";
 
 export const dynamic = "force-dynamic";
 
+function siteBase(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.memory-sumo.com").replace(
+    /\/+$/,
+    "",
+  );
+}
+
 interface PageProps {
-  params: Promise<{ pref: string }>;
+  params: Promise<{ locale: string; pref: string }>;
   searchParams?: Promise<{ embedded?: string }>;
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; pref: string }>;
+}): Promise<Metadata> {
+  const { locale, pref } = await params;
+  const prefSlug = pref;
+  const prefData = PREFECTURE_DATABASE[prefSlug];
+  const jaName = prefData?.name ?? prefSlug.toUpperCase();
+  const displayName = regionDisplayForLocale(jaName, locale);
+  const t = await getTranslations({ locale, namespace: "PrefecturePage" });
+  const base = siteBase();
+  const jaUrl = `${base}/prefectures/${prefSlug}`;
+  const enUrl = `${base}/en/prefectures/${prefSlug}`;
+  return {
+    title: t("metaTitle", { prefName: displayName }),
+    description: prefData
+      ? t("metaDescription", { prefName: displayName })
+      : t("metaDescriptionFallback"),
+    alternates: {
+      canonical: locale === "en" ? enUrl : jaUrl,
+      languages: {
+        ja: jaUrl,
+        en: enUrl,
+      },
+    },
+  };
+}
+
 export default async function PrefecturePage({ params, searchParams }: PageProps) {
-  const { pref } = await params;
+  const { locale, pref } = await params;
+  const t = await getTranslations({ locale, namespace: "PrefecturePage" });
   const sp = searchParams ? await searchParams : {};
   const isEmbedded = sp?.embedded === "1";
   const prefSlug = pref;
   const prefData = PREFECTURE_DATABASE[prefSlug];
-  const staticDisplay = prefData || {
+  const staticDisplay: PrefectureInfo = prefData ?? {
+    id: prefSlug,
     name: prefSlug.toUpperCase(),
     introTitle: `${prefSlug}の相撲事情`,
     introText: "現在、この地域の詳細情報は準備中です。",
     bannerImg: "",
     rikishiList: [],
   };
+
+  const displayName = regionDisplayForLocale(staticDisplay.name, locale);
+  const { title: introTitle, text: introText } = prefectureIntroForLocale(staticDisplay, locale);
 
   const preview = await getPreviewPayload();
   const prefBannerPreview =
@@ -132,8 +178,8 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
 
   const featuredClub = resolveFeaturedClub();
   const bannerTitle = featuredClub
-    ? `${featuredClub.name}の相撲風景`
-    : `${displayData.name}の相撲風景`;
+    ? t("bannerTitleWithClub", { clubName: featuredClub.name, prefName: displayName })
+    : t("bannerTitlePrefOnly", { prefName: displayName });
   const bannerAlt = prefBannerPreview?.alt ?? customBanner?.alt ?? bannerTitle;
   const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
@@ -178,10 +224,10 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       {prefBannerPreview && !isEmbedded && (
         <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
-          <span>プレビュー — 未保存の内容を表示しています。</span>
+          <span>{t("previewBanner")}</span>
           {/* eslint-disable-next-line no-script-url */}
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
-            編集に戻る
+            {t("previewBack")}
           </a>
         </div>
       )}
@@ -218,24 +264,22 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                     className="text-current group-hover:text-gray-900 transition-colors"
                   />
                 </div>
-                地図に戻る
+                {t("backToMap")}
               </Link>
             </div>
 
             <div>
               <div className="flex flex-col items-start mb-4 opacity-80">
                 <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white">
-                  Prefecture Info
+                  {t("headerKicker")}
                 </span>
               </div>
               {/* 优化点 1：移动端字体从 text-5xl 降级为 text-4xl，防止超长打乱布局 */}
-              <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left">
-                {displayData.name}
+              <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1]">
+                {displayName}
               </h1>
-              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base">
-                {displayData.name}の相撲クラブ・道場情報、
-                <br className="hidden md:inline" />
-                および出身力士のデータベース。
+              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base whitespace-pre-line">
+                {t("headerLead", { prefName: displayName })}
               </p>
             </div>
           </div>
@@ -297,20 +341,25 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                 {/* Intro Card */}
                 <Ceramic
                   interactive={false}
-                  className="p-6 md:p-10 border border-gray-100 border-b-[6px]"
+                  className="p-6 md:p-10 border border-gray-100 border-b-[6px] text-left"
                   style={ceramicStyle}
                 >
-                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100 flex items-center gap-3">
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100 flex items-start gap-3 text-left">
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm shrink-0"
                       style={{ backgroundColor: theme.color, color: "white" }}
                     >
                       <Info size={20} />
                     </div>
-                    <span className="tracking-tight">{displayData.introTitle}</span>
+                    <span className="tracking-tight min-w-0 flex-1">{introTitle}</span>
                   </h3>
-                  <p className="text-sm md:text-base text-gray-700 leading-loose text-justify font-medium">
-                    {displayData.introText}
+                  <p
+                    className={cn(
+                      "text-sm md:text-base text-gray-700 leading-loose font-medium",
+                      locale === "en" ? "text-left" : "text-justify",
+                    )}
+                  >
+                    {introText}
                   </p>
                 </Ceramic>
 
@@ -343,7 +392,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                     className="block py-3 bg-gray-50 text-center border-t border-gray-100 transition-colors group hover:bg-white"
                   >
                     <span className="text-[10px] font-bold tracking-wider flex items-center justify-center gap-2 text-gray-400 group-hover:text-gray-900 transition-colors">
-                      スポンサー募集
+                      {t("sponsorCta")}
                       <ArrowRight
                         size={10}
                         className="group-hover:translate-x-1 transition-transform"
@@ -395,9 +444,9 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                       <Link
                         href={clubDetailLink}
                         className="absolute inset-0 z-0"
-                        aria-label="View Club"
+                        aria-label={t("featureViewAria")}
                       >
-                        <span className="sr-only">View Club</span>
+                        <span className="sr-only">{t("featureViewAria")}</span>
                       </Link>
                       {/* 图片上的轻微渐变，仅为了让左上角的标签更清晰 */}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
@@ -408,11 +457,11 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                       <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
                         <div className="min-w-0 flex flex-col gap-3">
                           <div className="flex items-center gap-2">
-                            <span 
-                              className="px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase"
+                            <span
+                              className="px-2 py-0.5 rounded-sm text-[10px] font-bold tracking-widest uppercase"
                               style={{ backgroundColor: `${theme.color}15`, color: theme.color }}
                             >
-                              LOCAL FEATURE
+                              {t("featureBadge")}
                             </span>
                             <div className="h-px grow bg-gray-100" />
                           </div>
@@ -439,7 +488,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                             style={{ backgroundColor: theme.color }}
                           >
                             <UserPlus className="w-4 h-4 shrink-0" />
-                            メンバー募集中
+                            {t("recruitCta")}
                           </Link>
                         </div>
                       </div>
@@ -452,17 +501,17 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   <div className="flex items-end justify-between mb-6 md:mb-8 pb-4 border-b border-gray-200/60">
                     <div>
                       <h2 className="text-2xl md:text-3xl font-serif font-black flex items-center gap-3" style={{ color: theme.color }}>
-                        クラブ一覧
+                        {t("clubListTitle")}
                       </h2>
                       <p className="text-[10px] md:text-xs text-gray-400 font-bold tracking-widest mt-1 md:mt-2 uppercase">
-                        Registered Sumo Clubs
+                        {t("clubListSubtitle")}
                       </p>
                     </div>
                     <div className="text-right">
                       <span className="text-3xl md:text-4xl font-serif font-black" style={{ color: theme.color }}>
                         {filteredClubs.length}
                       </span>
-                      <span className="text-[10px] md:text-xs text-gray-400 font-bold ml-1">件</span>
+                      <span className="text-[10px] md:text-xs text-gray-400 font-bold ml-1">{t("countSuffix")}</span>
                     </div>
                   </div>
 
@@ -479,20 +528,26 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                       <div className="w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: `${theme.color}1A`, color: theme.color }}>
                         <MapPin className="w-6 h-6 md:w-8 md:h-8" />
                       </div>
-                      <p className="text-sm md:text-base text-gray-400 font-medium">現在、この地域の掲載クラブはありません。</p>
+                      <p className="text-sm md:text-base text-gray-400 font-medium">{t("emptyClubs")}</p>
                     </Ceramic>
                   )}
                 </div>
 
                 {/* Rikishi Table（出身力士一覧） */}
                 <div>
-                  <Suspense fallback={
-                    <div className="h-[400px] w-full bg-white rounded-2xl border border-gray-100 animate-pulse flex items-center justify-center text-gray-400">
-                      Loading Rikishi Data...
-                    </div>
-                  }>
+                  <Suspense
+                    fallback={
+                      <div className="h-[400px] w-full bg-white rounded-md border border-gray-100 animate-pulse flex items-center justify-center text-gray-400">
+                        {t("rikishiLoading")}
+                      </div>
+                    }
+                  >
                     <Ceramic interactive={false} className="p-0 border border-gray-100 border-b-[6px] overflow-hidden" style={ceramicStyle}>
-                      <RikishiTable rikishiList={displayData.rikishiList} prefectureName={displayData.name} accentColor={theme.color} />
+                      <RikishiTable
+                        rikishiList={displayData.rikishiList}
+                        prefectureName={displayName}
+                        accentColor={theme.color}
+                      />
                     </Ceramic>
                   </Suspense>
                 </div>

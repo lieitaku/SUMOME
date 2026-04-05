@@ -17,8 +17,10 @@ function parseFormData(formData: FormData) {
   return {
     id: formData.get("id") as string,
     name: formData.get("name") as string,
+    nameEn: (formData.get("nameEn") as string) || "",
     slug: formData.get("slug") as string,
     description: formData.get("description") as string,
+    descriptionEn: (formData.get("descriptionEn") as string) || "",
     logo: formData.get("logo") as string,
     mainImage: formData.get("mainImage") as string,
     mainImagePosition: formData.get("mainImagePosition") as string,
@@ -57,7 +59,9 @@ const CreateClubSchema = z.object({
       /^[a-z0-9-]+$/,
       "IDは半角英小文字、数字、ハイフン(-)のみ使用可能です",
     ),
+  nameEn: z.string().optional(),
   description: z.string().optional(),
+  descriptionEn: z.string().optional(),
   logo: z.string().optional(),
   mainImage: z.string().optional(),
 });
@@ -67,7 +71,9 @@ export async function createClub(formData: FormData) {
   const rawData = {
     name: formData.get("name"),
     slug: formData.get("slug"),
+    nameEn: formData.get("nameEn"),
     description: formData.get("description"),
+    descriptionEn: formData.get("descriptionEn"),
     logo: formData.get("logo"),
     mainImage: formData.get("mainImage"),
   };
@@ -82,9 +88,12 @@ export async function createClub(formData: FormData) {
   }
 
   try {
+    const { nameEn, descriptionEn, ...restCreate } = validatedFields.data;
     await prisma.club.create({
       data: {
-        ...validatedFields.data,
+        ...restCreate,
+        nameEn: nameEn?.trim() || null,
+        descriptionEn: descriptionEn?.trim() || null,
         area: "未設定",
         address: "未設定",
         subImages: [], // 创建时默认为空数组
@@ -115,8 +124,10 @@ const slugSchema = z
 const UpdateClubSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "クラブ名は必須です"),
+  nameEn: z.string().optional(),
   slug: z.string().optional(),
   description: z.string().optional(),
+  descriptionEn: z.string().optional(),
   logo: z.string().optional(),
   mainImage: z.string().optional(),
   mainImagePosition: z.string().optional(),
@@ -170,7 +181,7 @@ export async function updateClub(formData: FormData) {
   if (!isAdmin && currentClub?.ownerId !== currentUser.id) {
     return { error: "このクラブの編集権限がありません。" };
   }
-  const { id, slug: newSlug, ...rest } = validatedFields.data;
+  const { id, slug: newSlug, nameEn, descriptionEn, ...rest } = validatedFields.data;
   const oldSlug = currentClub?.slug ?? "";
 
   // 管理者のみ slug 変更可。変更する場合は形式・重複チェック。
@@ -212,6 +223,8 @@ export async function updateClub(formData: FormData) {
 
   const updateData = {
     ...rest,
+    nameEn: nameEn?.trim() ? nameEn.trim() : null,
+    descriptionEn: descriptionEn?.trim() ? descriptionEn.trim() : null,
     ...(slugToUpdate != null ? { slug: slugToUpdate } : {}),
     mainImageScale: mainImageScaleNum,
     mainImageRotation: mainImageRotationNum,

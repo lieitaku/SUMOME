@@ -12,7 +12,7 @@ type Props = {
     variant?: "default" | "onBrand";
     /** 切换语言后回调（例如关闭手机菜单 / 侧栏） */
     onAfterSelect?: () => void;
-    /** 下拉相对触发器：顶栏内建议 end（与锁按钮同排时向左展开） */
+    /** 下拉相对触发器：start=左对齐、向右展开（抽屉内语言球在左侧时用）；end=右对齐、向左展开（桌面顶栏右侧用时） */
     menuAlign?: "start" | "end";
 };
 

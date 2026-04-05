@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { Menu, X, Search, Lock, ChevronRight, ChevronDown } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import { useParams } from "next/navigation";
@@ -25,6 +26,13 @@ const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const moreButtonRef = useRef<HTMLButtonElement>(null);
+  /** Portal 挂在 body 上，避免祖先 backdrop-filter 把 fixed 变成「相对顶栏」导致坐标错位 */
+  const moreMenuPortalRef = useRef<HTMLDivElement>(null);
+  const [moreMenuFixed, setMoreMenuFixed] = useState<{
+    top: number;
+    right: number;
+  } | null>(null);
 
   // --- 2. 路由与主题 ---
   const pathname = usePathname();
@@ -64,9 +72,10 @@ const Header = () => {
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setMoreOpen(false);
-      }
+      const t = e.target as Node;
+      if (moreRef.current?.contains(t)) return;
+      if (moreMenuPortalRef.current?.contains(t)) return;
+      setMoreOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -75,6 +84,35 @@ const Header = () => {
   useEffect(() => {
     setMoreOpen(false);
   }, [pathname]);
+
+  /** その他メニュー：viewport 座標の fixed。メニューは portal で body 直下に出し、backdrop-filter 祖先による fixed 包含塊バグを避ける */
+  useLayoutEffect(() => {
+    if (!moreOpen) {
+      setMoreMenuFixed(null);
+      return;
+    }
+    const update = () => {
+      const btn = moreButtonRef.current;
+      if (!btn) return;
+      const r = btn.getBoundingClientRect();
+      setMoreMenuFixed({
+        top: r.bottom + 8,
+        right: document.documentElement.clientWidth - r.right,
+      });
+    };
+    update();
+    // 胶囊 width/radius 700ms 过渡后再对齐一帧，避免刚打开时 rect 仍处在动画中间
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(update);
+    });
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [moreOpen, isScrolled]);
 
   const hideHeaderPaths = ["/manager/login", "/manager/entry"];
   if (hideHeaderPaths.includes(pathname || "")) return null;
@@ -87,7 +125,7 @@ const Header = () => {
     { name: tNav("contact"), href: "/contact" },
   ] as const;
 
-  /** デスクトップ中央ナビ：xl以上で平置き、lg〜xlは「その他」に収納 */
+  /** 「その他」ドロップダウン内 */
   const secondaryNavItems = [
     { name: tNav("company"), href: "/company" },
     { name: tNav("characters"), href: "/characters" },
@@ -106,28 +144,18 @@ const Header = () => {
   /**
    * 桌面顶栏导航间距（lg 及以上）
    * ------------------------------------------------------------------
-   * 1) desktopNavGutter（中间导航容器左右的 padding）
-   *    → 控制「导航整组」与左侧 Logo、与右侧锁头/搜索按钮之间的距离。
-   *    格式：clamp(最小值, 中间随屏幕变化, 最大值)
-   *    - 想离两侧再远一点：略增大三个数字（例如最小 +0.125rem、vw 系数 +0.1～0.2、最大 +0.25rem）。
-   *    - 想离两侧近一点：三个数字略减小。
+   * 1) desktopNavGap（中央 <nav> 的 columnGap）
+   *    → 4 本番リンク +「その他」の間隔。中央ブロックは w-max でまとまり、flex-1 の空き領域で隠れない。
    *
-   * 2) desktopNavGap（<nav> 的 columnGap）
-   *    → 只影响五个文字链接「彼此之间」的间距，不动和 Logo/右侧的距离。
-   *    - 五个之间要更疏：增大 vw 系数或第三个「最大值」。
-   *    - 五个之间要更密：减小最小值、vw 系数或最大值。
-   *
-   * 3) desktopNavLinkTypography 里的 paddingLeft / paddingRight
+   * 2) desktopNavLinkTypography 里的 paddingLeft / paddingRight
    *    → 每个链接文字左右的内边距，也会视觉上拉开/收紧相邻两字之间的距离。
    *    - 一般优先改 columnGap；仍觉得字贴太紧再动这里。
    *
-   * 4) fontSize / letterSpacing
+   * 3) fontSize / letterSpacing
    *    → 字号与字距；与「间距」无关时也可单独调。
    * ------------------------------------------------------------------
    * rem 参考：1rem ≈ 16px（随用户系统字体可能略有差异）
    */
-  const desktopNavGutter =
-    "clamp(1rem, 2.35vw + 0.5rem, 2.5rem)";
   /** 导航链接之间的间距（columnGap） */
   const desktopNavGap =
     "clamp(0.35rem, 0.5vw + 0.1rem, 1.125rem)";
@@ -234,7 +262,7 @@ const Header = () => {
           {/* --- A. Logo 区域：桌面侧说明字缩小，避免与导航/操作区挤在一起 --- */}
           <Link
             href="/"
-            className="group relative flex min-w-0 max-w-[min(100%,19rem)] shrink-0 select-none items-center gap-2 sm:max-w-none sm:gap-3 md:gap-2 lg:gap-2.5 xl:gap-3"
+            className="group relative z-0 flex min-w-0 max-w-[min(100%,19rem)] shrink-0 select-none items-center gap-2 sm:max-w-none sm:gap-3 md:gap-2 lg:gap-2.5 xl:gap-3"
             onClick={() => setMenuOpen(false)}
           >
             <div className="flex shrink-0 items-baseline font-serif font-black leading-none tracking-wider sm:tracking-widest text-2xl sm:text-2xl md:text-2xl lg:text-2xl xl:text-2xl 2xl:text-2xl">
@@ -260,78 +288,88 @@ const Header = () => {
             </div>
           </Link>
 
-          {/* --- B. 桌面端导航（单行・fluid 字号/间距；最小幅でも僅かな余白を維持） --- */}
+          {/* --- B. 桌面端导航：4 リンク +「その他」を同一 w-max 行にまとめ中央寄せ（flex-1 の空き領域で隠れない） --- */}
           <div
             className={cn(
-              "header-nav-scroll hidden min-w-0 flex-1 justify-center overflow-x-auto lg:flex lg:items-center"
+              "relative z-[1] hidden min-w-0 flex-1 justify-center overflow-visible lg:flex lg:items-center"
             )}
-            style={{
-              paddingLeft: desktopNavGutter,
-              paddingRight: desktopNavGutter,
-            }}
           >
-            <nav
-              className="flex flex-nowrap items-center justify-center shrink-0"
-              style={{ columnGap: desktopNavGap }}
-              aria-label={tHeader("navAria")}
-            >
-              {primaryNavItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  style={desktopNavLinkTypography}
-                  className="nav-item-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 group whitespace-nowrap py-1"
-                >
-                  {item.name}
-                  <span className="nav-underline absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 transition-[width] duration-300 ease-out w-0 bg-gray-200"></span>
-                </Link>
-              ))}
+            <div className="header-nav-scroll flex w-full min-w-0 max-w-full overflow-x-auto">
+              <nav
+                className="mx-auto flex w-max shrink-0 flex-nowrap items-center"
+                style={{ columnGap: desktopNavGap }}
+                aria-label={tHeader("navAria")}
+              >
+                {primaryNavItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    style={desktopNavLinkTypography}
+                    className="nav-item-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 group whitespace-nowrap py-1"
+                  >
+                    {item.name}
+                    <span className="nav-underline absolute bottom-0 left-1/2 h-[2px] -translate-x-1/2 transition-[width] duration-300 ease-out w-0 bg-gray-200"></span>
+                  </Link>
+                ))}
 
-              {/* 「その他」ドロップダウン（常駐） */}
-              <div ref={moreRef} className="relative shrink-0">
-                <button
-                  onClick={() => setMoreOpen((prev) => !prev)}
-                  style={desktopNavLinkTypography}
-                  className="more-btn-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 whitespace-nowrap py-1 gap-0.5"
-                >
-                  {tNav("more")}
-                  <ChevronDown
-                    size={14}
-                    className={cn(
-                      "transition-transform duration-300",
-                      moreOpen && "rotate-180"
-                    )}
-                  />
-                </button>
+                <div ref={moreRef} className="relative shrink-0">
+                  <button
+                    ref={moreButtonRef}
+                    type="button"
+                    onClick={() => setMoreOpen((prev) => !prev)}
+                    style={desktopNavLinkTypography}
+                    className="more-btn-dynamic relative inline-flex shrink-0 items-center font-serif font-bold text-gray-600 transition-colors duration-300 whitespace-nowrap py-1 gap-0.5"
+                    aria-expanded={moreOpen}
+                    aria-haspopup="true"
+                  >
+                    {tNav("more")}
+                    <ChevronDown
+                      size={14}
+                      className={cn(
+                        "transition-transform duration-300",
+                        moreOpen && "rotate-180"
+                      )}
+                      aria-hidden
+                    />
+                  </button>
 
-                <div
-                  className={cn(
-                    "absolute top-full right-0 mt-2 min-w-[160px] bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-[110]",
-                    "transition-all duration-200 ease-out origin-top",
-                    moreOpen
-                      ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
-                      : "opacity-0 scale-95 -translate-y-1 pointer-events-none"
+                  {typeof document !== "undefined" &&
+                  moreOpen &&
+                  moreMenuFixed &&
+                  createPortal(
+                    <div
+                      ref={moreMenuPortalRef}
+                      className="fixed min-w-[160px] rounded-xl border border-gray-100 bg-white py-1.5 shadow-lg transition-opacity duration-200 ease-out"
+                      style={{
+                        top: moreMenuFixed.top,
+                        right: moreMenuFixed.right,
+                        zIndex: 200,
+                      }}
+                      role="menu"
+                    >
+                      {secondaryNavItems.map((item, idx) => (
+                        <React.Fragment key={item.name}>
+                          {idx > 0 && <div className="mx-3 border-t border-gray-100" />}
+                          <Link
+                            href={item.href}
+                            onClick={() => setMoreOpen(false)}
+                            className="more-dropdown-item block px-4 py-2.5 font-serif font-bold text-sm text-gray-600 transition-colors duration-200 whitespace-nowrap"
+                            role="menuitem"
+                          >
+                            {item.name}
+                          </Link>
+                        </React.Fragment>
+                      ))}
+                    </div>,
+                    document.body
                   )}
-                >
-                  {secondaryNavItems.map((item, idx) => (
-                    <React.Fragment key={item.name}>
-                      {idx > 0 && <div className="mx-3 border-t border-gray-100" />}
-                      <Link
-                        href={item.href}
-                        onClick={() => setMoreOpen(false)}
-                        className="more-dropdown-item block px-4 py-2.5 font-serif font-bold text-sm text-gray-600 transition-colors duration-200 whitespace-nowrap"
-                      >
-                        {item.name}
-                      </Link>
-                    </React.Fragment>
-                  ))}
                 </div>
-              </div>
-            </nav>
+              </nav>
+            </div>
           </div>
 
           {/* --- C. 桌面端操作区：锁（40×40）→ 语言（同尺寸）→ 搜索 --- */}
-          <div className="hidden shrink-0 lg:flex lg:items-center lg:gap-3">
+          <div className="relative z-0 hidden shrink-0 lg:flex lg:items-center lg:gap-3">
             <Link
               href="/admin/dashboard"
               title={tHeader("adminLoginTitle")}
@@ -392,7 +430,7 @@ const Header = () => {
       >
         <div className="flex flex-col h-full min-h-0 p-6">
           <div className="flex shrink-0 items-center justify-between gap-4 mb-6">
-            <LocaleSwitcher onAfterSelect={() => setMenuOpen(false)} />
+            <LocaleSwitcher menuAlign="start" onAfterSelect={() => setMenuOpen(false)} />
             <button
               type="button"
               onClick={() => setMenuOpen(false)}

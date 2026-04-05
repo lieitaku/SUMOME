@@ -55,6 +55,8 @@ const formSchema = z.object({
     pdfUrl: z.string().optional(),
     readLink: z.string().optional(),
     description: z.string().optional(),
+    titleEn: z.string().optional(),
+    descriptionEn: z.string().optional(),
     published: z.boolean(),
     images: z.array(z.string()),
     readingDirection: z.enum(["ltr", "rtl"]),
@@ -145,6 +147,8 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
             pdfUrl: initialData?.pdfUrl || "",
             readLink: initialData?.readLink || "",
             description: initialData?.description || "",
+            titleEn: initialData?.titleEn || "",
+            descriptionEn: initialData?.descriptionEn || "",
             published: initialData?.published ?? true,
             images: initialData?.images || [],
             readingDirection: getMagazineReadingDirection(initialData),
@@ -311,6 +315,8 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                     formData.append("pdfUrl", data.pdfUrl || "");
                     formData.append("readLink", data.readLink || "");
                     formData.append("description", data.description || "");
+                    formData.append("titleEn", data.titleEn || "");
+                    formData.append("descriptionEn", data.descriptionEn || "");
                     formData.append("published", String(data.published));
                     if (data.coverImage) formData.append("coverImage", data.coverImage);
 
@@ -668,6 +674,22 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                                 className={cn(inputClass, "resize-none min-h-[140px] flex-grow")}
                                 placeholder="誌面の紹介を入力..."
                             />
+                            <div className="mt-6 space-y-2">
+                                <label className={labelClass}>Title (English, optional)</label>
+                                <input
+                                    {...form.register("titleEn")}
+                                    className={inputClass}
+                                    placeholder="Photobook title in English"
+                                />
+                            </div>
+                            <div className="mt-4 space-y-2">
+                                <label className={labelClass}>Description (English, optional)</label>
+                                <textarea
+                                    {...form.register("descriptionEn")}
+                                    className={cn(inputClass, "resize-none min-h-[100px]")}
+                                    placeholder="Short description in English"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>

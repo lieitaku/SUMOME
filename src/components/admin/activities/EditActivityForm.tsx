@@ -41,6 +41,8 @@ type TemplateType = (typeof templateTypeOptions)[number];
 
 const formSchema = z.object({
     title: z.string().min(1, "タイトルを入力してください"),
+    titleEn: z.string().optional(),
+    contentEn: z.string().optional(),
     date: z.string(),
     clubId: z.string().min(1, "クラブを選択してください"),
     templateType: z.enum(templateTypeOptions),
@@ -88,6 +90,8 @@ export default function EditActivityForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: initialData.title || "",
+            titleEn: initialData.titleEn || "",
+            contentEn: initialData.contentEn || "",
             date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             clubId: initialData.clubId || (clubs.length > 0 ? clubs[0].id : ""),
             templateType: initialTemplateType,
@@ -123,6 +127,8 @@ export default function EditActivityForm({
 
         // 基础字段封装
         formData.append("title", values.title);
+        formData.append("titleEn", values.titleEn ?? "");
+        formData.append("contentEn", values.contentEn ?? "");
         formData.append("date", values.date);
         formData.append("clubId", values.clubId);
         formData.append("templateType", values.templateType);
@@ -253,6 +259,23 @@ export default function EditActivityForm({
                                     placeholder="記事のタイトル..."
                                 />
                                 {form.formState.errors.title && <p className="text-red-500 text-xs mt-1">{form.formState.errors.title.message}</p>}
+                            </div>
+                            <div>
+                                <label className={labelClass}>英語タイトル（任意・サイト英語版に表示）</label>
+                                <input
+                                    {...form.register("titleEn")}
+                                    className={inputClass}
+                                    placeholder="English title (optional)"
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>英語本文・概要（任意・ブロックの英訳がない場合のフォールバック）</label>
+                                <textarea
+                                    {...form.register("contentEn")}
+                                    rows={4}
+                                    className={inputClass}
+                                    placeholder="English summary or full text (optional)"
+                                />
                             </div>
                             <div className="flex gap-4">
                                 <div className="flex-1">

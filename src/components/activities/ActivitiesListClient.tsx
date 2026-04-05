@@ -11,17 +11,21 @@ import {
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
+import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
+import type { Club } from "@prisma/client";
 
 const ITEMS_PER_PAGE = 6;
 
 type ActivityItem = {
   id: string;
   title: string;
+  titleEn: string | null;
   date: string;
   location: string | null;
   category: string;
   mainImage: string | null;
-  club: { name: string } | null;
+  club: Pick<Club, "name" | "nameEn"> | null;
 };
 
 type ApiResponse = {
@@ -38,6 +42,8 @@ export default function ActivitiesListClient({
   initialPage: number;
   initialData?: ApiResponse | null;
 }) {
+  const locale = useLocale();
+  const t = useTranslations("ActivitiesPage");
   const [data, setData] = useState<ApiResponse | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
@@ -53,9 +59,9 @@ export default function ActivitiesListClient({
         return res.json();
       })
       .then((d: ApiResponse) => setData(d))
-      .catch(() => setError("読み込みに失敗しました。"))
+      .catch(() => setError(t("listLoadError")))
       .finally(() => setLoading(false));
-  }, [initialPage, initialData]);
+  }, [initialPage, initialData, t]);
 
   if (error) {
     return (
@@ -90,6 +96,11 @@ export default function ActivitiesListClient({
             const month = date.getMonth() + 1;
             const day = date.getDate();
             const year = date.getFullYear();
+            const titleShown = activityDisplayTitle(act, locale);
+            const monthLabel =
+              locale === "en"
+                ? new Intl.DateTimeFormat("en-US", { month: "short" }).format(date)
+                : `${month}月`;
 
             return (
               <div key={act.id} className="h-full">
@@ -102,13 +113,13 @@ export default function ActivitiesListClient({
                   <div className="relative aspect-[3/4] bg-gray-100 group">
                     <Image
                       src={act.mainImage || "/images/placeholder.webp"}
-                      alt={act.title}
+                      alt={titleShown}
                       fill
                       className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                     <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-3 py-2 text-center shadow-lg rounded-sm border-t-2 border-sumo-brand z-10">
                       <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">
-                        {month}月
+                        {monthLabel}
                       </span>
                       <span className="block text-xl font-serif font-black text-sumo-dark leading-none">
                         {day}
@@ -121,13 +132,14 @@ export default function ActivitiesListClient({
 
                   <div className="flex flex-col flex-grow p-6 group">
                     <h3 className="text-xl font-serif font-bold text-gray-900 mb-4 leading-relaxed group-hover:text-sumo-brand transition-colors line-clamp-2">
-                      {act.title}
+                      {titleShown}
                     </h3>
                     <div className="flex items-center gap-4 text-xs text-gray-500 font-medium mb-6 mt-auto">
                       <div className="flex items-center gap-1.5">
                         <MapPin size={14} className="text-sumo-brand" />
                         <span className="line-clamp-1">
-                          {act.location || act.club?.name}
+                          {act.location ||
+                            (act.club ? clubDisplayName(act.club, locale) : "")}
                         </span>
                       </div>
                       <span className="text-gray-300">|</span>
@@ -136,7 +148,7 @@ export default function ActivitiesListClient({
                     <div className="w-full h-px bg-gray-100 mb-4"></div>
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-bold tracking-[0.1em] text-gray-400 group-hover:text-sumo-brand transition-colors uppercase">
-                        詳細を見る
+                        {t("listReadMore")}
                       </span>
                       <div className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center group-hover:border-sumo-brand group-hover:bg-sumo-brand transition-all duration-300">
                         <ArrowRight size={14} className="text-gray-400 group-hover:text-white transition-colors" />

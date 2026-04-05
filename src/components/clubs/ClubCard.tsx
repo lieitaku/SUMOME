@@ -8,6 +8,8 @@ import { cn, getMainImageObjectPosition, getMainImageScale, getMainImageRotation
 import { hasRealClubMainImage, DEFAULT_CLUB_MAIN_IMAGE } from "@/lib/club-images";
 import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
+import { useLocale, useTranslations } from "next-intl";
+import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
 
 type ClubCardProps = {
   club: Club;
@@ -18,15 +20,17 @@ type ClubCardProps = {
 const DEFAULT_COLOR = "#2454a4";
 
 const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
+  const locale = useLocale();
+  const t = useTranslations("ClubDetail");
+  const displayName = clubDisplayName(club, locale);
   // --- 1. Hooks ---
   const summaryText = useMemo(() => {
-    if (club.description) {
-      return club.description.length > 60
-        ? club.description.substring(0, 60) + "..."
-        : club.description;
+    const desc = clubDisplayDescription(club, locale);
+    if (desc) {
+      return desc.length > 60 ? desc.substring(0, 60) + "..." : desc;
     }
-    return "道場の詳細は現在準備中です。";
-  }, [club.description]);
+    return t("introFallback");
+  }, [club, locale, t]);
 
   const dynamicTags = useMemo(() => {
     if (!club.target) return [];
@@ -88,7 +92,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
             ) : (
               <Image
                 src={displayImage}
-                alt={club.name}
+                alt={displayName}
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 style={{ objectPosition: mainImagePosition, transform: `rotate(${mainImageRotation}deg)` }}
@@ -116,7 +120,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
           {/* Information Area */}
           <div className="p-6 pb-0 flex flex-col flex-grow bg-white">
             <h3 className="text-xl font-serif font-bold text-gray-900 leading-snug mb-2 transition-colors group-hover:text-[var(--theme-color)] line-clamp-1">
-              {club.name}
+              {displayName}
             </h3>
 
             {(club.city || club.address) && (
@@ -150,17 +154,17 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
         <div className="mx-6 mb-6 pt-4 border-t border-gray-100 flex items-center justify-between">
           <div className="flex items-center gap-1.5">
             {club.phone && (
-              <a href={`tel:${club.phone}`} className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center hover:bg-emerald-100 hover:scale-110 transition-all" title={`電話: ${club.phone}`}>
+              <a href={`tel:${club.phone}`} className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center hover:bg-emerald-100 hover:scale-110 transition-all" title={t("cardLinkPhone", { phone: club.phone })}>
                 <Phone size={10} className="text-emerald-500" />
               </a>
             )}
             {club.email && (
-              <a href={`mailto:${club.email}`} className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100 hover:scale-110 transition-all" title={`メール: ${club.email}`}>
+              <a href={`mailto:${club.email}`} className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100 hover:scale-110 transition-all" title={t("cardLinkEmail", { email: club.email })}>
                 <Mail size={10} className="text-blue-500" />
               </a>
             )}
             {club.website && (
-              <a href={club.website} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center hover:bg-purple-100 hover:scale-110 transition-all" title="公式サイト">
+              <a href={club.website} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center hover:bg-purple-100 hover:scale-110 transition-all" title={t("cardLinkWebsite")}>
                 <Globe size={10} className="text-purple-500" />
               </a>
             )}
@@ -180,7 +184,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
           </div>
 
           <Link href={detailLink} className="text-[10px] font-black text-gray-300 group-hover:text-[var(--theme-color)] transition-colors uppercase tracking-widest">
-            詳細
+            {t("cardDetails")}
           </Link>
         </div>
       </div>

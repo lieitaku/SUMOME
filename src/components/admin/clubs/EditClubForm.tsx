@@ -37,10 +37,12 @@ import { useRouter } from "@/i18n/navigation";
 const formSchema = z.object({
     id: z.string(),
     name: z.string().min(1, "必須項目です"),
+    nameEn: z.string().optional(),
     slug: z.string()
         .min(3, "3文字以上")
         .regex(/^[a-z0-9-]+$/, "半角英小文字・数字・ハイフンのみ使用可能です"),
     description: z.string().optional(),
+    descriptionEn: z.string().optional(),
     logo: z.string().optional(),
     mainImage: z.string().optional(),
     mainImagePosition: z.string().optional(),
@@ -96,8 +98,10 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
         defaultValues: {
             id: initialData.id,
             name: initialData.name || "",
+            nameEn: initialData.nameEn || "",
             slug: initialData.slug || "",
             description: initialData.description || "",
+            descriptionEn: initialData.descriptionEn || "",
             logo: initialData.logo || "",
             mainImage: initialData.mainImage || "",
             mainImagePosition: initialData.mainImagePosition ?? "50,50",
@@ -367,6 +371,14 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                             <div>
                                 <label className={labelClass}>紹介文</label>
                                 <textarea {...form.register("description")} rows={6} className={inputClass} />
+                            </div>
+                            <div>
+                                <label className={labelClass}>クラブ名（英語・任意）</label>
+                                <input {...form.register("nameEn")} className={inputClass} placeholder="e.g. Osaka Sumo Club" />
+                            </div>
+                            <div>
+                                <label className={labelClass}>紹介文（英語・任意）</label>
+                                <textarea {...form.register("descriptionEn")} rows={4} className={inputClass} placeholder="English description for /en site" />
                             </div>
                         </div>
 

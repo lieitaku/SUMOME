@@ -74,8 +74,12 @@ function parseFormData(formData: FormData) {
     }
   }
 
+  const titleEnRaw = formData.get("titleEn") as string | null;
+  const contentEnRaw = formData.get("contentEn") as string | null;
+
   return {
     title,
+    titleEn: titleEnRaw?.trim() || null,
     slug: generateSlug(title), // 注意：Update 时通常不更新 slug，需在 Update 函数里剔除
     date: new Date(formData.get("date") as string),
     templateType,
@@ -85,6 +89,7 @@ function parseFormData(formData: FormData) {
     customRoute: formData.get("customRoute") as string || null,
     contentData: (contentData as unknown as Prisma.InputJsonValue),
     content: plainTextContent, // 自动生成的纯文本
+    contentEn: contentEnRaw?.trim() || null,
     clubId: formData.get("clubId") as string,
   };
 }

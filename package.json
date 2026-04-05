@@ -7,7 +7,12 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "messages:check": "node scripts/check-message-keys.mjs",
+    "pref:intros-en-check": "node scripts/check-prefecture-intros-en.mjs",
+    "messages:check-en-cjk": "node scripts/check-en-japanese.mjs",
+    "messages:flatten": "node scripts/messages-flatten.mjs",
     "batch:create-clubs": "npx tsx scripts/batch-create-clubs.ts",
+    "magazines:export-for-translation": "npx tsx scripts/export-magazines-for-translation.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

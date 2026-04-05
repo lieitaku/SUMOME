@@ -7,6 +7,8 @@ import { ArrowLeft, MapPin, Calendar, Hash } from "lucide-react";
 import { Activity, Club } from "@prisma/client";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActivityWithClub } from "@/lib/cached-queries";
+import { getTranslations } from "next-intl/server";
+import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
 
 // 1. ✨ 定义与组件完全匹配的强类型
 // 这个类型代表了：活动数据 + 必须包含的俱乐部关联数据
@@ -24,13 +26,14 @@ import ActivityActions from "@/components/activities/ActivityActions";
 
 function normalizePreviewActivity(
   p: Record<string, unknown>,
-  club: { id: string; name: string }
+  club: { id: string; name: string; nameEn?: string | null }
 ): ActivityWithClub {
   const date = p.date ? new Date(p.date as string) : new Date();
   const contentData = (p.contentData ?? (p.blocks || p.event ? { blocks: p.blocks, event: p.event } : null)) as Activity["contentData"];
   return {
     id: String(p.id ?? "preview"),
     title: String(p.title ?? ""),
+    titleEn: p.titleEn != null ? String(p.titleEn) : null,
     slug: String(p.slug ?? "preview"),
     date,
     location: p.location != null ? String(p.location) : null,
@@ -40,12 +43,13 @@ function normalizePreviewActivity(
     templateType: String(p.templateType ?? "news"),
     contentData,
     content: p.content != null ? String(p.content) : null,
+    contentEn: p.contentEn != null ? String(p.contentEn) : null,
     clubId: club.id,
     authorId: String(p.authorId ?? ""),
     customRoute: p.customRoute != null ? String(p.customRoute) : null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    club: { id: club.id, name: club.name } as Club,
+    club: { id: club.id, name: club.name, nameEn: club.nameEn ?? null } as Club,
   };
 }
 
@@ -53,10 +57,11 @@ export default async function ActivityDetailPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ id: string; locale: string }>;
   searchParams?: Promise<{ embedded?: string }>;
 }) {
-  const { id } = await params;
+  const { id, locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ActivitiesPage" });
   const sp = searchParams ? await searchParams : {};
   const isEmbedded = sp?.embedded === "1";
 
@@ -79,7 +84,7 @@ export default async function ActivityDetailPage({
     } else {
       const clubFromDb = await prisma.club.findUnique({
         where: { id: clubId },
-        select: { id: true, name: true },
+        select: { id: true, name: true, nameEn: true },
       });
       const club = clubFromDb ?? { id: clubId, name: clubName };
       activity = normalizePreviewActivity(p, club);
@@ -96,15 +101,18 @@ export default async function ActivityDetailPage({
   // 处理展示用的辅助变量
   const displayDate = new Date(activity.date);
   const safeImage = activity.mainImage || "/images/placeholder.webp";
-  const displayLocation = activity.location || activity.club?.name || "SUMOME";
+  const titleShown = activityDisplayTitle(activity, locale);
+  const displayLocation =
+    activity.location || clubDisplayName(activity.club, locale) || "SUMOME";
+  const dateLocale = locale === "en" ? "en-US" : "ja-JP";
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans selection:bg-sumo-brand selection:text-white flex flex-col">
       {usePreview && !isEmbedded ? (
         <div className="print:hidden bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
-          <span>プレビュー — 未保存の内容を表示しています。</span>
+          <span>{t("previewBanner")}</span>
           <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
-            編集に戻る
+            {t("previewBack")}
           </a>
         </div>
       ) : null}
@@ -130,13 +138,13 @@ export default async function ActivityDetailPage({
             <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white group-hover:text-sumo-brand transition-all">
               <ArrowLeft size={14} />
             </div>
-            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">イベント一覧へ戻る</span>
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase">{t("detailBackToList")}</span>
           </Link>
 
           <div className="flex flex-wrap items-center gap-6 mb-8 opacity-90">
             <div className="flex items-center gap-2 text-xs font-mono tracking-wide">
               <Calendar size={14} className="text-yellow-400" />
-              <span>{displayDate.toLocaleDateString('ja-JP').replace(/\//g, '.')}</span>
+              <span>{displayDate.toLocaleDateString(dateLocale).replace(/\//g, ".")}</span>
             </div>
             <div className="w-px h-3 bg-white/30"></div>
             <div className="flex items-center gap-2 text-xs font-medium tracking-wide">
@@ -146,7 +154,7 @@ export default async function ActivityDetailPage({
           </div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold leading-[1.2] tracking-wide mb-8 max-w-4xl drop-shadow-sm">
-            {activity.title}
+            {titleShown}
           </h1>
         </div>
       </header>
@@ -166,7 +174,7 @@ export default async function ActivityDetailPage({
                     <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">アクション</div>
                     <ActivityActions
                       activityId={activity.id}
-                      title={activity.title}
+                      title={titleShown}
                       variant="sidebar"
                     />
                   </div>
@@ -198,7 +206,7 @@ export default async function ActivityDetailPage({
                 <div className="print:hidden mt-8 md:mt-20 pt-4 md:pt-8 border-t border-gray-100 lg:hidden">
                   <ActivityActions
                     activityId={activity.id}
-                    title={activity.title}
+                    title={titleShown}
                     variant="mobile"
                   />
                 </div>
@@ -212,7 +220,7 @@ export default async function ActivityDetailPage({
               <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 group-hover:border-sumo-brand group-hover:text-sumo-brand group-hover:-translate-x-1 transition-all">
                 <ArrowLeft size={16} />
               </div>
-              <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-brand uppercase tracking-widest transition-colors">イベント一覧へ戻る</span>
+              <span className="text-[10px] font-bold text-gray-400 group-hover:text-sumo-brand uppercase tracking-widest transition-colors">{t("detailBackToList")}</span>
             </Link>
           </div>
         </div>

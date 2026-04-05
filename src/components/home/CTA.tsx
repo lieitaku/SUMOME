@@ -3,8 +3,10 @@
 import React from "react";
 import Image from "next/image";
 import Section from "@/components/ui/Section";
+import { useTranslations } from "next-intl";
 
 const CTA = () => {
+  const t = useTranslations("Home");
   return (
     <Section background="white" className="!py-0" id="cta">
       <div className="max-w-5xl mx-auto reveal-up flex flex-col items-center">
@@ -12,7 +14,7 @@ const CTA = () => {
         <div className="w-full max-w-4xl mx-auto">
           <Image
             src="/images/CTA/CTA.webp?v=4"
-            alt="将来の横綱を、ここから。"
+            alt={t("ctaAlt")}
             width={3840}
             height={1200}
             className="w-full h-auto block"

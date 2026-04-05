@@ -21,7 +21,9 @@ const formSchema = z.object({
     slug: z.string()
         .min(3, "IDは3文字以上で入力してください")
         .regex(/^[a-z0-9-]+$/, "IDは半角英小文字、数字、ハイフン(-)のみ使用可能です"),
+    nameEn: z.string().optional(),
     description: z.string().optional(),
+    descriptionEn: z.string().optional(),
     logo: z.string().optional(),
     mainImage: z.string().optional(),
 });
@@ -37,7 +39,9 @@ export default function NewClubPage() {
         defaultValues: {
             name: "",
             slug: "",
+            nameEn: "",
             description: "",
+            descriptionEn: "",
             logo: "",
             mainImage: "",
         },
@@ -178,6 +182,14 @@ export default function NewClubPage() {
                                         className={inputClass}
                                         placeholder="活動方針や歴史など..."
                                     />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>英語名（任意）</label>
+                                    <input {...form.register("nameEn")} className={inputClass} placeholder="English name (optional)" />
+                                </div>
+                                <div>
+                                    <label className={labelClass}>英語紹介（任意）</label>
+                                    <textarea {...form.register("descriptionEn")} rows={3} className={inputClass} placeholder="English blurb (optional)" />
                                 </div>
                             </div>
                         </div>

@@ -12,25 +12,28 @@ import {
   User,
   AtSign,
   Building2,
-  Send,
   AlertCircle,
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 import { createInquiry } from "@/lib/actions/inquiries";
+import { useTranslations } from "next-intl";
+
+const INQUIRY_TYPE_IDS = ["club_visit", "media", "sponsor", "other"] as const;
+type InquiryTypeId = (typeof INQUIRY_TYPE_IDS)[number];
 
 const ContactPage = () => {
+  const t = useTranslations("Contact");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 表单数据状态
   const [formData, setFormData] = useState({
     name: "",
     furigana: "",
     email: "",
     phone: "",
-    inquiryType: "",
+    inquiryTypeId: "" as "" | InquiryTypeId,
     message: "",
   });
 
@@ -41,8 +44,8 @@ const ContactPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleRadioChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, inquiryType: value }));
+  const handleRadioChange = (value: InquiryTypeId) => {
+    setFormData((prev) => ({ ...prev, inquiryTypeId: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,20 +54,30 @@ const ContactPage = () => {
     setError(null);
 
     try {
-      const result = await createInquiry(formData);
+      const inquiryType = t(`inquiryStorage_${formData.inquiryTypeId}`);
+      const result = await createInquiry({
+        name: formData.name,
+        furigana: formData.furigana,
+        email: formData.email,
+        phone: formData.phone,
+        inquiryType,
+        message: formData.message,
+      });
 
       if (result.success) {
         setIsSent(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        setError(result.error || "送信に失敗しました");
+        setError(result.error || t("errorSendFailed"));
       }
     } catch {
-      setError("送信中にエラーが発生しました");
+      setError(t("errorGeneric"));
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const addressLines = t("addressLines").split("\n");
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
@@ -81,16 +94,16 @@ const ContactPage = () => {
         />
 
         <div className="absolute top-1/2 right-10 -translate-y-1/2 text-[15vw] font-black text-white opacity-[0.03] select-none pointer-events-none leading-none mix-blend-overlay tracking-tighter font-sans">
-          お問い合わせ
+          {t("watermark")}
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
           <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
-            お問い合わせ
+            {t("heroTitle")}
           </h1>
 
           <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200">
-            クラブへの参加希望、取材のご依頼、その他ご質問など、<br />担当者からご連絡いたします。
+            {t("heroLead")}
           </p>
         </div>
       </header>
@@ -106,13 +119,11 @@ const ContactPage = () => {
               {/* --- A. Left Side: Info Panel --- */}
               <div className="lg:w-1/3 bg-[#FAFAFA] border-r border-gray-100 p-10 md:p-14 relative overflow-hidden flex flex-col justify-between">
                 <div className="relative z-10">
-                  {/* 标题 */}
                   <h3 className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-[0.25em] mb-10 border-b border-gray-200 pb-4">
-                    お問い合わせ先
+                    {t("sideHeading")}
                   </h3>
 
                   <div className="space-y-10">
-                    {/* Address */}
                     <div className="group">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded bg-white border border-gray-200 flex items-center justify-center text-sumo-brand shadow-sm mt-1">
@@ -120,20 +131,20 @@ const ContactPage = () => {
                         </div>
                         <div>
                           <h4 className="text-base md:text-sm font-bold text-sumo-dark mb-2">
-                            所在地
+                            {t("addressHeading")}
                           </h4>
                           <p className="text-gray-500 leading-relaxed text-base md:text-sm font-medium">
-                            〒103-0016
-                            <br />
-                            東京都中央区日本橋小網町4番9号
-                            <br />
-                            恵和ビル 3階
+                            {addressLines.map((line, i) => (
+                              <React.Fragment key={i}>
+                                {i > 0 && <br />}
+                                {line}
+                              </React.Fragment>
+                            ))}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Email */}
                     <div className="group">
                       <div className="flex items-start gap-4">
                         <div className="w-10 h-10 rounded bg-white border border-gray-200 flex items-center justify-center text-sumo-brand shadow-sm">
@@ -141,7 +152,7 @@ const ContactPage = () => {
                         </div>
                         <div>
                           <h4 className="text-base md:text-sm font-bold text-sumo-dark mb-2">
-                            メール
+                            {t("emailHeading")}
                           </h4>
                           <a
                             href="mailto:info@memory-pb.com"
@@ -155,11 +166,10 @@ const ContactPage = () => {
                   </div>
                 </div>
 
-                {/* 底部 Logo / 装饰 */}
                 <div className="relative z-10 mt-12 lg:mt-0">
                   <div className="w-8 h-1 bg-sumo-gold mb-3"></div>
                   <p className="text-xs md:text-[10px] text-gray-400 uppercase tracking-widest font-bold">
-                    SUMOME公式
+                    {t("officialLine")}
                   </p>
                 </div>
               </div>
@@ -167,39 +177,33 @@ const ContactPage = () => {
               {/* --- B. Right Side: The Form (纯白输入区) --- */}
               <div className="lg:w-2/3 bg-white p-8 md:p-14 lg:p-16 relative">
                 {isSent ? (
-                  // --- Success State ---
                   <div className="h-full flex flex-col items-center justify-center text-center animate-in zoom-in-95 duration-500">
                     <div className="w-20 h-20 bg-green-50 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm border border-green-100">
                       <CheckCircle2 size={36} />
                     </div>
                     <h3 className="text-2xl font-serif font-bold text-sumo-dark mb-4">
-                      お問い合わせ完了
+                      {t("successTitle")}
                     </h3>
                     <p className="text-gray-500 mb-8 max-w-md leading-relaxed font-medium">
-                      お問い合わせありがとうございます。
-                      <br />
-                      内容を確認の上、担当者より2営業日以内にご連絡させていただきます。
+                      {t("successBody")}
                     </p>
                     <Link href="/">
                       <button className="px-8 py-3 bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-widest rounded hover:bg-sumo-brand hover:text-white transition-all">
-                        トップページへ戻る
+                        {t("successHome")}
                       </button>
                     </Link>
                   </div>
                 ) : (
-                  // --- Form State ---
                   <form onSubmit={handleSubmit} className="space-y-10">
                     <div className="mb-10 border-b border-gray-100 pb-6">
                       <h3 className="text-2xl font-serif font-bold text-sumo-dark mb-2">
-                        入力フォーム
+                        {t("formTitle")}
                       </h3>
                       <p className="text-base md:text-sm text-gray-400 font-medium">
-                        以下の項目にご記入ください（
-                        <span className="text-sumo-red">*</span>は必須項目）
+                        {t("formHint")}
                       </p>
                     </div>
 
-                    {/* Error Message */}
                     {error && (
                       <div className="flex items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-base md:text-sm">
                         <AlertCircle size={16} />
@@ -207,11 +211,10 @@ const ContactPage = () => {
                       </div>
                     )}
 
-                    {/* Name & Furigana */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3 group">
                         <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                          <User size={12} /> お名前{" "}
+                          <User size={12} /> {t("fieldName")}{" "}
                           <span className="text-sumo-red">*</span>
                         </label>
                         <input
@@ -220,30 +223,29 @@ const ContactPage = () => {
                           value={formData.name}
                           onChange={handleInputChange}
                           required
-                          placeholder="相撲 太郎"
+                          placeholder={t("placeholderName")}
                           className="w-full h-12 px-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300"
                         />
                       </div>
                       <div className="space-y-3 group">
                         <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                          フリガナ
+                          {t("fieldFurigana")}
                         </label>
                         <input
                           type="text"
                           name="furigana"
                           value={formData.furigana}
                           onChange={handleInputChange}
-                          placeholder="スモウ タロウ"
+                          placeholder={t("placeholderFurigana")}
                           className="w-full h-12 px-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300"
                         />
                       </div>
                     </div>
 
-                    {/* Email & Phone */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-3 group">
                         <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                          <AtSign size={12} /> メールアドレス{" "}
+                          <AtSign size={12} /> {t("fieldEmail")}{" "}
                           <span className="text-sumo-red">*</span>
                         </label>
                         <input
@@ -258,7 +260,7 @@ const ContactPage = () => {
                       </div>
                       <div className="space-y-3 group">
                         <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                          <Phone size={12} /> 電話番号
+                          <Phone size={12} /> {t("fieldPhone")}
                         </label>
                         <input
                           type="tel"
@@ -271,52 +273,48 @@ const ContactPage = () => {
                       </div>
                     </div>
 
-                    {/* Inquiry Type */}
                     <div className="space-y-4">
                       <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                        <Building2 size={12} /> お問い合わせ種別{" "}
+                        <Building2 size={12} /> {t("fieldInquiryType")}{" "}
                         <span className="text-sumo-red">*</span>
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[
-                          "クラブ参加・見学について",
-                          "取材・メディア関連",
-                          "協賛・スポンサーについて",
-                          "その他",
-                        ].map((type) => (
-                          <label
-                            key={type}
-                            className={cn(
-                              "relative flex items-center gap-3 p-4 border rounded cursor-pointer hover:border-sumo-brand/50 hover:bg-gray-50 transition-all group",
-                              formData.inquiryType === type
-                                ? "border-sumo-brand bg-sumo-brand/[0.04] shadow-sm"
-                                : "border-gray-200"
-                            )}
-                          >
-                            <input
-                              type="radio"
-                              name="inquiryType"
-                              value={type}
-                              checked={formData.inquiryType === type}
-                              onChange={() => handleRadioChange(type)}
-                              required
-                              className="w-4 h-4 accent-sumo-brand border-gray-300"
-                            />
-                            <span className={cn(
-                              "text-base md:text-sm font-bold",
-                              formData.inquiryType === type ? "text-sumo-dark" : "text-gray-600"
-                            )}>
-                              {type}
-                            </span>
-                          </label>
-                        ))}
+                        {INQUIRY_TYPE_IDS.map((id) => {
+                          const label = t(`inquiryType_${id}`);
+                          return (
+                            <label
+                              key={id}
+                              className={cn(
+                                "relative flex items-center gap-3 p-4 border rounded cursor-pointer hover:border-sumo-brand/50 hover:bg-gray-50 transition-all group",
+                                formData.inquiryTypeId === id
+                                  ? "border-sumo-brand bg-sumo-brand/[0.04] shadow-sm"
+                                  : "border-gray-200"
+                              )}
+                            >
+                              <input
+                                type="radio"
+                                name="inquiryTypeId"
+                                value={id}
+                                checked={formData.inquiryTypeId === id}
+                                onChange={() => handleRadioChange(id)}
+                                required
+                                className="w-4 h-4 accent-sumo-brand border-gray-300"
+                              />
+                              <span className={cn(
+                                "text-base md:text-sm font-bold",
+                                formData.inquiryTypeId === id ? "text-sumo-dark" : "text-gray-600"
+                              )}>
+                                {label}
+                              </span>
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    {/* Message */}
                     <div className="space-y-3 group">
                       <label className="text-sm md:text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors">
-                        <MessageSquare size={12} /> お問い合わせ内容{" "}
+                        <MessageSquare size={12} /> {t("fieldMessage")}{" "}
                         <span className="text-sumo-red">*</span>
                       </label>
                       <textarea
@@ -325,23 +323,23 @@ const ContactPage = () => {
                         onChange={handleInputChange}
                         required
                         rows={5}
-                        placeholder="ご質問やご相談内容をご記入ください"
+                        placeholder={t("placeholderMessage")}
                         className="w-full p-4 bg-gray-50 border-b-2 border-gray-200 rounded-t-sm focus:outline-none focus:border-sumo-brand focus:bg-sumo-brand/[0.02] transition-all font-medium text-sumo-dark placeholder-gray-300 resize-none"
                       ></textarea>
                     </div>
 
-                    {/* Submit Action */}
                     <div className="pt-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
                       <p className="text-sm md:text-xs text-gray-400 text-center md:text-left leading-relaxed">
-                        <a
-                          href="/privacy"
-                          className="underline decoration-gray-300 hover:text-sumo-brand hover:decoration-sumo-brand transition-all"
-                        >
-                          プライバシーポリシー
-                        </a>
-                        に同意の上、
-                        <br className="hidden md:inline" />
-                        送信してください。
+                        {t.rich("privacyConsent", {
+                          privacy: (chunks) => (
+                            <Link
+                              href="/privacy"
+                              className="underline decoration-gray-300 hover:text-sumo-brand hover:decoration-sumo-brand transition-all"
+                            >
+                              {chunks}
+                            </Link>
+                          ),
+                        })}
                       </p>
 
                       <button
@@ -350,12 +348,12 @@ const ContactPage = () => {
                         className={cn(
                           "group relative overflow-hidden px-10 py-4 bg-sumo-dark text-white text-sm md:text-xs font-bold uppercase tracking-widest rounded shadow-lg transition-all",
                           isSubmitting
-                            ? "opacity-80 cursor-not-allowed"
-                            : "hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl",
+                            ? "opacity-50 grayscale cursor-not-allowed"
+                            : "hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl active:scale-[0.98]",
                         )}
                       >
                         <span className="relative z-10 flex items-center gap-2">
-                          {isSubmitting ? "送信中..." : "送信する"}
+                          {isSubmitting ? t("submitting") : t("submit")}
                           {!isSubmitting && (
                             <ArrowRight
                               size={14}

@@ -19,6 +19,10 @@ export type PrefectureInfo = {
   name: string; // 县名 (例: 愛知県)
   introTitle: string; // 介绍标题
   introText: string; // 介绍正文 (支持 HTML 或换行符)
+  /** 可选：覆盖 `intros-en` 集中数据时的英文标题 */
+  introTitleEn?: string;
+  /** 可选：覆盖 `intros-en` 集中数据时的英文正文 */
+  introTextEn?: string;
   bannerImg: string; // 顶部 Banner 图片路径
   rikishiList: Rikishi[]; // 该县出身的力士列表
 };

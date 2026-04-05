@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Share2, X, Check, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import HTMLFlipBook from "react-pageflip";
+import { useTranslations } from "next-intl";
 
 type PageFlipUi = {
     distElement: HTMLElement;
@@ -40,6 +41,7 @@ function patchPageFlipRtlPointer(flip: unknown): void {
 // ==============================================================================
 export function ShareButton() {
     const [copied, setCopied] = useState(false);
+    const t = useTranslations("MagazineReader");
 
     const handleShare = async () => {
         const url = window.location.href;
@@ -53,10 +55,10 @@ export function ShareButton() {
         try {
             await navigator.clipboard.writeText(url);
             setCopied(true);
-            toast.success("リンクをコピーしました");
+            toast.success(t("toastLinkCopied"));
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
-            toast.error("コピーに失敗しました");
+            toast.error(t("toastCopyFailed"));
         }
     };
 
@@ -66,7 +68,7 @@ export function ShareButton() {
             className="flex flex-col items-center justify-center gap-2 py-3 bg-white border border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl hover:bg-gray-50 transition-all group active:scale-95 w-full"
         >
             {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} className="group-hover:scale-110 transition-transform text-gray-400 group-hover:text-gray-900" />}
-            <span className="text-[10px] font-bold uppercase tracking-wider">{copied ? "コピーしました" : "共有"}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">{copied ? t("shareCopied") : t("share")}</span>
         </button>
     );
 }
@@ -83,6 +85,7 @@ interface PageProps {
 }
 
 const Page = forwardRef<HTMLDivElement, PageProps>((props, ref) => {
+    const t = useTranslations("MagazineReader");
     const unmirror = props.mirrorContent;
     /** 外側ブックが scaleX(-1) のとき、各ページ内だけ相殺（StPageFlip が子を複製しても relative ブロック単位で効かせる） */
     const unmirrorStyle: React.CSSProperties | undefined = unmirror
@@ -97,7 +100,7 @@ const Page = forwardRef<HTMLDivElement, PageProps>((props, ref) => {
             <div className="relative h-full w-full min-h-0" style={unmirrorStyle}>
                 <Image
                     src={props.src}
-                    alt={`ページ ${props.pageNumber}`}
+                    alt={t("pageAlt", { page: props.pageNumber })}
                     fill
                     className="object-contain"
                     quality={100}
@@ -149,6 +152,7 @@ export function MagazineReader({
     readingDirection = "ltr",
     innerImages,
 }: MagazineReaderProps) {
+    const t = useTranslations("MagazineReader");
     // 核心状态：控制 Portal 是否显示
     const [isOpen, setIsOpen] = useState(false);
     // 核心状态：✨ 新增 - 专门控制 FlipBook 组件是否开始渲染
@@ -308,27 +312,30 @@ export function MagazineReader({
                                 className="flex shadow-lg rounded-sm overflow-hidden border border-gray-100 bg-white relative cursor-pointer transition-transform hover:scale-[1.01] duration-500"
                             >
                                 <div className="flex-1 relative aspect-[3/4] border-r border-gray-200">
-                                    <Image src={spread.left} alt={`ページ ${startPage}`} fill className="object-cover" />
+                                    <Image src={spread.left} alt={t("pageAlt", { page: startPage })} fill className="object-cover" />
                                     <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-black/10 to-transparent pointer-events-none"></div>
                                 </div>
                                 <div className="flex-1 relative aspect-[3/4] bg-gray-50">
                                     {spread.right ? (
                                         <>
-                                            <Image src={spread.right} alt={`ページ ${endPage}`} fill className="object-cover" />
+                                            <Image src={spread.right} alt={t("pageAlt", { page: endPage })} fill className="object-cover" />
                                             <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-black/5 to-transparent pointer-events-none"></div>
                                         </>
                                     ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-300 text-xs font-mono uppercase tracking-widest">終</div>
+                                        <div className="flex items-center justify-center h-full text-gray-300 text-xs font-mono uppercase tracking-widest">{t("spreadEnd")}</div>
                                     )}
                                 </div>
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100 pointer-events-none">
                                     <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold shadow-lg flex items-center gap-2 transform translate-y-2 group-hover:translate-y-0 transition-all">
-                                        <span>立ち読みする</span>
+                                        <span>{t("browseInline")}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="text-center mt-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest">
-                                ページ {startPage} - {spread.right ? endPage : "終"}
+                                {t("pageRange", {
+                                    start: startPage,
+                                    end: spread.right ? endPage : t("spreadEnd"),
+                                })}
                             </div>
                         </div>
                     )
@@ -345,7 +352,7 @@ export function MagazineReader({
                     {/* Top Bar */}
                     <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-[100002] bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
                         <div className="text-white/80 text-xs font-bold tracking-widest px-4 pointer-events-auto">
-                            デジタルビューア
+                            {t("digitalViewer")}
                         </div>
                         <button
                             onClick={closeBook}
@@ -426,15 +433,13 @@ export function MagazineReader({
                         ) : (
                             // Loading 占位，防止闪烁
                             <div className="text-white/50 text-xs tracking-widest animate-pulse">
-                                読み込み中...
+                                {t("loading")}
                             </div>
                         )}
                     </div>
 
                     <div className="absolute bottom-6 text-white/50 text-[10px] uppercase tracking-widest font-medium pointer-events-none">
-                        {isRTL
-                            ? "左開き：右→左の向きでめくれます（スワイプ・角）"
-                            : "右開き：左→右の向きでめくれます（スワイプ・角）"}
+                        {isRTL ? t("hintRtl") : t("hintLtr")}
                     </div>
                 </div>,
                 document.body

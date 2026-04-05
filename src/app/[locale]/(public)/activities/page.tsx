@@ -1,29 +1,56 @@
 import React from "react";
 import type { Metadata } from "next";
-import { Calendar } from "lucide-react";
 import ActivitiesListClient from "@/components/activities/ActivitiesListClient";
 import { getCachedActivitiesPage } from "@/lib/cached-queries";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "活動記録・イベント情報",
-  description:
-    "SUMOMEが主催・参加した相撲イベント・大会の活動記録。アマチュア相撲の大会情報やイベントレポートをご覧いただけます。",
-  alternates: { canonical: "https://www.memory-sumo.com/activities" },
-};
+function siteBase(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.memory-sumo.com").replace(
+    /\/+$/,
+    ""
+  );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ActivitiesPage" });
+  const base = siteBase();
+  const jaUrl = `${base}/activities`;
+  const enUrl = `${base}/en/activities`;
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: {
+      canonical: locale === "en" ? enUrl : jaUrl,
+      languages: {
+        ja: jaUrl,
+        en: enUrl,
+      },
+    },
+  };
+}
 
 export default async function ActivitiesPage({
   searchParams,
+  params,
 }: {
-  searchParams?: { page?: string };
+  searchParams?: Promise<{ page?: string }>;
+  params: Promise<{ locale: string }>;
 }) {
-  const pageParam = searchParams?.page;
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ActivitiesPage" });
+  const sp = searchParams ? await searchParams : {};
+  const pageParam = sp.page;
   const initialPage = Math.max(1, Number(pageParam) || 1);
   const initialData = await getCachedActivitiesPage(initialPage);
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
-        {/* ==================== 1. Hero Section ==================== */}
         <section className="relative pt-40 pb-20 md:pb-32 overflow-hidden bg-sumo-brand text-white shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
           <div
@@ -40,24 +67,23 @@ export default async function ActivitiesPage({
 
           <div className="container mx-auto px-6 relative z-10 text-center">
             <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm">
-              活動記録
+              {t("heroTitle")}
             </h1>
             <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed">
-              SUMOMEが主催・参加したイベントの様子をお届けします。
+              {t("heroSubtitle")}
             </p>
           </div>
         </section>
 
-        {/* ==================== 2. Activity Grid (client, from API) ==================== */}
-        <ActivitiesListClient 
-          initialPage={initialPage} 
+        <ActivitiesListClient
+          initialPage={initialPage}
           initialData={{
             ...initialData,
-            activities: initialData.activities.map(act => ({
+            activities: initialData.activities.map((act) => ({
               ...act,
               date: act.date instanceof Date ? act.date.toISOString() : act.date,
             })),
-          }} 
+          }}
         />
       </main>
     </div>
