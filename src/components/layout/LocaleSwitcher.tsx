@@ -14,6 +14,8 @@ type Props = {
     onAfterSelect?: () => void;
     /** 下拉相对触发器：start=左对齐、向右展开（抽屉内语言球在左侧时用）；end=右对齐、向左展开（桌面顶栏右侧用时） */
     menuAlign?: "start" | "end";
+    /** 移动端抽屉等：在地球图标右侧显示简短说明（与 `label` 同源文案） */
+    showMobileCaption?: boolean;
 };
 
 export default function LocaleSwitcher({
@@ -21,6 +23,7 @@ export default function LocaleSwitcher({
     variant = "default",
     onAfterSelect,
     menuAlign = "end",
+    showMobileCaption = false,
 }: Props) {
     const t = useTranslations("LocaleSwitcher");
     const locale = useLocale();
@@ -92,21 +95,46 @@ export default function LocaleSwitcher({
         onAfterSelect?.();
     };
 
+    const triggerButton = (
+        <button
+            type="button"
+            className={triggerClass}
+            aria-label={t("label")}
+            aria-haspopup="listbox"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+        >
+            <Globe size={18} strokeWidth={2.25} aria-hidden />
+            <span className="pointer-events-none absolute bottom-0.5 right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded bg-sumo-brand px-0.5 text-[8px] font-black leading-none text-white">
+                {locale === "en" ? "EN" : "JP"}
+            </span>
+        </button>
+    );
+
     return (
-        <div ref={rootRef} className={cn("relative shrink-0", className)}>
-            <button
-                type="button"
-                className={triggerClass}
-                aria-label={t("label")}
-                aria-haspopup="listbox"
-                aria-expanded={open}
-                onClick={() => setOpen((v) => !v)}
-            >
-                <Globe size={18} strokeWidth={2.25} aria-hidden />
-                <span className="pointer-events-none absolute bottom-0.5 right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded bg-sumo-brand px-0.5 text-[8px] font-black leading-none text-white">
-                    {locale === "en" ? "EN" : "JP"}
-                </span>
-            </button>
+        <div
+            ref={rootRef}
+            className={cn(
+                "relative",
+                showMobileCaption
+                    ? "flex min-w-0 flex-1 items-center gap-3"
+                    : "shrink-0",
+                className
+            )}
+        >
+            {showMobileCaption ? (
+                <>
+                    {triggerButton}
+                    <span
+                        className="min-w-0 flex-1 text-left text-sm font-bold leading-snug text-gray-600"
+                        aria-hidden
+                    >
+                        {t("label")}
+                    </span>
+                </>
+            ) : (
+                triggerButton
+            )}
             {open ? (
                 <div
                     role="listbox"

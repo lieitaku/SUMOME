@@ -1,3 +1,5 @@
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 import "./globals.css";
 
 const FAVICON_VERSION = "6";
@@ -27,7 +29,10 @@ export default function RootLayout({
                 <link rel="apple-touch-icon" href={`/icons/apple-touch-icon.png?v=${FAVICON_VERSION}`} />
                 <link rel="manifest" href={`/site.webmanifest?v=${FAVICON_VERSION}`} />
             </head>
-            <body>{children}</body>
+            <body>
+                {children}
+                <SpeedInsights />
+            </body>
         </html>
     );
 }

@@ -297,7 +297,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
         }
       `}</style>
 
-            <main className="flex-grow pt-32 pb-20">
+            <main className="flex-grow pt-24 pb-12 md:pt-32 md:pb-20">
                 {/* 背景网格装饰 (Visual Decoration) */}
                 <div
                     className="absolute inset-0 pointer-events-none z-0 fixed"
@@ -309,12 +309,12 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                     }}
                 />
 
-                <div className="container mx-auto px-6 relative z-10">
+                <div className="container mx-auto px-4 md:px-6 relative z-10">
 
                     {/* ==================== 区域 1: 搜索控制中心 ==================== */}
-                    <div className="max-w-5xl mx-auto mb-16">
+                    <div className="max-w-5xl mx-auto mb-8 md:mb-16">
                         {/* 顶部标签 */}
-                        <div className="flex justify-center mb-8 reveal-up">
+                        <div className="flex justify-center mb-4 md:mb-8 reveal-up">
                             <div className="inline-flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm border border-gray-100">
                                 <SlidersHorizontal size={12} className="text-sumo-brand" />
                                 <span className="text-[10px] font-bold tracking-widest text-sumo-brand uppercase">
@@ -323,7 +323,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                             </div>
                         </div>
 
-                        <h1 className="text-center text-4xl md:text-5xl font-serif font-black text-gray-900 mb-10 tracking-tight reveal-up delay-100">
+                        <h1 className="text-center text-4xl md:text-5xl font-serif font-black text-gray-900 mb-6 md:mb-10 tracking-tight reveal-up delay-100">
                             {t("title")}
                         </h1>
 
@@ -371,10 +371,10 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                     </div>
 
                     {/* ==================== 区域 2: 筛选仪表盘 (折叠面板) ==================== */}
-                    <div className="max-w-6xl mx-auto mb-16 reveal-up delay-300">
+                    <div className="max-w-6xl mx-auto mb-8 md:mb-16 reveal-up delay-300">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             {/* 筛选器头部：仅展示，无箭头 */}
-                            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                            <div className="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 border-b border-gray-100 bg-gray-50/50">
                                 <div className="flex items-center gap-3">
                                     <Filter size={16} className="text-sumo-brand" />
                                     <span className="text-sm font-bold text-gray-700 tracking-wide">
@@ -396,11 +396,11 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 )}
                             >
                                 <div className="min-h-0">
-                                    <div className="p-6 md:p-10">
+                                    <div className="p-4 md:p-10">
                                     {/* 第一级：大区选择 (Region Tabs) */}
                                     <div className={cn(
-                                        "flex flex-wrap gap-3 md:gap-4",
-                                        activeRegion !== "all" ? "mb-10" : "mb-0"
+                                        "flex flex-wrap gap-2 md:gap-4",
+                                        activeRegion !== "all" ? "mb-6 md:mb-10" : "mb-0"
                                     )}>
                                         <Button
                                             variant="ceramic"
@@ -432,8 +432,8 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
 
                                     {/* 第二级：县选择 (Prefecture List) - 仅在选中大区时显示 */}
                                     {activeRegion !== "all" && (
-                                        <div className="relative pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
-                                            <div className="absolute -top-3 left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
+                                        <div className="relative pt-6 md:pt-8 border-t border-gray-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                                            <div className="absolute -top-3 left-4 md:left-6 px-3 bg-white text-[10px] font-bold text-gray-400 tracking-widest uppercase border border-gray-100 rounded-full">
                                                 {t("prefPickerLabel")}
                                             </div>
                                             <div className="flex flex-wrap gap-2">
@@ -469,7 +469,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                     {/* ==================== 区域 3: 搜索结果展示 ==================== */}
                     <div ref={resultsSectionRef} className="max-w-6xl mx-auto">
                         {/* 结果统计与排序、标签 */}
-                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200">
+                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6 pb-3 md:gap-4 md:mb-8 md:pb-4 border-b border-gray-200">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
                                     {filteredClubs.length}
@@ -480,7 +480,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                             </div>
 
                             {/* 右侧：排序 + 筛选标签 */}
-                            <div className="flex flex-wrap items-center justify-end gap-3 sm:gap-4">
+                            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-4">
                                 {/* 排序切换：默认按地区顺序，可切换为按时间 */}
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">
@@ -550,16 +550,16 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
 
                         {/* 结果列表：渐进式渲染，先显示首屏再分批追加，避免从地区切到全国时卡顿 */}
                         {clubsError ? (
-                            <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
+                            <div className="flex flex-col items-center justify-center py-16 md:py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
                                 <p className="text-gray-500 text-sm">{clubsError}</p>
                             </div>
                         ) : clubsLoading && initialClubs.length === 0 ? (
-                            <div className="flex justify-center py-24">
+                            <div className="flex justify-center py-12 md:py-24">
                                 <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
                             </div>
                         ) : filteredClubs.length > 0 ? (
                             <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                                     {clubsToRender.map((club, index) => {
                                         const ANIMATION_CAP = 24;
                                         const useAnimation = clubsToRender.length <= ANIMATION_CAP;
@@ -576,21 +576,21 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     })}
                                 </div>
                                 {hasMore && (
-                                    <div className="flex justify-center py-6" aria-hidden="true">
+                                    <div className="flex justify-center py-4 md:py-6" aria-hidden="true">
                                         <span className="inline-block w-6 h-6 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
                                     </div>
                                 )}
                             </>
                         ) : (
                             /* 空状态展示 (Empty State) */
-                            <div className="flex flex-col items-center justify-center py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
-                                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                            <div className="flex flex-col items-center justify-center py-16 md:py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
+                                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-4 md:mb-6">
                                     <Search size={40} className="text-gray-300" />
                                 </div>
                                 <h3 className="text-xl font-serif font-bold text-gray-900 mb-2">
                                     {t("emptyTitle")}
                                 </h3>
-                                <p className="text-gray-500 text-sm max-w-xs mx-auto mb-8 leading-relaxed">
+                                <p className="text-gray-500 text-sm max-w-xs mx-auto mb-6 md:mb-8 leading-relaxed">
                                     {t("emptyBody")}
                                 </p>
                                 <button

@@ -430,7 +430,11 @@ const Header = () => {
       >
         <div className="flex flex-col h-full min-h-0 p-6">
           <div className="flex shrink-0 items-center justify-between gap-4 mb-6">
-            <LocaleSwitcher menuAlign="start" onAfterSelect={() => setMenuOpen(false)} />
+            <LocaleSwitcher
+              menuAlign="start"
+              showMobileCaption
+              onAfterSelect={() => setMenuOpen(false)}
+            />
             <button
               type="button"
               onClick={() => setMenuOpen(false)}

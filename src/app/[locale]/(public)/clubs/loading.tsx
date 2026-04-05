@@ -4,7 +4,7 @@ export default function ClubsLoading() {
   return (
     <div className="min-h-screen bg-[#F4F5F7] animate-pulse">
       {/* Hero/标题区骨架 */}
-      <section className="pt-28 pb-16 px-6">
+      <section className="pt-24 pb-10 px-4 md:pt-28 md:pb-16 md:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="h-10 w-48 bg-gray-200 rounded mb-4" />
           <div className="h-5 w-96 max-w-md bg-gray-100 rounded" />
@@ -12,9 +12,9 @@ export default function ClubsLoading() {
       </section>
 
       {/* 搜索 & 筛选骨架 */}
-      <section className="px-6 pb-8">
+      <section className="px-4 pb-6 md:px-6 md:pb-8">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm space-y-4">
+          <div className="bg-white p-4 md:p-5 rounded-xl border border-gray-200 shadow-sm space-y-3 md:space-y-4">
             <div className="h-10 max-w-md bg-gray-100 rounded-lg" />
             <div className="flex gap-2 flex-wrap">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -26,9 +26,9 @@ export default function ClubsLoading() {
       </section>
 
       {/* 俱乐部卡片网格骨架 */}
-      <section className="px-6 pb-24">
+      <section className="px-4 pb-16 md:px-6 md:pb-24">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                 <div className="aspect-video bg-gray-200" />
