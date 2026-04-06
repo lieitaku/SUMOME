@@ -223,9 +223,16 @@ export default async function MagazineDetailPage({
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
           <div className="flex justify-center mb-8">
-            <Link
+          <Link
               href="/magazines"
-              className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 md:bg-white/10 backdrop-blur-md rounded-full border border-white/30 md:border-white/20 hover:bg-white/30 md:hover:bg-white/20 transition-all text-white group"
+              className="inline-flex items-center gap-2 px-4 py-1.5 backdrop-blur-md rounded-full transition-all text-white group"
+              style={{
+                backgroundColor: "rgba(193, 161, 78, 0.85)", /* 香槟金 */
+                borderColor: "rgba(193, 161, 78, 0.65)",
+                borderWidth: "1px",
+                borderStyle: "solid",
+                boxShadow: "0 10px 15px -3px rgba(193, 161, 78, 0.25)"
+              }}
             >
               <ChevronLeft className="w-4 h-4 md:w-3 md:h-3 group-hover:-translate-x-0.5 transition-transform" />
               <span className="text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToList")}</span>
