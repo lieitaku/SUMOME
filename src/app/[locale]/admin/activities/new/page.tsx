@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 export default async function SelectTemplatePage() {
+    const locale = await getLocale();
     const admin = await confirmAdmin();
-    if (!admin) redirect("/manager/login");
+    if (!admin) redirect({ href: "/manager/login", locale });
 
     const templates = [
         {

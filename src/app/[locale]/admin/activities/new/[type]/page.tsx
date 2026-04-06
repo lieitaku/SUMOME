@@ -2,6 +2,7 @@ import React from "react";
 import { prisma } from "@/lib/db";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import EditActivityForm from "@/components/admin/activities/EditActivityForm";
 import { Activity } from "@prisma/client";
@@ -11,15 +12,18 @@ interface PageProps {
 }
 
 export default async function NewActivityDynamicPage({ params }: PageProps) {
+    const locale = await getLocale();
     const admin = await confirmAdmin();
-    if (!admin) redirect("/manager/login");
+    if (!admin) {
+        redirect({ href: "/manager/login", locale });
+    }
 
     const { type } = await params;
     const validTypes = ["news", "report", "event", "custom"];
     if (!validTypes.includes(type)) return notFound();
 
     const clubs = await prisma.club.findMany({ orderBy: { name: "asc" } });
-    if (clubs.length === 0) redirect("/admin/clubs/new");
+    if (clubs.length === 0) redirect({ href: "/admin/clubs/new", locale });
 
     const skeletonData = {
         id: "new-placeholder",
@@ -29,7 +33,7 @@ export default async function NewActivityDynamicPage({ params }: PageProps) {
         templateType: type,
         category: type === "news" ? "News" : "Report",
         clubId: clubs[0].id,
-        authorId: admin.id,
+        authorId: admin!.id,
         published: false,
         contentData: {},
         content: "",

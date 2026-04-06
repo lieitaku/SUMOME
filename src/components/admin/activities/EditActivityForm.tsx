@@ -9,7 +9,13 @@ import {
     ArrowUp, ArrowDown, Trash2, LucideIcon, Eye
 } from "lucide-react";
 import { useState } from "react";
-import { Activity, Club } from "@prisma/client";
+import type { Activity, Club } from "@prisma/client";
+
+/** フォーム初期値用（Prisma Activity と同期；生成クライアントが古い場合の欠落フィールドを補完） */
+type EditActivityFormInitialData = Activity & {
+    titleEn?: string | null;
+    contentEn?: string | null;
+};
 
 // ✨ 1. 引入我们的“三剑客”
 import ImageUploader from "@/components/admin/ui/ImageUploader";
@@ -66,9 +72,9 @@ export default function EditActivityForm({
     clubs,
     isNew = false
 }: {
-    initialData: Activity,
-    clubs: Club[],
-    isNew?: boolean
+    initialData: EditActivityFormInitialData;
+    clubs: Club[];
+    isNew?: boolean;
 }) {
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);

@@ -3,10 +3,12 @@ import InquiriesListClient from "@/components/admin/inquiries/InquiriesListClien
 import { prisma } from "@/lib/db";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 export default async function AdminInquiriesPage() {
+    const locale = await getLocale();
     const admin = await confirmAdmin();
-    if (!admin) redirect("/admin");
+    if (!admin) redirect({ href: "/admin", locale });
 
     const inquiries = await prisma.inquiry.findMany({
         orderBy: { createdAt: "desc" },

@@ -33,7 +33,10 @@ export default function RegionFilter({
     // 乐观更新：立即显示选中状态
     const [optimisticState, setOptimisticState] = useOptimistic(
         { region: currentRegion, pref: currentPref },
-        (_, newState: { region?: string; pref?: string }) => newState
+        (
+            _,
+            newState: { region: string | undefined; pref: string | undefined }
+        ) => newState
     );
 
     // 构建 URL 并导航

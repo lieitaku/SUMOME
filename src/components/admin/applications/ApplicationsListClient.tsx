@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { ApplicationStatus } from "@prisma/client";
 import { CalendarDays, User, Mail, MessageSquare, Phone, Building2 } from "lucide-react";
 import StatusSelect from "@/components/admin/applications/StatusSelect";
 import DeleteApplicationButton from "@/components/admin/applications/DeleteApplicationButton";
@@ -13,7 +14,7 @@ export type ApplicationListItem = {
     phone: string | null;
     experience: string;
     message: string | null;
-    status: string;
+    status: ApplicationStatus;
     createdAt: string;
 };
 

@@ -1,4 +1,5 @@
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/db";
 import EditClubForm from "@/components/admin/clubs/EditClubForm";
@@ -7,8 +8,10 @@ import EditClubForm from "@/components/admin/clubs/EditClubForm";
  * 代表者(OWNER)用：自分のクラブのみ編集。管理者はこのページをメニューに持たない。
  */
 export default async function MyClubPage() {
-  const user = await getCurrentUser();
-  if (!user) redirect("/manager/login");
+  const locale = await getLocale();
+  const userRecord = await getCurrentUser();
+  if (!userRecord) redirect({ href: "/manager/login", locale });
+  const user = userRecord!;
 
   const club = await prisma.club.findFirst({
     where: { ownerId: user.id },

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Edit2, Trash2, ExternalLink, GripVertical } from "lucide-react";
+import type { DraggableAttributes, DraggableSyntheticListeners } from "@dnd-kit/core";
 import { toggleBannerActive, deleteBanner } from "@/lib/actions/banners";
 import { Banner } from "@prisma/client";
 
@@ -11,8 +12,8 @@ import { Banner } from "@prisma/client";
 type BannerForCard = Omit<Banner, "sponsorTier"> & { sponsorTier?: "OFFICIAL" | "LOCAL" | null };
 
 export type DragHandleProps = {
-    listeners: Record<string, unknown>;
-    attributes: Record<string, unknown>;
+    listeners: DraggableSyntheticListeners;
+    attributes: DraggableAttributes;
 };
 
 interface Props {

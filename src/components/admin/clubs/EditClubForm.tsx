@@ -4,7 +4,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ImageIcon, MapPin, Info, Phone, Mail, UploadCloud, X, Loader2, Eye } from "lucide-react";
-import { Club } from "@prisma/client";
+import type { Club } from "@prisma/client";
+
+/** 編集フォーム用の初期データ（Prisma の Club に追従；生成クライアントが古い場合の欠落フィールドを補完） */
+type EditClubFormInitialData = Club & {
+    nameEn?: string | null;
+    descriptionEn?: string | null;
+    phoneVisibleOnPublicSite?: boolean;
+};
 import { useState, useCallback } from "react";
 
 // 日本郵便番号API（zipcloud）レスポンス型
@@ -79,7 +86,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface EditClubFormProps {
-    initialData: Club;
+    initialData: EditClubFormInitialData;
     /** 管理者(ADMIN)のみ true。クラブID(slug)の編集可否に使用 */
     canEditSlug?: boolean;
 }
@@ -128,6 +135,8 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
             representative: initialData.representative || "",
         },
     });
+
+    const mainImageUrl = form.watch("mainImage");
 
     // --- 2. 配置提交与删除逻辑 (使用自定义 Hook) ---
     const { isSubmitting, handleSubmit } = useFormAction({
@@ -394,16 +403,16 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                 />
                                 <ImageUploader
                                     label="メイン画像"
-                                    value={form.watch("mainImage")}
+                                    value={mainImageUrl}
                                     onChange={(url) => form.setValue("mainImage", url)}
                                     bucket="images"
                                 />
                             </div>
 
                             {/* メイン画像：卡片预览与位置调整（仅在有图时显示） */}
-                            {form.watch("mainImage") && (
+                            {mainImageUrl ? (
                                 <MainImagePositionEditor
-                                    imageUrl={form.watch("mainImage")}
+                                    imageUrl={mainImageUrl}
                                     position={parsePositionString(form.watch("mainImagePosition"))}
                                     scale={parseScaleValue(form.watch("mainImageScale"))}
                                     rotation={parseRotationValue(form.watch("mainImageRotation"))}
@@ -411,7 +420,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                     onScaleChange={(s) => form.setValue("mainImageScale", String(s), { shouldDirty: true })}
                                     onRotationChange={(deg) => form.setValue("mainImageRotation", String(deg), { shouldDirty: true })}
                                 />
-                            )}
+                            ) : null}
 
                             {/* ✨ 多图上传区域 (Sub Images) */}
                             <div>

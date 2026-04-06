@@ -1,12 +1,16 @@
 import React from "react";
+import type { ApplicationStatus } from "@prisma/client";
 import ApplicationsListClient from "@/components/admin/applications/ApplicationsListClient";
 import { prisma } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 
 export default async function AdminApplicationsPage() {
-    const user = await getCurrentUser();
-    if (!user) redirect("/manager/login");
+    const locale = await getLocale();
+    const userRecord = await getCurrentUser();
+    if (!userRecord) redirect({ href: "/manager/login", locale });
+    const user = userRecord!;
 
     let apps: {
         id: string;
@@ -16,7 +20,7 @@ export default async function AdminApplicationsPage() {
         phone: string | null;
         experience: string | null;
         message: string | null;
-        status: string;
+        status: ApplicationStatus;
         createdAt: Date;
     }[] = [];
     if (user.role === "ADMIN") {

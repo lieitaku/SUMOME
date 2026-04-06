@@ -13,9 +13,11 @@ import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
 import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
-import type { Club } from "@prisma/client";
 
 const ITEMS_PER_PAGE = 6;
+
+/** 一覧 API の club 断片（Pick<Club, …> は nameEn 欠落時に unknown になり得るため明示） */
+type ActivityListClub = { name: string; nameEn?: string | null };
 
 type ActivityItem = {
   id: string;
@@ -25,7 +27,7 @@ type ActivityItem = {
   location: string | null;
   category: string;
   mainImage: string | null;
-  club: Pick<Club, "name" | "nameEn"> | null;
+  club: ActivityListClub | null;
 };
 
 type ApiResponse = {

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 const ITEMS_PER_PAGE = 6;
@@ -11,7 +12,15 @@ export async function GET(request: NextRequest) {
   const [activities, totalItems] = await Promise.all([
     prisma.activity.findMany({
       where: { published: true },
-      include: { club: { select: { name: true, nameEn: true, area: true } } },
+      include: {
+        club: {
+          select: {
+            name: true,
+            nameEn: true,
+            area: true,
+          } as Prisma.ClubSelect,
+        },
+      },
       orderBy: { date: "desc" },
       skip: (page - 1) * ITEMS_PER_PAGE,
       take: ITEMS_PER_PAGE,

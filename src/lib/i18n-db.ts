@@ -1,4 +1,4 @@
-import type { Activity, Club, Magazine } from "@prisma/client";
+import type { Magazine } from "@prisma/client";
 
 /** 英語ロケールのとき nameEn があれば優先、なければ name */
 export function clubDisplayName(
@@ -25,7 +25,7 @@ export function clubDisplayDescription(
 }
 
 export function activityDisplayTitle(
-  activity: Pick<Activity, "title" | "titleEn">,
+  activity: { title: string; titleEn?: string | null },
   locale: string
 ): string {
   if (locale === "en") {
@@ -37,7 +37,7 @@ export function activityDisplayTitle(
 
 /** 記事本文の英語フォールバック（ブロック JSON の英訳がない場合） */
 export function activityDisplayContentFallback(
-  activity: Pick<Activity, "content" | "contentEn">,
+  activity: { content?: string | null; contentEn?: string | null },
   locale: string
 ): string | null {
   if (locale === "en") {

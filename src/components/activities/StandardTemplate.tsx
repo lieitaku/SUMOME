@@ -27,9 +27,12 @@ interface ContentDataSchema {
 }
 
 // --- 3. 定义完整的活动数据类型 (包含关联的俱乐部) ---
-interface ActivityWithClub extends Activity {
+type ActivityWithClub = Activity & {
     club: Club;
-}
+    /** Prisma スキーマと i18n 用；生成型が古い場合も optional で整合 */
+    titleEn?: string | null;
+    contentEn?: string | null;
+};
 
 export default function StandardTemplate({ activity }: { activity: ActivityWithClub }) {
     const locale = useLocale();

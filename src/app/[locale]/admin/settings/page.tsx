@@ -4,6 +4,7 @@ import { createStaffAccount, updateMyProfile, updatePassword } from "@/lib/actio
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
 import { redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import Link from "next/link";
 
 import { ProfileForm, PasswordForm, CreateStaffForm, DeleteAccountForm } from "./components";
@@ -12,20 +13,24 @@ import { ProfileForm, PasswordForm, CreateStaffForm, DeleteAccountForm } from ".
 // 🟢 Server Component: 页面入口
 // ==============================================================================
 export default async function SettingsPage() {
+    const locale = await getLocale();
     // 1. 获取当前登录用户和数据库里的角色信息 (并行执行)
     const supabase = await createClient();
     
     // 我们先获取 session，然后并行请求 user详情
     const { data: { session } } = await supabase.auth.getSession();
     
-    if (!session?.user) redirect("/manager/login");
+    if (!session?.user) redirect({ href: "/manager/login", locale });
+    const authedSession = session!;
+    const userId = authedSession.user.id;
 
-    const dbUser = await prisma.user.findUnique({
-        where: { id: session.user.id },
+    const dbUserRow = await prisma.user.findUnique({
+        where: { id: userId },
         select: { role: true, email: true, name: true }
     });
 
-    if (!dbUser) redirect("/manager/login");
+    if (!dbUserRow) redirect({ href: "/manager/login", locale });
+    const dbUser = dbUserRow!;
 
     const isAdmin = dbUser.role === "ADMIN";
 
@@ -34,7 +39,7 @@ export default async function SettingsPage() {
     if (dbUser.role === "ADMIN") {
         const [adminCount, activityCount] = await Promise.all([
             prisma.user.count({ where: { role: "ADMIN" } }),
-            prisma.activity.count({ where: { authorId: session.user.id } }),
+            prisma.activity.count({ where: { authorId: userId } }),
         ]);
         if (adminCount <= 1) {
             deleteCanDelete = false;

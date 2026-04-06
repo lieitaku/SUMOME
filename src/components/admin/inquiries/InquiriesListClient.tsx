@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { InquiryStatus } from "@prisma/client";
 import { CalendarDays, User, Mail, MessageSquare, Phone, Building2 } from "lucide-react";
 import InquiryStatusSelect from "@/components/admin/inquiries/InquiryStatusSelect";
 import DeleteInquiryButton from "@/components/admin/inquiries/DeleteInquiryButton";
@@ -13,7 +14,7 @@ export type InquiryListItem = {
     email: string;
     phone: string | null;
     message: string;
-    status: string;
+    status: InquiryStatus;
     createdAt: string;
 };
 
