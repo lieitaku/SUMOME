@@ -22,12 +22,15 @@ export default async function AdminInquiriesPage() {
             message: true,
             status: true,
             createdAt: true,
+            repliedAt: true,
+            lastReplyBody: true,
         },
     });
 
     const serializedInquiries = inquiries.map(inq => ({
         ...inq,
         createdAt: inq.createdAt.toISOString(),
+        repliedAt: inq.repliedAt ? inq.repliedAt.toISOString() : null,
     }));
 
     return (

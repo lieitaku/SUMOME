@@ -12,6 +12,8 @@ const INQUIRY_SELECT = {
     message: true,
     status: true,
     createdAt: true,
+    repliedAt: true,
+    lastReplyBody: true,
 } as const;
 
 export async function GET() {

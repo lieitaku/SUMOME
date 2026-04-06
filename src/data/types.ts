@@ -11,6 +11,17 @@ export type Rikishi = {
 };
 
 /**
+ * 都道府县宣传角色数据类型
+ * 集中存储于 src/data/characters.ts，与县数据文件分离
+ */
+export type PrefectureCharacter = {
+  name: string;           // 角色名，如 "サウレス"
+  description: string;    // 日文介绍文本
+  descriptionEn?: string; // 英文介绍文本（可选）
+  // 图片路径由组件根据 prefSlug 自动拼接，不存入此类型
+};
+
+/**
  * 都道府县 (Prefecture) 数据类型定义
  * 用于动态路由页面的内容展示
  */

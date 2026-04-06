@@ -5,6 +5,7 @@ import { InquiryStatus } from "@prisma/client";
 import { CalendarDays, User, Mail, MessageSquare, Phone, Building2 } from "lucide-react";
 import InquiryStatusSelect from "@/components/admin/inquiries/InquiryStatusSelect";
 import DeleteInquiryButton from "@/components/admin/inquiries/DeleteInquiryButton";
+import ReplyToInquiryForm from "@/components/admin/inquiries/ReplyToInquiryForm";
 
 export type InquiryListItem = {
     id: string;
@@ -16,6 +17,8 @@ export type InquiryListItem = {
     message: string;
     status: InquiryStatus;
     createdAt: string;
+    repliedAt: string | null;
+    lastReplyBody: string | null;
 };
 
 function Fallback() {
@@ -121,6 +124,12 @@ function Content({ inquiries }: { inquiries: InquiryListItem[] }) {
                                             <MessageSquare size={16} className="shrink-0 mt-1 text-gray-400" />
                                             <p className="whitespace-pre-wrap">{inquiry.message}</p>
                                         </div>
+                                        <ReplyToInquiryForm
+                                            inquiryId={inquiry.id}
+                                            toEmail={inquiry.email}
+                                            repliedAt={inquiry.repliedAt}
+                                            lastReplyBody={inquiry.lastReplyBody}
+                                        />
                                     </div>
                                     <div className="lg:w-48 flex flex-col justify-between items-end gap-4 lg:border-l lg:border-gray-100 lg:pl-6">
                                         <div className="text-right w-full">

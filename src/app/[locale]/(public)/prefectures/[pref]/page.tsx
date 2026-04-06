@@ -22,8 +22,12 @@ import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import PrefectureFeatureBanner from "@/components/prefecture/PrefectureFeatureBanner";
 import type { FeaturedClubInfo } from "@/components/prefecture/PrefectureFeatureBanner";
+import PrefectureCharacter, {
+  PREFECTURE_CHARACTER_HERO_TUNING,
+} from "@/components/prefecture/PrefectureCharacter";
 
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
+import { PREFECTURE_CHARACTERS } from "@/data/characters";
 import type { PrefectureInfo } from "@/data/types";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
@@ -131,6 +135,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   const theme = getPrefectureTheme(prefSlug);
   const prefAreaName = staticDisplay.name;
+  const character = PREFECTURE_CHARACTERS[prefSlug] ?? null;
 
   // Resolve featured club from DB data only (preview is handled client-side)
   const resolveFeaturedClub = () => {
@@ -220,18 +225,37 @@ export default async function PrefecturePage({ params }: PageProps) {
               </Link>
             </div>
 
-            <div>
-              <div className="flex flex-col items-start mb-4 opacity-80">
-                <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white">
-                  {t("headerKicker")}
-                </span>
+            <div className="flex flex-row items-end justify-between gap-4 lg:gap-10 min-w-0 max-w-full overflow-visible">
+              <div className="min-w-min flex-1 pb-2 lg:pb-0">
+                <div className="flex flex-col items-start mb-4 opacity-80">
+                  <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white whitespace-nowrap">
+                    {t("headerKicker")}
+                  </span>
+                </div>
+                <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1] whitespace-nowrap">
+                  {displayName}
+                </h1>
+                <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base whitespace-pre-line">
+                  {t("headerLead", { prefName: displayName })}
+                </p>
               </div>
-              <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1]">
-                {displayName}
-              </h1>
-              <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base whitespace-pre-line">
-                {t("headerLead", { prefName: displayName })}
-              </p>
+              {character && (
+                <div
+                  className={cn(
+                    "flex justify-center lg:justify-end lg:pb-1 min-w-0 shrink",
+                    "lg:shrink-0",
+                    PREFECTURE_CHARACTER_HERO_TUNING.heroColumnMaxWidthClass,
+                  )}
+                >
+                  <PrefectureCharacter
+                    prefSlug={prefSlug}
+                    character={character}
+                    locale={locale}
+                    themeColor={theme.color}
+                    variant="hero"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </section>
@@ -285,14 +309,15 @@ export default async function PrefecturePage({ params }: PageProps) {
         {/* ==================== SECTION 3: Main Content Grid ==================== */}
         <section className="relative pb-12 md:pb-24 px-6 pt-12 md:pt-20">
           <div className="container mx-auto max-w-6xl relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-start">
-
-              {/* --- 左侧边栏 (Left Sidebar) --- */}
-              <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start flex flex-col gap-4 lg:gap-6">
-                {/* Intro Card */}
+            {/* 外层 flex：避免「12 列 + 嵌套 12 列」导致的 grid 自动排版/收缩异常 */}
+            <div className="flex flex-col gap-4 lg:gap-10 w-full min-w-0">
+              {/* 与改版前相同：左侧 4 列 + 右侧 8 列；角色仅在页头展示 */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-10 items-start w-full min-w-0">
+              {/* --- 左侧边栏（sticky）：都道府県情報 + 赞助商 --- */}
+              <div className="lg:col-span-4 w-full min-w-0 lg:sticky lg:top-24 lg:self-start flex flex-col gap-4 lg:gap-6">
                 <Ceramic
                   interactive={false}
-                  className="p-6 md:p-10 border border-gray-100 border-b-[6px] text-left"
+                  className="p-6 md:p-10 border border-gray-100 border-b-[6px] text-left w-full min-w-0"
                   style={ceramicStyle}
                 >
                   <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-6 pb-4 border-b border-gray-100 flex items-start gap-3 text-left">
@@ -425,6 +450,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                     </Ceramic>
                   </Suspense>
                 </div>
+              </div>
               </div>
             </div>
           </div>
