@@ -1,35 +1,28 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "@/components/ui/TransitionLink";
-import Image from "next/image";
 import {
   ChevronLeft,
-  Camera,
   ArrowRight,
-  UserPlus,
   Info,
   MapPin,
-  ExternalLink,
 } from "lucide-react";
 
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
-import { getPreviewPayload } from "@/lib/preview";
 import {
   getCachedActiveBanners,
   getCachedClubsByArea,
   getCachedPrefectureBanner,
 } from "@/lib/cached-queries";
 
-// Client component wrapper: dynamic import with ssr: false (must live in a Client Component in Next.js 16)
 import RabbitWalkingBanner from "@/components/home/RabbitBanner/RabbitBannerDynamic";
-
-// Components
 import RikishiTable from "@/components/clubs/RikishiTable";
 import ClubCard from "@/components/clubs/ClubCard";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
+import PrefectureFeatureBanner from "@/components/prefecture/PrefectureFeatureBanner";
+import type { FeaturedClubInfo } from "@/components/prefecture/PrefectureFeatureBanner";
 
-// Data & Utils
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import type { PrefectureInfo } from "@/data/types";
 import { cn } from "@/lib/utils";
@@ -39,7 +32,13 @@ import { getTranslations } from "next-intl/server";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 import { prefectureIntroForLocale } from "@/lib/prefecture-intro";
 
-export const dynamic = "force-dynamic";
+// ISR: re-render at most once per 60 s, matching the unstable_cache TTL on each data query
+export const revalidate = 60;
+
+// Pre-build every prefecture at deploy time for both locales
+export function generateStaticParams() {
+  return Object.keys(PREFECTURE_DATABASE).map((pref) => ({ pref }));
+}
 
 function siteBase(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.memory-sumo.com").replace(
@@ -50,7 +49,6 @@ function siteBase(): string {
 
 interface PageProps {
   params: Promise<{ locale: string; pref: string }>;
-  searchParams?: Promise<{ embedded?: string }>;
 }
 
 export async function generateMetadata({
@@ -82,11 +80,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function PrefecturePage({ params, searchParams }: PageProps) {
+export default async function PrefecturePage({ params }: PageProps) {
   const { locale, pref } = await params;
   const t = await getTranslations({ locale, namespace: "PrefecturePage" });
-  const sp = searchParams ? await searchParams : {};
-  const isEmbedded = sp?.embedded === "1";
   const prefSlug = pref;
   const prefData = PREFECTURE_DATABASE[prefSlug];
   const staticDisplay: PrefectureInfo = prefData ?? {
@@ -101,23 +97,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
   const displayName = regionDisplayForLocale(staticDisplay.name, locale);
   const { title: introTitle, text: introText } = prefectureIntroForLocale(staticDisplay, locale);
 
-  const preview = await getPreviewPayload();
-  const prefBannerPreview =
-    preview?.type === "prefecture_banner" &&
-    preview.payload &&
-    typeof preview.payload === "object" &&
-    (preview.payload as { pref?: string }).pref === prefSlug
-      ? (preview.payload as {
-          pref: string;
-          image?: string;
-          alt?: string;
-          imagePosition?: string;
-          imageScale?: string | number;
-          imageRotation?: string | number;
-          featuredClubId?: string | null;
-        })
-      : null;
-
   // All four queries are independent — fire them in parallel with caching
   const [customBanner, filteredClubs, banners, displaySettings] = await Promise.all([
     getCachedPrefectureBanner(prefSlug),
@@ -125,11 +104,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     getCachedActiveBanners(),
     getBannerDisplaySettings(),
   ]);
-
-  const displayData = {
-    ...staticDisplay,
-    bannerImg: prefBannerPreview?.image ?? customBanner?.image ?? staticDisplay.bannerImg,
-  };
 
   const toSponsorItem = (b: (typeof banners)[0]) => ({
     id: b.id,
@@ -145,7 +119,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     if (b.category !== "sponsor") return false;
     if (filter === "all") return true;
     if (filter === "official_only") return b.sponsorTier === "OFFICIAL";
-    return b.sponsorTier === "LOCAL" || b.sponsorTier == null; // local_only
+    return b.sponsorTier === "LOCAL" || b.sponsorTier == null;
   };
 
   const sponsorsTop = banners
@@ -156,13 +130,9 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
     .map(toSponsorItem);
 
   const theme = getPrefectureTheme(prefSlug);
-
   const prefAreaName = staticDisplay.name;
-  const previewFeaturedId =
-    prefBannerPreview?.featuredClubId != null && prefBannerPreview.featuredClubId !== ""
-      ? prefBannerPreview.featuredClubId
-      : null;
 
+  // Resolve featured club from DB data only (preview is handled client-side)
   const resolveFeaturedClub = () => {
     const tryById = (id: string | null | undefined) => {
       if (!id) return null;
@@ -171,49 +141,45 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
       if (!hasRealClubMainImage(c.mainImage)) return null;
       return c;
     };
-    const manual = tryById(previewFeaturedId ?? customBanner?.featuredClubId);
+    const manual = tryById(customBanner?.featuredClubId);
     if (manual) return manual;
     return filteredClubs.find((c) => hasRealClubMainImage(c.mainImage)) ?? null;
   };
 
   const featuredClub = resolveFeaturedClub();
+
   const bannerTitle = featuredClub
     ? t("bannerTitleWithClub", { clubName: featuredClub.name, prefName: displayName })
     : t("bannerTitlePrefOnly", { prefName: displayName });
-  const bannerAlt = prefBannerPreview?.alt ?? customBanner?.alt ?? bannerTitle;
-  const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
-  const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
-  
-  // 构建俱乐部完整地址
-  const clubAddress = featuredClub
-    ? [featuredClub.area, featuredClub.city, featuredClub.address].filter(Boolean).join(" ")
-    : "";
 
+  // DB-derived banner display properties (preview overrides happen client-side)
   type BannerWithPosition = { imagePosition?: string | null; imageScale?: number | null; imageRotation?: number | null };
   const bannerRecord = customBanner as (BannerWithPosition & typeof customBanner) | null;
-  const bannerPositionRaw =
-    prefBannerPreview?.imagePosition ?? bannerRecord?.imagePosition ?? "50,50";
+  const bannerPositionRaw = bannerRecord?.imagePosition ?? "50,50";
   const bannerPosition = String(bannerPositionRaw ?? "50,50").trim();
-  const [posX, posY] = bannerPosition.split(",").map((s: string) => {
+  const [dbPosX, dbPosY] = bannerPosition.split(",").map((s: string) => {
     const n = Number(s.trim());
     return Number.isNaN(n) ? 50 : Math.min(100, Math.max(0, n));
   });
-  const bannerScale =
-    prefBannerPreview?.imageScale != null
-      ? Number(prefBannerPreview.imageScale)
-      : bannerRecord?.imageScale != null
-        ? Number(bannerRecord.imageScale)
-        : 1;
-  const bannerRotation =
-    prefBannerPreview?.imageRotation != null
-      ? (() => {
-          const n = Number(prefBannerPreview.imageRotation);
-          return [0, 90, 180, 270].includes(n) ? n : 0;
-        })()
-      : bannerRecord?.imageRotation != null && [0, 90, 180, 270].includes(bannerRecord.imageRotation)
-        ? bannerRecord.imageRotation
-        : 0;
-  const bannerBgPosition = `${posX}% ${posY}%`;
+  const dbBannerScale = bannerRecord?.imageScale != null ? Number(bannerRecord.imageScale) : 1;
+  const dbBannerRotation =
+    bannerRecord?.imageRotation != null && [0, 90, 180, 270].includes(bannerRecord.imageRotation)
+      ? bannerRecord.imageRotation
+      : 0;
+  const dbBannerImg = customBanner?.image ?? staticDisplay.bannerImg ?? "";
+  const dbBannerAlt = customBanner?.alt ?? bannerTitle;
+
+  const dbFeaturedClub: FeaturedClubInfo | null = featuredClub
+    ? {
+        id: featuredClub.id,
+        name: featuredClub.name,
+        slug: featuredClub.slug,
+        area: featuredClub.area ?? null,
+        city: featuredClub.city ?? null,
+        address: featuredClub.address ?? null,
+        mainImage: featuredClub.mainImage ?? null,
+      }
+    : null;
 
   const ceramicStyle = {
     borderBottomColor: theme.color,
@@ -222,15 +188,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
-      {prefBannerPreview && !isEmbedded && (
-        <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
-          <span>{t("previewBanner")}</span>
-          {/* eslint-disable-next-line no-script-url */}
-          <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
-            {t("previewBack")}
-          </a>
-        </div>
-      )}
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
         <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">
@@ -269,7 +226,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   {t("headerKicker")}
                 </span>
               </div>
-              {/* 优化点 1：移动端字体从 text-5xl 降级为 text-4xl，防止超长打乱布局 */}
               <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1]">
                 {displayName}
               </h1>
@@ -364,7 +320,6 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   className="p-0 border border-gray-100 border-b-[6px] overflow-hidden"
                   style={ceramicStyle}
                 >
-
                   <div
                     className="relative w-full h-[240px] bg-white overflow-hidden"
                     style={{
@@ -398,98 +353,22 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
               </div>
 
               {/* --- Right Main Content --- */}
-              {/* 移动端缩小卡片间距 */}
               <div className="lg:col-span-8 flex flex-col gap-4 md:gap-12">
-                
-                {/* Feature Banner */}
-                {displayData.bannerImg && (
-                  <div
-                    className="group relative rounded-2xl overflow-hidden shadow-lg bg-white border border-gray-100 border-b-[6px] ceramic-3d-hover transition-all duration-500"
-                    style={{ 
-                      "--hover-shadow": theme.shadow,
-                      borderBottomColor: theme.color 
-                    } as React.CSSProperties}
-                  >
-                    {/* 上半部分：图片区域 */}
-                    <div className="relative aspect-[21/9] overflow-hidden">
-                      {bannerScale > 1 ? (
-                        <div
-                          className="absolute inset-0 bg-no-repeat transition-transform duration-700 group-hover:scale-105"
-                          style={{
-                            backgroundImage: `url(${displayData.bannerImg})`,
-                            backgroundSize: `${100 * bannerScale}%`,
-                            backgroundPosition: bannerBgPosition,
-                            transform: `rotate(${bannerRotation}deg)`,
-                          }}
-                          aria-hidden
-                        />
-                      ) : (
-                        <Image
-                          src={displayData.bannerImg}
-                          alt={bannerAlt}
-                          fill
-                          priority
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
-                          style={{
-                            objectPosition: bannerBgPosition,
-                            transform: `rotate(${bannerRotation}deg)`,
-                          }}
-                        />
-                      )}
-                      <Link
-                        href={clubDetailLink}
-                        className="absolute inset-0 z-0"
-                        aria-label={t("featureViewAria")}
-                      >
-                        <span className="sr-only">{t("featureViewAria")}</span>
-                      </Link>
-                      {/* 图片上的轻微渐变，仅为了让左上角的标签更清晰 */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-                    </div>
 
-                    {/* 下半部分：文字信息区域（类似移动端的卡片式布局） */}
-                    <div className="p-6 md:p-8 bg-white relative">
-                      <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6">
-                        <div className="min-w-0 flex flex-col gap-3">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className="px-2 py-0.5 rounded-sm text-[10px] font-bold tracking-widest uppercase"
-                              style={{ backgroundColor: `${theme.color}15`, color: theme.color }}
-                            >
-                              {t("featureBadge")}
-                            </span>
-                            <div className="h-px grow bg-gray-100" />
-                          </div>
-                          
-                          <Link href={clubDetailLink} className="group/title">
-                            <h3 className="font-serif font-bold tracking-wide text-xl md:text-2xl text-gray-900 group-hover/title:text-gray-600 transition-colors flex items-center gap-2">
-                              {bannerTitle}
-                              <ArrowRight className="w-5 h-5 shrink-0 text-gray-400 group-hover/title:translate-x-1 transition-transform" />
-                            </h3>
-                          </Link>
-
-                          {clubAddress && (
-                            <p className="text-gray-500 flex items-start gap-2 text-sm md:text-base">
-                              <MapPin className="w-4 h-4 shrink-0 mt-1 text-gray-400" />
-                              <span>{clubAddress}</span>
-                            </p>
-                          )}
-                        </div>
-
-                        <div className="shrink-0">
-                          <Link
-                            href={recruitLink}
-                            className="inline-flex items-center justify-center gap-2 text-white px-8 py-3.5 rounded-xl font-bold tracking-wider transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 text-sm w-full md:w-auto"
-                            style={{ backgroundColor: theme.color }}
-                          >
-                            <UserPlus className="w-4 h-4 shrink-0" />
-                            {t("recruitCta")}
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {/* Feature Banner — preview handled client-side */}
+                <PrefectureFeatureBanner
+                  prefSlug={prefSlug}
+                  displayName={displayName}
+                  themeColor={theme.color}
+                  themeShadow={theme.shadow}
+                  dbBannerImg={dbBannerImg}
+                  dbBannerAlt={dbBannerAlt}
+                  dbPosX={dbPosX}
+                  dbPosY={dbPosY}
+                  dbBannerScale={dbBannerScale}
+                  dbBannerRotation={dbBannerRotation}
+                  dbFeaturedClub={dbFeaturedClub}
+                />
 
                 {/* Club List */}
                 <div>
@@ -528,7 +407,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   )}
                 </div>
 
-                {/* Rikishi Table（出身力士一覧） */}
+                {/* Rikishi Table */}
                 <div>
                   <Suspense
                     fallback={
@@ -539,7 +418,7 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
                   >
                     <Ceramic interactive={false} className="p-0 border border-gray-100 border-b-[6px] overflow-hidden" style={ceramicStyle}>
                       <RikishiTable
-                        rikishiList={displayData.rikishiList}
+                        rikishiList={staticDisplay.rikishiList}
                         prefectureName={displayName}
                         accentColor={theme.color}
                       />
