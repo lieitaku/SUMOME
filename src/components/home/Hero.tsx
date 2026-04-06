@@ -976,6 +976,59 @@ const Hero = ({
 
   const onVideoPlaying = () => setVideoPlaying(true);
 
+  /**
+   * 手机锁屏 / 切后台再回来时，WebKit 常会释放解码器，视频层出现系统「蓝色问号」；
+   * 此时若 `videoPlaying` 仍为 true，下层 poster 图也被叠在下面盖不住。
+   * - 记录是否曾进入 hidden，回到 visible 时先 `load()` + `play()` 恢复；
+   * - hidden 时立刻把 `videoPlaying` 设为 false，并让 video 透明（见下方 className），露出 poster。
+   */
+  const wasDocumentHiddenRef = useRef(false);
+  useEffect(() => {
+    if (!useVideo || !canLoadVideo) return;
+
+    const recoverVideoAfterWake = () => {
+      const el = videoRef.current;
+      if (!el) return;
+      setVideoPlaying(false);
+      const run = () => {
+        try {
+          el.load();
+        } catch {
+          /* ignore */
+        }
+        void el.play().catch(() => {
+          /* 静音自动播放偶发被拒时不降级整段 Hero，保持 poster */
+        });
+      };
+      requestAnimationFrame(() => requestAnimationFrame(run));
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        wasDocumentHiddenRef.current = true;
+        setVideoPlaying(false);
+        return;
+      }
+      if (document.visibilityState === "visible" && wasDocumentHiddenRef.current) {
+        wasDocumentHiddenRef.current = false;
+        recoverVideoAfterWake();
+      }
+    };
+
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        recoverVideoAfterWake();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, [useVideo, canLoadVideo]);
+
   // ========== 视频背景模式：横屏用 16:9，竖屏用 9:16 ==========
   if (useVideo) {
     return (
@@ -1007,7 +1060,10 @@ const Hero = ({
             <video
               key={isMobileView ? "mobile" : "desktop"}
               ref={videoRef}
-              className="absolute top-1/2 left-1/2 block min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 scale-[1.02] object-cover"
+              className={cn(
+                "absolute top-1/2 left-1/2 block min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 scale-[1.02] object-cover transition-opacity duration-700",
+                videoPlaying ? "opacity-100" : "opacity-0",
+              )}
               autoPlay
               muted
               loop
@@ -1025,8 +1081,18 @@ const Hero = ({
                 ...(isHakuhoCompactTouch ? { WebkitTouchCallout: "none" } : {}),
               }}
             >
-              {effectiveWebm && <source src={effectiveWebm} type="video/webm" />}
-              {effectiveMp4 && <source src={effectiveMp4} type="video/mp4" />}
+              {/* 触控窄屏优先 MP4：硬件解码更稳，锁屏恢复后 WebM 偶发问号 */}
+              {isHakuhoCompactTouch ? (
+                <>
+                  {effectiveMp4 && <source src={effectiveMp4} type="video/mp4" />}
+                  {effectiveWebm && <source src={effectiveWebm} type="video/webm" />}
+                </>
+              ) : (
+                <>
+                  {effectiveWebm && <source src={effectiveWebm} type="video/webm" />}
+                  {effectiveMp4 && <source src={effectiveMp4} type="video/mp4" />}
+                </>
+              )}
             </video>
           )}
         </div>
