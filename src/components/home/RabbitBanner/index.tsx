@@ -2,6 +2,8 @@
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import ExternalUrlAnchor from "@/components/ui/ExternalUrlAnchor";
+import { clubWebsiteHref } from "@/lib/club-contact-urls";
 import RabbitActor from "./RabbitActor";
 import {
   RABBIT_VARIANTS,
@@ -90,18 +92,17 @@ function SponsorFlagLink({
       </Link>
     );
   }
+  const externalHref = clubWebsiteHref(t) ?? t;
   return (
-    <a
-      href={t}
-      target="_blank"
-      rel="noopener noreferrer"
+    <ExternalUrlAnchor
+      href={externalHref}
       className={className}
       aria-label={ariaLabel}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
     >
       {children}
-    </a>
+    </ExternalUrlAnchor>
   );
 }
 
@@ -398,7 +399,7 @@ export default function RabbitWalkingBanner({
               >
                 {/* --- Rabbit Body (Z=0, 在后面) --- */}
                 <div
-                  className="absolute inset-0"
+                  className="pointer-events-none absolute inset-0"
                   style={{
                     transformOrigin: "center bottom",
                     ...restBodyStyle,
@@ -406,7 +407,7 @@ export default function RabbitWalkingBanner({
                     transform: `${finalBodyTransform} translateZ(0px)`,
                   }}
                 >
-                  {/* 移动端降低动画速率以减少 GPU 负担 */}
+                  {/* 移动端降低动画速率以减少 GPU 负担；pointer-events-none 避免 Rive canvas 抢走旗面点击 */}
                   <RabbitActor rivSrc={variant.rivSrc} playbackRate={isMobile ? 0.4 : 0.6} />
                 </div>
 

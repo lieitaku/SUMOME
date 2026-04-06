@@ -449,6 +449,11 @@
     "previewEnd": "End of preview",
     "readFull": "Read the full issue"
   },
+  "ExternalLink": {
+    "toastCopied": "Link copied. Open it in your browser.",
+    "toastBlockedTitle": "Could not open a new window",
+    "toastBlockedDescription": "Long-press to copy the URL below or open it in Safari/Chrome."
+  },
   "MagazineReader": {
     "toastLinkCopied": "Link copied",
     "toastCopyFailed": "Could not copy",

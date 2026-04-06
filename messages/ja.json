@@ -449,6 +449,11 @@
     "previewEnd": "プレビューはここまでです",
     "readFull": "全文を読む"
   },
+  "ExternalLink": {
+    "toastCopied": "リンクをコピーしました。ブラウザで開いてください。",
+    "toastBlockedTitle": "新しいウィンドウを開けませんでした",
+    "toastBlockedDescription": "下記URLを長押しでコピーするか、ブラウザで開いてください。"
+  },
   "MagazineReader": {
     "toastLinkCopied": "リンクをコピーしました",
     "toastCopyFailed": "コピーに失敗しました",

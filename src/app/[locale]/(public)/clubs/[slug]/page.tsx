@@ -14,6 +14,13 @@ import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { getTranslations } from "next-intl/server";
 import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
+import {
+    clubWebsiteHref,
+    clubInstagramHref,
+    clubTwitterHref,
+    clubFacebookHref,
+} from "@/lib/club-contact-urls";
+import ClubExternalAnchor from "@/components/clubs/ClubExternalAnchor";
 
 export const dynamic = "force-dynamic";
 
@@ -143,6 +150,11 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
     const displayDescription =
         clubDisplayDescription(club, locale) ?? t("introFallback");
     const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
+    const websiteHref = clubWebsiteHref(club.website);
+    const instagramHref = clubInstagramHref(club.instagram);
+    const twitterHref = clubTwitterHref(club.twitter);
+    const facebookHref = clubFacebookHref(club.facebook);
+    const mapHref = club.mapUrl ? clubWebsiteHref(club.mapUrl) : null;
 
     // --- 数据预处理逻辑 ---
 
@@ -301,25 +313,25 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                     <Phone size={20} />
                                                 </a>
                                             )}
-                                            {club.instagram && (
-                                                <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-pink-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-pink-100" aria-label={t("cardLinkInstagram")}>
+                                            {instagramHref && (
+                                                <ClubExternalAnchor href={instagramHref} className="p-3 bg-white rounded-full text-pink-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-pink-100" aria-label={t("cardLinkInstagram")}>
                                                     <Instagram size={20} />
-                                                </a>
+                                                </ClubExternalAnchor>
                                             )}
-                                            {club.twitter && (
-                                                <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-black shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200" aria-label={t("cardLinkTwitter")}>
+                                            {twitterHref && (
+                                                <ClubExternalAnchor href={twitterHref} className="p-3 bg-white rounded-full text-black shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200" aria-label={t("cardLinkTwitter")}>
                                                     <Twitter size={20} />
-                                                </a>
+                                                </ClubExternalAnchor>
                                             )}
-                                            {club.facebook && (
-                                                <a href={`https://www.facebook.com/${club.facebook}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-indigo-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-indigo-100" aria-label={t("cardLinkFacebook")}>
+                                            {facebookHref && (
+                                                <ClubExternalAnchor href={facebookHref} className="p-3 bg-white rounded-full text-indigo-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-indigo-100" aria-label={t("cardLinkFacebook")}>
                                                     <Facebook size={20} />
-                                                </a>
+                                                </ClubExternalAnchor>
                                             )}
-                                            {club.website && (
-                                                <a href={club.website} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-blue-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-blue-100" aria-label={t("cardLinkWebsite")}>
+                                            {websiteHref && (
+                                                <ClubExternalAnchor href={websiteHref} className="p-3 bg-white rounded-full text-blue-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-blue-100" aria-label={t("cardLinkWebsite")}>
                                                     <Globe size={20} />
-                                                </a>
+                                                </ClubExternalAnchor>
                                             )}
                                             {club.email && (
                                                 <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-cyan-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200" aria-label={t("cardLinkEmail", { email: club.email })}>
@@ -327,7 +339,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                 </a>
                                             )}
                                         </div>
-                                        {(!showPhonePublic && !club.instagram && !club.twitter && !club.facebook && !club.website && !club.email) && (
+                                        {(!showPhonePublic && !instagramHref && !twitterHref && !facebookHref && !websiteHref && !club.email) && (
                                             <p className="text-sm md:text-xs text-gray-400 leading-relaxed">{t("snsEmpty")}</p>
                                         )}
                                     </div>
@@ -451,11 +463,11 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                 </div>
 
                                                 {/* Google Maps 跳转按钮 */}
-                                                {club.mapUrl && (
+                                                {mapHref && (
                                                     <div className="mt-6 pt-4 border-t border-gray-100">
-                                                        <a href={club.mapUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full gap-2 py-2.5 bg-gray-900 text-white rounded-lg text-xs font-bold tracking-wide hover:bg-sumo-brand transition-colors">
+                                                        <ClubExternalAnchor href={mapHref} className="flex items-center justify-center w-full gap-2 py-2.5 bg-gray-900 text-white rounded-lg text-xs font-bold tracking-wide hover:bg-sumo-brand transition-colors">
                                                             {t("mapsOpen")} <ExternalLink size={12} />
-                                                        </a>
+                                                        </ClubExternalAnchor>
                                                     </div>
                                                 )}
                                             </div>

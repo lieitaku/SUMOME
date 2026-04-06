@@ -10,6 +10,13 @@ import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
 import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
+import {
+  clubWebsiteHref,
+  clubInstagramHref,
+  clubTwitterHref,
+  clubFacebookHref,
+} from "@/lib/club-contact-urls";
+import ClubExternalAnchor from "@/components/clubs/ClubExternalAnchor";
 
 type ExtendedClub = Club & {
   nameEn?: string | null;
@@ -50,6 +57,11 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   // --- 2. Early Return ---
   if (club.slug === "official-hq") return null;
 
+  const websiteHref = clubWebsiteHref(club.website);
+  const instagramHref = clubInstagramHref(club.instagram);
+  const twitterHref = clubTwitterHref(club.twitter);
+  const facebookHref = clubFacebookHref(club.facebook);
+
   const themeColor = accentColor || DEFAULT_COLOR;
   const detailLink = `/clubs/${club.slug}`;
   const displayImage = hasRealClubMainImage(club.mainImage)
@@ -79,8 +91,8 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
         className,
       )}
     >
-      <div className="flex flex-col h-full">
-        <Link href={detailLink} className="flex flex-col flex-grow">
+      <div className="flex flex-col h-full min-h-0">
+        <Link href={detailLink} className="relative z-0 flex min-h-0 flex-1 flex-col outline-none">
           {/* Visual Area */}
           <div
             className="relative aspect-[16/10] block overflow-hidden z-0 bg-gray-100 rounded-t-[inherit]"
@@ -160,8 +172,8 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
           </div>
         </Link>
 
-        {/* Footer: 可独立点击的联系方式图标 */}
-        <div className="mx-6 mb-6 pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
+        {/* Footer: 外链优先新标签；内嵌浏览器拦截时降级为当前页；z-20 避免被 transform 层盖住 */}
+        <div className="relative z-20 mx-6 mb-6 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
           <div className="flex flex-wrap items-center gap-3 md:gap-2">
             {showPhonePublic && (
               <a href={`tel:${club.phone}`} className={cn(contactIconWrap, "bg-emerald-50 hover:bg-emerald-100")} title={t("cardLinkPhone", { phone: club.phone! })}>
@@ -173,27 +185,43 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
                 <Mail className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-blue-600" />
               </a>
             )}
-            {club.website && (
-              <a href={club.website} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-purple-50 hover:bg-purple-100")} title={t("cardLinkWebsite")}>
+            {websiteHref && (
+              <ClubExternalAnchor
+                href={websiteHref}
+                className={cn(contactIconWrap, "bg-purple-50 hover:bg-purple-100")}
+                title={t("cardLinkWebsite")}
+              >
                 <Globe className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-purple-600" />
-              </a>
+              </ClubExternalAnchor>
             )}
-            {club.instagram && (
-              <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-pink-50 hover:bg-pink-100")} title={t("cardLinkInstagram")}>
+            {instagramHref && (
+              <ClubExternalAnchor
+                href={instagramHref}
+                className={cn(contactIconWrap, "bg-pink-50 hover:bg-pink-100")}
+                title={t("cardLinkInstagram")}
+              >
                 <Instagram className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-pink-600" />
-              </a>
+              </ClubExternalAnchor>
             )}
-            {club.twitter && (
-              <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-sky-50 hover:bg-sky-100")} title={t("cardLinkTwitter")}>
+            {twitterHref && (
+              <ClubExternalAnchor
+                href={twitterHref}
+                className={cn(contactIconWrap, "bg-sky-50 hover:bg-sky-100")}
+                title={t("cardLinkTwitter")}
+              >
                 <Twitter className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-sky-600" />
-              </a>
+              </ClubExternalAnchor>
             )}
-            {club.facebook && (
-              <a href={`https://www.facebook.com/${club.facebook}`} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-indigo-50 hover:bg-indigo-100")} title={t("cardLinkFacebook")}>
+            {facebookHref && (
+              <ClubExternalAnchor
+                href={facebookHref}
+                className={cn(contactIconWrap, "bg-indigo-50 hover:bg-indigo-100")}
+                title={t("cardLinkFacebook")}
+              >
                 <Facebook className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-indigo-600" />
-              </a>
+              </ClubExternalAnchor>
             )}
-            {!showPhonePublic && !club.email && !club.website && !club.instagram && !club.twitter && !club.facebook && (
+            {!showPhonePublic && !club.email && !websiteHref && !instagramHref && !twitterHref && !facebookHref && (
               <span className="text-[9px] text-gray-300 font-medium">—</span>
             )}
           </div>
