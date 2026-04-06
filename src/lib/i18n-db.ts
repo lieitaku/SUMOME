@@ -2,7 +2,7 @@ import type { Activity, Club, Magazine } from "@prisma/client";
 
 /** 英語ロケールのとき nameEn があれば優先、なければ name */
 export function clubDisplayName(
-  club: Pick<Club, "name" | "nameEn">,
+  club: { name: string; nameEn?: string | null },
   locale: string
 ): string {
   if (locale === "en") {
@@ -13,7 +13,7 @@ export function clubDisplayName(
 }
 
 export function clubDisplayDescription(
-  club: Pick<Club, "description" | "descriptionEn">,
+  club: { description?: string | null; descriptionEn?: string | null },
   locale: string
 ): string | null {
   if (locale === "en") {

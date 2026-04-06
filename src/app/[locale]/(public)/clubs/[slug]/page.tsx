@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "@/components/ui/TransitionLink";
 import {
     MapPin, Users, ChevronLeft, Sparkles, CheckCircle2,
-    CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Globe, Navigation, Phone
+    CalendarDays, Target, ExternalLink, Mail, Instagram, Twitter, Facebook, Globe, Navigation, Phone
 } from "lucide-react";
 import { getMainImageObjectPosition, getMainImageScale, getMainImageRotation } from "@/lib/utils";
 import { DEFAULT_CLUB_MAIN_IMAGE } from "@/lib/club-images";
@@ -49,6 +49,8 @@ function normalizePreviewClub(p: Record<string, unknown>): {
     website: string | null;
     instagram: string | null;
     twitter: string | null;
+    facebook: string | null;
+    phoneVisibleOnPublicSite: boolean;
     schedule: string | null;
     target: string | null;
     representative: string | null;
@@ -92,6 +94,14 @@ function normalizePreviewClub(p: Record<string, unknown>): {
         website: p.website != null ? String(p.website) : null,
         instagram: p.instagram != null ? String(p.instagram) : null,
         twitter: p.twitter != null ? String(p.twitter) : null,
+        facebook:
+            p.facebook != null && String(p.facebook).trim() !== ""
+                ? String(p.facebook)
+                : null,
+        phoneVisibleOnPublicSite:
+            p.phoneVisibleOnPublicSite === true ||
+            p.phoneVisibleOnPublicSite === "true" ||
+            p.phoneVisibleOnPublicSite === "1",
         schedule: p.schedule != null ? String(p.schedule) : null,
         target: p.target != null ? String(p.target) : null,
         representative: p.representative != null ? String(p.representative) : null,
@@ -132,6 +142,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
     const displayName = clubDisplayName(club, locale);
     const displayDescription =
         clubDisplayDescription(club, locale) ?? t("introFallback");
+    const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
 
     // --- 数据预处理逻辑 ---
 
@@ -283,34 +294,39 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                     {/* 底部：官方链接 (SNS) */}
                                     <div className="mt-auto pt-8 border-t border-gray-200/50">
                                         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{t("linksTitle")}</h3>
-                                        <div className="flex gap-4">
-                                            {club.phone && (
-                                                <a href={`tel:${club.phone}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-emerald-100" title="電話をかける">
+                                        <div className="flex flex-wrap gap-4">
+                                            {showPhonePublic && (
+                                                <a href={`tel:${club.phone}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-emerald-100" title={t("linkDialPhone")}>
                                                     <Phone size={20} />
                                                 </a>
                                             )}
                                             {club.instagram && (
-                                                <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-pink-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-pink-100">
+                                                <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-pink-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-pink-100" aria-label={t("cardLinkInstagram")}>
                                                     <Instagram size={20} />
                                                 </a>
                                             )}
                                             {club.twitter && (
-                                                <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-black shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
+                                                <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-black shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200" aria-label={t("cardLinkTwitter")}>
                                                     <Twitter size={20} />
                                                 </a>
                                             )}
+                                            {club.facebook && (
+                                                <a href={`https://www.facebook.com/${club.facebook}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-indigo-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-indigo-100" aria-label={t("cardLinkFacebook")}>
+                                                    <Facebook size={20} />
+                                                </a>
+                                            )}
                                             {club.website && (
-                                                <a href={club.website} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-blue-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-blue-100">
+                                                <a href={club.website} target="_blank" rel="noopener noreferrer" className="p-3 bg-white rounded-full text-blue-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-blue-100" aria-label={t("cardLinkWebsite")}>
                                                     <Globe size={20} />
                                                 </a>
                                             )}
                                             {club.email && (
-                                                <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-cyan-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200">
+                                                <a href={`mailto:${club.email}`} className="p-3 bg-white rounded-full text-cyan-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-gray-200" aria-label={t("cardLinkEmail", { email: club.email })}>
                                                     <Mail size={20} />
                                                 </a>
                                             )}
                                         </div>
-                                        {(!club.phone && !club.instagram && !club.twitter && !club.website && !club.email) && (
+                                        {(!showPhonePublic && !club.instagram && !club.twitter && !club.facebook && !club.website && !club.email) && (
                                             <p className="text-xs text-gray-400">{t("snsEmpty")}</p>
                                         )}
                                     </div>
@@ -444,8 +460,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                             </div>
                                         </div>
 
-                                        {/* 3. 電話番号 */}
-                                        {club.phone && (
+                                        {/* 3. 電話番号（公開フラグが on のときのみ） */}
+                                        {showPhonePublic && (
                                             <div className="col-span-1 md:col-span-2">
                                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                                                     <Phone size={14} className="text-sumo-brand" /> {t("contactHeading")}
@@ -464,7 +480,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                         </div>
                                                     </div>
                                                     <span className="hidden md:inline text-[10px] font-bold text-emerald-600 uppercase tracking-widest shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        Tap to Call
+                                                        {t("tapToCall")}
                                                     </span>
                                                 </a>
                                             </div>

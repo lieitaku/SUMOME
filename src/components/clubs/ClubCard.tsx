@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
-import { MapPin, Instagram, Twitter, ArrowUpRight, Users, Phone, Mail, Globe } from "lucide-react";
+import { MapPin, Instagram, Twitter, ArrowUpRight, Users, Phone, Mail, Globe, Facebook } from "lucide-react";
 import { cn, getMainImageObjectPosition, getMainImageScale, getMainImageRotation } from "@/lib/utils";
 import { hasRealClubMainImage, DEFAULT_CLUB_MAIN_IMAGE } from "@/lib/club-images";
 import Ceramic from "@/components/ui/Ceramic";
@@ -11,8 +11,14 @@ import { type Club } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
 import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
 
+type ExtendedClub = Club & {
+  nameEn?: string | null;
+  descriptionEn?: string | null;
+  phoneVisibleOnPublicSite?: boolean;
+};
+
 type ClubCardProps = {
-  club: Club;
+  club: ExtendedClub;
   className?: string;
   accentColor?: string;
 };
@@ -53,6 +59,10 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   const mainImageScale = getMainImageScale(club.mainImageScale);
   const mainImageRotation = getMainImageRotation(club.mainImageRotation);
   const useBackgroundCover = mainImageScale > 1;
+  const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
+  /** 使用 w-11 h-11 替代 size-11 (Tailwind 3.3 不支持 size-*)，确保宽高固定为正圆 */
+  const contactIconWrap =
+    "inline-flex aspect-square w-11 h-11 md:w-7 md:h-7 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 active:scale-[0.98]";
 
   return (
     <Ceramic
@@ -151,34 +161,39 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
         </Link>
 
         {/* Footer: 可独立点击的联系方式图标 */}
-        <div className="mx-6 mb-6 pt-4 border-t border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {club.phone && (
-              <a href={`tel:${club.phone}`} className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center hover:bg-emerald-100 hover:scale-110 transition-all" title={t("cardLinkPhone", { phone: club.phone })}>
-                <Phone size={10} className="text-emerald-500" />
+        <div className="mx-6 mb-6 pt-4 border-t border-gray-100 flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3 md:gap-2">
+            {showPhonePublic && (
+              <a href={`tel:${club.phone}`} className={cn(contactIconWrap, "bg-emerald-50 hover:bg-emerald-100")} title={t("cardLinkPhone", { phone: club.phone! })}>
+                <Phone className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-emerald-600" />
               </a>
             )}
             {club.email && (
-              <a href={`mailto:${club.email}`} className="w-6 h-6 rounded-full bg-blue-50 flex items-center justify-center hover:bg-blue-100 hover:scale-110 transition-all" title={t("cardLinkEmail", { email: club.email })}>
-                <Mail size={10} className="text-blue-500" />
+              <a href={`mailto:${club.email}`} className={cn(contactIconWrap, "bg-blue-50 hover:bg-blue-100")} title={t("cardLinkEmail", { email: club.email })}>
+                <Mail className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-blue-600" />
               </a>
             )}
             {club.website && (
-              <a href={club.website} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-purple-50 flex items-center justify-center hover:bg-purple-100 hover:scale-110 transition-all" title={t("cardLinkWebsite")}>
-                <Globe size={10} className="text-purple-500" />
+              <a href={club.website} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-purple-50 hover:bg-purple-100")} title={t("cardLinkWebsite")}>
+                <Globe className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-purple-600" />
               </a>
             )}
             {club.instagram && (
-              <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-pink-50 flex items-center justify-center hover:bg-pink-100 hover:scale-110 transition-all" title="Instagram">
-                <Instagram size={10} className="text-pink-500" />
+              <a href={`https://instagram.com/${club.instagram}`} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-pink-50 hover:bg-pink-100")} title={t("cardLinkInstagram")}>
+                <Instagram className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-pink-600" />
               </a>
             )}
             {club.twitter && (
-              <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className="w-6 h-6 rounded-full bg-sky-50 flex items-center justify-center hover:bg-sky-100 hover:scale-110 transition-all" title="X (Twitter)">
-                <Twitter size={10} className="text-sky-500" />
+              <a href={`https://twitter.com/${club.twitter}`} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-sky-50 hover:bg-sky-100")} title={t("cardLinkTwitter")}>
+                <Twitter className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-sky-600" />
               </a>
             )}
-            {!club.phone && !club.email && !club.website && !club.instagram && !club.twitter && (
+            {club.facebook && (
+              <a href={`https://www.facebook.com/${club.facebook}`} target="_blank" rel="noopener noreferrer" className={cn(contactIconWrap, "bg-indigo-50 hover:bg-indigo-100")} title={t("cardLinkFacebook")}>
+                <Facebook className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-indigo-600" />
+              </a>
+            )}
+            {!showPhonePublic && !club.email && !club.website && !club.instagram && !club.twitter && !club.facebook && (
               <span className="text-[9px] text-gray-300 font-medium">—</span>
             )}
           </div>

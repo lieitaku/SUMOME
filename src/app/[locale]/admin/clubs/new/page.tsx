@@ -95,7 +95,7 @@ export default function NewClubPage() {
                                         body: JSON.stringify({
                                             type: "club",
                                             redirectPath: `/clubs/${slug}`,
-                                            payload: { ...values, id: "", area: "未設定", address: "", subImages: [], mainImagePosition: "50,50", mainImageScale: 1, zipCode: "", city: "", mapUrl: "", phone: "", email: "", website: "", instagram: "", twitter: "", schedule: "", target: "", representative: "" },
+                                            payload: { ...values, id: "", area: "未設定", address: "", subImages: [], mainImagePosition: "50,50", mainImageScale: 1, zipCode: "", city: "", mapUrl: "", phone: "", email: "", website: "", instagram: "", twitter: "", tiktok: "", facebook: "", phoneVisibleOnPublicSite: false, schedule: "", target: "", representative: "" },
                                         }),
                                     });
                                     const data = await res.json();

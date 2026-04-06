@@ -36,9 +36,15 @@ function parseFormData(formData: FormData) {
     website: formData.get("website") as string,
     instagram: formData.get("instagram") as string,
     twitter: formData.get("twitter") as string,
+    tiktok: formData.get("tiktok") as string,
+    facebook: formData.get("facebook") as string,
     schedule: formData.get("schedule") as string, // 存的是 JSON 字符串
     target: formData.get("target") as string,
     representative: formData.get("representative") as string,
+    /** 客户端 FormData 使用 "1" / "0"（见 EditClubForm onSubmit） */
+    phoneVisibleOnPublicSite:
+      formData.get("phoneVisibleOnPublicSite") === "1" ||
+      formData.get("phoneVisibleOnPublicSite") === "true",
 
     // ✨ 关键：获取所有名为 'subImages' 的值组成数组
     // 如果前端没传，getAll 会返回空数组 []
@@ -147,6 +153,9 @@ const UpdateClubSchema = z.object({
   website: z.string().optional(),
   instagram: z.string().optional(),
   twitter: z.string().optional(),
+  tiktok: z.string().optional(),
+  facebook: z.string().optional(),
+  phoneVisibleOnPublicSite: z.boolean(),
   schedule: z.string().optional(),
   target: z.string().optional(),
   representative: z.string().optional(),

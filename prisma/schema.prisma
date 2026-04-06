@@ -86,6 +86,8 @@ model Club {
   twitter        String?
   tiktok         String?
   facebook       String?
+  /// 访客向けに電話番号を表示するか（DB の phone は保持し、同意取得後にのみ true）
+  phoneVisibleOnPublicSite Boolean @default(false)
 
   // 运营信息
   schedule       String?   // 稽古时间 (JSON String)

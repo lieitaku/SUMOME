@@ -256,6 +256,11 @@
     "cardLinkPhone": "電話: {phone}",
     "cardLinkEmail": "メール: {email}",
     "cardLinkWebsite": "公式サイト",
+    "cardLinkInstagram": "Instagram",
+    "cardLinkTwitter": "X（Twitter）",
+    "cardLinkFacebook": "Facebook",
+    "linkDialPhone": "電話をかける",
+    "tapToCall": "タップして発信",
     "cardDetails": "詳細"
   },
   "ClubSearch": {

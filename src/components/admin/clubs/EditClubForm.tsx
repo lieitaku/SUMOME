@@ -69,6 +69,8 @@ const formSchema = z.object({
     twitter: z.string().optional(),
     tiktok: z.string().optional(),
     facebook: z.string().optional(),
+    /** サイト訪問者に電話を出すか（番号は DB に保存したまま） */
+    phoneVisibleOnPublicSite: z.boolean(),
     schedule: z.string().optional(), // 存的是 JSON 字符串
     target: z.string().optional(),
     representative: z.string().optional(),
@@ -118,8 +120,9 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
             website: initialData.website || "",
             instagram: initialData.instagram || "",
             twitter: initialData.twitter || "",
-            tiktok: (initialData as Club & { tiktok?: string }).tiktok || "",
-            facebook: (initialData as Club & { facebook?: string }).facebook || "",
+            tiktok: initialData.tiktok || "",
+            facebook: initialData.facebook || "",
+            phoneVisibleOnPublicSite: initialData.phoneVisibleOnPublicSite ?? false,
             schedule: initialData.schedule || "",
             target: initialData.target || "",
             representative: initialData.representative || "",
@@ -230,13 +233,11 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
         const formData = new FormData();
 
         Object.entries(data).forEach(([key, value]) => {
-            // TypeScript 在这里会理解：如果进了这个 if，它是数组；否则它是字符串。
             if (Array.isArray(value)) {
-                // 如果是数组 (如 subImages)，遍历添加
                 value.forEach((v) => formData.append(key, v));
+            } else if (typeof value === "boolean") {
+                formData.append(key, value ? "1" : "0");
             } else {
-                // 如果不是数组，当作普通字符串处理
-                // value 可能是 null 或 undefined，所以加 || ""
                 formData.append(key, value || "");
             }
         });
@@ -546,9 +547,22 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                 <label className={labelClass}>代表者名</label>
                                 <input {...form.register("representative")} className={inputClass} />
                             </div>
-                            <div>
-                                <label className={labelClass}>電話番号</label>
-                                <input {...form.register("phone")} className={inputClass} />
+                            <div className="space-y-3">
+                                <div>
+                                    <label className={labelClass}>電話番号</label>
+                                    <input {...form.register("phone")} className={inputClass} />
+                                </div>
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        className="mt-1 w-4 h-4 rounded border-gray-300 text-sumo-brand focus:ring-sumo-brand"
+                                        {...form.register("phoneVisibleOnPublicSite")}
+                                    />
+                                    <span className="text-xs text-gray-600 leading-snug">
+                                        <span className="font-bold text-gray-800 block mb-0.5">サイト上に電話番号を表示する</span>
+                                        本人の同意がある場合のみオンにしてください。オフのときは管理画面・DB にのみ保存され、公開ページでは非表示です。
+                                    </span>
+                                </label>
                             </div>
                             <div>
                                 <label className={labelClass}>メールアドレス</label>
