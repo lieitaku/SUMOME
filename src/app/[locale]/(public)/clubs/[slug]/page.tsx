@@ -227,9 +227,9 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                     <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
                         {/* 返回按钮 */}
                         <div className="flex justify-center mb-8">
-                            <Link href="/clubs" className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group">
-                                <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-                                <span className="text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToList")}</span>
+                            <Link href="/clubs" className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 md:bg-white/10 backdrop-blur-md rounded-full border border-white/30 md:border-white/20 hover:bg-white/30 md:hover:bg-white/20 transition-all text-white group">
+                                <ChevronLeft className="w-4 h-4 md:w-3 md:h-3 group-hover:-translate-x-0.5 transition-transform" />
+                                <span className="text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToList")}</span>
                             </Link>
                         </div>
 
@@ -240,15 +240,16 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                         {/* 顶部简要信息 */}
                         <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-white/80 font-medium">
-                            <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-[10px] uppercase tracking-widest border border-white/10">
-                                <MapPin size={12} /> {club.area} {club.city && `· ${club.city}`}
+                            <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-xs md:text-[10px] uppercase tracking-widest border border-white/10">
+                                <MapPin className="w-4 h-4 shrink-0 md:w-3 md:h-3" aria-hidden /> {club.area}{" "}
+                                {club.city && `· ${club.city}`}
                             </span>
                         </div>
                     </div>
                 </section>
 
                 {/* --- Main Content Section (卡片容器) --- */}
-                <section className="relative px-4 md:px-6 z-20 -mt-20 md:-mt-24 pb-32">
+                <section className="relative px-4 md:px-6 z-20 -mt-20 md:-mt-24 pb-16 md:pb-32">
                     <div className="container mx-auto max-w-6xl">
                         <Ceramic interactive={false} className="bg-white border-b-[6px] shadow-[0_30px_60px_-15px_rgba(36,84,164,0.15)] overflow-hidden p-0 border-b-sumo-brand">
                             <div className="flex flex-col lg:flex-row min-h-[800px]">
@@ -277,8 +278,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                     {/* 副图画廊 (仅当有副图时显示) */}
                                     {galleryImages.length > 1 && (
                                         <div>
-                                            <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <Sparkles size={12} /> {t("galleryTitle")}
+                                            <h3 className="text-xs md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                <Sparkles className="w-4 h-4 shrink-0 md:w-3 md:h-3" aria-hidden /> {t("galleryTitle")}
                                             </h3>
                                             <div className="grid grid-cols-2 gap-3">
                                                 {/* 切片：跳过第一张主图，显示剩下的副图 */}
@@ -293,7 +294,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                                     {/* 底部：官方链接 (SNS) */}
                                     <div className="mt-auto pt-8 border-t border-gray-200/50">
-                                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{t("linksTitle")}</h3>
+                                        <h3 className="text-xs md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{t("linksTitle")}</h3>
                                         <div className="flex flex-wrap gap-4">
                                             {showPhonePublic && (
                                                 <a href={`tel:${club.phone}`} className="p-3 bg-white rounded-full text-emerald-600 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border border-emerald-100" title={t("linkDialPhone")}>
@@ -327,7 +328,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                             )}
                                         </div>
                                         {(!showPhonePublic && !club.instagram && !club.twitter && !club.facebook && !club.website && !club.email) && (
-                                            <p className="text-xs text-gray-400">{t("snsEmpty")}</p>
+                                            <p className="text-sm md:text-xs text-gray-400 leading-relaxed">{t("snsEmpty")}</p>
                                         )}
                                     </div>
                                 </div>
@@ -359,8 +360,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                                         {/* 1. 稽古日程表 (设计感排版) */}
                                         <div className="col-span-1 md:col-span-2">
-                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
-                                                <CalendarDays size={14} className="text-sumo-brand" /> {t("scheduleHeading")}
+                                            <h4 className="text-xs md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                                                <CalendarDays className="w-4 h-4 shrink-0 text-sumo-brand md:w-3.5 md:h-3.5" aria-hidden /> {t("scheduleHeading")}
                                             </h4>
 
                                             <div className="flex flex-col gap-3">
@@ -428,8 +429,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                                         {/* 2. 地址与地图 (名片风格) */}
                                         <div className="col-span-1 md:col-span-2">
-                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                <MapPin size={14} className="text-sumo-brand" /> {t("accessHeading")}
+                                            <h4 className="text-xs md:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                                                <MapPin className="w-4 h-4 shrink-0 text-sumo-brand md:w-3.5 md:h-3.5" aria-hidden /> {t("accessHeading")}
                                             </h4>
                                             <div className="relative group bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all">
                                                 <div className="flex items-start justify-between">
@@ -488,8 +489,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
                                         {/* 4. 募集对象信息 */}
                                         <div className="col-span-1 md:col-span-2">
-                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
-                                                <Target size={14} className="text-sumo-brand" /> {t("recruitHeading")}
+                                            <h4 className="text-xs md:text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2 mb-4">
+                                                <Target className="w-4 h-4 shrink-0 text-sumo-brand md:w-3.5 md:h-3.5" aria-hidden /> {t("recruitHeading")}
                                             </h4>
                                             <div className="bg-sumo-brand/5 p-5 rounded-xl border border-sumo-brand/10 flex items-center justify-between">
                                                 <div>
@@ -512,7 +513,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                 <Users size={20} /> {t("ctaApply")}
                                             </span>
                                         </Button>
-                                        <p className="text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">{t("ctaFootnote")}</p>
+                                        <p className="text-xs md:text-[9px] text-center text-gray-400 mt-4 font-black uppercase tracking-[0.2em]">{t("ctaFootnote")}</p>
                                     </div>
                                 </div>
                             </div>

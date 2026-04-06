@@ -256,15 +256,10 @@ export default async function PrefecturePage({ params, searchParams }: PageProps
             <div className="mb-8">
               <Link
                 href="/clubs/map"
-                className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-xs font-bold tracking-widest uppercase group"
+                className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 md:bg-white/10 backdrop-blur-md rounded-full border border-white/30 md:border-white/20 hover:bg-white/30 md:hover:bg-white/20 transition-all text-white group"
               >
-                <div className="w-6 h-6 rounded-full border border-white/30 flex items-center justify-center group-hover:bg-white transition-all duration-300">
-                  <ChevronLeft
-                    size={14}
-                    className="text-current group-hover:text-gray-900 transition-colors"
-                  />
-                </div>
-                {t("backToMap")}
+                <ChevronLeft className="w-4 h-4 md:w-3 md:h-3 group-hover:-translate-x-0.5 transition-transform" />
+                <span className="text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToMap")}</span>
               </Link>
             </div>
 

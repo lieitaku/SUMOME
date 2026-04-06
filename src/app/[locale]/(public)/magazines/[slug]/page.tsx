@@ -225,10 +225,10 @@ export default async function MagazineDetailPage({
           <div className="flex justify-center mb-8">
             <Link
               href="/magazines"
-              className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group"
+              className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 md:bg-white/10 backdrop-blur-md rounded-full border border-white/30 md:border-white/20 hover:bg-white/30 md:hover:bg-white/20 transition-all text-white group"
             >
-              <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToList")}</span>
+              <ChevronLeft className="w-4 h-4 md:w-3 md:h-3 group-hover:-translate-x-0.5 transition-transform" />
+              <span className="text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToList")}</span>
             </Link>
           </div>
 
@@ -237,11 +237,11 @@ export default async function MagazineDetailPage({
           </h1>
 
           <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-white/80 font-medium">
-            <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-[10px] uppercase tracking-widest border border-white/10">
-              <MapPin size={12} /> {regionShown}
+            <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-xs md:text-[10px] uppercase tracking-widest border border-white/10">
+              <MapPin className="w-4 h-4 shrink-0 md:w-3 md:h-3" aria-hidden /> {regionShown}
             </span>
             <span className="hidden md:inline w-px h-4 bg-white/20"></span>
-            <span className="text-[10px] uppercase tracking-[0.2em] opacity-80">
+            <span className="text-xs md:text-[10px] uppercase tracking-[0.2em] opacity-80">
               {publishDate.toLocaleDateString(localeTag, {
                 year: "numeric",
                 month: "short",
@@ -296,7 +296,9 @@ export default async function MagazineDetailPage({
                 <div className="mb-20 max-w-2xl">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-[2px] bg-sumo-brand"></div>
-                    <h3 className="text-xs font-black text-sumo-brand uppercase tracking-[0.25em]">{t("sectionOverview")}</h3>
+                    <h3 className="text-lg md:text-base font-serif font-black text-sumo-brand uppercase tracking-[0.2em]">
+                      {t("sectionOverview")}
+                    </h3>
                   </div>
                   <p className="text-lg md:text-xl font-medium text-gray-800 leading-relaxed font-serif text-justify whitespace-pre-wrap">
                     {descriptionShown}
@@ -304,13 +306,10 @@ export default async function MagazineDetailPage({
                 </div>
 
                 <div>
-                  <div className="flex items-end justify-between mb-8 border-b border-gray-100 pb-4">
-                    <h3 className="text-xs font-black text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2">
-                      <Layers size={14} /> {t("sectionSpreads")}
+                  <div className="flex items-end mb-8 border-b border-gray-100 pb-4">
+                    <h3 className="text-sm md:text-xs font-black text-gray-400 uppercase tracking-[0.25em] flex items-center gap-2">
+                      <Layers className="w-4 h-4 shrink-0 md:w-3.5 md:h-3.5" aria-hidden /> {t("sectionSpreads")}
                     </h3>
-                    <span className="text-[10px] font-mono text-gray-400">
-                      {t("spreadsCount", { count: spreads.length })}
-                    </span>
                   </div>
 
                   {spreads.length > 0 ? (

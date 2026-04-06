@@ -68,7 +68,7 @@ export function ShareButton() {
             className="flex flex-col items-center justify-center gap-2 py-3 bg-white border border-gray-200 hover:border-gray-300 text-gray-600 rounded-xl hover:bg-gray-50 transition-all group active:scale-95 w-full"
         >
             {copied ? <Check size={16} className="text-green-500" /> : <Share2 size={16} className="group-hover:scale-110 transition-transform text-gray-400 group-hover:text-gray-900" />}
-            <span className="text-[10px] font-bold uppercase tracking-wider">{copied ? t("shareCopied") : t("share")}</span>
+            <span className="text-xs md:text-[10px] font-bold uppercase tracking-wider">{copied ? t("shareCopied") : t("share")}</span>
         </button>
     );
 }
@@ -331,7 +331,7 @@ export function MagazineReader({
                                     </div>
                                 </div>
                             </div>
-                            <div className="text-center mt-3 text-[10px] font-mono text-gray-400 uppercase tracking-widest">
+                            <div className="text-center mt-3 text-xs md:text-[10px] font-mono text-gray-400 uppercase tracking-widest">
                                 {t("pageRange", {
                                     start: startPage,
                                     end: spread.right ? endPage : t("spreadEnd"),
