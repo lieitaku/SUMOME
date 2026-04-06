@@ -60,9 +60,9 @@
   "Hero": {
     "yearUnit": "Year",
     "launch": "Launch",
-    "shin": "心",
-    "gi": "技",
-    "tai": "体",
+    "shin": "Shin",
+    "gi": "Gi",
+    "tai": "Tai",
     "tagline": "Tradition to the future"
   },
   "About": {
@@ -174,7 +174,29 @@
     "previewBack": "Back to edit",
     "ctaAlt": "The next yokozuna starts here.",
     "activityReportTitle": "Outreach & coverage",
-    "activityReportViewAll": "See all activities"
+    "activityReportViewAll": "See all activities",
+    "introLine1": "The <heat>passion</heat> of sumo,",
+    "introLine2": "delivered to the <brand>world</brand>.",
+    "introBody": "SUMOME is a next-generation platform that amplifies the appeal of sumo—Japan’s national sport—through technology.\n\nWe connect community-based clubs with everyone who loves sumo and serve as a bridge between tradition and innovation to protect the dohyō of the future.",
+    "introReadMore": "Learn more",
+    "pillarsTitle": "SUMOME’s <three>three</three> pillars",
+    "serviceSearchDesc": "Find clubs across Japan\nby region",
+    "serviceConnectDesc": "Book a visit or trial—\ntake the first step",
+    "serviceRecordDesc": "Turn practice and events\ninto a beautiful photobook",
+    "pickupTitle": "Featured sumo clubs",
+    "pickupViewAll": "Browse all clubs",
+    "managerHeadingLine1": "Your club,",
+    "managerHeadingLine2": "seen by more people.",
+    "managerLead": "SUMOME connects sumo clubs across Japan<br></br>with the rikishi of tomorrow.<br></br><br></br>All listing and usage fees are <free>free</free>.<br></br>Register in minutes and share<br></br>what makes your club special worldwide.",
+    "managerCta": "Apply to list your club",
+    "benefit1Title": "Showcase your club",
+    "benefit1Desc": "A dedicated page for your activities and atmosphere. Add photos and video so your club’s personality comes through.",
+    "benefit2Title": "Smooth trial bookings",
+    "benefit2Desc": "Receive visit and trial requests directly on the site—less phone tag and easier management.",
+    "benefit3Title": "Free photobook",
+    "benefit3Desc": "As a perk, we send a high-quality magazine-style photobook of your activities—free—so memories live on in print.",
+    "sponsorLinkFallback": "Sponsor",
+    "hakuhoLightboxAria": "Hakuhō photo (enlarged)"
   },
   "ActivitiesPage": {
     "metaTitle": "Events & activity log",

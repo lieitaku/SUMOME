@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const Z_LIGHTBOX = 100;
 const BLUR_PX = 12;
@@ -28,6 +29,7 @@ type HakuhoLightboxProps = {
  * 白鹏大图：Portal 挂 body，原图 object-contain 限框（不拉伸缩略图），周边弱化 + backdrop-blur。
  */
 export function HakuhoLightbox({ src, onClose }: HakuhoLightboxProps) {
+  const t = useTranslations("Home");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ export function HakuhoLightbox({ src, onClose }: HakuhoLightboxProps) {
           style={{ zIndex: Z_LIGHTBOX }}
           role="dialog"
           aria-modal="true"
-          aria-label="白鹏写真"
+          aria-label={t("hakuhoLightboxAria")}
           initial={{
             backgroundColor: "rgba(0, 0, 0, 0)",
             backdropFilter: "blur(0px)",

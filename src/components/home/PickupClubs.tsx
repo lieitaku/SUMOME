@@ -3,6 +3,7 @@
 import React, { useMemo } from "react";
 import Link from "@/components/ui/TransitionLink";
 import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { type Club } from "@prisma/client";
 
 import ClubCard from "@/components/clubs/ClubCard";
@@ -14,10 +15,9 @@ interface PickupClubsProps {
 }
 
 const PickupClubs = ({ clubs }: PickupClubsProps) => {
-  // --- ✨ 核心逻辑：过滤掉官方总部账号 ---
-  // 使用 useMemo 确保过滤逻辑只在 clubs 变化时运行，提高性能
+  const t = useTranslations("Home");
   const displayClubs = useMemo(() => {
-    return clubs.filter(club => club.slug !== "official-hq");
+    return clubs.filter((club) => club.slug !== "official-hq");
   }, [clubs]);
 
   return (
@@ -26,7 +26,7 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
       <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-6 md:mb-16 border-b border-gray-200 pb-4 md:pb-8 reveal-up">
         <div>
           <h2 className="text-3xl md:text-5xl font-black font-serif text-sumo-text">
-            注目の相撲クラブ
+            {t("pickupTitle")}
           </h2>
         </div>
 
@@ -34,7 +34,7 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
           href="/clubs"
           className="hidden md:flex items-center gap-2 text-sm font-bold text-sumo-brand hover:text-sumo-red transition-colors group tracking-widest"
         >
-          クラブ一覧を見る
+          {t("pickupViewAll")}
           <ArrowRight
             size={16}
             className="group-hover:translate-x-1 transition-transform"
@@ -63,7 +63,7 @@ const PickupClubs = ({ clubs }: PickupClubsProps) => {
           variant="outline"
           className="w-full md:w-auto"
         >
-          クラブ一覧を見る
+          {t("pickupViewAll")}
         </Button>
       </div>
     </Section>

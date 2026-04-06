@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import ExternalUrlAnchor from "@/components/ui/ExternalUrlAnchor";
 import { clubWebsiteHref } from "@/lib/club-contact-urls";
@@ -112,6 +113,7 @@ export default function RabbitWalkingBanner({
   sponsors,
   displayMode = "mixed", // 默认混合模式
 }: RabbitWalkingBannerProps = {}) {
+  const tHome = useTranslations("Home");
   const [isMobile, setIsMobile] = useState(false);
   /** 相对 1920×1080 视口缩放，低分辨率笔记本上整体缩小；与外部 scale 相乘 */
   const [adaptiveScale, setAdaptiveScale] = useState(1);
@@ -334,7 +336,7 @@ export default function RabbitWalkingBanner({
             const { transform: _ignored, ...restBodyStyle } = variant.bodyStyle || {};
 
             const flagHref = item.link?.trim();
-            const flagLinkLabel = item.alt || "スポンサー";
+            const flagLinkLabel = item.alt || tHome("sponsorLinkFallback");
 
             const {
               transform: handOffsetTransform,
