@@ -102,6 +102,7 @@ export default function PrefectureCharacter({
             sizes="(max-width: 1024px) 28vw, 88px"
             className={cn(
               "block h-auto w-full object-contain object-bottom border-0 bg-transparent shadow-none outline-none ring-0",
+              "drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]",
             )}
             style={{
               maxHeight: imgMaxHeight,
@@ -125,6 +126,7 @@ export default function PrefectureCharacter({
           height={900}
           className={cn(
             "block w-full h-auto object-contain border-0 bg-transparent shadow-none outline-none ring-0",
+            "drop-shadow-[0_4px_12px_rgba(0,0,0,0.15)]",
           )}
           style={{ verticalAlign: "bottom" }}
           onError={() => setImgError(true)}
