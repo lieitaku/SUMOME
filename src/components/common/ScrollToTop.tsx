@@ -43,30 +43,21 @@ const ScrollToTop = () => {
       {/* 内层 Ceramic 控制点击交互 */}
       <Ceramic
         as="button"
+        variant="blue"
         onClick={scrollToTop}
         aria-label="Scroll to top"
         className={cn(
           "flex flex-col items-center justify-center",
-          "w-12 h-12 md:w-14 md:h-14",
-
-          // === 颜色逻辑 (修改版) ===
-          // 始终保持白底蓝字，哪怕 hover 也不变黑或变实心蓝
-          "bg-white text-sumo-brand",
-
-          // 悬停效果：
-          // 1. 只有底座变蓝 (能量感)
-          // 2. 依然上浮
-          "hover:border-b-sumo-brand",
-          // 去掉了 hover:bg-sumo-brand 和 hover:text-white
+          "w-14 h-14 md:w-16 md:h-16", // 手机端和电脑端都适当放大
         )}
       >
         <ArrowUp
-          size={20}
+          size={24}
           strokeWidth={2.5}
           // 图标单独加一个小动画
           className="transition-transform duration-300 group-hover:-translate-y-1"
         />
-        <span className="text-[9px] font-black tracking-widest mt-0.5 font-sans">
+        <span className="text-[10px] font-black tracking-widest mt-0.5 font-sans">
           TOP
         </span>
       </Ceramic>

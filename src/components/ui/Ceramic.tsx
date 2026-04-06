@@ -29,25 +29,36 @@ const Ceramic: React.FC<CeramicProps> = ({
         "block isolate", // 确保它是块级元素，isolate 创建新堆叠上下文防止 transform 时圆角溢出
 
         // === 2. 物理材质 (Physical Material) ===
-        "border border-gray-100 border-b-[4px]", // 核心厚度
+        "border border-b-[4px]", // 核心厚度
 
         // === 3. 颜色变体 ===
         variant === "white" && [
-          "bg-white border-b-gray-200",
+          "bg-white border-gray-100 border-b-gray-200 text-gray-800",
           // 釉面高光 (Inner Highlight)
           "shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_2px_8px_rgba(0,0,0,0.04)]",
         ],
-        // 如果以后有蓝色变体，可以在这里加
+        variant === "blue" && [
+          "bg-sumo-brand text-white border-sumo-brand border-b-[#1a3d7a]", // 深蓝色底座
+          // 蓝色的高光与阴影
+          "shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(36,84,164,0.3)]",
+        ],
 
         // === 4. 交互效果 (Interactive) ===
         interactive && [
           "cursor-pointer group",
-          // Hover: 上浮 + 蓝底座 + 蓝投影
           "hover:-translate-y-1",
-          "hover:border-b-sumo-brand",
-          "hover:shadow-[0_15px_30px_rgba(36,84,164,0.15)]",
           // Active: 机械下压 (厚度消失 + 位移)
           "active:border-b-[0px] active:translate-y-[3px] active:shadow-none active:duration-100",
+        ],
+        
+        // 针对不同变体的 Hover 效果
+        interactive && variant === "white" && [
+          "hover:border-b-sumo-brand",
+          "hover:shadow-[0_15px_30px_rgba(36,84,164,0.15)]",
+        ],
+        interactive && variant === "blue" && [
+          "hover:brightness-110",
+          "hover:shadow-[0_15px_30px_rgba(36,84,164,0.4)]",
         ],
 
         className,
