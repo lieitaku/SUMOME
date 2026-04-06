@@ -21,6 +21,14 @@ import { cn } from "@/lib/utils";
 import { signUp, type SignUpState } from "@/lib/actions/auth-signup";
 import { loginErrorToJapanese } from "@/lib/auth-error-messages";
 
+const CHAMPAGNE_GLASS_BUTTON_STYLE: React.CSSProperties = {
+    backgroundColor: "rgba(193, 161, 78, 0.75)",
+    borderColor: "rgba(193, 161, 78, 0.5)",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    boxShadow: "0 10px 15px -3px rgba(193, 161, 78, 0.25)",
+};
+
 const RegistrationForm = () => {
     const router = useRouter();
     const formRef = useRef<HTMLFormElement>(null);
@@ -31,14 +39,6 @@ const RegistrationForm = () => {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
-
-    const handleBack = () => {
-        if (window.history.length > 1) {
-            router.back();
-        } else {
-            router.push("/partners");
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -124,20 +124,22 @@ const RegistrationForm = () => {
                 </div>
 
                 <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center md:text-left">
-                    <div className="flex justify-start mb-6 md:mb-8">
-                        <button
-                            type="button"
-                            onClick={handleBack}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 active:scale-95 transition-all text-white group"
+                    <div className="flex justify-center mb-6 md:mb-8">
+                        <Link
+                            href="/partners"
+                            className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-full transition-all duration-200 ease-in-out text-white group hover:brightness-110 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80"
+                            style={CHAMPAGNE_GLASS_BUTTON_STYLE}
+                            aria-label="パートナー案内ページへ戻る"
                         >
                             <ChevronLeft
                                 size={16}
-                                className="group-hover:-translate-x-1 transition-transform"
+                                className="shrink-0 group-hover:-translate-x-1 transition-transform duration-200 ease-in-out"
+                                aria-hidden
                             />
-                            <span className="text-xs font-bold tracking-[0.2em] uppercase">
-                                戻る
+                            <span className="text-xs font-bold tracking-wide">
+                                パートナー案内へ戻る
                             </span>
-                        </button>
+                        </Link>
                     </div>
 
                     <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm reveal-up delay-100 text-center">

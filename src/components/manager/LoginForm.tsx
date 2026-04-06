@@ -25,6 +25,14 @@ import { cn } from "@/lib/utils";
 import { loginErrorForLocale } from "@/lib/auth-error-messages";
 import { verifyIdentity, resetPassword } from "@/lib/actions/auth-reset";
 
+const CHAMPAGNE_GLASS_BUTTON_STYLE: React.CSSProperties = {
+  backgroundColor: "rgba(193, 161, 78, 0.75)",
+  borderColor: "rgba(193, 161, 78, 0.5)",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  boxShadow: "0 10px 15px -3px rgba(193, 161, 78, 0.25)",
+};
+
 type ViewState = "login" | "verify" | "reset";
 
 const LoginForm = () => {
@@ -55,14 +63,6 @@ const LoginForm = () => {
   const [verifiedEmail, setVerifiedEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const handleBack = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/partners");
-    }
-  };
 
   const switchToVerify = () => {
     setView("verify");
@@ -230,16 +230,40 @@ const LoginForm = () => {
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
           <div className="flex justify-center mb-8">
-            <button
-              type="button"
-              onClick={view === "login" ? handleBack : switchToLogin}
-              className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all text-white group"
-            >
-              <ChevronLeft size={12} className="group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-[10px] font-bold tracking-[0.2em] uppercase">
-                {view === "login" ? "戻る" : "ログインに戻る"}
-              </span>
-            </button>
+            {view === "login" ? (
+              <Link
+                href="/partners"
+                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-full transition-all duration-200 ease-in-out text-white group hover:brightness-110 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80"
+                style={CHAMPAGNE_GLASS_BUTTON_STYLE}
+                aria-label="パートナー案内ページへ戻る"
+              >
+                <ChevronLeft
+                  size={16}
+                  className="shrink-0 group-hover:-translate-x-1 transition-transform duration-200 ease-in-out"
+                  aria-hidden
+                />
+                <span className="text-xs font-bold tracking-wide">
+                  パートナー案内へ戻る
+                </span>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={switchToLogin}
+                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-full transition-all duration-200 ease-in-out text-white group hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80"
+                style={CHAMPAGNE_GLASS_BUTTON_STYLE}
+                aria-label="ログイン画面へ戻る"
+              >
+                <ChevronLeft
+                  size={16}
+                  className="shrink-0 group-hover:-translate-x-1 transition-transform duration-200 ease-in-out"
+                  aria-hidden
+                />
+                <span className="text-xs font-bold tracking-wide">
+                  ログイン画面へ戻る
+                </span>
+              </button>
+            )}
           </div>
 
           <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm">

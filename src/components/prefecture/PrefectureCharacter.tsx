@@ -90,17 +90,25 @@ export default function PrefectureCharacter({
         </div>
 
         <div
-          className="relative flex items-end justify-center shrink-0 overflow-visible mx-auto lg:mx-0"
+          className="relative flex items-end justify-center shrink-0 overflow-visible mx-auto lg:mx-0 leading-none"
           style={boxStyle}
         >
+          {/* leading-none + block img：避免内联图片基线在透明底上形成「细边框」 */}
           <Image
             src={imgSrc}
             alt={character.name}
             width={600}
             height={900}
             sizes="(max-width: 1024px) 28vw, 88px"
-            className="h-auto w-full object-contain object-bottom drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
-            style={{ maxHeight: imgMaxHeight }}
+            className={cn(
+              "block h-auto w-full object-contain object-bottom border-0 bg-transparent shadow-none outline-none ring-0",
+              "drop-shadow-[0_8px_24px_rgba(0,0,0,0.35)]",
+              "[-webkit-backface-visibility:hidden] backface-hidden",
+            )}
+            style={{
+              maxHeight: imgMaxHeight,
+              verticalAlign: "bottom",
+            }}
             onError={() => setImgError(true)}
             priority
           />
@@ -111,13 +119,18 @@ export default function PrefectureCharacter({
 
   return (
     <div className="flex flex-col items-center lg:items-end h-full">
-      <div className="relative w-[180px] lg:w-[240px] xl:w-[280px] shrink-0">
+      <div className="relative w-[180px] lg:w-[240px] xl:w-[280px] shrink-0 leading-none">
         <Image
           src={imgSrc}
           alt={character.name}
           width={600}
           height={900}
-          className="w-full h-auto object-contain drop-shadow-xl"
+          className={cn(
+            "block w-full h-auto object-contain border-0 bg-transparent shadow-none outline-none ring-0",
+            "drop-shadow-xl",
+            "[-webkit-backface-visibility:hidden] backface-hidden",
+          )}
+          style={{ verticalAlign: "bottom" }}
           onError={() => setImgError(true)}
           priority={false}
         />
