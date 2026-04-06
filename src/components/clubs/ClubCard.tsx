@@ -72,9 +72,9 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   const mainImageRotation = getMainImageRotation(club.mainImageRotation);
   const useBackgroundCover = mainImageScale > 1;
   const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
-  /** 使用 w-11 h-11 替代 size-11 (Tailwind 3.3 不支持 size-*)，确保宽高固定为正圆 */
+  /** 与俱乐部详情页「公式链接」区一致的圆钮：白底 + 描边 + 阴影（移动端略大便于点击） */
   const contactIconWrap =
-    "inline-flex aspect-square w-11 h-11 md:w-7 md:h-7 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 active:scale-[0.98]";
+    "inline-flex aspect-square w-11 h-11 md:w-7 md:h-7 shrink-0 items-center justify-center rounded-full bg-white shadow-sm transition-all hover:shadow-md hover:-translate-y-1 active:scale-[0.98]";
 
   return (
     <Ceramic
@@ -176,49 +176,49 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
         <div className="relative z-20 mx-6 mb-6 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
           <div className="flex flex-wrap items-center gap-3 md:gap-2">
             {showPhonePublic && (
-              <a href={`tel:${club.phone}`} className={cn(contactIconWrap, "bg-emerald-50 hover:bg-emerald-100")} title={t("cardLinkPhone", { phone: club.phone! })}>
-                <Phone className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-emerald-600" />
+              <a href={`tel:${club.phone}`} className={cn(contactIconWrap, "border border-emerald-100 text-emerald-600")} title={t("cardLinkPhone", { phone: club.phone! })}>
+                <Phone className="w-[18px] h-[18px] md:w-3.5 md:h-3.5" />
               </a>
             )}
             {club.email && (
-              <a href={`mailto:${club.email}`} className={cn(contactIconWrap, "bg-blue-50 hover:bg-blue-100")} title={t("cardLinkEmail", { email: club.email })}>
-                <Mail className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-blue-600" />
+              <a href={`mailto:${club.email}`} className={cn(contactIconWrap, "border border-gray-200 text-cyan-600")} title={t("cardLinkEmail", { email: club.email })}>
+                <Mail className="w-[18px] h-[18px] md:w-3.5 md:h-3.5" />
               </a>
             )}
             {websiteHref && (
               <ClubExternalAnchor
                 href={websiteHref}
-                className={cn(contactIconWrap, "bg-purple-50 hover:bg-purple-100")}
+                className={cn(contactIconWrap, "border border-blue-100 text-blue-600")}
                 title={t("cardLinkWebsite")}
               >
-                <Globe className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-purple-600" />
+                <Globe className="w-[18px] h-[18px] md:w-3.5 md:h-3.5" />
               </ClubExternalAnchor>
             )}
             {instagramHref && (
               <ClubExternalAnchor
                 href={instagramHref}
-                className={cn(contactIconWrap, "bg-pink-50 hover:bg-pink-100")}
+                className={cn(contactIconWrap, "border border-pink-100 text-pink-600")}
                 title={t("cardLinkInstagram")}
               >
-                <Instagram className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-pink-600" />
+                <Instagram className="w-[18px] h-[18px] md:w-3.5 md:h-3.5" />
               </ClubExternalAnchor>
             )}
             {twitterHref && (
               <ClubExternalAnchor
                 href={twitterHref}
-                className={cn(contactIconWrap, "bg-sky-50 hover:bg-sky-100")}
+                className={cn(contactIconWrap, "border border-gray-200 text-black")}
                 title={t("cardLinkTwitter")}
               >
-                <Twitter className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-sky-600" />
+                <Twitter className="w-[18px] h-[18px] md:w-3.5 md:h-3.5" />
               </ClubExternalAnchor>
             )}
             {facebookHref && (
               <ClubExternalAnchor
                 href={facebookHref}
-                className={cn(contactIconWrap, "bg-indigo-50 hover:bg-indigo-100")}
+                className={cn(contactIconWrap, "border border-indigo-100 text-indigo-600")}
                 title={t("cardLinkFacebook")}
               >
-                <Facebook className="w-[18px] h-[18px] md:w-3.5 md:h-3.5 text-indigo-600" />
+                <Facebook className="w-[18px] h-[18px] md:w-3.5 md:h-3.5" />
               </ClubExternalAnchor>
             )}
             {!showPhonePublic && !club.email && !websiteHref && !instagramHref && !twitterHref && !facebookHref && (

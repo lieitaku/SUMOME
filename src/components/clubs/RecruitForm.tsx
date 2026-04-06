@@ -74,7 +74,7 @@ export default function RecruitForm({ club }: { club: Club }) {
         }
       `}</style>
 
-      <section className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+      <section className="relative bg-sumo-brand text-white pt-32 pb-32 md:pb-48 overflow-hidden shadow-xl">
         <div
           className="absolute inset-0"
           style={{ background: `linear-gradient(to bottom, ${BRAND_BLUE}, #1a3a7a)` }}
@@ -101,17 +101,17 @@ export default function RecruitForm({ club }: { club: Club }) {
             </Link>
           </div>
           <div className="reveal-up delay-100">
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm leading-tight">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm leading-tight">
               {club.name}
             </h1>
-            <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed">
+            <p className="max-w-xl mx-auto text-white/80 font-medium tracking-wide leading-relaxed">
               {t("heroSubtitle")}
             </p>
           </div>
         </div>
       </section>
 
-      <section className="relative px-4 md:px-6 z-20 -mt-24 pb-32">
+      <section className="relative z-20 -mt-20 px-4 pb-16 md:-mt-24 md:px-6 md:pb-24 lg:pb-32">
         <div className="container mx-auto max-w-[1280px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             <div className="lg:col-span-5 flex flex-col gap-6">
@@ -193,7 +193,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                         placeholder={t("placeholderName")}
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand/30 focus:border-sumo-brand transition-all duration-200"
+                        className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:border-sumo-brand transition-all duration-200"
                       />
                     </div>
 
@@ -209,7 +209,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                           placeholder="sample@email.com"
                           value={formData.email}
                           onChange={handleInputChange}
-                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand/30 focus:border-sumo-brand transition-all duration-200"
+                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:border-sumo-brand transition-all duration-200"
                         />
                       </div>
                       <div className="space-y-2 group">
@@ -222,7 +222,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                           placeholder="090-1234-5678"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand/30 focus:border-sumo-brand transition-all duration-200"
+                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:border-sumo-brand transition-all duration-200"
                         />
                       </div>
                     </div>
@@ -236,10 +236,10 @@ export default function RecruitForm({ club }: { club: Club }) {
                           <label
                             key={type}
                             className={cn(
-                              "cursor-pointer border rounded-md p-4 text-center transition-all duration-200 ease-in-out flex flex-col items-center gap-2 group",
+                              "cursor-pointer rounded-md border p-4 text-center transition-all duration-200 ease-in-out flex flex-col items-center gap-2 outline-none focus-within:outline-none focus-visible:outline-none",
                               formData.experience === type
-                                ? "bg-blue-50/50 border-sumo-brand shadow-sm"
-                                : "bg-white border-gray-200",
+                                ? "border-sumo-brand bg-white shadow-sm"
+                                : "border-gray-200 bg-white",
                             )}
                           >
                             <input
@@ -248,7 +248,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                               value={type}
                               checked={formData.experience === type}
                               onChange={handleInputChange}
-                              className="sr-only"
+                              className="sr-only focus:outline-none"
                             />
                             <div
                               className={cn(
@@ -283,7 +283,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                         placeholder={t("placeholderMessage")}
                         value={formData.message}
                         onChange={handleInputChange}
-                        className="w-full p-4 bg-gray-50 border border-gray-200 rounded-md text-sm font-medium text-gray-900 focus:outline-none focus:bg-white focus:border-sumo-brand focus-visible:ring-2 focus-visible:ring-sumo-brand/30 transition-all duration-200 resize-none"
+                        className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 p-4 text-sm font-medium text-gray-900 transition-all duration-200 focus:border-sumo-brand focus:bg-white focus:outline-none focus-visible:outline-none focus-visible:ring-0"
                       />
                     </div>
 
