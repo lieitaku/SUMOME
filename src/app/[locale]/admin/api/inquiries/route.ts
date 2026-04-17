@@ -1,29 +1,43 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { NextRequest, NextResponse } from "next/server";
 import { confirmAdmin } from "@/lib/auth-utils";
+import {
+    fetchInquiriesAdminPage,
+    getInquiryStatusCounts,
+} from "@/lib/admin-inquiries-list";
 
-const INQUIRY_SELECT = {
-    id: true,
-    inquiryType: true,
-    name: true,
-    furigana: true,
-    email: true,
-    phone: true,
-    message: true,
-    status: true,
-    createdAt: true,
-    repliedAt: true,
-    lastReplyBody: true,
-} as const;
-
-export async function GET() {
+export async function GET(request: NextRequest) {
     const admin = await confirmAdmin();
     if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const inquiries = await prisma.inquiry.findMany({
-        orderBy: { createdAt: "desc" },
-        select: INQUIRY_SELECT,
-    });
+    const page = Math.max(
+        1,
+        parseInt(request.nextUrl.searchParams.get("page") ?? "1", 10) || 1,
+    );
 
-    return NextResponse.json(inquiries);
+    const [statusCounts, pageData] = await Promise.all([
+        getInquiryStatusCounts(),
+        fetchInquiriesAdminPage(page),
+    ]);
+
+    const inquiries = pageData.inquiries.map((inq) => ({
+        id: inq.id,
+        inquiryType: inq.inquiryType,
+        name: inq.name,
+        furigana: inq.furigana,
+        email: inq.email,
+        phone: inq.phone,
+        message: inq.message.length === 400 ? `${inq.message}…` : inq.message,
+        status: inq.status,
+        createdAt: inq.createdAt.toISOString(),
+        repliedAt: inq.repliedAt ? inq.repliedAt.toISOString() : null,
+        lastReplyBody: null as string | null,
+    }));
+
+    return NextResponse.json({
+        inquiries,
+        total: pageData.total,
+        totalPages: pageData.totalPages,
+        page: pageData.page,
+        statusCounts,
+    });
 }

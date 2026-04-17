@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { InquiryStatus } from "@prisma/client";
-import { CalendarDays, User, Mail, MessageSquare, Phone, Building2 } from "lucide-react";
+import { CalendarDays, User, Mail, MessageSquare, Phone, Building2, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "@/components/ui/TransitionLink";
 import InquiryStatusSelect from "@/components/admin/inquiries/InquiryStatusSelect";
 import DeleteInquiryButton from "@/components/admin/inquiries/DeleteInquiryButton";
 import ReplyToInquiryForm from "@/components/admin/inquiries/ReplyToInquiryForm";
@@ -19,6 +20,21 @@ export type InquiryListItem = {
     createdAt: string;
     repliedAt: string | null;
     lastReplyBody: string | null;
+};
+
+export type InquiryStatusCounts = {
+    unread: number;
+    read: number;
+    replied: number;
+    closed: number;
+};
+
+export type InquiriesListPayload = {
+    inquiries: InquiryListItem[];
+    total: number;
+    totalPages: number;
+    page: number;
+    statusCounts: InquiryStatusCounts;
 };
 
 function Fallback() {
@@ -41,13 +57,21 @@ function Fallback() {
     );
 }
 
-function Content({ inquiries }: { inquiries: InquiryListItem[] }) {
-    const statusCounts = {
-        unread: inquiries.filter(i => i.status === "unread").length,
-        read: inquiries.filter(i => i.status === "read").length,
-        replied: inquiries.filter(i => i.status === "replied").length,
-        closed: inquiries.filter(i => i.status === "closed").length,
-    };
+function Content({
+    inquiries,
+    statusCounts,
+    total,
+    totalPages,
+    page,
+}: {
+    inquiries: InquiryListItem[];
+    statusCounts: InquiryStatusCounts;
+    total: number;
+    totalPages: number;
+    page: number;
+}) {
+    const hasPrev = page > 1;
+    const hasNext = page < totalPages;
 
     return (
         <>
@@ -69,6 +93,38 @@ function Content({ inquiries }: { inquiries: InquiryListItem[] }) {
                     <div className="text-xs text-gray-400 font-bold">対応完了</div>
                 </div>
             </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 text-xs text-gray-500">
+                <span>全 {total} 件</span>
+                {totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                        <Link
+                            href={page === 2 ? "/admin/inquiries" : `/admin/inquiries?page=${page - 1}`}
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white font-bold transition-all duration-200 ${
+                                !hasPrev ? "pointer-events-none opacity-40" : "hover:bg-gray-50"
+                            }`}
+                            aria-disabled={!hasPrev}
+                        >
+                            <ChevronLeft size={14} />
+                            前へ
+                        </Link>
+                        <span className="text-gray-600 tabular-nums">
+                            {page} / {totalPages}
+                        </span>
+                        <Link
+                            href={`/admin/inquiries?page=${page + 1}`}
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-gray-200 bg-white font-bold transition-all duration-200 ${
+                                !hasNext ? "pointer-events-none opacity-40" : "hover:bg-gray-50"
+                            }`}
+                            aria-disabled={!hasNext}
+                        >
+                            次へ
+                            <ChevronRight size={14} />
+                        </Link>
+                    </div>
+                )}
+            </div>
+
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 {inquiries.length === 0 ? (
                     <div className="text-center py-20 text-gray-400">
@@ -151,11 +207,11 @@ function Content({ inquiries }: { inquiries: InquiryListItem[] }) {
 }
 
 interface Props {
-    initialData?: InquiryListItem[];
+    initialData?: InquiriesListPayload;
 }
 
 export default function InquiriesListClient({ initialData }: Props) {
-    const [list, setList] = useState<InquiryListItem[] | null>(initialData || null);
+    const [data, setData] = useState<InquiriesListPayload | null>(initialData || null);
     const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
@@ -168,21 +224,21 @@ export default function InquiriesListClient({ initialData }: Props) {
         }
         isFirstMount.current = false;
 
-        fetch("/admin/api/inquiries")
+        fetch("/admin/api/inquiries?page=1")
             .then((res) => {
                 if (!res.ok) throw new Error(res.status === 401 ? "Unauthorized" : "Failed to load");
-                return res.json();
+                return res.json() as Promise<InquiriesListPayload>;
             })
-            .then((data: InquiryListItem[]) => setList(data))
+            .then(setData)
             .catch((err) => {
                 setError(err instanceof Error ? err.message : "Failed to load");
-                setList([]);
+                setData(null);
             })
             .finally(() => setLoading(false));
     }, []);
 
     useEffect(() => {
-        if (initialData) setList(initialData);
+        if (initialData) setData(initialData);
     }, [initialData]);
 
     if (error) {
@@ -192,6 +248,14 @@ export default function InquiriesListClient({ initialData }: Props) {
             </div>
         );
     }
-    if (loading || list === null) return <Fallback />;
-    return <Content inquiries={list} />;
+    if (loading || data === null) return <Fallback />;
+    return (
+        <Content
+            inquiries={data.inquiries}
+            statusCounts={data.statusCounts}
+            total={data.total}
+            totalPages={data.totalPages}
+            page={data.page}
+        />
+    );
 }

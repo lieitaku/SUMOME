@@ -1,9 +1,8 @@
-import React from "react";
+import React, { cache } from "react";
 import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "@/components/ui/TransitionLink";
 
-export const dynamic = "force-dynamic";
 import { notFound } from "next/navigation";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedMagazineBySlug } from "@/lib/cached-queries";
@@ -23,6 +22,11 @@ import {
   magazineDisplayTitle,
 } from "@/lib/i18n-db";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
+
+export const revalidate = 60;
+
+/** 同请求内 generateMetadata 与 Page 各查一次 DB 时合并为单次 */
+const getMagazineBySlug = cache((slug: string) => getCachedMagazineBySlug(slug));
 
 const BRAND_BLUE = "#2454a4";
 
@@ -45,7 +49,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { locale, slug } = await params;
-  const magazine = await getCachedMagazineBySlug(slug);
+  const magazine = await getMagazineBySlug(slug);
   const t = await getTranslations({ locale, namespace: "MagazineDetail" });
   if (!magazine) {
     return { title: t("metaTitleSuffix") };
@@ -130,9 +134,7 @@ export default async function MagazineDetailPage({
     "slug" in preview.payload &&
     String((preview.payload as { slug: unknown }).slug) === slug;
 
-  type MagazineBySlug = NonNullable<
-    Awaited<ReturnType<typeof getCachedMagazineBySlug>>
-  >;
+  type MagazineBySlug = NonNullable<Awaited<ReturnType<typeof getMagazineBySlug>>>;
 
   let magazine: MagazineBySlug | null;
   if (usePreview && preview.payload && typeof preview.payload === "object") {
@@ -157,7 +159,7 @@ export default async function MagazineDetailPage({
       updatedAt: new Date(),
     } as MagazineBySlug;
   } else {
-    magazine = await getCachedMagazineBySlug(slug);
+    magazine = await getMagazineBySlug(slug);
   }
 
   if (!magazine) return notFound();

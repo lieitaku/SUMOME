@@ -1,36 +1,42 @@
 import React from "react";
 import InquiriesListClient from "@/components/admin/inquiries/InquiriesListClient";
-import { prisma } from "@/lib/db";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { redirect } from "@/i18n/navigation";
 import { getLocale } from "next-intl/server";
+import {
+    fetchInquiriesAdminPage,
+    getInquiryStatusCounts,
+} from "@/lib/admin-inquiries-list";
 
-export default async function AdminInquiriesPage() {
+export default async function AdminInquiriesPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ page?: string }>;
+}) {
     const locale = await getLocale();
     const admin = await confirmAdmin();
     if (!admin) redirect({ href: "/admin", locale });
 
-    const inquiries = await prisma.inquiry.findMany({
-        orderBy: { createdAt: "desc" },
-        select: {
-            id: true,
-            inquiryType: true,
-            name: true,
-            furigana: true,
-            email: true,
-            phone: true,
-            message: true,
-            status: true,
-            createdAt: true,
-            repliedAt: true,
-            lastReplyBody: true,
-        },
-    });
+    const { page: pageParam } = await searchParams;
+    const page = Math.max(1, parseInt(String(pageParam || "1"), 10) || 1);
 
-    const serializedInquiries = inquiries.map(inq => ({
-        ...inq,
+    const [statusCounts, pageData] = await Promise.all([
+        getInquiryStatusCounts(),
+        fetchInquiriesAdminPage(page),
+    ]);
+
+    const serializedInquiries = pageData.inquiries.map((inq) => ({
+        id: inq.id,
+        inquiryType: inq.inquiryType,
+        name: inq.name,
+        furigana: inq.furigana,
+        email: inq.email,
+        phone: inq.phone,
+        message: inq.message.length === 400 ? `${inq.message}…` : inq.message,
+        status: inq.status,
         createdAt: inq.createdAt.toISOString(),
         repliedAt: inq.repliedAt ? inq.repliedAt.toISOString() : null,
+        lastReplyBody: null as string | null,
     }));
 
     return (
@@ -43,7 +49,15 @@ export default async function AdminInquiriesPage() {
                     </p>
                 </div>
             </div>
-            <InquiriesListClient initialData={serializedInquiries} />
+            <InquiriesListClient
+                initialData={{
+                    inquiries: serializedInquiries,
+                    total: pageData.total,
+                    totalPages: pageData.totalPages,
+                    page: pageData.page,
+                    statusCounts,
+                }}
+            />
         </div>
     );
 }

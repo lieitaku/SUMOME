@@ -5,25 +5,7 @@ import RegionFilter from "@/components/admin/ui/RegionFilter";
 import MagazinesListClient, {
     type MagazineListItem,
 } from "@/components/admin/magazines/MagazinesListClient";
-import { prisma } from "@/lib/db";
-import { REGIONS } from "@/lib/constants";
-import { Prisma } from "@prisma/client";
-import { getPrefectureIndex } from "@/lib/prefecture-order";
-
-const PAGE_SIZE = 12;
-
-/** Admin 列表用 select（含 hidden）。旧版 Prisma 型定義に hidden が無い場合でも実行時は有効。 */
-const magazineAdminListSelect = {
-    id: true,
-    title: true,
-    slug: true,
-    region: true,
-    coverImage: true,
-    pdfUrl: true,
-    issueDate: true,
-    published: true,
-    hidden: true,
-};
+import { fetchMagazinesAdminList } from "@/lib/admin-magazines-list";
 
 function toMagazineListItem(mag: {
     id: string;
@@ -58,36 +40,15 @@ export default async function MagazineListPage({
     const page = Math.max(1, parseInt(String(pageParam || "1"), 10) || 1);
     const sort = sortParam === "time" ? "time" : "area";
 
-    // SSR 预取数据
-    const where: Prisma.MagazineWhereInput = {};
-    if (q) where.title = { contains: q, mode: "insensitive" };
-    if (pref) where.region = { equals: pref };
-    else if (region && region in REGIONS) where.region = { in: REGIONS[region as keyof typeof REGIONS] };
+    const { magazines: rows, total, totalPages } = await fetchMagazinesAdminList({
+        q,
+        pref,
+        region,
+        page,
+        sort,
+    });
 
-    const total = await prisma.magazine.count({ where });
-    const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-    let magazines;
-    if (sort === "area") {
-        const all = await prisma.magazine.findMany({
-            where,
-            select: magazineAdminListSelect as Prisma.MagazineSelect,
-        });
-        all.sort((a, b) => getPrefectureIndex(a.region) - getPrefectureIndex(b.region));
-        magazines = all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-    } else {
-        magazines = await prisma.magazine.findMany({
-            where,
-            orderBy: { issueDate: "desc" },
-            take: PAGE_SIZE,
-            skip: (page - 1) * PAGE_SIZE,
-            select: magazineAdminListSelect as Prisma.MagazineSelect,
-        });
-    }
-
-    const serializedMagazines: MagazineListItem[] = magazines.map((mag) =>
-        toMagazineListItem(mag),
-    );
+    const serializedMagazines: MagazineListItem[] = rows.map((mag) => toMagazineListItem(mag));
 
     const initialData = {
         magazines: serializedMagazines,

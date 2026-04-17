@@ -12,9 +12,10 @@ import { TransitionProvider } from "@/context/TransitionContext";
 import PageLoader from "@/components/ui/PageLoader";
 import { DocumentHtmlLang } from "@/components/i18n/DocumentHtmlLang";
 
+/** 字重精简：减少首屏 Google Fonts 体积（FCP）；需特粗时再单独局部加载 */
 const notoSerif = Noto_Serif_JP({
     subsets: ["latin"],
-    weight: ["400", "700", "900"],
+    weight: ["400", "700"],
     variable: "--font-noto-serif",
     display: "swap",
 });
@@ -28,7 +29,7 @@ const notoSans = Noto_Sans_JP({
 
 const cormorant = Cormorant_Garamond({
     subsets: ["latin"],
-    weight: ["400", "600", "700"],
+    weight: ["400", "600"],
     variable: "--font-cormorant",
     display: "swap",
 });
