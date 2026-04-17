@@ -199,23 +199,26 @@ export default async function PrefecturePage({ params }: PageProps) {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 overflow-hidden text-white shadow-xl bg-gray-900 transition-colors duration-500">
-          <div
-            className={cn(
-              "absolute inset-0 bg-gradient-to-b opacity-100",
-              theme.gradient
-            )}
-          ></div>
-          <div
-            className="absolute inset-0 pointer-events-none opacity-20"
-            style={{
-              backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-                                linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
-              backgroundSize: "40px 40px",
-            }}
-          />
-          <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 text-[18vw] font-black text-white opacity-[0.04] select-none pointer-events-none leading-none z-0 mix-blend-overlay uppercase tracking-tighter font-sans">
-            {prefSlug}
+        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 overflow-x-clip overflow-y-visible text-white shadow-xl bg-gray-900 transition-colors duration-500">
+          {/* 装饰单独裁切，section 本身可纵向 overflow，供窄屏 absolute 吉祥物伸出 */}
+          <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
+            <div
+              className={cn(
+                "absolute inset-0 bg-gradient-to-b opacity-100",
+                theme.gradient
+              )}
+            />
+            <div
+              className="absolute inset-0 opacity-20"
+              style={{
+                backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                                  linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)`,
+                backgroundSize: "40px 40px",
+              }}
+            />
+            <div className="absolute top-1/2 right-[-5%] -translate-y-1/2 text-[18vw] font-black text-white opacity-[0.04] select-none leading-none mix-blend-overlay uppercase tracking-tighter font-sans">
+              {prefSlug}
+            </div>
           </div>
 
           <div className="container mx-auto px-6 relative z-10">
@@ -229,37 +232,47 @@ export default async function PrefecturePage({ params }: PageProps) {
               </Link>
             </div>
 
-            <div className="flex flex-row items-end justify-between gap-4 lg:gap-10 min-w-0 max-w-full overflow-visible">
-              <div className="min-w-min flex-1 pb-2 lg:pb-0">
-                <div className="flex flex-col items-start mb-4 opacity-80">
-                  <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white whitespace-nowrap">
-                    {t("headerKicker")}
-                  </span>
-                </div>
-                <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1] whitespace-nowrap">
-                  {displayName}
-                </h1>
-                <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base whitespace-pre-line">
-                  {t("headerLead", { prefName: displayName })}
-                </p>
-              </div>
-              {character && (
+            <div className="relative">
+              <div className="flex flex-row items-start justify-between gap-4 lg:gap-10 min-w-0 max-w-full overflow-visible">
                 <div
                   className={cn(
-                    "flex justify-center lg:justify-end lg:pb-1 min-w-0 shrink",
-                    "lg:shrink-0",
-                    PREFECTURE_CHARACTER_HERO_TUNING.heroColumnMaxWidthClass,
+                    "min-w-min flex-1 relative z-20",
+                    character && "max-lg:pr-[min(120px,30vw)]",
                   )}
                 >
-                  <PrefectureCharacter
-                    prefSlug={prefSlug}
-                    character={character}
-                    locale={locale}
-                    themeColor={theme.color}
-                    variant="hero"
-                  />
+                  <div className="flex flex-col items-start mb-4 opacity-80">
+                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white whitespace-nowrap">
+                      {t("headerKicker")}
+                    </span>
+                  </div>
+                  <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1] whitespace-nowrap">
+                    {displayName}
+                  </h1>
+                  <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base whitespace-pre-line">
+                    {t("headerLead", { prefName: displayName })}
+                  </p>
                 </div>
-              )}
+                {character && (
+                  <div
+                    className={cn(
+                      "flex justify-center lg:justify-end min-w-0 shrink",
+                      "lg:shrink-0",
+                      PREFECTURE_CHARACTER_HERO_TUNING.heroColumnMaxWidthClass,
+                      "max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:z-10 max-lg:max-w-none max-lg:w-[min(288px,72vw)]",
+                      "lg:relative lg:top-auto lg:right-auto lg:w-auto",
+                    )}
+                  >
+                    <PrefectureCharacter
+                      prefSlug={prefSlug}
+                      character={character}
+                      locale={locale}
+                      themeColor={theme.color}
+                      variant="hero"
+                      heroMobileAbsoluteLayer
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>

@@ -28,7 +28,15 @@ export const PREFECTURE_CHARACTER_HERO_TUNING = {
     "max-w-[min(148px,40vw)] sm:max-w-[min(168px,38vw)] lg:max-w-none",
 } as const;
 
-function heroImageLayoutStyles(): { box: CSSProperties; imgMaxHeight: string } {
+/**
+ * default：与 flex 同行占位（原样）。
+ * mobileOverlay：用于 max-lg 下页头内 absolute 吉祥物——占位加宽加高，但不参与 flex 行高。
+ */
+function heroImageLayoutStyles(): {
+  box: CSSProperties;
+  imgMaxHeight: string;
+  mobileOverlay: { box: CSSProperties; imgMaxHeight: string };
+} {
   const t = PREFECTURE_CHARACTER_HERO_TUNING;
   const k = Math.max(0.25, Math.min(2, t.overallPercent / 100));
   const minPx = Math.round(t.widthMinPx * k);
@@ -37,12 +45,23 @@ function heroImageLayoutStyles(): { box: CSSProperties; imgMaxHeight: string } {
   const maxH = Math.round(t.maxHeightPxCap * k);
   const maxHv = Number((t.maxHeightPercentOfViewport * k).toFixed(2));
   const imgMaxHeight = `min(${maxHv}vh, ${maxH}px)`;
+  /** 约 1.35× 默认 clamp 上限，配合页头 absolute，仍不撑开主内容 flex 高度 */
+  const overlayMaxPx = Math.min(288, Math.round(maxPx * 1.35));
+  const overlayMaxH = Math.round(maxH * 1.35);
+  const overlayMaxHv = Number((maxHv * 1.2).toFixed(2));
   return {
     box: {
       width: `clamp(${minPx}px, ${vw}vw, ${maxPx}px)`,
       maxWidth: "100%",
     },
     imgMaxHeight,
+    mobileOverlay: {
+      box: {
+        width: `min(${overlayMaxPx}px, 54vw)`,
+        maxWidth: "100%",
+      },
+      imgMaxHeight: `min(${overlayMaxHv}vh, ${overlayMaxH}px)`,
+    },
   };
 }
 
@@ -53,6 +72,11 @@ interface PrefectureCharacterProps {
   themeColor: string;
   /** hero：绿色页头右侧，小图 + 浅色文案；default：内容区用（若需） */
   variant?: "default" | "hero";
+  /**
+   * max-lg 页头内吉祥物用 absolute 浮层时设为 true：使用更宽的 mobileOverlay 尺寸；
+   * 与 `lg:hidden` / `hidden lg:flex` 拆行搭配，避免 flex 行被吉祥物撑高。
+   */
+  heroMobileAbsoluteLayer?: boolean;
 }
 
 export default function PrefectureCharacter({
@@ -61,6 +85,7 @@ export default function PrefectureCharacter({
   locale,
   themeColor,
   variant = "default",
+  heroMobileAbsoluteLayer = false,
 }: PrefectureCharacterProps) {
   const [imgError, setImgError] = useState(false);
 
@@ -75,42 +100,64 @@ export default function PrefectureCharacter({
 
   if (variant === "hero") {
     const { textMaxWidthClass } = PREFECTURE_CHARACTER_HERO_TUNING;
-    const { box: boxStyle, imgMaxHeight } = heroImageLayoutStyles();
-    return (
-      <div className="flex flex-col items-center lg:items-end justify-end w-full max-w-full min-w-0 mx-auto lg:mx-0 pointer-events-none select-none">
-        {/* 漫画对话框 */}
-        <div className={cn("relative mb-4 drop-shadow-xl pointer-events-auto", textMaxWidthClass)}>
-          <div className="bg-white text-gray-900 px-3 py-2 md:px-4 md:py-3 rounded-2xl">
-            <p className="text-[11px] md:text-xs font-bold leading-relaxed text-center whitespace-pre-wrap wrap-break-word">
-              {description}
-            </p>
-          </div>
-          {/* 气泡尾巴 (纯 CSS 三角形，利用外层 drop-shadow 自动带阴影) */}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
-        </div>
+    const { box: boxStyle, imgMaxHeight, mobileOverlay } = heroImageLayoutStyles();
 
-        <div
-          className="relative flex items-end justify-center shrink-0 overflow-visible mx-auto lg:mx-0 leading-none"
-          style={boxStyle}
-        >
-          {/* leading-none + block img：避免内联图片基线在透明底上形成「细边框」 */}
-          <Image
-            src={imgSrc}
-            alt={character.name}
-            width={600}
-            height={900}
-            sizes="(max-width: 1024px) 28vw, 88px"
-            className={cn(
-              "block h-auto w-full object-contain object-bottom border-0 bg-transparent shadow-none outline-none ring-0",
-            )}
-            style={{
-              maxHeight: imgMaxHeight,
-              verticalAlign: "bottom",
-            }}
-            onError={() => setImgError(true)}
-            priority
-          />
+    const speechBubble = (
+      <div className={cn("relative mb-4 drop-shadow-xl pointer-events-auto", textMaxWidthClass)}>
+        <div className="bg-white text-gray-900 px-3 py-2 md:px-4 md:py-3 rounded-2xl">
+          <p className="text-[11px] md:text-xs font-bold leading-relaxed text-center whitespace-pre-wrap wrap-break-word">
+            {description}
+          </p>
         </div>
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-white"></div>
+      </div>
+    );
+
+    const heroImage = (box: CSSProperties, mh: string, sizes: string) => (
+      <div
+        className="relative mx-auto flex shrink-0 items-end justify-center overflow-visible leading-none lg:mx-0"
+        style={box}
+      >
+        <Image
+          src={imgSrc}
+          alt={character.name}
+          width={600}
+          height={900}
+          sizes={sizes}
+          className={cn(
+            "block h-auto w-full object-contain object-bottom border-0 bg-transparent shadow-none outline-none ring-0",
+          )}
+          style={{
+            maxHeight: mh,
+            verticalAlign: "bottom",
+          }}
+          onError={() => setImgError(true)}
+          priority
+        />
+      </div>
+    );
+
+    if (heroMobileAbsoluteLayer) {
+      return (
+        <div className="flex flex-col items-center lg:items-end justify-start w-full max-w-full min-w-0 mx-auto lg:mx-0 pointer-events-none select-none">
+          {/* 窄屏：absolute 浮层内为大图；与下面 lg 块二选一显示，避免同一描述挂两次在 a11y 树 */}
+          <div className="flex w-full max-w-full flex-col items-end justify-start lg:hidden">
+            {speechBubble}
+            {heroImage(mobileOverlay.box, mobileOverlay.imgMaxHeight, "(max-width: 1024px) 55vw, 208px")}
+          </div>
+          <div className="hidden w-full max-w-full flex-col items-end justify-start lg:flex">
+            {speechBubble}
+            {heroImage(boxStyle, imgMaxHeight, "(max-width: 1024px) 28vw, 88px")}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex flex-col items-center lg:items-end justify-start w-full max-w-full min-w-0 mx-auto lg:mx-0 pointer-events-none select-none">
+        {speechBubble}
+
+        {heroImage(boxStyle, imgMaxHeight, "(max-width: 1024px) 28vw, 88px")}
       </div>
     );
   }
