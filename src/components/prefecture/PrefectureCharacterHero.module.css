@@ -1,0 +1,79 @@
+/* 县页 hero：气泡 + 立绘；与 prefectureCharacterTuning 配合，不依赖 globals.css */
+
+.root {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+  user-select: none;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.bubbleWrap {
+  position: relative;
+  width: 100%;
+  pointer-events: auto;
+  filter: drop-shadow(0 20px 25px rgb(0 0 0 / 0.1)) drop-shadow(0 8px 10px rgb(0 0 0 / 0.1));
+}
+
+.bubble {
+  background-color: #ffffff;
+  color: #111827;
+}
+
+.bubbleText {
+  font-weight: 700;
+  line-height: 1.625;
+  text-align: center;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.tail {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: var(--tailPx, 32px) solid transparent;
+  border-right: var(--tailPx, 32px) solid transparent;
+  border-top: var(--tailPx, 32px) solid #ffffff;
+}
+
+.figure {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: flex-end;
+  justify-content: center;
+  line-height: 0;
+}
+
+/* 仅小屏对立绘放大；倍数由内联 --heroFigureScale（见 PrefectureCharacter） */
+@media (max-width: 767px) {
+  .figure {
+    transform: scale(var(--heroFigureScale, 1));
+    transform-origin: top right;
+  }
+}
+
+.heroImage {
+  display: block;
+  height: auto;
+  width: 100%;
+  max-height: var(--heroImgMaxHeight);
+  object-fit: contain;
+  object-position: bottom;
+  border: 0;
+  background: transparent;
+  outline: none;
+  box-shadow: none;
+  vertical-align: bottom;
+}

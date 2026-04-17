@@ -22,9 +22,8 @@ import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import PrefectureFeatureBanner from "@/components/prefecture/PrefectureFeatureBanner";
 import type { FeaturedClubInfo } from "@/components/prefecture/PrefectureFeatureBanner";
-import PrefectureCharacter, {
-  PREFECTURE_CHARACTER_HERO_TUNING,
-} from "@/components/prefecture/PrefectureCharacter";
+import PrefectureCharacter from "@/components/prefecture/PrefectureCharacter";
+import { heroCharacterColumnWidth } from "@/components/prefecture/prefectureCharacterTuning";
 
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import { PREFECTURE_CHARACTERS } from "@/data/characters";
@@ -199,7 +198,8 @@ export default async function PrefecturePage({ params }: PageProps) {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
+        {/* z-[25] > 下方白卡 z-20；底部 pb 加大 + 白卡负 margin 减小，保证「说明」与吉祥物露在叠层之上 */}
+        <section className="relative z-[25] pt-32 md:pt-40 pb-48 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
           {/* overflow-x-clip 会产生新层叠上下文，导致内部 z-index 无法与外部比较；
               装饰层已有独立 overflow-hidden，section 本身不需要 overflow 限制 */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
@@ -222,12 +222,7 @@ export default async function PrefecturePage({ params }: PageProps) {
             </div>
           </div>
 
-          {/*
-            container: 只用 relative 定位，不加 z-index。
-            加了 z-index 就会产生新的层叠上下文，导致内部元素的 z-index
-            无法跨出去和外部的白色卡片（z-20）直接比较。
-          */}
-          <div className="container mx-auto px-6 relative">
+          <div className="container mx-auto px-6">
             <div className="mb-8">
               <Link
                 href="/clubs/map"
@@ -238,58 +233,43 @@ export default async function PrefecturePage({ params }: PageProps) {
               </Link>
             </div>
 
-            {/*
-              relative：作为 absolute 角色的定位基准。
-              不加 z-index，保持 z:auto，不产生层叠上下文。
-            */}
-            <div className="relative">
-              <div className="flex flex-row items-start justify-between gap-4 lg:gap-10 min-w-0 max-w-full overflow-visible">
-                <div
-                  className={cn(
-                    "min-w-min flex-1",
-                    character && "max-lg:pr-[min(120px,30vw)]",
-                  )}
-                >
-                  <div className="flex flex-col items-start mb-4 opacity-80">
-                    <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white whitespace-nowrap">
-                      {t("headerKicker")}
-                    </span>
-                  </div>
-                  <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1] whitespace-nowrap">
-                    {displayName}
-                  </h1>
-                  <p className="text-white/80 font-medium tracking-wide max-w-xl leading-relaxed text-left text-sm md:text-base whitespace-pre-line">
-                    {t("headerLead", { prefName: displayName })}
-                  </p>
+            {/* 两列：左=都道府県情報+县名+headerLead（自动换行）；右=人物气泡+立绘。min-w-0 保证左列可收缩换行 */}
+            <div className="flex min-w-0 flex-row items-start justify-between gap-4 overflow-visible sm:gap-6 lg:gap-10">
+              <div className="relative z-10 min-w-0 flex-1 pr-1">
+                <div className="flex flex-col items-start mb-4 opacity-80">
+                  <span className="text-xs font-bold tracking-[0.3em] uppercase text-left text-white whitespace-nowrap">
+                    {t("headerKicker")}
+                  </span>
                 </div>
-                {character && (
-                  <div
-                    className={cn(
-                      "flex justify-center lg:justify-end min-w-0 shrink lg:shrink-0",
-                      PREFECTURE_CHARACTER_HERO_TUNING.heroColumnMaxWidthClass,
-                      "max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:max-w-none max-lg:w-[min(288px,72vw)]",
-                      "lg:relative lg:top-auto lg:right-auto lg:w-auto",
-                    )}
-                    style={{ zIndex: 30 }}
-                  >
-                    <PrefectureCharacter
-                      prefSlug={prefSlug}
-                      character={character}
-                      locale={locale}
-                      themeColor={theme.color}
-                      variant="hero"
-                      heroMobileAbsoluteLayer
-                    />
-                  </div>
-                )}
+                <h1 className="text-4xl md:text-7xl font-serif font-black tracking-tight mb-4 md:mb-6 text-white drop-shadow-md text-left leading-[1.1] max-lg:whitespace-normal lg:whitespace-nowrap">
+                  {displayName}
+                </h1>
+                <p className="text-white/90 font-medium tracking-wide leading-relaxed text-left text-sm md:text-base wrap-anywhere">
+                  {t("headerLead", { prefName: displayName })}
+                </p>
               </div>
+              {character && (
+                <div
+                  className="shrink-0 self-start"
+                  style={{ width: heroCharacterColumnWidth() }}
+                >
+                  <PrefectureCharacter
+                    prefSlug={prefSlug}
+                    character={character}
+                    locale={locale}
+                    themeColor={theme.color}
+                    variant="hero"
+                  />
+                </div>
+              )}
             </div>
           </div>
         </section>
 
         {/* ==================== SECTION 2: Top Sponsors Banner ==================== */}
         <section className="relative px-6 z-20">
-          <div className="container mx-auto max-w-6xl relative -mt-16 md:-mt-20">
+          {/* 负 margin 略小：移动端白卡少叠入 hero，吉祥物+说明仍可见；大屏保持较强视差 */}
+          <div className="container mx-auto max-w-6xl relative -mt-8 md:-mt-14 lg:-mt-20">
             <Ceramic
               interactive={false}
               className="border border-gray-100 border-b-[6px] shadow-xl"
