@@ -199,7 +199,7 @@ export default async function PrefecturePage({ params }: PageProps) {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        <section className="relative z-30 pt-32 md:pt-40 pb-24 md:pb-32 overflow-x-clip overflow-y-visible text-white shadow-xl bg-gray-900 transition-colors duration-500">
+        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 overflow-x-clip overflow-y-visible text-white bg-gray-900 transition-colors duration-500">
           {/* 装饰单独裁切，section 本身可纵向 overflow，供窄屏 absolute 吉祥物伸出 */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
             <div
@@ -221,7 +221,7 @@ export default async function PrefecturePage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="container mx-auto px-6 relative z-10">
+          <div className="container mx-auto px-6 relative z-30">
             <div className="mb-8">
               <Link
                 href="/clubs/map"
@@ -258,7 +258,7 @@ export default async function PrefecturePage({ params }: PageProps) {
                       "flex justify-center lg:justify-end min-w-0 shrink",
                       "lg:shrink-0",
                       PREFECTURE_CHARACTER_HERO_TUNING.heroColumnMaxWidthClass,
-                      "max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:z-10 max-lg:max-w-none max-lg:w-[min(288px,72vw)]",
+                      "max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:z-30 max-lg:max-w-none max-lg:w-[min(288px,72vw)]",
                       "lg:relative lg:top-auto lg:right-auto lg:w-auto",
                     )}
                   >
@@ -282,7 +282,7 @@ export default async function PrefecturePage({ params }: PageProps) {
           <div className="container mx-auto max-w-6xl relative -mt-16 md:-mt-20">
             <Ceramic
               interactive={false}
-              className="border border-gray-100 border-b-[6px]"
+              className="border border-gray-100 border-b-[6px] shadow-xl"
               style={{
                 ...ceramicStyle,
                 marginTop: "-10px",
