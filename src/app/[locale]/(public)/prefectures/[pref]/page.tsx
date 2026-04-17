@@ -198,8 +198,8 @@ export default async function PrefecturePage({ params }: PageProps) {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        {/* z-[25] > 下方白卡 z-20；底部 pb 加大 + 白卡负 margin 减小，保证「说明」与吉祥物露在叠层之上 */}
-        <section className="relative z-[25] pt-32 md:pt-40 pb-48 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
+        {/* 桌面：z 高于白卡，标题与吉祥物在叠层上。移动端：整段 hero 低于白卡，白卡盖住底部背景与角色形成视差 */}
+        <section className="relative z-10 md:z-25 pt-32 md:pt-40 pb-48 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
           {/* overflow-x-clip 会产生新层叠上下文，导致内部 z-index 无法与外部比较；
               装饰层已有独立 overflow-hidden，section 本身不需要 overflow 限制 */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
@@ -267,9 +267,9 @@ export default async function PrefecturePage({ params }: PageProps) {
         </section>
 
         {/* ==================== SECTION 2: Top Sponsors Banner ==================== */}
-        <section className="relative px-6 z-20">
-          {/* 负 margin 略小：移动端白卡少叠入 hero，吉祥物+说明仍可见；大屏保持较强视差 */}
-          <div className="container mx-auto max-w-6xl relative -mt-8 md:-mt-14 lg:-mt-20">
+        <section className="relative z-30 px-6 md:z-20">
+          {/* 移动端：z 高于 hero，负 margin 加大使白卡叠在背景与角色之上；md+ 恢复原先 z 与上移量 */}
+          <div className="container mx-auto max-w-6xl relative -mt-16 md:-mt-14 lg:-mt-20">
             <Ceramic
               interactive={false}
               className="border border-gray-100 border-b-[6px] shadow-xl"
