@@ -29,12 +29,16 @@ import PrefectureCharacter, {
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import { PREFECTURE_CHARACTERS } from "@/data/characters";
 import type { PrefectureInfo } from "@/data/types";
+import { prisma } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
 import { hasRealClubMainImage } from "@/lib/club-images";
 import { getTranslations } from "next-intl/server";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 import { prefectureIntroForLocale } from "@/lib/prefecture-intro";
+
+/** Full club row shape from the shared Prisma client (no `Club` import from `@prisma/client`). */
+type Club = Awaited<ReturnType<typeof prisma.club.findMany>>[number];
 
 // ISR: re-render at most once per 60 s, matching the unstable_cache TTL on each data query
 export const revalidate = 60;
@@ -127,10 +131,10 @@ export default async function PrefecturePage({ params }: PageProps) {
   };
 
   const sponsorsTop = banners
-    .filter((b) => matchSponsorTier(b, displaySettings.prefTopSponsorTierFilter))
+    .filter((b: BannerWithTier) => matchSponsorTier(b, displaySettings.prefTopSponsorTierFilter))
     .map(toSponsorItem);
   const sponsorsSidebar = banners
-    .filter((b) => matchSponsorTier(b, displaySettings.prefSidebarSponsorTierFilter))
+    .filter((b: BannerWithTier) => matchSponsorTier(b, displaySettings.prefSidebarSponsorTierFilter))
     .map(toSponsorItem);
 
   const theme = getPrefectureTheme(prefSlug);
@@ -141,14 +145,14 @@ export default async function PrefecturePage({ params }: PageProps) {
   const resolveFeaturedClub = () => {
     const tryById = (id: string | null | undefined) => {
       if (!id) return null;
-      const c = filteredClubs.find((x) => x.id === id);
+      const c = filteredClubs.find((x: Club) => x.id === id);
       if (!c || c.area !== prefAreaName) return null;
       if (!hasRealClubMainImage(c.mainImage)) return null;
       return c;
     };
     const manual = tryById(customBanner?.featuredClubId);
     if (manual) return manual;
-    return filteredClubs.find((c) => hasRealClubMainImage(c.mainImage)) ?? null;
+    return filteredClubs.find((c: Club) => hasRealClubMainImage(c.mainImage)) ?? null;
   };
 
   const featuredClub = resolveFeaturedClub();
@@ -416,7 +420,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
                   {filteredClubs.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                      {filteredClubs.map((club) => (
+                      {filteredClubs.map((club: Club) => (
                         <div key={club.id}>
                           <ClubCard club={club} accentColor={theme.color} />
                         </div>

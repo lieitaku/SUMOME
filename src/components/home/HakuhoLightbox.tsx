@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 
 const Z_LIGHTBOX = 100;
 const BLUR_PX = 12;
+/** motion 的 Target 只接受 CSSStyleDeclaration 中的键，不含 WebkitBackdropFilter；用变量同时驱动两类 backdrop-filter */
+const BLUR_CSS_VAR = "--hakuho-backdrop-blur" as const;
 const OVERLAY = "rgba(0, 0, 0, 0.32)";
 /** 遮罩 + 模糊略长于内容，避免「糊一下贴上」的突兀感 */
 const BACKDROP_DURATION_S = 0.52;
@@ -62,24 +64,25 @@ export function HakuhoLightbox({ src, onClose }: HakuhoLightboxProps) {
         <motion.div
           key={src}
           className="fixed inset-0 flex cursor-default items-center justify-center p-16"
-          style={{ zIndex: Z_LIGHTBOX }}
+          style={{
+            zIndex: Z_LIGHTBOX,
+            backdropFilter: `blur(var(${BLUR_CSS_VAR}, 0px))`,
+            WebkitBackdropFilter: `blur(var(${BLUR_CSS_VAR}, 0px))`,
+          }}
           role="dialog"
           aria-modal="true"
           aria-label={t("hakuhoLightboxAria")}
           initial={{
             backgroundColor: "rgba(0, 0, 0, 0)",
-            backdropFilter: "blur(0px)",
-            WebkitBackdropFilter: "blur(0px)",
+            [BLUR_CSS_VAR]: "0px",
           }}
           animate={{
             backgroundColor: OVERLAY,
-            backdropFilter: `blur(${BLUR_PX}px)`,
-            WebkitBackdropFilter: `blur(${BLUR_PX}px)`,
+            [BLUR_CSS_VAR]: `${BLUR_PX}px`,
           }}
           exit={{
             backgroundColor: "rgba(0, 0, 0, 0)",
-            backdropFilter: "blur(0px)",
-            WebkitBackdropFilter: "blur(0px)",
+            [BLUR_CSS_VAR]: "0px",
           }}
           transition={{
             duration: BACKDROP_DURATION_S,
