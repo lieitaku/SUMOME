@@ -222,7 +222,12 @@ export default async function PrefecturePage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="container mx-auto px-6 relative z-30">
+          {/*
+            container: 只用 relative 定位，不加 z-index。
+            加了 z-index 就会产生新的层叠上下文，导致内部元素的 z-index
+            无法跨出去和外部的白色卡片（z-20）直接比较。
+          */}
+          <div className="container mx-auto px-6 relative">
             <div className="mb-8">
               <Link
                 href="/clubs/map"
@@ -233,11 +238,15 @@ export default async function PrefecturePage({ params }: PageProps) {
               </Link>
             </div>
 
+            {/*
+              relative：作为 absolute 角色的定位基准。
+              不加 z-index，保持 z:auto，不产生层叠上下文。
+            */}
             <div className="relative">
               <div className="flex flex-row items-start justify-between gap-4 lg:gap-10 min-w-0 max-w-full overflow-visible">
                 <div
                   className={cn(
-                    "min-w-min flex-1 relative z-20",
+                    "min-w-min flex-1",
                     character && "max-lg:pr-[min(120px,30vw)]",
                   )}
                 >
@@ -256,12 +265,12 @@ export default async function PrefecturePage({ params }: PageProps) {
                 {character && (
                   <div
                     className={cn(
-                      "flex justify-center lg:justify-end min-w-0 shrink",
-                      "lg:shrink-0",
+                      "flex justify-center lg:justify-end min-w-0 shrink lg:shrink-0",
                       PREFECTURE_CHARACTER_HERO_TUNING.heroColumnMaxWidthClass,
-                      "max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:z-30 max-lg:max-w-none max-lg:w-[min(288px,72vw)]",
+                      "max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:max-w-none max-lg:w-[min(288px,72vw)]",
                       "lg:relative lg:top-auto lg:right-auto lg:w-auto",
                     )}
+                    style={{ zIndex: 30 }}
                   >
                     <PrefectureCharacter
                       prefSlug={prefSlug}
