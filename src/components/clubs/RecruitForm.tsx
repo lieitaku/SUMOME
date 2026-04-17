@@ -21,12 +21,19 @@ import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import { type Club } from "@prisma/client";
 import { submitApplicationAction } from "@/lib/actions/recruit";
+import { CAPTCHA_VERIFY_FAILED } from "@/lib/captcha-constants";
+import {
+  executeRecaptcha,
+  isRecaptchaSiteKeyConfigured,
+} from "@/lib/recaptcha-client";
+import { useRecaptchaLoader } from "@/hooks/useRecaptchaLoader";
 import { useTranslations } from "next-intl";
 
 const BRAND_BLUE = "#2454a4";
 
 export default function RecruitForm({ club }: { club: Club }) {
   const t = useTranslations("RecruitPage");
+  const { ready: recaptchaReady } = useRecaptchaLoader();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -39,19 +46,45 @@ export default function RecruitForm({ club }: { club: Club }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRecaptchaSiteKeyConfigured() && !recaptchaReady) {
+      alert(t("captchaLoading"));
+      return;
+    }
     setIsSubmitting(true);
+
+    let recaptchaToken: string | undefined;
+    if (isRecaptchaSiteKeyConfigured()) {
+      const tok = await executeRecaptcha("recruit");
+      if (!tok) {
+        alert(t("errorCaptcha"));
+        setIsSubmitting(false);
+        return;
+      }
+      recaptchaToken = tok;
+    }
 
     const result = await submitApplicationAction({
       ...formData,
       clubId: club.id,
       clubName: club.name,
+      recaptchaToken,
     });
 
     if (result.success) {
       alert(t("successAlert"));
       router.push(`/clubs/${club.slug}`);
     } else {
-      alert(typeof result.error === "string" && result.error.trim() ? result.error : t("errorAlert"));
+      const err =
+        result && typeof result === "object" && "error" in result
+          ? (result as { error?: string }).error
+          : undefined;
+      if (err === CAPTCHA_VERIFY_FAILED) {
+        alert(t("errorCaptcha"));
+      } else {
+        alert(
+          typeof err === "string" && err.trim() ? err : t("errorAlert"),
+        );
+      }
     }
     setIsSubmitting(false);
   };
@@ -287,13 +320,49 @@ export default function RecruitForm({ club }: { club: Club }) {
                       />
                     </div>
 
-                    <div className="pt-6">
+                    <div className="pt-6 flex flex-col gap-6">
+                      {process.env.NODE_ENV === "development" &&
+                        !isRecaptchaSiteKeyConfigured() && (
+                          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-md p-4 leading-relaxed font-medium">
+                            {t("devCaptchaHint")}
+                          </p>
+                        )}
+                      {isRecaptchaSiteKeyConfigured() && (
+                        <p className="text-xs text-gray-400 leading-relaxed font-medium">
+                          {t.rich("recaptchaLegal", {
+                            privacy: (chunks) => (
+                              <a
+                                href="https://policies.google.com/privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline decoration-gray-300 hover:text-sumo-brand"
+                              >
+                                {chunks}
+                              </a>
+                            ),
+                            terms: (chunks) => (
+                              <a
+                                href="https://policies.google.com/terms"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline decoration-gray-300 hover:text-sumo-brand"
+                              >
+                                {chunks}
+                              </a>
+                            ),
+                          })}
+                        </p>
+                      )}
                       <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={
+                          isSubmitting ||
+                          (isRecaptchaSiteKeyConfigured() && !recaptchaReady)
+                        }
                         className={cn(
                           "w-full py-5 text-white shadow-xl transition-all duration-200 ease-in-out",
-                          isSubmitting
+                          isSubmitting ||
+                            (isRecaptchaSiteKeyConfigured() && !recaptchaReady)
                             ? "opacity-50 grayscale cursor-not-allowed"
                             : "hover:brightness-110 active:scale-[0.98]",
                         )}

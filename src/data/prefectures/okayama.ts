@@ -5,7 +5,7 @@ export const okayama: PrefectureInfo = {
   name: "岡山県",
   introTitle: "岡山県の相撲事情",
   introText:
-    "古くは常ノ山などの名力士がおり、相撲が盛んな西日本の中でも堅実な相撲文化を持っています。現在は地元出身の若手が着実に力をつけ、郷土の期待を背負っています。",
+    "古くは常ノ花などの名力士がおり、相撲が盛んな西日本の中でも堅実な相撲文化を持っています。現在は地元出身の若手が着実に力をつけ、郷土の期待を背負っています。",
   bannerImg: "/images/banner/banner-okayama.webp",
   rikishiList: [
     {

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { ApplicationStatus } from "@prisma/client";
 import { getCurrentUser } from "@/lib/auth-utils";
+import { CAPTCHA_VERIFY_FAILED } from "@/lib/captcha-constants";
+import { verifyRecaptchaToken } from "@/lib/recaptcha-verify";
 
 interface ApplicationInput {
   clubId: string;
@@ -13,9 +15,15 @@ interface ApplicationInput {
   phone?: string;
   experience: string;
   message?: string;
+  recaptchaToken?: string;
 }
 
 export async function submitApplicationAction(data: ApplicationInput) {
+  const captchaOk = await verifyRecaptchaToken(data.recaptchaToken);
+  if (!captchaOk) {
+    return { error: CAPTCHA_VERIFY_FAILED };
+  }
+
   try {
     await prisma.application.create({
       data: {

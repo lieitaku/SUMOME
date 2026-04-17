@@ -5,6 +5,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { InquiryStatus } from "@prisma/client";
 import nodemailer from "nodemailer";
+import { CAPTCHA_VERIFY_FAILED } from "@/lib/captcha-constants";
+import { verifyRecaptchaToken } from "@/lib/recaptcha-verify";
 
 const mailer = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
@@ -24,7 +26,13 @@ export async function createInquiry(formData: {
   phone?: string;
   inquiryType: string;
   message: string;
+  recaptchaToken?: string;
 }) {
+  const captchaOk = await verifyRecaptchaToken(formData.recaptchaToken);
+  if (!captchaOk) {
+    return { success: false, error: CAPTCHA_VERIFY_FAILED };
+  }
+
   try {
     const inquiry = await prisma.inquiry.create({
       data: {

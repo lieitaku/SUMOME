@@ -17,6 +17,12 @@ import {
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 import { createInquiry } from "@/lib/actions/inquiries";
+import { CAPTCHA_VERIFY_FAILED } from "@/lib/captcha-constants";
+import {
+  executeRecaptcha,
+  isRecaptchaSiteKeyConfigured,
+} from "@/lib/recaptcha-client";
+import { useRecaptchaLoader } from "@/hooks/useRecaptchaLoader";
 import { useTranslations } from "next-intl";
 
 const INQUIRY_TYPE_IDS = ["club_visit", "media", "sponsor", "other"] as const;
@@ -24,6 +30,7 @@ type InquiryTypeId = (typeof INQUIRY_TYPE_IDS)[number];
 
 const ContactPage = () => {
   const t = useTranslations("Contact");
+  const { ready: recaptchaReady } = useRecaptchaLoader();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,10 +57,24 @@ const ContactPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isRecaptchaSiteKeyConfigured() && !recaptchaReady) {
+      setError(t("captchaLoading"));
+      return;
+    }
     setIsSubmitting(true);
     setError(null);
 
     try {
+      let recaptchaToken: string | undefined;
+      if (isRecaptchaSiteKeyConfigured()) {
+        const tok = await executeRecaptcha("contact");
+        if (!tok) {
+          setError(t("errorCaptcha"));
+          return;
+        }
+        recaptchaToken = tok;
+      }
+
       const inquiryType = t(`inquiryStorage_${formData.inquiryTypeId}`);
       const result = await createInquiry({
         name: formData.name,
@@ -62,11 +83,14 @@ const ContactPage = () => {
         phone: formData.phone,
         inquiryType,
         message: formData.message,
+        recaptchaToken,
       });
 
       if (result.success) {
         setIsSent(true);
         window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (result.error === CAPTCHA_VERIFY_FAILED) {
+        setError(t("errorCaptcha"));
       } else {
         setError(result.error || t("errorSendFailed"));
       }
@@ -328,7 +352,42 @@ const ContactPage = () => {
                       ></textarea>
                     </div>
 
-                    <div className="pt-6 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="pt-6 border-t border-gray-100 flex flex-col gap-4">
+                      {process.env.NODE_ENV === "development" &&
+                        !isRecaptchaSiteKeyConfigured() && (
+                          <p className="text-sm md:text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-md p-4 leading-relaxed">
+                            {t("devCaptchaHint")}
+                          </p>
+                        )}
+                      {isRecaptchaSiteKeyConfigured() && (
+                        <p className="text-sm md:text-xs text-gray-400 leading-relaxed">
+                          {t.rich("recaptchaLegal", {
+                            privacy: (chunks) => (
+                              <a
+                                href="https://policies.google.com/privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline decoration-gray-300 hover:text-sumo-brand"
+                              >
+                                {chunks}
+                              </a>
+                            ),
+                            terms: (chunks) => (
+                              <a
+                                href="https://policies.google.com/terms"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline decoration-gray-300 hover:text-sumo-brand"
+                              >
+                                {chunks}
+                              </a>
+                            ),
+                          })}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                       <p className="text-sm md:text-xs text-gray-400 text-center md:text-left leading-relaxed">
                         {t.rich("privacyConsent", {
                           privacy: (chunks) => (
@@ -344,10 +403,14 @@ const ContactPage = () => {
 
                       <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={
+                          isSubmitting ||
+                          (isRecaptchaSiteKeyConfigured() && !recaptchaReady)
+                        }
                         className={cn(
-                          "group relative overflow-hidden px-10 py-4 bg-sumo-dark text-white text-sm md:text-xs font-bold uppercase tracking-widest rounded shadow-lg transition-all",
-                          isSubmitting
+                          "group relative overflow-hidden px-10 py-4 bg-sumo-dark text-white text-sm md:text-xs font-bold uppercase tracking-widest rounded shadow-lg transition-all duration-200 ease-in-out",
+                          isSubmitting ||
+                            (isRecaptchaSiteKeyConfigured() && !recaptchaReady)
                             ? "opacity-50 grayscale cursor-not-allowed"
                             : "hover:bg-sumo-brand hover:-translate-y-1 hover:shadow-xl active:scale-[0.98]",
                         )}

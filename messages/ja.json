@@ -248,6 +248,11 @@
     "submitting": "送信中...",
     "errorSendFailed": "送信に失敗しました",
     "errorGeneric": "送信中にエラーが発生しました",
+    "errorCaptcha": "認証に失敗しました。しばらくしてから再度お試しください。",
+    "captchaLoading": "認証を読み込み中です。少し待ってから送信してください。",
+    "captchaRequired": "送信前に「私はロボットではありません」の確認を完了してください。",
+    "devCaptchaHint": "開発環境: .env に NEXT_PUBLIC_RECAPTCHA_SITE_KEY と RECAPTCHA_SECRET_KEY を設定してください（Google reCAPTCHA v3）。",
+    "recaptchaLegal": "このサイトは reCAPTCHA によって保護されており、Google の<privacy>プライバシーポリシー</privacy>および<terms>利用規約</terms>が適用されます。",
     "inquiryType_club_visit": "クラブ参加・見学について",
     "inquiryType_media": "取材・メディア関連",
     "inquiryType_sponsor": "協賛・スポンサーについて",
@@ -385,7 +390,12 @@
     "submit": "メッセージを送信する",
     "submitting": "送信中…",
     "successAlert": "お申し込みありがとうございます！担当者よりご連絡いたします。",
-    "errorAlert": "送信に失敗しました。もう一度お試しください。"
+    "errorAlert": "送信に失敗しました。もう一度お試しください。",
+    "errorCaptcha": "認証に失敗しました。しばらくしてから再度お試しください。",
+    "captchaLoading": "認証を読み込み中です。少し待ってから送信してください。",
+    "captchaRequired": "送信前に確認を完了してください。",
+    "devCaptchaHint": "開発環境: .env に NEXT_PUBLIC_RECAPTCHA_SITE_KEY と RECAPTCHA_SECRET_KEY を設定してください（Google reCAPTCHA v3）。",
+    "recaptchaLegal": "このサイトは reCAPTCHA によって保護されており、Google の<privacy>プライバシーポリシー</privacy>および<terms>利用規約</terms>が適用されます。"
   },
   "CompanyPage": {
     "metaTitle": "運営会社情報",

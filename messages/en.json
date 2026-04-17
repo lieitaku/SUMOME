@@ -248,6 +248,11 @@
     "submitting": "Sending...",
     "errorSendFailed": "Failed to send",
     "errorGeneric": "An error occurred while sending",
+    "errorCaptcha": "Verification failed. Please try again in a moment.",
+    "captchaLoading": "Loading verification. Please wait before sending.",
+    "captchaRequired": "Please complete the verification before sending.",
+    "devCaptchaHint": "Development: set NEXT_PUBLIC_RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY in .env (Google reCAPTCHA v3).",
+    "recaptchaLegal": "This site is protected by reCAPTCHA and the Google <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms> apply.",
     "inquiryType_club_visit": "Club visit / trial practice",
     "inquiryType_media": "Press & media",
     "inquiryType_sponsor": "Sponsorship",
@@ -385,7 +390,12 @@
     "submit": "Send application",
     "submitting": "Sending…",
     "successAlert": "Thank you! We will contact you soon.",
-    "errorAlert": "Something went wrong. Please try again."
+    "errorAlert": "Something went wrong. Please try again.",
+    "errorCaptcha": "Verification failed. Please try again in a moment.",
+    "captchaLoading": "Loading verification. Please wait before sending.",
+    "captchaRequired": "Please complete the verification before sending.",
+    "devCaptchaHint": "Development: set NEXT_PUBLIC_RECAPTCHA_SITE_KEY and RECAPTCHA_SECRET_KEY in .env (Google reCAPTCHA v3).",
+    "recaptchaLegal": "This site is protected by reCAPTCHA and the Google <privacy>Privacy Policy</privacy> and <terms>Terms of Service</terms> apply."
   },
   "CompanyPage": {
     "metaTitle": "Company information",
