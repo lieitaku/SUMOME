@@ -1148,7 +1148,13 @@ const Hero = ({
         preserveAspectRatio="xMidYMid slice"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <image href="/images/hero/bg.webp" width={WORLD_W} height={WORLD_H} x="0" y="0" />
+        <image
+          href={posterSrc ?? "/images/hero/bg.webp"}
+          width={WORLD_W}
+          height={WORLD_H}
+          x="0"
+          y="0"
+        />
         <image
           href="/images/hero/l1.webp"
           x={CHAR_X}
