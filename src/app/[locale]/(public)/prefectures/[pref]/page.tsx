@@ -199,8 +199,9 @@ export default async function PrefecturePage({ params }: PageProps) {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 overflow-x-clip overflow-y-visible text-white bg-gray-900 transition-colors duration-500">
-          {/* 装饰单独裁切，section 本身可纵向 overflow，供窄屏 absolute 吉祥物伸出 */}
+        <section className="relative pt-32 md:pt-40 pb-24 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
+          {/* overflow-x-clip 会产生新层叠上下文，导致内部 z-index 无法与外部比较；
+              装饰层已有独立 overflow-hidden，section 本身不需要 overflow 限制 */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
             <div
               className={cn(
