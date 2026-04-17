@@ -42,6 +42,18 @@ export async function middleware(request: NextRequest) {
         return intlResponse;
     }
 
+    const pathname = request.nextUrl.pathname;
+    const locale = getLocaleFromPath(pathname);
+    const normalizedPath = stripEnPrefix(pathname);
+
+    const isAdminPath = normalizedPath.startsWith("/admin");
+    const isManagerLoginPath = normalizedPath.startsWith("/manager/login");
+
+    /** 公开页不需要会话：跳过 Supabase，降低 TTFB / FCP（Speed Insights 主要瓶颈之一） */
+    if (!isAdminPath && !isManagerLoginPath) {
+        return intlResponse;
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -68,13 +80,6 @@ export async function middleware(request: NextRequest) {
     const {
         data: { user },
     } = await supabase.auth.getUser();
-
-    const pathname = request.nextUrl.pathname;
-    const locale = getLocaleFromPath(pathname);
-    const normalizedPath = stripEnPrefix(pathname);
-
-    const isAdminPath = normalizedPath.startsWith("/admin");
-    const isManagerLoginPath = normalizedPath.startsWith("/manager/login");
 
     if (isAdminPath && !user) {
         const redirectRes = NextResponse.redirect(loginUrl(request, locale));
