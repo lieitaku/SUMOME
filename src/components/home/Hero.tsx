@@ -350,12 +350,12 @@ const HAKUHO_SIDE_MOBILE: HakuhoSideLayout = {
 };
 
 /** 左/右栏素材（与画面人物左右对调：原先 1=左 2=右 观感反了） */
-const HAKUHO_LEFT_SRC = "/images/hero/hakuho2.webp";
-const HAKUHO_RIGHT_SRC = "/images/hero/hakuho1.webp";
+const HAKUHO_LEFT_SRC = "/images/hero/sumome.webp";
+const HAKUHO_RIGHT_SRC = "/images/hero/gozzan.webp";
 /**
  * 临时关闭 Hero 两侧白鹏图与点击放大；素材仍保留在 public。恢复时改为 `true`，或换图只需改 `HAKUHO_*_SRC`。
  */
-const HAKUHO_SIDE_IMAGES_ENABLED = false;
+const HAKUHO_SIDE_IMAGES_ENABLED = true;
 
 /** 仅拦系统菜单，不 stopPropagation，避免打断 Pointer 长按链 */
 function preventContextMenuOnly(e: React.MouseEvent) {
