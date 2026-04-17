@@ -1,20 +1,20 @@
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { getPreview } from "@/lib/preview-store";
+import { PREVIEW_ID_HEADER } from "@/lib/preview-constants";
 
-export const PREVIEW_COOKIE_NAME = "preview_id";
+export { PREVIEW_COOKIE_NAME, PREVIEW_ID_HEADER } from "@/lib/preview-constants";
 
 /**
- * Read preview payload from cookie.
- * 使用 getPreview 而非 consume，避免同一页面多次请求（如文档 + RSC）时只有第一次拿到 payload。
- * 过期由 store 的 TTL 清理。
+ * Read preview payload：preview_id 由 middleware 从 cookie 写入 {@link PREVIEW_ID_HEADER}。
+ * RSC 内不调用 cookies()，仅读 headers；无预览时不打 DB。
  */
 export async function getPreviewPayload(): Promise<{
     type: string;
     redirectPath: string;
     payload: unknown;
 } | null> {
-    const cookieStore = await cookies();
-    const id = cookieStore.get(PREVIEW_COOKIE_NAME)?.value;
+    const headersList = await headers();
+    const id = headersList.get(PREVIEW_ID_HEADER);
     if (!id) return null;
     const stored = await getPreview(id);
     if (!stored) return null;

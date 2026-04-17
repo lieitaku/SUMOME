@@ -1,7 +1,8 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
 import { routing } from "./i18n/routing";
+import { PREVIEW_COOKIE_NAME, PREVIEW_ID_HEADER } from "@/lib/preview-constants";
 
 const handleI18nRouting = createMiddleware(routing);
 
@@ -36,7 +37,16 @@ function copyCookies(from: NextResponse, to: NextResponse) {
 }
 
 export async function middleware(request: NextRequest) {
-    const intlResponse = handleI18nRouting(request);
+    const requestHeaders = new Headers(request.headers);
+    const previewId = request.cookies.get(PREVIEW_COOKIE_NAME)?.value;
+    if (previewId) {
+        requestHeaders.set(PREVIEW_ID_HEADER, previewId);
+    }
+    const requestWithPreview = new NextRequest(request.url, {
+        headers: requestHeaders,
+    });
+
+    const intlResponse = handleI18nRouting(requestWithPreview);
 
     if (intlResponse.headers.get("location")) {
         return intlResponse;

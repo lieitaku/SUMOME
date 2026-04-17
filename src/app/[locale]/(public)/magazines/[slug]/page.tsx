@@ -123,10 +123,14 @@ export default async function MagazineDetailPage({
   const sp = searchParams ? await searchParams : {};
   const isEmbedded = sp?.embedded === "1";
 
-  const t = await getTranslations({ locale, namespace: "MagazineDetail" });
   const localeTag = locale === "en" ? "en-US" : "ja-JP";
 
-  const preview = await getPreviewPayload();
+  const [t, preview, magazineFromDb] = await Promise.all([
+    getTranslations({ locale, namespace: "MagazineDetail" }),
+    getPreviewPayload(),
+    getMagazineBySlug(slug),
+  ]);
+
   const usePreview =
     preview?.type === "magazine" &&
     preview.payload &&
@@ -159,7 +163,7 @@ export default async function MagazineDetailPage({
       updatedAt: new Date(),
     } as MagazineBySlug;
   } else {
-    magazine = await getMagazineBySlug(slug);
+    magazine = magazineFromDb;
   }
 
   if (!magazine) return notFound();

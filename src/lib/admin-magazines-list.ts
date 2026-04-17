@@ -64,10 +64,11 @@ export async function fetchMagazinesAdminList(params: {
     totalPages: number;
     page: number;
 }> {
-    const { q, pref, region, page, sort } = params;
+    const { q, pref, region, page: pageParam, sort } = params;
     const where = buildMagazineAdminWherePrisma(q, pref, region);
     const total = await prisma.magazine.count({ where });
     const totalPages = Math.max(1, Math.ceil(total / MAGAZINE_ADMIN_PAGE_SIZE));
+    const page = Math.min(Math.max(1, pageParam), totalPages);
     const skip = (page - 1) * MAGAZINE_ADMIN_PAGE_SIZE;
 
     let magazines: MagazineAdminListRow[];

@@ -1,6 +1,5 @@
 import React from "react";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminRouteGuard from "@/components/admin/AdminRouteGuard";
 import { Toaster } from "sonner";
@@ -14,18 +13,15 @@ export const metadata: Metadata = {
 /**
  * 后台管理布局组件
  * 作用：包含侧边栏、全局通知容器；按 DB 中的 user.role 区分管理员(ADMIN)与代表者(OWNER)
- * 性能：优先从 middleware 注入的 x-user-email 读取，避免同一次请求内重复调用 Supabase
+ * 性能：getTranslations 与 getCurrentUser 并行；邮箱以 session 为准（middleware 已拦未登录）
  */
 export default async function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const t = await getTranslations("Admin");
-    const user = await getCurrentUser();
-    const headersList = await headers();
-    const emailFromHeader = headersList.get("x-user-email");
-    const userEmail = user?.email ?? emailFromHeader ?? "";
+    const [t, user] = await Promise.all([getTranslations("Admin"), getCurrentUser()]);
+    const userEmail = user?.email ?? "";
     const role = user?.role ?? "OWNER";
 
     return (

@@ -48,6 +48,7 @@ export async function createInquiry(formData: {
 
     revalidatePath("/admin/inquiries");
     revalidateTag("admin-stats");
+    revalidateTag("admin-inquiries");
     return { success: true, id: inquiry.id };
   } catch (error) {
     console.error("Failed to create inquiry:", error);
@@ -68,6 +69,7 @@ export async function updateInquiryStatus(id: string, status: InquiryStatus) {
 
     revalidatePath("/admin/inquiries");
     revalidateTag("admin-stats");
+    revalidateTag("admin-inquiries");
     return { success: true };
   } catch (error) {
     console.error("Failed to update inquiry status:", error);
@@ -129,6 +131,7 @@ export async function replyToInquiry(id: string, body: string) {
     });
     revalidatePath("/admin/inquiries");
     revalidateTag("admin-stats");
+    revalidateTag("admin-inquiries");
     return { success: true };
   } catch (err) {
     console.error("Failed to update inquiry after reply:", err);
@@ -148,6 +151,7 @@ export async function deleteInquiry(id: string) {
 
     revalidatePath("/admin/inquiries");
     revalidateTag("admin-stats");
+    revalidateTag("admin-inquiries");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete inquiry:", error);

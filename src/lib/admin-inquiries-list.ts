@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import type { InquiryStatus } from "@prisma/client";
 
@@ -10,7 +11,7 @@ export type InquiryStatusCounts = {
     closed: number;
 };
 
-export async function getInquiryStatusCounts(): Promise<InquiryStatusCounts> {
+async function getInquiryStatusCountsUncached(): Promise<InquiryStatusCounts> {
     const rows = await prisma.inquiry.groupBy({
         by: ["status"],
         _count: { _all: true },
@@ -21,6 +22,13 @@ export async function getInquiryStatusCounts(): Promise<InquiryStatusCounts> {
     }
     return base;
 }
+
+/** 状态统计：60s 缓存，与列表并行时减少一次 groupBy 命中 DB 的频率 */
+export const getInquiryStatusCounts = unstable_cache(
+    getInquiryStatusCountsUncached,
+    ["admin-inquiry-status-counts"],
+    { revalidate: 60, tags: ["admin-inquiries"] },
+);
 
 export type InquiryAdminListRow = {
     id: string;
@@ -36,7 +44,7 @@ export type InquiryAdminListRow = {
 };
 
 /**
- * 列表：DB 端截断 message，不选 lastReplyBody（大字段按需 GET /admin/api/inquiries/[id]）
+ * 列表：先 count 再 LIMIT/OFFSET（页码合法）；message 在 DB 端截断
  */
 export async function fetchInquiriesAdminPage(page: number): Promise<{
     inquiries: InquiryAdminListRow[];

@@ -17,17 +17,16 @@ type Props = {
 };
 
 export default async function HomeContent({ locale, isEmbedded }: Props) {
-    const tHome = await getTranslations({ locale, namespace: "Home" });
-    const preview = await getPreviewPayload();
-    const isPreview =
-        !!preview &&
-        (preview.redirectPath === "/" || preview.redirectPath === "" || preview.type === "banner_single");
-
-    const [displaySettingsInit, pickupClubsRaw, bannersFromDb] = await Promise.all([
+    const [preview, tHome, displaySettingsInit, pickupClubsRaw, bannersFromDb] = await Promise.all([
+        getPreviewPayload(),
+        getTranslations({ locale, namespace: "Home" }),
         getBannerDisplaySettings(),
         getCachedPickupClubsForHome(),
         getCachedActiveBanners(),
     ]);
+    const isPreview =
+        !!preview &&
+        (preview.redirectPath === "/" || preview.redirectPath === "" || preview.type === "banner_single");
     let displaySettings = displaySettingsInit;
     let pickupClubs = pickupClubsRaw;
 
