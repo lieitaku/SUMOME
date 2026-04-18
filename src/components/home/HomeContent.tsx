@@ -4,29 +4,24 @@ import type { BannerSponsorTier } from "@prisma/client";
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActiveBanners, getCachedPickupClubsForHome } from "@/lib/cached-queries";
-import { getTranslations } from "next-intl/server";
 import Hero from "@/components/home/Hero";
 import AboutService from "@/components/home/AboutService";
 import PickupClubs from "@/components/home/PickupClubs";
 import ManagerInfo from "@/components/home/ManagerInfo";
 import CTA from "@/components/home/CTA";
+import PreviewBanner from "@/components/home/PreviewBanner";
 
 type Props = {
     locale: string;
-    isEmbedded: boolean;
 };
 
-export default async function HomeContent({ locale, isEmbedded }: Props) {
-    const [preview, tHome, displaySettingsInit, pickupClubsRaw, bannersFromDb] = await Promise.all([
+export default async function HomeContent({ locale: _locale }: Props) {
+    const [preview, displaySettingsInit, pickupClubsRaw, bannersFromDb] = await Promise.all([
         getPreviewPayload(),
-        getTranslations({ locale, namespace: "Home" }),
         getBannerDisplaySettings(),
         getCachedPickupClubsForHome(),
         getCachedActiveBanners(),
     ]);
-    const isPreview =
-        !!preview &&
-        (preview.redirectPath === "/" || preview.redirectPath === "" || preview.type === "banner_single");
     let displaySettings = displaySettingsInit;
     let pickupClubs = pickupClubsRaw;
 
@@ -98,14 +93,7 @@ export default async function HomeContent({ locale, isEmbedded }: Props) {
 
     return (
         <>
-            {isPreview && !isEmbedded && (
-                <div className="bg-amber-500 text-white text-center py-2 px-4 text-sm font-bold flex flex-wrap items-center justify-center gap-2">
-                    <span>{tHome("previewBanner")}</span>
-                    <a href="javascript:history.back()" className="underline font-bold hover:no-underline">
-                        {tHome("previewBack")}
-                    </a>
-                </div>
-            )}
+            <PreviewBanner />
 
             <main className="flex-grow w-full">
                 <Hero
