@@ -17,7 +17,7 @@ export default function PrefectureLoading() {
         </section>
 
         {/* Ceramic 区域骨架 */}
-        <section className="relative px-6 z-20">
+        <section className="relative z-30 px-6">
           <div className="container mx-auto max-w-6xl relative -mt-20">
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
               <div className="h-6 w-40 bg-gray-100 rounded mx-auto mb-6" />
@@ -27,7 +27,7 @@ export default function PrefectureLoading() {
         </section>
 
         {/* 主内容网格骨架 */}
-        <section className="relative pb-24 px-6 pt-20">
+        <section className="relative z-30 pb-24 px-6 pt-20">
           <div className="container mx-auto max-w-6xl">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
               <div className="lg:col-span-4 space-y-6">

@@ -198,8 +198,8 @@ export default async function PrefecturePage({ params }: PageProps) {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
-        {/* 桌面：z 高于白卡，标题与吉祥物在叠层上。移动端：整段 hero 低于白卡，白卡盖住底部背景与角色形成视差 */}
-        <section className="relative z-10 md:z-25 pt-32 md:pt-40 pb-48 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
+        {/* Hero 保持较低 z-index，便于下方白卡 / 兔子横幅叠在渐变之上形成视差；导航等全局元素仍可用更高 z */}
+        <section className="relative z-10 pt-32 md:pt-40 pb-48 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
           {/* overflow-x-clip 会产生新层叠上下文，导致内部 z-index 无法与外部比较；
               装饰层已有独立 overflow-hidden，section 本身不需要 overflow 限制 */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
@@ -267,8 +267,8 @@ export default async function PrefecturePage({ params }: PageProps) {
         </section>
 
         {/* ==================== SECTION 2: Top Sponsors Banner ==================== */}
-        <section className="relative z-30 px-6 md:z-20">
-          {/* 移动端：z 高于 hero，负 margin 加大使白卡叠在背景与角色之上；md+ 恢复原先 z 与上移量 */}
+        <section className="relative z-30 px-6">
+          {/* z-30 高于 hero(z-10)，桌面与移动一致：负 margin 白卡叠在渐变之上 */}
           <div className="container mx-auto max-w-6xl relative -mt-16 md:-mt-14 lg:-mt-20">
             <Ceramic
               interactive={false}
@@ -314,7 +314,8 @@ export default async function PrefecturePage({ params }: PageProps) {
         </section>
 
         {/* ==================== SECTION 3: Main Content Grid ==================== */}
-        <section className="relative pb-12 md:pb-24 px-6 pt-12 md:pt-20">
+        {/* z-30 与横幅区同级且晚于文档顺序，确保侧栏兔子等整块主内容压在 hero 背景之上，避免被上层「大块背景」裁切 */}
+        <section className="relative z-30 pb-12 md:pb-24 px-6 pt-12 md:pt-20">
           <div className="container mx-auto max-w-6xl relative z-10">
             {/* 外层 flex：避免「12 列 + 嵌套 12 列」导致的 grid 自动排版/收缩异常 */}
             <div className="flex flex-col gap-4 lg:gap-10 w-full min-w-0">
