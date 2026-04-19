@@ -199,9 +199,9 @@ export default async function PrefecturePage({ params }: PageProps) {
       <main className="grow">
         {/* ==================== SECTION 1: Header ==================== */}
         {/* Hero 保持较低 z-index，便于下方白卡 / 兔子横幅叠在渐变之上形成视差；导航等全局元素仍可用更高 z */}
-        <section className="relative z-10 pt-32 md:pt-40 pb-48 md:pb-32 text-white bg-gray-900 transition-colors duration-500">
-          {/* overflow-x-clip 会产生新层叠上下文，导致内部 z-index 无法与外部比较；
-              装饰层已有独立 overflow-hidden，section 本身不需要 overflow 限制 */}
+        {/* 人物与白卡间距 ≈ pb − |负 margin|；须保持 pb > |margin|，避免立绘（含移动端 scale）与白卡重叠 */}
+        <section className="relative z-10 pt-32 md:pt-40 pb-36 md:pb-24 lg:pb-28 text-white bg-gray-900 transition-colors duration-500">
+        {/* overflow-x-clip 会产生新层叠上下文，导致内部 z-index 无法与外部比较；装饰层已有独立 overflow-hidden，section 本身不需要 overflow 限制 */}
           <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden>
             <div
               className={cn(
@@ -269,13 +269,12 @@ export default async function PrefecturePage({ params }: PageProps) {
         {/* ==================== SECTION 2: Top Sponsors Banner ==================== */}
         <section className="relative z-30 px-6">
           {/* z-30 高于 hero(z-10)，桌面与移动一致：负 margin 白卡叠在渐变之上 */}
-          <div className="container mx-auto max-w-6xl relative -mt-16 md:-mt-14 lg:-mt-20">
+          <div className="container mx-auto max-w-6xl relative -mt-24 md:-mt-20 lg:-mt-24">
             <Ceramic
               interactive={false}
               className="border border-gray-100 border-b-[6px] shadow-xl"
               style={{
                 ...ceramicStyle,
-                marginTop: "-10px",
               }}
             >
               <div className="px-2 md:px-4 pt-8 md:pt-12 pb-0 text-center">

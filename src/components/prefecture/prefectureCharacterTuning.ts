@@ -12,7 +12,7 @@
  * 手机端（max-width 767px）仅对立绘做 transform: scale() 的倍数。
  * 气泡宽度仍由列宽决定，不参与缩放；样式见 PrefectureCharacterHero.module.css。
  */
-export const HERO_CHARACTER_IMAGE_SCALE_MOBILE = 1.6;
+export const HERO_CHARACTER_IMAGE_SCALE_MOBILE = 1.2;
 
 /**
  * 县页 hero 气泡外观（4pt 网格；字号 11px 为历史视觉，其余为 4 的倍数）。
