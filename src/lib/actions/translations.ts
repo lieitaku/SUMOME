@@ -56,11 +56,12 @@ export async function getBatchTranslationTargets(): Promise<
 /**
  * 1 件だけ機械翻訳（既存訳は skipExisting でスキップ）。
  * 一括処理中はキャッシュ再検証を抑え、最後に revalidateAfterBatchTranslation を呼ぶ想定。
+ * `skipped`: true のときは API を呼ばず DB も未更新（既に訳が揃っている等）。クライアントは待機を短くできる。
  */
 export async function runOneBatchTranslation(
   type: "club" | "magazine",
   id: string
-): Promise<{ success: true } | { error: string }> {
+): Promise<{ success: true; skipped: boolean } | { error: string }> {
   const admin = await confirmAdmin();
   if (!admin) return { error: "権限がありません。" };
 
@@ -76,7 +77,7 @@ export async function runOneBatchTranslation(
         });
 
   if (!result.ok) return { error: result.error };
-  return { success: true };
+  return { success: true, skipped: !result.updated };
 }
 
 /** 一括完了後に公開ページ・管理一覧のキャッシュを更新 */

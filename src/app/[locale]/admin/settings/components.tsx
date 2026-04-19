@@ -169,8 +169,10 @@ export function DeleteAccountForm({
     );
 }
 
-/** レコード間待機（15 RPM 程度の無料枠でも安全側に） */
+/** 実際に Gemini を叩いたレコードのあとに空ける待機（RPM 対策） */
 const BATCH_ITEM_DELAY_MS = 4500;
+/** 既に訳が揃って API をスキップした場合は短くてよい */
+const BATCH_SKIP_DELAY_MS = 80;
 
 /** 管理者：クラブ・雑誌の機械翻訳を一括実行（既存訳はスキップ） */
 export function BatchTranslateCard() {
@@ -213,6 +215,8 @@ export function BatchTranslateCard() {
       });
 
       let successCount = 0;
+      let skippedCount = 0;
+      let translatedCount = 0;
       const failureLines: string[] = [];
 
       for (let i = 0; i < items.length; i++) {
@@ -230,6 +234,8 @@ export function BatchTranslateCard() {
           failureLines.push(`${itemLabel}: ${one.error}`);
         } else {
           successCount += 1;
+          if (one.skipped) skippedCount += 1;
+          else translatedCount += 1;
         }
         flushSync(() => {
           setProgress({
@@ -239,7 +245,13 @@ export function BatchTranslateCard() {
           });
         });
         if (i < items.length - 1) {
-          await new Promise((r) => setTimeout(r, BATCH_ITEM_DELAY_MS));
+          const delay =
+            "error" in one
+              ? BATCH_SKIP_DELAY_MS
+              : one.skipped
+                ? BATCH_SKIP_DELAY_MS
+                : BATCH_ITEM_DELAY_MS;
+          await new Promise((r) => setTimeout(r, delay));
         }
       }
 
@@ -254,7 +266,7 @@ export function BatchTranslateCard() {
       const failCount = failureLines.length;
       if (failCount > 0) {
         const summary =
-          `成功 ${successCount} 件・失敗 ${failCount} 件（全 ${items.length} 件）。` +
+          `成功 ${successCount} 件（新規翻訳 ${translatedCount}・スキップ ${skippedCount}）・失敗 ${failCount} 件（全 ${items.length} 件）。` +
           (failureLines.length > 0
             ? `\n失敗例（最大5件）:\n${failureLines.slice(0, 5).join("\n")}`
             : "");
@@ -262,7 +274,11 @@ export function BatchTranslateCard() {
         toast.warning(`一括処理完了: 成功 ${successCount} / 失敗 ${failCount}`);
       } else {
         setLastError(null);
-        toast.success(`一括翻訳が完了しました（${successCount} 件）。`);
+        toast.success(
+          skippedCount === items.length
+            ? `すべて既に翻訳済みでした（${skippedCount} 件スキップ）。`
+            : `一括翻訳が完了しました（新規 ${translatedCount} 件・スキップ ${skippedCount} 件）。`
+        );
       }
       setPhase("done");
     })();
@@ -283,9 +299,9 @@ export function BatchTranslateCard() {
       </div>
 
       <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-        全クラブ・全フォトブックを順に処理します。既に該当言語があるフィールドはスキップし、新規言語（例:
-        fr）追加時は不足分のみ翻訳します。Gemini API のレート制限を避けるため、各レコードの処理の間に約{" "}
-        {Math.round(BATCH_ITEM_DELAY_MS / 1000)} 秒の間隔を空けます。
+        全クラブ・全フォトブックを順に処理します。既に該当言語があるフィールドはサーバー側でスキップし、新規言語（例:
+        fr）追加時は不足分のみ翻訳します。実際に翻訳 API を呼んだレコードのあとだけ約{" "}
+        {Math.round(BATCH_ITEM_DELAY_MS / 1000)} 秒待ちます。既に揃っているレコードはほぼ待たずに進みます。
       </p>
 
       {lastError && (
