@@ -3,9 +3,18 @@
 import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import { Search, X, Check } from "lucide-react";
+import { useLocale } from "next-intl";
+import type { Prisma } from "@prisma/client";
 import { cn } from "@/lib/utils";
+import { allTranslationValues } from "@/lib/document-translations";
+import { clubDisplayName } from "@/lib/i18n-db";
 
-type ClubOption = { id: string; name: string; mainImage: string | null };
+type ClubOption = {
+  id: string;
+  name: string;
+  mainImage: string | null;
+  translations?: Prisma.JsonValue | null;
+};
 
 interface Props {
   isOpen: boolean;
@@ -16,6 +25,7 @@ interface Props {
 }
 
 export default function ClubSelectorModal({ isOpen, onClose, onSelect, clubs, currentSelectedId }: Props) {
+  const locale = useLocale();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 12;
@@ -38,7 +48,12 @@ export default function ClubSelectorModal({ isOpen, onClose, onSelect, clubs, cu
   const filteredClubs = useMemo(() => {
     if (!searchQuery) return clubs;
     const q = searchQuery.toLowerCase();
-    return clubs.filter((c) => c.name.toLowerCase().includes(q));
+    return clubs.filter((c) => {
+      const nameHaystack = [c.name, ...allTranslationValues(c.translations, "name")]
+        .join(" ")
+        .toLowerCase();
+      return nameHaystack.includes(q);
+    });
   }, [clubs, searchQuery]);
 
   // Reset to first page when search changes or clubs list变化
@@ -105,6 +120,7 @@ export default function ClubSelectorModal({ isOpen, onClose, onSelect, clubs, cu
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {paginatedClubs.map((club) => {
                 const isSelected = currentSelectedId === club.id;
+                const displayName = clubDisplayName(club, locale);
                 return (
                   <button
                     key={club.id}
@@ -123,7 +139,7 @@ export default function ClubSelectorModal({ isOpen, onClose, onSelect, clubs, cu
                       {club.mainImage ? (
                         <Image
                           src={club.mainImage}
-                          alt={club.name}
+                          alt={displayName}
                           fill
                           className="object-cover"
                           sizes="48px"
@@ -136,7 +152,7 @@ export default function ClubSelectorModal({ isOpen, onClose, onSelect, clubs, cu
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-bold text-gray-900 truncate group-hover:text-sumo-brand transition-colors">
-                        {club.name}
+                        {displayName}
                       </div>
                       <div className="text-[10px] text-gray-400 mt-0.5">ID: {club.id.slice(0, 8)}...</div>
                     </div>

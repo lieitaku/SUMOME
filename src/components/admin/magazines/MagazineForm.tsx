@@ -25,7 +25,13 @@ import Image from "next/image";
 import { useFormAction } from "@/hooks/useFormAction";
 import AdminFormLayout from "@/components/admin/ui/AdminFormLayout";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
-import { createMagazine, updateMagazine, deleteMagazine, toggleMagazineHidden } from "@/lib/actions/magazines";
+import {
+    createMagazine,
+    updateMagazine,
+    deleteMagazine,
+    toggleMagazineHidden,
+    retranslateMagazine,
+} from "@/lib/actions/magazines";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner"; // 确保安装了 sonner，如果没有请删除这行用 alert
@@ -55,8 +61,6 @@ const formSchema = z.object({
     pdfUrl: z.string().optional(),
     readLink: z.string().optional(),
     description: z.string().optional(),
-    titleEn: z.string().optional(),
-    descriptionEn: z.string().optional(),
     published: z.boolean(),
     images: z.array(z.string()),
     readingDirection: z.enum(["ltr", "rtl"]),
@@ -123,13 +127,20 @@ function SortableGalleryItem({ url, index, onRemove }: { url: string; index: num
 /**
  * 主表单组件
  */
-export default function MagazineForm({ initialData, isNew = false }: { initialData?: Magazine, isNew?: boolean }) {
+export default function MagazineForm({
+    initialData,
+    isNew = false,
+}: {
+    initialData?: Magazine;
+    isNew?: boolean;
+}) {
     const router = useRouter();
     const [selectedRegionTab, setSelectedRegionTab] = useState<string>("関東");
     const [isUploading, setIsUploading] = useState(false);
     const [isPreviewing, setIsPreviewing] = useState(false);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isTogglingHidden, setIsTogglingHidden] = useState(false);
+    const [isRetranslating, setIsRetranslating] = useState(false);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -147,8 +158,6 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
             pdfUrl: initialData?.pdfUrl || "",
             readLink: initialData?.readLink || "",
             description: initialData?.description || "",
-            titleEn: initialData?.titleEn || "",
-            descriptionEn: initialData?.descriptionEn || "",
             published: initialData?.published ?? true,
             images: initialData?.images || [],
             readingDirection: getMagazineReadingDirection(initialData),
@@ -315,8 +324,6 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                     formData.append("pdfUrl", data.pdfUrl || "");
                     formData.append("readLink", data.readLink || "");
                     formData.append("description", data.description || "");
-                    formData.append("titleEn", data.titleEn || "");
-                    formData.append("descriptionEn", data.descriptionEn || "");
                     formData.append("published", String(data.published));
                     if (data.coverImage) formData.append("coverImage", data.coverImage);
 
@@ -674,22 +681,35 @@ export default function MagazineForm({ initialData, isNew = false }: { initialDa
                                 className={cn(inputClass, "resize-none min-h-[140px] flex-grow")}
                                 placeholder="誌面の紹介を入力..."
                             />
-                            <div className="mt-6 space-y-2">
-                                <label className={labelClass}>Title (English, optional)</label>
-                                <input
-                                    {...form.register("titleEn")}
-                                    className={inputClass}
-                                    placeholder="Photobook title in English"
-                                />
-                            </div>
-                            <div className="mt-4 space-y-2">
-                                <label className={labelClass}>Description (English, optional)</label>
-                                <textarea
-                                    {...form.register("descriptionEn")}
-                                    className={cn(inputClass, "resize-none min-h-[100px]")}
-                                    placeholder="Short description in English"
-                                />
-                            </div>
+                            {!isNew && initialData && (
+                                <div className="mt-6 p-4 rounded-xl border border-amber-200 bg-amber-50/90 space-y-2">
+                                    <p className="text-[11px] text-amber-900/90 leading-relaxed">
+                                        保存時に多言語へ自動翻訳されます。既存データの翻訳だけやり直す場合は下のボタンを押してください。
+                                    </p>
+                                    <button
+                                        type="button"
+                                        disabled={isRetranslating}
+                                        onClick={async () => {
+                                            setIsRetranslating(true);
+                                            try {
+                                                const r = await retranslateMagazine(initialData.id);
+                                                if (r && "error" in r && r.error) {
+                                                    toast.error(r.error);
+                                                } else {
+                                                    toast.success("翻訳を再生成しました");
+                                                    router.refresh();
+                                                }
+                                            } finally {
+                                                setIsRetranslating(false);
+                                            }
+                                        }}
+                                        className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-600 text-white text-[11px] font-bold hover:brightness-110 disabled:opacity-50"
+                                    >
+                                        {isRetranslating ? <Loader2 className="animate-spin" size={14} /> : null}
+                                        翻訳を再生成
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

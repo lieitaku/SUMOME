@@ -15,12 +15,12 @@ import type { Club } from "@prisma/client";
 type ActivityWithClub = {
   id: string;
   title: string;
-  titleEn: string | null;
+  translations?: import("@prisma/client").Prisma.JsonValue | null;
   date: Date;
   location: string | null;
   mainImage: string | null;
   category?: string | null;
-  club: Pick<Club, "name" | "nameEn"> | null;
+  club: Pick<Club, "name" | "translations"> | null;
 };
 
 interface ActivityReportProps {

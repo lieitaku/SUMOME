@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import { ArrowRight, Search, X, Filter, ChevronDown, MapPin, LayoutGrid, LayoutList } from "lucide-react";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Magazine } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
 import { magazineDisplayDescription, magazineDisplayTitle } from "@/lib/i18n-db";
+import { allTranslationValues } from "@/lib/document-translations";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 
 type RegionKey =
@@ -84,6 +85,7 @@ function getRegionFilterIndex(region: string): number {
 }
 
 interface MagazinesClientProps {
+    /** サーバー（getCachedAllMagazines）で取得済みの一覧。クライアントで /api を再取得しない（SSR と二重取得による失敗表示の食い違いを防ぐ）。 */
     initialMagazines?: Magazine[] | null;
 }
 
@@ -91,23 +93,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     const locale = useLocale();
     const t = useTranslations("MagazinesPage");
     const tClub = useTranslations("ClubSearch");
-    const [magazinesFromApi, setMagazinesFromApi] = useState<Magazine[] | null>(null);
-    const [magazinesLoading, setMagazinesLoading] = useState(true);
-    const [magazinesError, setMagazinesError] = useState<string | null>(null);
-    const initialMagazines = magazinesFromApi ?? initialMagazinesProp ?? [];
-
-    useEffect(() => {
-        setMagazinesLoading(true);
-        setMagazinesError(null);
-        fetch("/api/magazines")
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to load");
-                return res.json();
-            })
-            .then((data: Magazine[]) => setMagazinesFromApi(data))
-            .catch(() => setMagazinesError(t("loadError")))
-            .finally(() => setMagazinesLoading(false));
-    }, [t]);
+    const initialMagazines = initialMagazinesProp ?? [];
 
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all");
     const [activePref, setActivePref] = useState<string | "all">("all");
@@ -124,14 +110,22 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     const filteredMagazines = useMemo(() => {
         const filtered = initialMagazines.filter((mag) => {
             const query = searchQuery.toLowerCase();
-            const titleEn = (mag as { titleEn?: string | null }).titleEn?.toLowerCase() ?? "";
-            const descEn = (mag as { descriptionEn?: string | null }).descriptionEn?.toLowerCase() ?? "";
+            const titleHay = [
+                mag.title,
+                ...allTranslationValues(mag.translations, "title"),
+            ]
+                .join(" ")
+                .toLowerCase();
+            const descHay = [
+                mag.description ?? "",
+                ...allTranslationValues(mag.translations, "description"),
+            ]
+                .join(" ")
+                .toLowerCase();
             const matchSearch =
                 searchQuery === "" ||
-                mag.title.toLowerCase().includes(query) ||
-                (mag.description?.toLowerCase().includes(query) ?? false) ||
-                titleEn.includes(query) ||
-                descEn.includes(query);
+                titleHay.includes(query) ||
+                descHay.includes(query);
 
             let matchLocation = true;
             if (activeRegion !== "all") {
@@ -442,13 +436,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
 
                 <section ref={resultsSectionRef} className="relative pb-16 md:pb-32 px-6 z-20">
                     <div className="container mx-auto max-w-6xl">
-                        {magazinesError ? (
-                            <div className="py-24 text-center text-gray-500 text-sm">{magazinesError}</div>
-                        ) : magazinesLoading && initialMagazines.length === 0 ? (
-                            <div className="flex justify-center py-24">
-                                <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
-                            </div>
-                        ) : filteredMagazines.length > 0 ? (
+                        {filteredMagazines.length > 0 ? (
                             <div
                                 className={cn(
                                     "grid",

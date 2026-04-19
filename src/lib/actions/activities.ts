@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { Prisma } from "@prisma/client";
+import { mergeActivityTranslations } from "@/lib/document-translations";
 
 // ==========================================
 // 1. 定义统一的数据结构 (与前端 Editor 对应)
@@ -117,6 +118,7 @@ export async function createPlaceholderActivity(templateType: string) {
         clubId: defaultClub.id,
         authorId: admin.id,
         published: false,
+        translations: {},
       }
     });
     return { id: activity.id };
@@ -132,18 +134,17 @@ export async function createActivityAction(formData: FormData) {
   if (!admin) return { error: "権限がありません" };
 
   try {
-    // 1. 解析数据
     const data = parseFormData(formData);
+    const { titleEn, contentEn, ...row } = data;
 
-    // 2. 校验必填项
-    if (!data.clubId) return { error: "クラブを選択してください" };
+    if (!row.clubId) return { error: "クラブを選択してください" };
 
-    // 3. 写入数据库
     const newActivity = await prisma.activity.create({
       data: {
-        ...data,
-        published: true, // 新建即发布
-        authorId: admin.id, // 绑定作者
+        ...row,
+        translations: mergeActivityTranslations(null, { titleEn, contentEn }),
+        published: true,
+        authorId: admin.id,
       },
     });
     return { success: true, id: newActivity.id };
@@ -178,17 +179,23 @@ export async function updateActivityAction(id: string, formData: FormData) {
   if (!admin) return { error: "権限がありません" };
 
   try {
-    // 1. 解析数据
     const data = parseFormData(formData);
+    const { titleEn, contentEn, slug, ...updateData } = data;
 
-    // 2. 剔除不应更新的字段 (Slug 和 Author)
-    // 我们不希望每次保存都改变 URL，也不希望改变作者
-    const { slug, ...updateData } = data;
+    const existing = await prisma.activity.findUnique({
+      where: { id },
+      select: { translations: true },
+    });
 
-    // 3. 执行更新
     await prisma.activity.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...updateData,
+        translations: mergeActivityTranslations(existing?.translations ?? null, {
+          titleEn,
+          contentEn,
+        }),
+      },
     });
 
     revalidatePath("/admin/activities");

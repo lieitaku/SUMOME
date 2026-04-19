@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         club: {
           select: {
             name: true,
-            nameEn: true,
+            translations: true,
             area: true,
           } as Prisma.ClubSelect,
         },

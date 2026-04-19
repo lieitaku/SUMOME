@@ -9,7 +9,7 @@ export default async function AdminPickupClubsPage() {
     prisma.club.findMany({
       where: { slug: { not: "official-hq" } },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, mainImage: true },
+      select: { id: true, name: true, mainImage: true, translations: true },
     }),
   ]);
 

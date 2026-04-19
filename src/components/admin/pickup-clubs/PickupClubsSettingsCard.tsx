@@ -3,10 +3,13 @@
 import { useState, useTransition } from "react";
 import Image from "next/image";
 import { Save, Loader2, Star, Eye, Plus, Trash2, ArrowRightLeft } from "lucide-react";
+import { useLocale } from "next-intl";
+import type { Prisma } from "@prisma/client";
 import PreviewModal from "@/components/admin/ui/PreviewModal";
 import { updateHomePickupClubs } from "@/lib/actions/pickup-clubs";
 import ClubSelectorModal from "./ClubSelectorModal";
 import { cn } from "@/lib/utils";
+import { clubDisplayName } from "@/lib/i18n-db";
 
 export type SlotItem = {
   sortOrder: number;
@@ -14,7 +17,12 @@ export type SlotItem = {
   club: { id: string; name: string; slug: string; logo: string | null } | null;
 };
 
-type ClubOption = { id: string; name: string; mainImage: string | null };
+type ClubOption = {
+  id: string;
+  name: string;
+  mainImage: string | null;
+  translations?: Prisma.JsonValue | null;
+};
 
 const PLACEHOLDER_IMAGE = "/images/placeholder.webp";
 
@@ -26,6 +34,7 @@ interface Props {
 }
 
 export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: Props) {
+  const locale = useLocale();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -169,6 +178,9 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
             const selectedClub = selectedId
               ? clubOptions.find((c) => c.id === selectedId)
               : null;
+            const selectedDisplayName = selectedClub
+              ? clubDisplayName(selectedClub, locale)
+              : "";
 
             return (
               <div key={i} className="flex flex-col gap-3">
@@ -197,14 +209,14 @@ export default function PickupClubsSettingsCard({ initialSlots, clubOptions }: P
                     <>
                       <Image
                         src={selectedClub.mainImage || PLACEHOLDER_IMAGE}
-                        alt={selectedClub.name}
+                        alt={selectedDisplayName}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
                         sizes="(max-width: 768px) 100vw, 33vw"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-80" />
                       <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                        <p className="text-sm font-bold line-clamp-2 leading-tight">{selectedClub.name}</p>
+                        <p className="text-sm font-bold line-clamp-2 leading-tight">{selectedDisplayName}</p>
                         <div className="mt-2 inline-flex items-center gap-1 text-[10px] font-bold bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full border border-white/10 group-hover:bg-sumo-brand group-hover:border-sumo-brand transition-colors">
                           <ArrowRightLeft size={10} /> 変更する
                         </div>

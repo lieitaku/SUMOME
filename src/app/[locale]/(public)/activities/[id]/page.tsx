@@ -9,6 +9,7 @@ import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActivityWithClub } from "@/lib/cached-queries";
 import { getTranslations } from "next-intl/server";
 import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
+import { mergeActivityTranslations } from "@/lib/document-translations";
 
 // 1. ✨ 定义与组件完全匹配的强类型
 // 这个类型代表了：活动数据 + 必须包含的俱乐部关联数据
@@ -26,14 +27,20 @@ import ActivityActions from "@/components/activities/ActivityActions";
 
 function normalizePreviewActivity(
   p: Record<string, unknown>,
-  club: { id: string; name: string; nameEn?: string | null }
+  club: { id: string; name: string; translations?: import("@prisma/client").Prisma.JsonValue | null }
 ): ActivityWithClub {
   const date = p.date ? new Date(p.date as string) : new Date();
   const contentData = (p.contentData ?? (p.blocks || p.event ? { blocks: p.blocks, event: p.event } : null)) as Activity["contentData"];
+  const tr =
+    p.translations != null && typeof p.translations === "object"
+      ? p.translations
+      : mergeActivityTranslations(null, {
+          titleEn: p.titleEn != null ? String(p.titleEn) : null,
+          contentEn: p.contentEn != null ? String(p.contentEn) : null,
+        });
   return {
     id: String(p.id ?? "preview"),
     title: String(p.title ?? ""),
-    titleEn: p.titleEn != null ? String(p.titleEn) : null,
     slug: String(p.slug ?? "preview"),
     date,
     location: p.location != null ? String(p.location) : null,
@@ -43,13 +50,17 @@ function normalizePreviewActivity(
     templateType: String(p.templateType ?? "news"),
     contentData,
     content: p.content != null ? String(p.content) : null,
-    contentEn: p.contentEn != null ? String(p.contentEn) : null,
+    translations: tr,
     clubId: club.id,
     authorId: String(p.authorId ?? ""),
     customRoute: p.customRoute != null ? String(p.customRoute) : null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    club: { id: club.id, name: club.name, nameEn: club.nameEn ?? null } as Club,
+    club: {
+      id: club.id,
+      name: club.name,
+      translations: club.translations ?? null,
+    } as Club,
   };
 }
 
@@ -78,13 +89,13 @@ export default async function ActivityDetailPage({
     const p = preview.payload as Record<string, unknown>;
     const clubPayload = p.club as { id?: string; name?: string } | undefined;
     const clubId = (p.clubId as string) || clubPayload?.id || "";
-    const clubName = clubPayload?.name ?? "クラブ";
+    const clubName = clubPayload?.name ?? t("previewClubFallback");
     if (!clubId) {
       activity = normalizePreviewActivity(p, { id: "preview", name: clubName });
     } else {
       const clubFromDb = await prisma.club.findUnique({
         where: { id: clubId },
-        select: { id: true, name: true, nameEn: true },
+        select: { id: true, name: true, translations: true },
       });
       const club = clubFromDb ?? { id: clubId, name: clubName };
       activity = normalizePreviewActivity(p, club);
@@ -171,7 +182,7 @@ export default async function ActivityDetailPage({
               <aside className="print:hidden hidden lg:block lg:col-span-3 border-r border-gray-100 bg-white">
                 <div className="sticky top-0 px-8 py-12 flex flex-col gap-10">
                   <div>
-                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">アクション</div>
+                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">{t("detailSidebarActions")}</div>
                     <ActivityActions
                       activityId={activity.id}
                       title={titleShown}
@@ -179,9 +190,9 @@ export default async function ActivityDetailPage({
                     />
                   </div>
                   <div>
-                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">キーワード</div>
+                    <div className="text-[9px] font-bold text-gray-300 uppercase tracking-[0.2em] mb-4">{t("detailSidebarKeywords")}</div>
                     <div className="flex flex-wrap gap-2">
-                      {Array.from(new Set(["イベント", activity.category, "相撲"])).map((tag) => (
+                      {Array.from(new Set([t("tagEvent"), activity.category, t("tagSumo")])).map((tag) => (
                         <span key={tag} className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded">
                           <Hash size={9} className="opacity-50" /> {tag}
                         </span>

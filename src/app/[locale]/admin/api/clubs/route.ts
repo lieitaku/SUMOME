@@ -12,6 +12,7 @@ const LIST_SELECT = {
     city: true,
     hidden: true,
     updatedAt: true,
+    translations: true,
 } as const;
 
 export async function GET(request: NextRequest) {

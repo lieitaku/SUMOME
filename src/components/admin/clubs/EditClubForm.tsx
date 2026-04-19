@@ -8,8 +8,6 @@ import type { Club } from "@prisma/client";
 
 /** 編集フォーム用の初期データ（Prisma の Club に追従；生成クライアントが古い場合の欠落フィールドを補完） */
 type EditClubFormInitialData = Club & {
-    nameEn?: string | null;
-    descriptionEn?: string | null;
     phoneVisibleOnPublicSite?: boolean;
 };
 import { useState, useCallback } from "react";
@@ -32,7 +30,7 @@ import TargetEditor from "./TargetEditor"; // <--- 引入募集对象编辑器
 import MainImagePositionEditor, { parsePositionString, formatPositionString, parseScaleValue, parseRotationValue } from "./MainImagePositionEditor";
 
 // ✨ 2. 引入 Server Actions
-import { updateClub, deleteClub, toggleClubHidden } from "@/lib/actions/clubs";
+import { updateClub, deleteClub, toggleClubHidden, retranslateClub } from "@/lib/actions/clubs";
 import { useRouter } from "@/i18n/navigation";
 
 // ==============================================================================
@@ -44,12 +42,10 @@ import { useRouter } from "@/i18n/navigation";
 const formSchema = z.object({
     id: z.string(),
     name: z.string().min(1, "必須項目です"),
-    nameEn: z.string().optional(),
     slug: z.string()
         .min(3, "3文字以上")
         .regex(/^[a-z0-9-]+$/, "半角英小文字・数字・ハイフンのみ使用可能です"),
     description: z.string().optional(),
-    descriptionEn: z.string().optional(),
     logo: z.string().optional(),
     mainImage: z.string().optional(),
     mainImagePosition: z.string().optional(),
@@ -89,9 +85,11 @@ interface EditClubFormProps {
     initialData: EditClubFormInitialData;
     /** 管理者(ADMIN)のみ true。クラブID(slug)の編集可否に使用 */
     canEditSlug?: boolean;
+    /** 管理者のみ：機械翻訳の再生成ボタンを表示 */
+    isAdmin?: boolean;
 }
 
-export default function EditClubForm({ initialData, canEditSlug = false }: EditClubFormProps) {
+export default function EditClubForm({ initialData, canEditSlug = false, isAdmin = false }: EditClubFormProps) {
     const router = useRouter();
     // 用于控制副图上传时的 Loading 状态
     const [isUploadingSub, setIsUploadingSub] = useState(false);
@@ -107,10 +105,8 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
         defaultValues: {
             id: initialData.id,
             name: initialData.name || "",
-            nameEn: initialData.nameEn || "",
             slug: initialData.slug || "",
             description: initialData.description || "",
-            descriptionEn: initialData.descriptionEn || "",
             logo: initialData.logo || "",
             mainImage: initialData.mainImage || "",
             mainImagePosition: initialData.mainImagePosition ?? "50,50",
@@ -150,6 +146,7 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
     });
 
     const [isTogglingHidden, setIsTogglingHidden] = useState(false);
+    const [isRetranslating, setIsRetranslating] = useState(false);
 
     // --- 3. 多图上传逻辑 (Supabase) ---
     const currentSubImages = form.watch("subImages");
@@ -382,14 +379,6 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                                 <label className={labelClass}>紹介文</label>
                                 <textarea {...form.register("description")} rows={6} className={inputClass} />
                             </div>
-                            <div>
-                                <label className={labelClass}>クラブ名（英語・任意）</label>
-                                <input {...form.register("nameEn")} className={inputClass} placeholder="e.g. Osaka Sumo Club" />
-                            </div>
-                            <div>
-                                <label className={labelClass}>紹介文（英語・任意）</label>
-                                <textarea {...form.register("descriptionEn")} rows={4} className={inputClass} placeholder="English description for /en site" />
-                            </div>
                         </div>
 
                         <div className="space-y-6">
@@ -605,6 +594,36 @@ export default function EditClubForm({ initialData, canEditSlug = false }: EditC
                         </div>
                     </div>
                 </div>
+
+                {isAdmin && (
+                    <div className="bg-amber-50/90 p-6 md:p-8 rounded-3xl border border-amber-200/80 shadow-sm space-y-3">
+                        <h2 className="text-sm font-bold text-amber-900">多言語（機械翻訳）</h2>
+                        <p className="text-xs text-amber-900/80 leading-relaxed">
+                            保存時に自動で翻訳されます。既存データの翻訳だけやり直す場合は下のボタンを押してください（環境変数 AUTO_TRANSLATE_LOCALES / GEMINI_API_KEY が必要です）。
+                        </p>
+                        <button
+                            type="button"
+                            disabled={isRetranslating}
+                            onClick={async () => {
+                                setIsRetranslating(true);
+                                try {
+                                    const r = await retranslateClub(initialData.id);
+                                    if (r && "error" in r && r.error) {
+                                        alert(r.error);
+                                    } else {
+                                        alert("翻訳を再生成しました。公開サイトはキャッシュの関係で数秒〜1分後に反映されることがあります。");
+                                    }
+                                } finally {
+                                    setIsRetranslating(false);
+                                }
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:brightness-110 disabled:opacity-50 transition-all"
+                        >
+                            {isRetranslating ? <Loader2 className="animate-spin" size={14} /> : null}
+                            翻訳を再生成
+                        </button>
+                    </div>
+                )}
 
             </AdminFormLayout>
         </form>

@@ -9,7 +9,14 @@ import { hasRealClubMainImage, DEFAULT_CLUB_MAIN_IMAGE } from "@/lib/club-images
 import Ceramic from "@/components/ui/Ceramic";
 import { type Club } from "@prisma/client";
 import { useLocale, useTranslations } from "next-intl";
-import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
+import {
+  clubDisplayAddress,
+  clubDisplayArea,
+  clubDisplayCity,
+  clubDisplayDescription,
+  clubDisplayName,
+  clubDisplayTarget,
+} from "@/lib/i18n-db";
 import {
   clubWebsiteHref,
   clubInstagramHref,
@@ -19,8 +26,6 @@ import {
 import ClubExternalAnchor from "@/components/clubs/ClubExternalAnchor";
 
 type ExtendedClub = Club & {
-  nameEn?: string | null;
-  descriptionEn?: string | null;
   phoneVisibleOnPublicSite?: boolean;
 };
 
@@ -36,6 +41,9 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   const locale = useLocale();
   const t = useTranslations("ClubDetail");
   const displayName = clubDisplayName(club, locale);
+  const displayArea = clubDisplayArea(club, locale);
+  const displayCity = clubDisplayCity(club, locale);
+  const displayAddress = clubDisplayAddress(club, locale);
   // --- 1. Hooks ---
   const summaryText = useMemo(() => {
     const desc = clubDisplayDescription(club, locale);
@@ -46,13 +54,14 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
   }, [club, locale, t]);
 
   const dynamicTags = useMemo(() => {
-    if (!club.target) return [];
-    return club.target
+    const raw = clubDisplayTarget(club, locale);
+    if (!raw) return [];
+    return raw
       .split(",")
-      .map((t) => t.trim())
+      .map((tag) => tag.trim())
       .filter(Boolean)
       .slice(0, 4);
-  }, [club.target]);
+  }, [club, locale]);
 
   // --- 2. Early Return ---
   if (club.slug === "official-hq") return null;
@@ -128,7 +137,7 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
               style={{ color: themeColor }}
             >
               <MapPin size={10} />
-              {club.area}
+              {displayArea}
             </div>
 
             <div
@@ -145,11 +154,13 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
               {displayName}
             </h3>
 
-            {(club.city || club.address) && (
+            {(displayCity || displayAddress) && (
               <p className="text-[11px] text-gray-400 mb-3 flex items-center gap-1 line-clamp-1">
                 <MapPin size={10} className="shrink-0" />
                 <span className="truncate">
-                  {club.area}{club.city && ` ${club.city}`}{club.address && ` ${club.address}`}
+                  {displayArea}
+                  {displayCity && ` ${displayCity}`}
+                  {displayAddress && ` ${displayAddress}`}
                 </span>
               </p>
             )}

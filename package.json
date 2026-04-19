@@ -13,12 +13,15 @@
     "messages:flatten": "node scripts/messages-flatten.mjs",
     "batch:create-clubs": "npx tsx scripts/batch-create-clubs.ts",
     "magazines:export-for-translation": "npx tsx scripts/export-magazines-for-translation.ts",
+    "retranslate:all": "npx tsx scripts/retranslate-all-content.ts",
+    "retranslate:missing": "npx tsx scripts/retranslate-all-content.ts --only-missing",
     "postinstall": "prisma generate"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@google/generative-ai": "^0.24.1",
     "@hello-pangea/dnd": "^18.0.1",
     "@hookform/resolvers": "^3.9.1",
     "@prisma/client": "^5.22.0",

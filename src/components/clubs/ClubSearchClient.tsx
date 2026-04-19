@@ -18,6 +18,7 @@ import { hasRealClubMainImage } from "@/lib/club-images";
 import Button from "@/components/ui/Button";
 import { useLocale, useTranslations } from "next-intl";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
+import { allTranslationValues } from "@/lib/document-translations";
 
 // ==============================================================================
 // 1. 类型定义与常量配置
@@ -108,7 +109,7 @@ function getRegionFilterIndex(area: string): number {
 // ==============================================================================
 
 interface ClubSearchClientProps {
-    /** 可选：服务端传入的初始数据；不传时由客户端从 /api/clubs 拉取 */
+    /** サーバー（getCachedAllClubs）で取得済みの一覧。クライアントで /api を再取得しない（SSR と二重取得による失敗表示の食い違いを防ぐ）。 */
     initialClubs?: Club[] | null;
 }
 
@@ -117,24 +118,7 @@ type SortMode = "area" | "time";
 const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientProps = {}) => {
     const t = useTranslations("ClubSearch");
     const locale = useLocale();
-    const [clubsFromApi, setClubsFromApi] = useState<Club[] | null>(null);
-    const [clubsLoading, setClubsLoading] = useState(true);
-    const [clubsError, setClubsError] = useState<string | null>(null);
-    // 优先使用 API 返回的实时数据，确保卡片能随后台变更而更新；API 未返回前用服务端 initialClubs 占位
-    const initialClubs = clubsFromApi ?? initialClubsProp ?? [];
-
-    useEffect(() => {
-        setClubsLoading(true);
-        setClubsError(null);
-        fetch("/api/clubs")
-            .then((res) => {
-                if (!res.ok) throw new Error("Failed to load");
-                return res.json();
-            })
-            .then((data: Club[]) => setClubsFromApi(data))
-            .catch(() => setClubsError(t("loadError")))
-            .finally(() => setClubsLoading(false));
-    }, [t]);
+    const initialClubs = initialClubsProp ?? [];
 
     // --- 状态管理 (State Management) ---
     const [activeRegion, setActiveRegion] = useState<RegionKey | "all">("all"); // 当前选中的大区
@@ -163,10 +147,15 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
             // 1. 文本搜索逻辑 (不区分大小写)
             // 匹配范围：俱乐部名称 或 地区字段
             const q = searchQuery.toLowerCase();
+            const nameHaystack = [
+                club.name,
+                ...allTranslationValues(club.translations, "name"),
+            ]
+                .join(" ")
+                .toLowerCase();
             const matchQuery =
                 searchQuery === "" ||
-                club.name.toLowerCase().includes(q) ||
-                (club.nameEn?.toLowerCase().includes(q) ?? false) ||
+                nameHaystack.includes(q) ||
                 club.area.includes(searchQuery);
 
             // 2. 地区筛选逻辑
@@ -549,15 +538,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                         </div>
 
                         {/* 结果列表：渐进式渲染，先显示首屏再分批追加，避免从地区切到全国时卡顿 */}
-                        {clubsError ? (
-                            <div className="flex flex-col items-center justify-center py-16 md:py-32 text-center bg-white rounded-3xl border border-dashed border-gray-200">
-                                <p className="text-gray-500 text-sm">{clubsError}</p>
-                            </div>
-                        ) : clubsLoading && initialClubs.length === 0 ? (
-                            <div className="flex justify-center py-12 md:py-24">
-                                <span className="inline-block w-10 h-10 border-2 border-sumo-brand/30 border-t-sumo-brand rounded-full animate-spin" />
-                            </div>
-                        ) : filteredClubs.length > 0 ? (
+                        {filteredClubs.length > 0 ? (
                             <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
                                     {clubsToRender.map((club, index) => {

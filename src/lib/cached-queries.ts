@@ -119,7 +119,7 @@ export function getCachedActivitiesPage(page: number, pageSize: number = 6) {
           skip: (p - 1) * ps,
           take: ps,
           orderBy: { date: "desc" },
-          include: { club: { select: { name: true, nameEn: true, area: true } } },
+          include: { club: { select: { name: true, translations: true, area: true } } },
         }),
         prisma.activity.count(),
       ]);

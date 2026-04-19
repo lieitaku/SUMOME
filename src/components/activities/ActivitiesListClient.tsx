@@ -16,13 +16,12 @@ import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
 
 const ITEMS_PER_PAGE = 6;
 
-/** 一覧 API の club 断片（Pick<Club, …> は nameEn 欠落時に unknown になり得るため明示） */
-type ActivityListClub = { name: string; nameEn?: string | null };
+type ActivityListClub = { name: string; translations?: import("@prisma/client").Prisma.JsonValue | null };
 
 type ActivityItem = {
   id: string;
   title: string;
-  titleEn: string | null;
+  translations?: import("@prisma/client").Prisma.JsonValue | null;
   date: string;
   location: string | null;
   category: string;

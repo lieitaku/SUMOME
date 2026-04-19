@@ -2,8 +2,11 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { revalidatePath, revalidateTag } from "next/cache";
-import { getCurrentUser } from "@/lib/auth-utils";
+import { revalidatePath } from "next/cache";
+import { revalidateTagMax } from "@/lib/revalidate-tag-max";
+import { getCurrentUser, confirmAdmin } from "@/lib/auth-utils";
+import { translateAndPersistClub } from "@/lib/auto-translate-on-save";
+import { scheduleAfterResponse } from "@/lib/schedule-after-response";
 
 // ==============================================================================
 // 🛠️ 通用工具函数：解析 FormData
@@ -17,10 +20,8 @@ function parseFormData(formData: FormData) {
   return {
     id: formData.get("id") as string,
     name: formData.get("name") as string,
-    nameEn: (formData.get("nameEn") as string) || "",
     slug: formData.get("slug") as string,
     description: formData.get("description") as string,
-    descriptionEn: (formData.get("descriptionEn") as string) || "",
     logo: formData.get("logo") as string,
     mainImage: formData.get("mainImage") as string,
     mainImagePosition: formData.get("mainImagePosition") as string,
@@ -65,9 +66,7 @@ const CreateClubSchema = z.object({
       /^[a-z0-9-]+$/,
       "IDは半角英小文字、数字、ハイフン(-)のみ使用可能です",
     ),
-  nameEn: z.string().optional(),
   description: z.string().optional(),
-  descriptionEn: z.string().optional(),
   logo: z.string().optional(),
   mainImage: z.string().optional(),
 });
@@ -77,9 +76,7 @@ export async function createClub(formData: FormData) {
   const rawData = {
     name: formData.get("name"),
     slug: formData.get("slug"),
-    nameEn: formData.get("nameEn"),
     description: formData.get("description"),
-    descriptionEn: formData.get("descriptionEn"),
     logo: formData.get("logo"),
     mainImage: formData.get("mainImage"),
   };
@@ -94,17 +91,16 @@ export async function createClub(formData: FormData) {
   }
 
   try {
-    const { nameEn, descriptionEn, ...restCreate } = validatedFields.data;
-    await prisma.club.create({
+    const created = await prisma.club.create({
       data: {
-        ...restCreate,
-        nameEn: nameEn?.trim() || null,
-        descriptionEn: descriptionEn?.trim() || null,
+        ...validatedFields.data,
         area: "未設定",
         address: "未設定",
         subImages: [], // 创建时默认为空数组
       },
+      select: { id: true },
     });
+    scheduleAfterResponse(() => translateAndPersistClub(created.id));
   } catch (error) {
     console.error("作成失敗:", error);
     return { error: "このIDは既に使われている可能性があります。" };
@@ -112,8 +108,8 @@ export async function createClub(formData: FormData) {
 
   revalidatePath("/admin/clubs");
   revalidatePath("/clubs");
-  revalidateTag("clubs");
-  revalidateTag("admin-stats");
+  revalidateTagMax("clubs");
+  revalidateTagMax("admin-stats");
 
   return { success: true };
 }
@@ -130,10 +126,8 @@ const slugSchema = z
 const UpdateClubSchema = z.object({
   id: z.string(),
   name: z.string().min(1, "クラブ名は必須です"),
-  nameEn: z.string().optional(),
   slug: z.string().optional(),
   description: z.string().optional(),
-  descriptionEn: z.string().optional(),
   logo: z.string().optional(),
   mainImage: z.string().optional(),
   mainImagePosition: z.string().optional(),
@@ -190,7 +184,7 @@ export async function updateClub(formData: FormData) {
   if (!isAdmin && currentClub?.ownerId !== currentUser.id) {
     return { error: "このクラブの編集権限がありません。" };
   }
-  const { id, slug: newSlug, nameEn, descriptionEn, ...rest } = validatedFields.data;
+  const { id, slug: newSlug, ...rest } = validatedFields.data;
   const oldSlug = currentClub?.slug ?? "";
 
   // 管理者のみ slug 変更可。変更する場合は形式・重複チェック。
@@ -232,8 +226,6 @@ export async function updateClub(formData: FormData) {
 
   const updateData = {
     ...rest,
-    nameEn: nameEn?.trim() ? nameEn.trim() : null,
-    descriptionEn: descriptionEn?.trim() ? descriptionEn.trim() : null,
     ...(slugToUpdate != null ? { slug: slugToUpdate } : {}),
     mainImageScale: mainImageScaleNum,
     mainImageRotation: mainImageRotationNum,
@@ -245,8 +237,8 @@ export async function updateClub(formData: FormData) {
     revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${oldSlug}`);
     if (slugToUpdate) revalidatePath(`/clubs/${slugToUpdate}`);
-    revalidateTag("clubs");
-    revalidateTag("admin-stats");
+    revalidateTagMax("clubs");
+    revalidateTagMax("admin-stats");
   };
 
   try {
@@ -255,6 +247,7 @@ export async function updateClub(formData: FormData) {
       data: updateData,
     });
     doRevalidate();
+    scheduleAfterResponse(() => translateAndPersistClub(id));
     return { success: true };
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
@@ -272,6 +265,7 @@ export async function updateClub(formData: FormData) {
           data: dataWithoutRotation,
         });
         doRevalidate();
+        scheduleAfterResponse(() => translateAndPersistClub(id));
         return { success: true };
       } catch (retryErr) {
         console.error("更新リトライ失敗:", retryErr);
@@ -286,6 +280,14 @@ export async function updateClub(formData: FormData) {
     }
     return { error: "データベースの更新に失敗しました。" };
   }
+}
+
+/** 管理者：DB の日文から機械翻訳を再実行し `translations` を上書き（存量データの補翻用） */
+export async function retranslateClub(clubId: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { error: "権限がありません。" };
+  await translateAndPersistClub(clubId);
+  return { success: true };
 }
 
 // ==============================================================================
@@ -315,8 +317,8 @@ export async function deleteClub(id: string) {
     revalidatePath("/admin/clubs");
     revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${club.slug}`);
-    revalidateTag("clubs");
-    revalidateTag("admin-stats");
+    revalidateTagMax("clubs");
+    revalidateTagMax("admin-stats");
 
     return { success: true };
   } catch (error) {
@@ -342,17 +344,16 @@ export async function toggleClubHidden(id: string) {
   }
 
   const isAdmin = currentUser.role === "ADMIN";
-  if (!isAdmin && club?.ownerId !== currentUser.id) {
+  if (!club) {
+    return { error: "クラブが見つかりません。" };
+  }
+  if (!isAdmin && club.ownerId !== currentUser.id) {
     return { error: "このクラブの編集権限がありません。" };
   }
 
   // ✨ 審査制ロジック：一般ユーザー(OWNER)は「非公開→公開」への変更不可
   if (!isAdmin && club.hidden === true) {
     return { error: "公開するには管理者の承認が必要です。事務局へご連絡ください。" };
-  }
-
-  if (!club) {
-    return { error: "クラブが見つかりません。" };
   }
 
   try {
@@ -365,9 +366,9 @@ export async function toggleClubHidden(id: string) {
     revalidatePath("/admin/clubs");
     revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${club.slug}`);
-    revalidateTag("clubs");
-    revalidateTag("admin-stats");
-    revalidateTag("home-pickup");
+    revalidateTagMax("clubs");
+    revalidateTagMax("admin-stats");
+    revalidateTagMax("home-pickup");
 
     return { success: true };
   } catch (error) {

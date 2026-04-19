@@ -10,11 +10,10 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import type { Activity, Club } from "@prisma/client";
+import { getLocaleString } from "@/lib/document-translations";
 
 /** フォーム初期値用（Prisma Activity と同期；生成クライアントが古い場合の欠落フィールドを補完） */
 type EditActivityFormInitialData = Activity & {
-    titleEn?: string | null;
-    contentEn?: string | null;
 };
 
 // ✨ 1. 引入我们的“三剑客”
@@ -96,8 +95,8 @@ export default function EditActivityForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: initialData.title || "",
-            titleEn: initialData.titleEn || "",
-            contentEn: initialData.contentEn || "",
+            titleEn: getLocaleString(initialData.translations, "title", "en"),
+            contentEn: getLocaleString(initialData.translations, "content", "en"),
             date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
             clubId: initialData.clubId || (clubs.length > 0 ? clubs[0].id : ""),
             templateType: initialTemplateType,

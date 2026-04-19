@@ -13,8 +13,7 @@ try {
       slug: true,
       title: true,
       description: true,
-      titleEn: true,
-      descriptionEn: true,
+      translations: true,
     },
   });
   console.log(JSON.stringify(rows, null, 2));

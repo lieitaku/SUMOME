@@ -21,6 +21,7 @@ import {
   magazineDisplayDescription,
   magazineDisplayTitle,
 } from "@/lib/i18n-db";
+import { mergeMagazineTranslations } from "@/lib/document-translations";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 
 export const revalidate = 60;
@@ -146,10 +147,16 @@ export default async function MagazineDetailPage({
     magazine = {
       id: String(p.id ?? ""),
       title: String(p.title ?? ""),
-      titleEn: p.titleEn != null ? String(p.titleEn) : null,
       slug: String(p.slug ?? slug),
       description: p.description != null ? String(p.description) : null,
-      descriptionEn: p.descriptionEn != null ? String(p.descriptionEn) : null,
+      translations:
+        p.translations != null && typeof p.translations === "object"
+          ? p.translations
+          : mergeMagazineTranslations(null, {
+              titleEn: p.titleEn != null ? String(p.titleEn) : null,
+              descriptionEn:
+                  p.descriptionEn != null ? String(p.descriptionEn) : null,
+            }),
       region: String(p.region ?? "All"),
       coverImage: p.coverImage != null ? String(p.coverImage) : null,
       images: Array.isArray(p.images) ? (p.images as string[]) : [],

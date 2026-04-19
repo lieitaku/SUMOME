@@ -1,4 +1,5 @@
 import React from "react";
+import type { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "@/components/ui/TransitionLink";
@@ -13,7 +14,16 @@ import { getCachedClubBySlug } from "@/lib/cached-queries";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { getTranslations } from "next-intl/server";
-import { clubDisplayDescription, clubDisplayName } from "@/lib/i18n-db";
+import {
+    clubDisplayAddress,
+    clubDisplayArea,
+    clubDisplayCity,
+    clubDisplayDescription,
+    clubDisplayName,
+    clubDisplayTarget,
+} from "@/lib/i18n-db";
+import { mergeClubTranslations } from "@/lib/document-translations";
+import { localizedScheduleDayLabel } from "@/lib/schedule-day-locale";
 import {
     clubWebsiteHref,
     clubInstagramHref,
@@ -37,10 +47,9 @@ interface PageProps {
 function normalizePreviewClub(p: Record<string, unknown>): {
     id: string;
     name: string;
-    nameEn: string | null;
     slug: string;
     description: string | null;
-    descriptionEn: string | null;
+    translations: Prisma.JsonValue;
     logo: string | null;
     mainImage: string | null;
     mainImagePosition: string | null;
@@ -79,13 +88,23 @@ function normalizePreviewClub(p: Record<string, unknown>): {
                     return [0, 90, 180, 270].includes(n) ? n : 0;
                 })()
                 : 0;
+    const translationBase =
+        p.translations != null && typeof p.translations === "object"
+            ? p.translations
+            : null;
+    const legacyTranslations = mergeClubTranslations(translationBase, {
+        nameEn: p.nameEn != null ? String(p.nameEn) : null,
+        descriptionEn: p.descriptionEn != null ? String(p.descriptionEn) : null,
+        cityEn: p.cityEn != null ? String(p.cityEn) : null,
+        addressEn: p.addressEn != null ? String(p.addressEn) : null,
+        targetEn: p.targetEn != null ? String(p.targetEn) : null,
+    });
     return {
         id: String(p.id ?? ""),
         name: String(p.name ?? ""),
-        nameEn: p.nameEn != null ? String(p.nameEn) : null,
         slug: String(p.slug ?? ""),
         description: p.description != null ? String(p.description) : null,
-        descriptionEn: p.descriptionEn != null ? String(p.descriptionEn) : null,
+        translations: legacyTranslations as Prisma.JsonValue,
         logo: p.logo != null ? String(p.logo) : null,
         mainImage: p.mainImage != null ? String(p.mainImage) : null,
         mainImagePosition: p.mainImagePosition != null ? String(p.mainImagePosition) : null,
@@ -149,6 +168,10 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
     const displayName = clubDisplayName(club, locale);
     const displayDescription =
         clubDisplayDescription(club, locale) ?? t("introFallback");
+    const displayArea = clubDisplayArea(club, locale);
+    const displayCity = clubDisplayCity(club, locale);
+    const displayAddress = clubDisplayAddress(club, locale);
+    const displayTargetStr = clubDisplayTarget(club, locale);
     const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
     const websiteHref = clubWebsiteHref(club.website);
     const instagramHref = clubInstagramHref(club.instagram);
@@ -158,12 +181,16 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
 
     // --- 数据预处理逻辑 ---
 
-    // 标签生成：组合区域、城市和募集对象
-    const displayTags = [
-        club.area,
-        club.city,
-        club.target,
-    ].filter(Boolean);
+    const displayTags: string[] = [];
+    if (displayArea) displayTags.push(displayArea);
+    if (displayCity) displayTags.push(displayCity);
+    if (displayTargetStr) {
+        displayTargetStr
+            .split(",")
+            .map((x) => x.trim())
+            .filter(Boolean)
+            .forEach((x) => displayTags.push(x));
+    }
 
     // 画廊逻辑：优先显示主图，其次是副图 (subImages)
     // 如果没有任何图片，则显示默认占位符
@@ -263,8 +290,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                         {/* 顶部简要信息 */}
                         <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-white/80 font-medium">
                             <span className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded text-xs md:text-[10px] uppercase tracking-widest border border-white/10">
-                                <MapPin className="w-4 h-4 shrink-0 md:w-3 md:h-3" aria-hidden /> {club.area}{" "}
-                                {club.city && `· ${club.city}`}
+                                <MapPin className="w-4 h-4 shrink-0 md:w-3 md:h-3" aria-hidden /> {displayArea}
+                                {displayCity && ` · ${displayCity}`}
                             </span>
                         </div>
                     </div>
@@ -391,6 +418,15 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                     parsedSchedule.map((sch, idx) => {
                                                         const { start, end, isRange } = formatTimeDisplay(sch.time);
                                                         const enDay = getDayEnglish(sch.day);
+                                                        const dayLabel = localizedScheduleDayLabel(
+                                                            sch.day,
+                                                            locale,
+                                                            {
+                                                                holiday: t("scheduleDayHoliday"),
+                                                                irregular: t("scheduleDayIrregular"),
+                                                                info: t("scheduleDayInfo"),
+                                                            }
+                                                        );
 
                                                         return (
                                                             <div
@@ -408,7 +444,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                                         {enDay}
                                                                     </span>
                                                                     <span className="text-lg font-black text-gray-900 leading-none">
-                                                                        {sch.day}
+                                                                        {dayLabel}
                                                                     </span>
                                                                 </div>
 
@@ -460,11 +496,11 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                         <p className="text-xs font-mono font-bold text-sumo-brand mb-2 flex items-center gap-2">
                                                             〒{club.zipCode || "000-0000"}
                                                             <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
-                                                            {club.area} {club.city}
+                                                            {[displayArea, displayCity].filter(Boolean).join(" ")}
                                                         </p>
                                                         {/* 地址文字优化 (Palt 字体特性) */}
                                                         <p className="text-lg font-bold text-gray-900 leading-tight tracking-tight" style={{ fontFeatureSettings: '"palt"' }}>
-                                                            {club.address}
+                                                            {displayAddress ?? ""}
                                                         </p>
                                                     </div>
                                                     <div className="w-10 h-10 shrink-0 aspect-square bg-gray-50 rounded-full flex items-center justify-center text-gray-400 group-hover:bg-blue-50 group-hover:text-sumo-brand transition-colors">
@@ -517,7 +553,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                             <div className="bg-sumo-brand/5 p-5 rounded-xl border border-sumo-brand/10 flex items-center justify-between">
                                                 <div>
                                                     <p className="text-sm font-black text-sumo-brand">
-                                                        {club.target}
+                                                        {displayTargetStr ?? ""}
                                                     </p>
                                                     <p className="text-[10px] text-gray-500 mt-1 font-bold opacity-80">
                                                         {t("recruitNote")}

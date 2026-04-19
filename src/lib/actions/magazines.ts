@@ -2,14 +2,16 @@
 
 import { z } from "zod";
 import { prisma } from "@/lib/db"; // 保持您原有的引用路径
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
+import { revalidateTagMax } from "@/lib/revalidate-tag-max";
 import { Prisma } from "@prisma/client";
 import { confirmAdmin } from "@/lib/auth-utils";
+import { translateAndPersistMagazine } from "@/lib/auto-translate-on-save";
+import { scheduleAfterResponse } from "@/lib/schedule-after-response";
 
 // Zod Schema
 const MagazineSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
-  titleEn: z.string().optional().nullable(),
   slug: z
     .string()
     .min(1, "IDは必須です")
@@ -20,7 +22,6 @@ const MagazineSchema = z.object({
   pdfUrl: z.string().optional().nullable(),
   readLink: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  descriptionEn: z.string().optional().nullable(),
   published: z.boolean(),
   images: z.array(z.string()),
   readingDirection: z.enum(["ltr", "rtl"]).default("ltr"),
@@ -30,7 +31,6 @@ const MagazineSchema = z.object({
 function parseFormData(formData: FormData) {
   return {
     title: formData.get("title") as string,
-    titleEn: (formData.get("titleEn") as string) || null,
     slug: formData.get("slug") as string,
     region: formData.get("region") as string,
     issueDate: formData.get("issueDate") as string,
@@ -38,7 +38,6 @@ function parseFormData(formData: FormData) {
     pdfUrl: (formData.get("pdfUrl") as string) || null,
     readLink: (formData.get("readLink") as string) || null,
     description: (formData.get("description") as string) || null,
-    descriptionEn: (formData.get("descriptionEn") as string) || null,
     published: formData.get("published") === "true",
     images: formData.getAll("images") as string[],
     readingDirection:
@@ -62,14 +61,19 @@ export async function createMagazine(formData: FormData) {
       return { error: "入力内容に誤りがあります。" };
     }
 
-    await prisma.magazine.create({
-      data: validated.data,
+    const created = await prisma.magazine.create({
+      data: {
+        ...validated.data,
+      },
+      select: { id: true },
     });
+
+    scheduleAfterResponse(() => translateAndPersistMagazine(created.id));
 
     revalidatePath("/admin/magazines");
     revalidatePath("/magazines");
-    revalidateTag("magazines");
-    revalidateTag("admin-stats");
+    revalidateTagMax("magazines");
+    revalidateTagMax("admin-stats");
 
     return { success: true, message: "登録しました" };
   } catch (err) {
@@ -107,21 +111,33 @@ export async function updateMagazine(id: string, formData: FormData) {
 
     await prisma.magazine.update({
       where: { id },
-      data: validated.data,
+      data: {
+        ...validated.data,
+      },
     });
+
+    scheduleAfterResponse(() => translateAndPersistMagazine(id));
 
     revalidatePath("/admin/magazines");
     revalidatePath(`/admin/magazines/${id}`);
     revalidatePath("/magazines");
     revalidatePath(`/magazines/${validated.data.slug}`);
-    revalidateTag("magazines");
-    revalidateTag("admin-stats");
+    revalidateTagMax("magazines");
+    revalidateTagMax("admin-stats");
 
     return { success: true, message: "保存しました" };
   } catch (err) {
     console.error("Update Error:", err);
     return { error: "更新に失敗しました。" };
   }
+}
+
+/** 管理者：日文から機械翻訳を再実行（存量データの補翻用） */
+export async function retranslateMagazine(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { error: "権限がありません。" };
+  await translateAndPersistMagazine(id);
+  return { success: true };
 }
 
 /**
@@ -135,8 +151,8 @@ export async function deleteMagazine(id: string) {
     await prisma.magazine.delete({ where: { id } });
     revalidatePath("/admin/magazines");
     revalidatePath("/magazines");
-    revalidateTag("magazines");
-    revalidateTag("admin-stats");
+    revalidateTagMax("magazines");
+    revalidateTagMax("admin-stats");
 
     return { success: true, message: "削除しました" };
   } catch (err) {
@@ -173,8 +189,8 @@ export async function toggleMagazineHidden(id: string) {
     revalidatePath(`/admin/magazines/${id}`);
     revalidatePath("/magazines");
     revalidatePath(`/magazines/${magazine.slug}`);
-    revalidateTag("magazines");
-    revalidateTag("admin-stats");
+    revalidateTagMax("magazines");
+    revalidateTagMax("admin-stats");
 
     return { success: true };
   } catch (error) {

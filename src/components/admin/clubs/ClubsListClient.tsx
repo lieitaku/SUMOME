@@ -5,6 +5,9 @@ import { MapPin, Pencil } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import SortOrderBar, { type SortMode } from "@/components/admin/ui/SortOrderBar";
 import { getPrefectureIndex } from "@/lib/prefecture-order";
+import { useLocale } from "next-intl";
+import type { Prisma } from "@prisma/client";
+import { clubDisplayArea, clubDisplayCity, clubDisplayName } from "@/lib/i18n-db";
 
 export type ClubListItem = {
     id: string;
@@ -14,6 +17,7 @@ export type ClubListItem = {
     city: string | null;
     hidden?: boolean;
     updatedAt: string;
+    translations?: Prisma.JsonValue | null;
 };
 
 function ClubsListFallback() {
@@ -51,6 +55,8 @@ function ClubsListContent({
     sortBy: SortMode;
     onSortChange: (v: SortMode) => void;
 }) {
+    const locale = useLocale();
+
     return (
         <>
             <div className="flex flex-wrap items-center justify-end gap-4 mb-4">
@@ -60,7 +66,7 @@ function ClubsListContent({
                 {clubs.map((club) => (
                     <div key={club.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-4">
                         <div>
-                            <h3 className="font-bold text-lg text-gray-900">{club.name}</h3>
+                            <h3 className="font-bold text-lg text-gray-900">{clubDisplayName(club, locale)}</h3>
                             <span className="text-xs text-gray-400 font-mono">#{club.slug}</span>
                         </div>
                         <div className="flex items-center gap-2 text-xs">
@@ -73,7 +79,9 @@ function ClubsListContent({
                         <div className="space-y-2 text-sm text-gray-600 border-t border-gray-100 pt-3">
                             <div className="flex items-center gap-2">
                                 <MapPin size={14} className="text-sumo-brand" />
-                                <span>{club.area} {club.city}</span>
+                                <span>
+                                    {[clubDisplayArea(club, locale), clubDisplayCity(club, locale)].filter(Boolean).join(" ")}
+                                </span>
                             </div>
                         </div>
                         <Link
@@ -101,7 +109,7 @@ function ClubsListContent({
                         {clubs.map((club) => (
                             <tr key={club.id} className="hover:bg-gray-50/50 transition-colors group">
                                 <td className="px-6 py-4 align-middle">
-                                    <div className="font-bold text-gray-900">{club.name}</div>
+                                    <div className="font-bold text-gray-900">{clubDisplayName(club, locale)}</div>
                                     <div className="text-xs text-gray-400 font-mono">#{club.slug}</div>
                                 </td>
                                 <td className="px-6 py-4 align-middle text-center">
@@ -118,7 +126,9 @@ function ClubsListContent({
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-1.5 text-sm text-gray-600">
                                         <MapPin size={14} className="text-gray-400" />
-                                        <span>{club.area} {club.city}</span>
+                                        <span>
+                                            {[clubDisplayArea(club, locale), clubDisplayCity(club, locale)].filter(Boolean).join(" ")}
+                                        </span>
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 text-sm text-gray-500 font-mono">

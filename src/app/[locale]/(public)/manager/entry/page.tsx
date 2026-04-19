@@ -1,17 +1,39 @@
 import React from "react";
-// 引入刚才拆分出去的客户端组件
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import RegistrationForm from "@/components/manager/RegistrationForm";
 
-// ✅ 核心修复：强制动态渲染，跳过静态生成
-// 这告诉 Next.js："这个页面不要在构建时跑，等用户访问时再跑"
+function siteBase(): string {
+  return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.memory-sumo.com").replace(/\/+$/, "");
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "ManagerEntry" });
+  const base = siteBase();
+  const jaUrl = `${base}/manager/entry`;
+  const enUrl = `${base}/en/manager/entry`;
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: {
+      canonical: locale === "en" ? enUrl : jaUrl,
+      languages: {
+        ja: jaUrl,
+        en: enUrl,
+      },
+    },
+  };
+}
+
 export const dynamic = "force-dynamic";
 
-/** 新規登録 Server Action が冷スタート + 外部 API + DB でタイムアウトしにくくする（Vercel プランに応じて上限はクランプ） */
 export const maxDuration = 60;
 
 export default function ManagerEntryPage() {
-  return (
-    // 直接渲染表单组件
-    <RegistrationForm />
-  );
+  return <RegistrationForm />;
 }

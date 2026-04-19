@@ -21,5 +21,11 @@ export default async function EditClubPage({ params }: PageProps) {
     // クラブID(slug)は管理者(ADMIN)のみ変更可能。OWNER は変更不可。
     const canEditSlug = currentUser?.role === "ADMIN";
 
-    return <EditClubForm initialData={club} canEditSlug={canEditSlug} />;
+    return (
+        <EditClubForm
+            initialData={club}
+            canEditSlug={canEditSlug}
+            isAdmin={currentUser?.role === "ADMIN"}
+        />
+    );
 }
