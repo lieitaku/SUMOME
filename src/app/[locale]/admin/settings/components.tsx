@@ -1,9 +1,17 @@
 "use client";
 
 import React, { useState, useTransition } from "react";
-import { Save, UserPlus, Trash2, Loader2 } from "lucide-react";
+import { flushSync } from "react-dom";
+import { Save, UserPlus, Trash2, Loader2, Languages, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { createStaffAccount, updateMyProfile, updatePassword, deleteMyAccount } from "@/lib/actions/users";
+import {
+  getBatchTranslationTargets,
+  runOneBatchTranslation,
+  revalidateAfterBatchTranslation,
+} from "@/lib/actions/translations";
+import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 
 // --- Profile Form ---
 export function ProfileForm({ initialName }: { initialName: string }) {
@@ -159,4 +167,192 @@ export function DeleteAccountForm({
             </button>
         </form>
     );
+}
+
+/** 管理者：クラブ・雑誌の機械翻訳を一括実行（既存訳はスキップ） */
+export function BatchTranslateCard() {
+  const [phase, setPhase] = useState<"idle" | "running" | "done">("idle");
+  const [progress, setProgress] = useState({ current: 0, total: 0, label: "" });
+  const [lastError, setLastError] = useState<string | null>(null);
+
+  const pct =
+    progress.total > 0 ? Math.min(100, Math.round((progress.current / progress.total) * 100)) : 0;
+  const indeterminate = phase === "running" && progress.total === 0;
+
+  const startBatch = () => {
+    setLastError(null);
+    flushSync(() => {
+      setPhase("running");
+      setProgress({
+        current: 0,
+        total: 0,
+        label: "サーバーから対象一覧を取得しています…",
+      });
+    });
+
+    void (async () => {
+      const res = await getBatchTranslationTargets();
+      if ("error" in res) {
+        setLastError(res.error);
+        toast.error(res.error);
+        setPhase("idle");
+        return;
+      }
+      const items = "items" in res && Array.isArray(res.items) ? res.items : [];
+      if (items.length === 0) {
+        toast.message("翻訳対象のクラブ・フォトブックがありません。");
+        setPhase("idle");
+        return;
+      }
+
+      flushSync(() => {
+        setProgress({ current: 0, total: items.length, label: "準備中…" });
+      });
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const itemLabel = `${item.type === "club" ? "クラブ" : "フォトブック"}: ${item.label}`;
+        flushSync(() => {
+          setProgress({
+            current: i,
+            total: items.length,
+            label: `処理中: ${i + 1}/${items.length}（${itemLabel}）`,
+          });
+        });
+        const one = await runOneBatchTranslation(item.type, item.id);
+        if ("error" in one) {
+          setLastError(one.error);
+          toast.error(one.error);
+          setPhase("idle");
+          return;
+        }
+        flushSync(() => {
+          setProgress({
+            current: i + 1,
+            total: items.length,
+            label: `処理中: ${i + 1}/${items.length}（${itemLabel}）`,
+          });
+        });
+        await new Promise((r) => setTimeout(r, 350));
+      }
+
+      const rev = await revalidateAfterBatchTranslation();
+      if ("error" in rev) {
+        setLastError(rev.error);
+        toast.error(rev.error);
+        setPhase("idle");
+        return;
+      }
+
+      toast.success("一括翻訳が完了しました。");
+      setPhase("done");
+    })();
+  };
+
+  return (
+    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col min-h-0 lg:h-full lg:row-start-2 lg:col-start-2">
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+        <div className="p-2 bg-violet-50 text-violet-600 rounded-lg">
+          <Languages size={20} />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">多言語機械翻訳（一括）</h2>
+          <p className="text-xs text-gray-400">
+            環境変数 AUTO_TRANSLATE_LOCALES に従い、未翻訳のみ補完します
+          </p>
+        </div>
+      </div>
+
+      <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+        全クラブ・全フォトブックを順に処理します。既に該当言語があるフィールドはスキップし、新規言語（例:
+        fr）追加時は不足分のみ翻訳します。Gemini API のレート制限を避けるため項目間に短い間隔を空けます。
+      </p>
+
+      {lastError && (
+        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-xs font-bold text-red-800">
+          {lastError}
+        </div>
+      )}
+
+      <div className="space-y-3 mb-6">
+        <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest text-gray-400">
+          <span>進捗</span>
+          <span>
+            {phase === "running" || phase === "done"
+              ? indeterminate
+                ? "取得中…"
+                : `${progress.current} / ${progress.total}`
+              : "—"}
+          </span>
+        </div>
+        <div className="h-3 rounded-full bg-gray-100 overflow-hidden border border-gray-200/80 shadow-inner">
+          <div
+            className={cn(
+              "h-full rounded-full bg-gradient-to-r transition-[width] duration-500 ease-out",
+              indeterminate
+                ? "from-violet-400 via-fuchsia-400 to-amber-300 animate-pulse"
+                : "from-violet-500 via-fuchsia-500 to-amber-400"
+            )}
+            style={{
+              width: indeterminate ? "100%" : phase === "idle" ? "0%" : `${pct}%`,
+            }}
+          />
+        </div>
+        <p className="text-[11px] text-gray-600 font-medium min-h-[2.5rem] leading-snug">
+          {phase === "running" ? (
+            <>
+              <Sparkles className="inline w-3.5 h-3.5 text-violet-500 mr-1 align-text-bottom" />
+              {progress.label || "処理中…"}
+            </>
+          ) : phase === "done" ? (
+            <span className="text-emerald-600 font-bold">完了しました。公開ページに反映済みです。</span>
+          ) : (
+            <span className="text-gray-400">開始ボタンで処理を開始します。</span>
+          )}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        disabled={phase === "running"}
+        onClick={() => {
+          if (phase === "done") {
+            setPhase("idle");
+            setProgress({ current: 0, total: 0, label: "" });
+            return;
+          }
+          startBatch();
+        }}
+        className={cn(
+          "lg:mt-auto flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-xs transition-colors",
+          phase === "running"
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : phase === "done"
+              ? "bg-emerald-600 text-white hover:bg-emerald-700"
+              : "bg-gray-900 text-white hover:bg-gray-800"
+        )}
+      >
+        {phase === "running" ? (
+          <>
+            <Loader2 size={16} className="animate-spin" />
+            処理中…
+          </>
+        ) : phase === "done" ? (
+          "もう一度実行"
+        ) : (
+          <>
+            <Languages size={16} />
+            翻訳を開始する
+          </>
+        )}
+      </button>
+
+      <Link
+        href="/admin/settings/migration"
+        className="mt-3 text-center text-[10px] text-gray-400 hover:text-gray-700 underline underline-offset-2"
+      >
+        画像フォーマット遷移ツール
+      </Link>
+    </div>
+  );
 }

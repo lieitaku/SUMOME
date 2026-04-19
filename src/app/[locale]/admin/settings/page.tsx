@@ -1,5 +1,5 @@
 import React from "react";
-import { UserPlus, Shield, Lock, User, Zap, Trash2 } from "lucide-react";
+import { UserPlus, Shield, Lock, User, Trash2 } from "lucide-react";
 import { createStaffAccount, updateMyProfile, updatePassword } from "@/lib/actions/users";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/db";
@@ -7,7 +7,13 @@ import { redirect } from "@/i18n/navigation";
 import { getLocale } from "next-intl/server";
 import Link from "next/link";
 
-import { ProfileForm, PasswordForm, CreateStaffForm, DeleteAccountForm } from "./components";
+import {
+    ProfileForm,
+    PasswordForm,
+    CreateStaffForm,
+    DeleteAccountForm,
+    BatchTranslateCard,
+} from "./components";
 
 // ==============================================================================
 // 🟢 Server Component: 页面入口
@@ -140,27 +146,8 @@ export default async function SettingsPage() {
                         />
                     </div>
 
-                    {/* 行2 右：システムパフォーマンス（アカウント削除と同じ行の高さ） */}
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col min-h-0 lg:h-full lg:row-start-2 lg:col-start-2">
-                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                                <Zap size={20} />
-                            </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-900">システムパフォーマンス</h2>
-                                <p className="text-xs text-gray-400">画像の最適化とメンテナンス</p>
-                            </div>
-                        </div>
-                        <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-                            過去にアップロードされた古い形式の画像（JPG/PNG）を、読み込みの速い WebP 形式に一括変換します。
-                        </p>
-                        <Link
-                            href="/admin/settings/migration"
-                            className="lg:mt-auto flex items-center justify-center gap-2 w-full py-3 bg-gray-900 text-white rounded-xl font-bold text-xs hover:bg-gray-800 transition-colors"
-                        >
-                            画像フォーマット遷移ツール
-                        </Link>
-                    </div>
+                    {/* 行2 右：多言語機械翻訳（一括） */}
+                    <BatchTranslateCard />
                 </div>
             ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

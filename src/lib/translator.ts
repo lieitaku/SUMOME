@@ -1,7 +1,13 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-/** Prefer 2.5-flash: some projects have free-tier quota 0 on 2.0-flash (429). */
-const DEFAULT_MODEL = "gemini-2.5-flash";
+/**
+ * 既定はコスト重視の Flash-Lite 系。`GEMINI_MODEL` で上書き可能。
+ * - `gemini-3.1-flash-lite-preview` … 公式の省コスト・高頻度向け（翻訳用途にも記載あり）
+ * - `gemini-2.5-flash-lite` … 2.5 世代の安定版 Flash-Lite
+ * - `gemma-4-31b-it` … Gemma（オープン系）同一 API・同一キー。品質は十分だが JSON 厳密性は Gemini より落ちることがある
+ * @see https://ai.google.dev/gemini-api/docs/models
+ */
+const DEFAULT_MODEL = "gemini-3.1-flash-lite-preview";
 
 /** 環境変数 AUTO_TRANSLATE_LOCALES（カンマ区切り、例: en,fr）。未設定時は en のみ。ja は含めない。 */
 export function getAutoTranslateTargetLocales(): string[] {
@@ -29,6 +35,25 @@ function stripCodeFences(text: string): string {
   return t.trim();
 }
 
+/** Gemini が説明文を付けたりフェンスを崩した場合の救済 */
+function tryParseJsonObject(raw: string): unknown | null {
+  const cleaned = stripCodeFences(raw.trim());
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start >= 0 && end > start) {
+      try {
+        return JSON.parse(cleaned.slice(start, end + 1));
+      } catch {
+        /* fallthrough */
+      }
+    }
+  }
+  return null;
+}
+
 const PLACEHOLDER_JA = new Set(["未設定", "—", "-"]);
 
 function shouldSkipValue(v: string | null | undefined): boolean {
@@ -38,6 +63,68 @@ function shouldSkipValue(v: string | null | undefined): boolean {
 
 /** フィールドキー → 各 target locale への訳文 */
 export type MultiLocaleFieldResult = Record<string, Partial<Record<string, string>>>;
+
+function fieldLocalesComplete(
+  per: Partial<Record<string, string>> | undefined,
+  locales: string[]
+): boolean {
+  if (!per) return false;
+  return locales.every((loc) => typeof per[loc] === "string" && per[loc]!.trim() !== "");
+}
+
+/**
+ * 複数フィールドをまとめて送ると、Gemini が JSON のトップレベルキーを欠落させることがある。
+ * その場合でも欠けたフィールドだけもう 1 回リクエストしてマージする（DB に city のみ等が残るのを防ぐ）。
+ */
+export async function translateJaFieldsToTargetLocalesWithGapRetry(
+  input: Record<string, string>,
+  targetLocales: string[],
+  options?: { retries?: number }
+): Promise<MultiLocaleFieldResult> {
+  const keys = Object.keys(input).filter((k) => !shouldSkipValue(input[k]));
+  if (keys.length === 0 || targetLocales.length === 0) return {};
+
+  let merged = await translateJaFieldsToTargetLocales(input, targetLocales, options);
+  /** 一括が空のときはフィールド単位で再試行（長い JSON / モデル欠落対策） */
+  if (Object.keys(merged).length === 0) {
+    merged = await translateJaFieldsSequentially(input, targetLocales, options);
+  }
+  if (Object.keys(merged).length === 0) return merged;
+
+  const incomplete = keys.filter((k) => !fieldLocalesComplete(merged[k], targetLocales));
+  if (incomplete.length === 0) return merged;
+
+  const subInput: Record<string, string> = {};
+  for (const k of incomplete) subInput[k] = input[k]!;
+
+  const second = await translateJaFieldsToTargetLocales(subInput, targetLocales, options);
+  merged = { ...merged, ...second };
+
+  const still = keys.filter((k) => !fieldLocalesComplete(merged[k], targetLocales));
+  if (still.length > 0) {
+    const oneByOne: Record<string, string> = {};
+    for (const k of still) oneByOne[k] = input[k]!;
+    const third = await translateJaFieldsSequentially(oneByOne, targetLocales, options);
+    merged = { ...merged, ...third };
+  }
+
+  return merged;
+}
+
+/** フィールドを 1 つずつ翻訳してマージ（バッチ失敗時のフォールバック） */
+async function translateJaFieldsSequentially(
+  input: Record<string, string>,
+  targetLocales: string[],
+  options?: { retries?: number }
+): Promise<MultiLocaleFieldResult> {
+  const out: MultiLocaleFieldResult = {};
+  for (const [key, val] of Object.entries(input)) {
+    if (shouldSkipValue(val)) continue;
+    const part = await translateJaFieldsToTargetLocales({ [key]: val }, targetLocales, options);
+    Object.assign(out, part);
+  }
+  return out;
+}
 
 /**
  * 日文の JSON 片を、指定 locales へ一度に翻訳（1 回の Gemini 呼び出し）。
@@ -61,7 +148,6 @@ export async function translateJaFieldsToTargetLocales(
   for (const k of fieldKeys) subset[k] = input[k]!;
 
   const modelName = process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
-  const model = client.getGenerativeModel({ model: modelName });
 
   const localeList = targetLocales.join(", ");
   const prompt = `You are a professional translator for a sumo sports club / magazine website.
@@ -70,23 +156,67 @@ Translate each value into ALL of these locale codes: ${localeList}.
 Use natural, idiomatic wording for each target language.
 
 Output ONLY valid JSON with this exact shape:
-- Top-level keys MUST match the input keys exactly (${fieldKeys.join(", ")}).
+- Top-level keys MUST match the input keys exactly (${fieldKeys.join(", ")}). Do not omit any key; every input key must appear in the output.
 - Each value MUST be an object whose keys are exactly these locale codes: ${targetLocales.map((l) => `"${l}"`).join(", ")}.
 - Each locale value is the translation of the Japanese source for that field.
 Example shape: {"name":{"en":"...","fr":"..."},"description":{"en":"...","fr":"..."}}
 Do not use markdown fences. Do not add commentary.
+${
+    fieldKeys.includes("schedule")
+      ? `
+If the key "schedule" is present, its value is a JSON string describing weekly practice times (array of {day, time, note?}). Translate Japanese text inside day/time/note while keeping the string parseable as JSON (escape quotes as needed). Preserve the array structure.`
+      : ""
+  }
 
 Input JSON (Japanese values):
 ${JSON.stringify(subset, null, 2)}`;
+
+  const generateWithModel = (jsonMime: boolean) =>
+    client.getGenerativeModel({
+      model: modelName,
+      generationConfig: jsonMime
+        ? { responseMimeType: "application/json", maxOutputTokens: 8192 }
+        : { maxOutputTokens: 8192 },
+    });
 
   const retries = options?.retries ?? 2;
   let lastErr: unknown;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const result = await model.generateContent(prompt);
-      const text = result.response.text();
-      const cleaned = stripCodeFences(text);
-      const parsed = JSON.parse(cleaned) as unknown;
+      let result;
+      try {
+        result = await generateWithModel(true).generateContent(prompt);
+      } catch (apiErr) {
+        console.warn("[translator] JSON mime request failed, retrying without responseMimeType:", apiErr);
+        result = await generateWithModel(false).generateContent(prompt);
+      }
+      let text = "";
+      try {
+        text = result.response.text();
+      } catch (textErr) {
+        const raw = result.response as {
+          promptFeedback?: { blockReason?: string; blockReasonMessage?: string };
+          candidates?: { finishReason?: string; finishMessage?: string }[];
+        };
+        console.warn(
+          "[translator] response.text() failed:",
+          textErr,
+          "block:",
+          raw.promptFeedback,
+          "finish:",
+          raw.candidates?.[0]?.finishReason
+        );
+        throw textErr;
+      }
+      if (!text?.trim()) {
+        try {
+          result = await generateWithModel(false).generateContent(prompt);
+          text = result.response.text();
+        } catch {
+          throw new Error("Empty Gemini response text");
+        }
+      }
+      const parsed = tryParseJsonObject(text);
       if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
         throw new Error("Gemini response is not a JSON object");
       }
@@ -94,9 +224,15 @@ ${JSON.stringify(subset, null, 2)}`;
       for (const fieldKey of fieldKeys) {
         const fieldVal = (parsed as Record<string, unknown>)[fieldKey];
         if (!fieldVal || typeof fieldVal !== "object" || Array.isArray(fieldVal)) continue;
+        const raw = fieldVal as Record<string, unknown>;
+        /** Gemini が "EN" 等と返す場合に targetLocales（小文字）へ合わせる */
+        const byLower: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(raw)) {
+          byLower[k.toLowerCase()] = v;
+        }
         const per: Partial<Record<string, string>> = {};
         for (const loc of targetLocales) {
-          const v = (fieldVal as Record<string, unknown>)[loc];
+          const v = byLower[loc] ?? raw[loc];
           if (typeof v === "string" && v.trim() !== "") per[loc] = v.trim();
         }
         if (Object.keys(per).length > 0) out[fieldKey] = per;

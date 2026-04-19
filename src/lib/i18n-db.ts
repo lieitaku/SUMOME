@@ -92,6 +92,44 @@ export function clubDisplayTarget(
   return fromDoc.trim() || ja || null;
 }
 
+/** 稽古日程 JSON 文字列：locale ごとに `translations.schedule.<loc>` があればその JSON 文字列を使用 */
+export function clubDisplaySchedule(
+  club: {
+    schedule?: string | null;
+    translations?: Prisma.JsonValue | null;
+  },
+  locale: string
+): string | null {
+  const ja = club.schedule?.trim() ?? "";
+  if (locale === "ja") return ja || null;
+  const fromDoc = getTranslated(
+    club.translations ?? null,
+    "schedule",
+    locale,
+    ja
+  );
+  return fromDoc.trim() || ja || null;
+}
+
+/** 代表者名 */
+export function clubDisplayRepresentative(
+  club: {
+    representative?: string | null;
+    translations?: Prisma.JsonValue | null;
+  },
+  locale: string
+): string | null {
+  const ja = club.representative?.trim() ?? "";
+  if (locale === "ja") return ja || null;
+  const fromDoc = getTranslated(
+    club.translations ?? null,
+    "representative",
+    locale,
+    ja
+  );
+  return fromDoc.trim() || ja || null;
+}
+
 export function activityDisplayTitle(
   activity: {
     title: string;

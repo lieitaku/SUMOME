@@ -286,7 +286,8 @@ export async function updateClub(formData: FormData) {
 export async function retranslateClub(clubId: string) {
   const admin = await confirmAdmin();
   if (!admin) return { error: "権限がありません。" };
-  await translateAndPersistClub(clubId);
+  const r = await translateAndPersistClub(clubId);
+  if (!r.ok) return { error: r.error };
   return { success: true };
 }
 

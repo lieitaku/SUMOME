@@ -5,7 +5,7 @@ import { after } from "next/server";
  * 単に `void fn()` だとサーバーレス環境でプロセス終了により翻訳が落ちることがある。
  * @see https://nextjs.org/docs/app/api-reference/functions/after
  */
-export function scheduleAfterResponse(task: () => Promise<void>): void {
+export function scheduleAfterResponse(task: () => Promise<void | unknown>): void {
   try {
     after(() =>
       task().catch((e) => {

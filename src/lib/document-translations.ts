@@ -55,6 +55,40 @@ export function translationDocCoversPayload(
   return true;
 }
 
+/**
+ * 在 targetLocales 中，至少有一个 payload 字段尚未录入该 locale 译文的那些 locale（并集）。
+ * 用于 skipExisting：只向 Gemini 请求仍缺译文的语种。
+ */
+export function getMissingLocalesUnion(
+  doc: Prisma.JsonValue | null | undefined,
+  payload: Record<string, string>,
+  targetLocales: string[]
+): string[] {
+  const d = parseTranslationDoc(doc);
+  return targetLocales.filter((loc) =>
+    Object.keys(payload).some((key) => !d[key]?.[loc]?.trim())
+  );
+}
+
+/**
+ * 仅保留「在 missingLocales 中仍缺至少一种译文」的字段，避免重复翻已齐字段。
+ */
+export function filterPayloadNeedingAnyLocale(
+  doc: Prisma.JsonValue | null | undefined,
+  payload: Record<string, string>,
+  missingLocales: string[]
+): Record<string, string> {
+  if (missingLocales.length === 0) return {};
+  const d = parseTranslationDoc(doc);
+  const out: Record<string, string> = {};
+  for (const [key, val] of Object.entries(payload)) {
+    if (!val?.trim()) continue;
+    const needs = missingLocales.some((loc) => !d[key]?.[loc]?.trim());
+    if (needs) out[key] = val;
+  }
+  return out;
+}
+
 /** 回退顺序：当前 locale → en → 日文主字段 */
 export function getTranslated(
   doc: Prisma.JsonValue | null | undefined,

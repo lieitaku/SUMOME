@@ -94,7 +94,7 @@ export function getCachedClubBySlug(slug: string) {
       prisma.club.findFirst({
         where: { slug: s, hidden: false },
       }),
-    ["club-by-slug"],
+    ["club-by-slug", slug],
     { revalidate: 60, tags: ["clubs"] }
   )(slug);
 }
@@ -106,7 +106,7 @@ export function getCachedMagazineBySlug(slug: string) {
       prisma.magazine.findFirst({
         where: { slug: s, published: true, hidden: false },
       }),
-    ["magazine-by-slug"],
+    ["magazine-by-slug", slug],
     { revalidate: 60, tags: ["magazines"] }
   )(slug);
 }

@@ -32,6 +32,7 @@ import MainImagePositionEditor, { parsePositionString, formatPositionString, par
 // ✨ 2. 引入 Server Actions
 import { updateClub, deleteClub, toggleClubHidden, retranslateClub } from "@/lib/actions/clubs";
 import { useRouter } from "@/i18n/navigation";
+import { getLocaleString } from "@/lib/document-translations";
 
 // ==============================================================================
 // 📜 Zod Schema 定义
@@ -596,11 +597,35 @@ export default function EditClubForm({ initialData, canEditSlug = false, isAdmin
                 </div>
 
                 {isAdmin && (
-                    <div className="bg-amber-50/90 p-6 md:p-8 rounded-3xl border border-amber-200/80 shadow-sm space-y-3">
+                    <div className="bg-amber-50/90 p-6 md:p-8 rounded-3xl border border-amber-200/80 shadow-sm space-y-4">
                         <h2 className="text-sm font-bold text-amber-900">多言語（機械翻訳）</h2>
                         <p className="text-xs text-amber-900/80 leading-relaxed">
-                            保存時に自動で翻訳されます。既存データの翻訳だけやり直す場合は下のボタンを押してください（環境変数 AUTO_TRANSLATE_LOCALES / GEMINI_API_KEY が必要です）。
+                            保存時に自動で翻訳され、DB の <code className="rounded bg-amber-100/80 px-1">translations</code>{" "}
+                            に保存されます（公開サイトは <code className="rounded bg-amber-100/80 px-1">name.en</code> などから参照）。
+                            環境変数 <code className="rounded bg-amber-100/80 px-1">AUTO_TRANSLATE_LOCALES</code> /{" "}
+                            <code className="rounded bg-amber-100/80 px-1">GEMINI_API_KEY</code> が必要です。
                         </p>
+                        <div className="rounded-xl border border-amber-200/60 bg-white/60 p-3 text-xs text-amber-950/90 space-y-1.5">
+                            <p className="font-bold text-amber-900 mb-1">現在 DB に保存されている英語（en）プレビュー</p>
+                            <p>
+                                <span className="font-bold text-amber-800">名前: </span>
+                                {getLocaleString(initialData.translations, "name", "en") || "—"}
+                            </p>
+                            <p>
+                                <span className="font-bold text-amber-800">説明: </span>
+                                {getLocaleString(initialData.translations, "description", "en") || "—"}
+                            </p>
+                            <p>
+                                <span className="font-bold text-amber-800">市区町村 / 住所: </span>
+                                {getLocaleString(initialData.translations, "city", "en") || "—"} /{" "}
+                                {getLocaleString(initialData.translations, "address", "en") || "—"}
+                            </p>
+                            <p>
+                                <span className="font-bold text-amber-800">募集対象 / 代表: </span>
+                                {getLocaleString(initialData.translations, "target", "en") || "—"} /{" "}
+                                {getLocaleString(initialData.translations, "representative", "en") || "—"}
+                            </p>
+                        </div>
                         <button
                             type="button"
                             disabled={isRetranslating}
@@ -611,7 +636,10 @@ export default function EditClubForm({ initialData, canEditSlug = false, isAdmin
                                     if (r && "error" in r && r.error) {
                                         alert(r.error);
                                     } else {
-                                        alert("翻訳を再生成しました。公開サイトはキャッシュの関係で数秒〜1分後に反映されることがあります。");
+                                        router.refresh();
+                                        alert(
+                                            "翻訳を再生成しました。下のプレビューが更新されない場合はページを再読み込みしてください。公開サイトはキャッシュで数秒〜1分遅れることがあります。"
+                                        );
                                     }
                                 } finally {
                                     setIsRetranslating(false);

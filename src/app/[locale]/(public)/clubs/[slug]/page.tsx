@@ -20,6 +20,8 @@ import {
     clubDisplayCity,
     clubDisplayDescription,
     clubDisplayName,
+    clubDisplayRepresentative,
+    clubDisplaySchedule,
     clubDisplayTarget,
 } from "@/lib/i18n-db";
 import { mergeClubTranslations } from "@/lib/document-translations";
@@ -172,6 +174,8 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
     const displayCity = clubDisplayCity(club, locale);
     const displayAddress = clubDisplayAddress(club, locale);
     const displayTargetStr = clubDisplayTarget(club, locale);
+    const displayRepresentative = clubDisplayRepresentative(club, locale);
+    const scheduleSourceForParse = clubDisplaySchedule(club, locale);
     const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
     const websiteHref = clubWebsiteHref(club.website);
     const instagramHref = clubInstagramHref(club.instagram);
@@ -203,21 +207,21 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
         galleryImages.push(DEFAULT_CLUB_MAIN_IMAGE);
     }
 
-    // 日程解析逻辑：尝试解析 JSON 字符串，兼容旧数据格式
+    // 日程解析逻辑：尝试解析 JSON 字符串，兼容旧数据格式（多言語は clubDisplaySchedule の結果を使用）
     let parsedSchedule: { day: string; time: string }[] = [];
     try {
-        if (club.schedule) {
-            const parsed = JSON.parse(club.schedule);
+        if (scheduleSourceForParse) {
+            const parsed = JSON.parse(scheduleSourceForParse);
             if (Array.isArray(parsed)) {
                 parsedSchedule = parsed;
             } else {
                 // 如果不是数组（可能是旧数据的纯文本），作为单行信息处理
-                parsedSchedule = [{ day: "Info", time: club.schedule }];
+                parsedSchedule = [{ day: "Info", time: scheduleSourceForParse }];
             }
         }
     } catch (e) {
         // 解析失败时的容错处理
-        if (club.schedule) parsedSchedule = [{ day: "Info", time: club.schedule }];
+        if (scheduleSourceForParse) parsedSchedule = [{ day: "Info", time: scheduleSourceForParse }];
     }
 
     // --- 辅助函数：用于日程表美化 ---
@@ -519,12 +523,18 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                             </div>
                                         </div>
 
-                                        {/* 3. 電話番号（公開フラグが on のときのみ） */}
-                                        {showPhonePublic && (
+                                        {/* 3. 運営・連絡先（代表者 / 電話） */}
+                                        {(displayRepresentative || showPhonePublic) && (
                                             <div className="col-span-1 md:col-span-2">
                                                 <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                                                     <Phone size={14} className="text-sumo-brand" /> {t("contactHeading")}
                                                 </h4>
+                                                {displayRepresentative && (
+                                                    <p className="text-xs font-bold text-gray-600 mb-4">
+                                                        {displayRepresentative}
+                                                    </p>
+                                                )}
+                                                {showPhonePublic && (
                                                 <a
                                                     href={`tel:${club.phone}`}
                                                     className="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all flex items-center justify-between gap-4"
@@ -542,6 +552,7 @@ export default async function ClubDetailPage({ params, searchParams }: PageProps
                                                         {t("tapToCall")}
                                                     </span>
                                                 </a>
+                                                )}
                                             </div>
                                         )}
 

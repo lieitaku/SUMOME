@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import ScrollInitializer from "@/components/utils/ScrollInitializer";
 import HomeContent from "@/components/home/HomeContent";
 import HomeSkeleton from "@/components/home/HomeSkeleton";
 
@@ -18,7 +17,6 @@ export default async function Home({
 
     return (
         <div className="w-full flex flex-col min-h-screen">
-            <ScrollInitializer />
             <Suspense fallback={<HomeSkeleton />}>
                 <HomeContent locale={locale} />
             </Suspense>

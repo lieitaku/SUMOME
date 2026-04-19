@@ -1116,7 +1116,7 @@ const Hero = ({
         ) : null}
         <div
           ref={heroCardShellRef}
-          className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px] pointer-events-none [&_*]:pointer-events-none"
+          className="absolute z-30 reveal-up is-visible top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px] pointer-events-none [&_*]:pointer-events-none"
         >
           <HeroContent />
         </div>
@@ -1205,7 +1205,7 @@ const Hero = ({
 
       <div
         ref={heroCardShellRef}
-        className="absolute z-30 reveal-up top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px] pointer-events-none [&_*]:pointer-events-none"
+        className="absolute z-30 reveal-up is-visible top-32 left-1/2 -translate-x-1/2 w-[92vw] max-w-[600px] pointer-events-none [&_*]:pointer-events-none"
       >
         <HeroContent />
       </div>

@@ -53,6 +53,8 @@ async function main() {
       city: true,
       address: true,
       target: true,
+      schedule: true,
+      representative: true,
     },
     orderBy: { updatedAt: "desc" },
   });

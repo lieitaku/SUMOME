@@ -147,15 +147,27 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
             // 1. 文本搜索逻辑 (不区分大小写)
             // 匹配范围：俱乐部名称 或 地区字段
             const q = searchQuery.toLowerCase();
-            const nameHaystack = [
+            const textHaystack = [
                 club.name,
                 ...allTranslationValues(club.translations, "name"),
+                club.description ?? "",
+                ...allTranslationValues(club.translations, "description"),
+                club.city ?? "",
+                ...allTranslationValues(club.translations, "city"),
+                club.address,
+                ...allTranslationValues(club.translations, "address"),
+                club.target ?? "",
+                ...allTranslationValues(club.translations, "target"),
+                club.schedule ?? "",
+                ...allTranslationValues(club.translations, "schedule"),
+                club.representative ?? "",
+                ...allTranslationValues(club.translations, "representative"),
             ]
                 .join(" ")
                 .toLowerCase();
             const matchQuery =
                 searchQuery === "" ||
-                nameHaystack.includes(q) ||
+                textHaystack.includes(q) ||
                 club.area.includes(searchQuery);
 
             // 2. 地区筛选逻辑

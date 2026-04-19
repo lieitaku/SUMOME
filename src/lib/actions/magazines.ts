@@ -136,7 +136,8 @@ export async function updateMagazine(id: string, formData: FormData) {
 export async function retranslateMagazine(id: string) {
   const admin = await confirmAdmin();
   if (!admin) return { error: "権限がありません。" };
-  await translateAndPersistMagazine(id);
+  const r = await translateAndPersistMagazine(id);
+  if (!r.ok) return { error: r.error };
   return { success: true };
 }
 
