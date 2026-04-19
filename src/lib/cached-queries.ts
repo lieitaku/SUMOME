@@ -1,7 +1,30 @@
 import { unstable_cache } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { getPickupClubsForHome } from "@/lib/actions/pickup-clubs";
 import { sortClubsWithRealImagePriority } from "@/lib/club-images";
+
+/**
+ * 都道府県ページの prefName（例: 東京都）と DB の club.area の表記揺れに対応。
+ * 完全一致に加え、末尾の 県/府/都 を除いた表記（例: 東京）でも startsWith マッチ。
+ */
+function clubAreaOrForPrefecture(prefName: string): Prisma.ClubWhereInput {
+  const key = prefName.trim();
+  if (!key) {
+    return { id: { equals: "__impossible_club_id__" } };
+  }
+  const keys = new Set<string>([key]);
+  const stripped = key.replace(/(県|府|都)$/u, "");
+  if (stripped && stripped !== key && stripped.length >= 2) {
+    keys.add(stripped);
+  }
+  const or: Prisma.ClubWhereInput[] = [];
+  for (const k of keys) {
+    or.push({ area: k });
+    or.push({ area: { startsWith: k } });
+  }
+  return { OR: or };
+}
 
 /** Cached active banners (home + prefecture pages). Invalidate with tag "active-banners". */
 export function getCachedActiveBanners() {
@@ -46,7 +69,11 @@ export function getCachedClubsByArea(prefName: string) {
     async () => {
       try {
         const rows = await prisma.club.findMany({
-          where: { area: prefName, slug: { not: "official-hq" }, hidden: false },
+          where: {
+            slug: { not: "official-hq" },
+            hidden: false,
+            ...clubAreaOrForPrefecture(prefName),
+          },
           orderBy: { createdAt: "desc" },
         });
         return sortClubsWithRealImagePriority(rows);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import {
@@ -48,10 +48,14 @@ export default function ActivitiesListClient({
   const [data, setData] = useState<ApiResponse | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState<string | null>(null);
+  const initialDataRef = useRef(initialData);
+  initialDataRef.current = initialData;
 
   useEffect(() => {
-    if (initialData && initialPage === initialData.page) return;
     const page = Math.max(1, initialPage);
+    const snap = initialDataRef.current;
+    if (snap && page === snap.page) return;
+
     setLoading(true);
     setError(null);
     fetch(`/api/activities?page=${page}`)
@@ -60,9 +64,20 @@ export default function ActivitiesListClient({
         return res.json();
       })
       .then((d: ApiResponse) => setData(d))
-      .catch(() => setError(t("listLoadError")))
+      .catch(() => {
+        const fallback = initialDataRef.current;
+        const p = Math.max(1, initialPage);
+        if (fallback && fallback.page === p) {
+          setData(fallback);
+          setError(null);
+        } else {
+          setError(t("listLoadError"));
+        }
+      })
       .finally(() => setLoading(false));
-  }, [initialPage, initialData, t]);
+    // t は listLoadError のみ。t の参照変化で再 fetch しない。
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- see above
+  }, [initialPage, initialData]);
 
   if (error) {
     return (
