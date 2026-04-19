@@ -61,6 +61,13 @@ function shouldSkipValue(v: string | null | undefined): boolean {
   return s === "" || PLACEHOLDER_JA.has(s);
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+/** 1 回の batch 内での generateContent 再試行回数（0 始まりなので +1 回）。RPM 節約のため控えめに。 */
+const BATCH_INNER_RETRIES = 1;
+
 /** フィールドキー → 各 target locale への訳文 */
 export type MultiLocaleFieldResult = Record<string, Partial<Record<string, string>>>;
 
@@ -74,7 +81,7 @@ function fieldLocalesComplete(
 
 /**
  * 複数フィールドをまとめて送ると、Gemini が JSON のトップレベルキーを欠落させることがある。
- * その場合でも欠けたフィールドだけもう 1 回リクエストしてマージする（DB に city のみ等が残るのを防ぐ）。
+ * 方針: 最大 2 回の batch（2 回目は空なら全文再試行、部分なら欠損キーのみ）→ まだ欠ける場合のみフィールド単位（間隔付き）。
  */
 export async function translateJaFieldsToTargetLocalesWithGapRetry(
   input: Record<string, string>,
@@ -84,42 +91,53 @@ export async function translateJaFieldsToTargetLocalesWithGapRetry(
   const keys = Object.keys(input).filter((k) => !shouldSkipValue(input[k]));
   if (keys.length === 0 || targetLocales.length === 0) return {};
 
-  let merged = await translateJaFieldsToTargetLocales(input, targetLocales, options);
-  /** 一括が空のときはフィールド単位で再試行（長い JSON / モデル欠落対策） */
-  if (Object.keys(merged).length === 0) {
-    merged = await translateJaFieldsSequentially(input, targetLocales, options);
+  const innerOpts = { ...options, retries: options?.retries ?? BATCH_INNER_RETRIES };
+
+  let merged = await translateJaFieldsToTargetLocales(input, targetLocales, innerOpts);
+
+  const anyIncomplete = (): boolean =>
+    keys.some((k) => !fieldLocalesComplete(merged[k], targetLocales));
+
+  const isEmpty = Object.keys(merged).length === 0;
+  const needsSecondBatch = isEmpty || anyIncomplete();
+
+  if (needsSecondBatch) {
+    await sleep(2000);
+    if (isEmpty) {
+      const retryFull = await translateJaFieldsToTargetLocales(input, targetLocales, innerOpts);
+      merged = retryFull;
+    } else {
+      const incompleteKeys = keys.filter((k) => !fieldLocalesComplete(merged[k], targetLocales));
+      const subInput: Record<string, string> = {};
+      for (const k of incompleteKeys) subInput[k] = input[k]!;
+      const second = await translateJaFieldsToTargetLocales(subInput, targetLocales, innerOpts);
+      merged = { ...merged, ...second };
+    }
   }
-  if (Object.keys(merged).length === 0) return merged;
-
-  const incomplete = keys.filter((k) => !fieldLocalesComplete(merged[k], targetLocales));
-  if (incomplete.length === 0) return merged;
-
-  const subInput: Record<string, string> = {};
-  for (const k of incomplete) subInput[k] = input[k]!;
-
-  const second = await translateJaFieldsToTargetLocales(subInput, targetLocales, options);
-  merged = { ...merged, ...second };
 
   const still = keys.filter((k) => !fieldLocalesComplete(merged[k], targetLocales));
-  if (still.length > 0) {
-    const oneByOne: Record<string, string> = {};
-    for (const k of still) oneByOne[k] = input[k]!;
-    const third = await translateJaFieldsSequentially(oneByOne, targetLocales, options);
-    merged = { ...merged, ...third };
-  }
+  if (still.length === 0) return merged;
 
-  return merged;
+  const oneByOne: Record<string, string> = {};
+  for (const k of still) oneByOne[k] = input[k]!;
+  const sequential = await translateJaFieldsSequentially(oneByOne, targetLocales, innerOpts);
+  return { ...merged, ...sequential };
 }
 
-/** フィールドを 1 つずつ翻訳してマージ（バッチ失敗時のフォールバック） */
+/** フィールドを 1 つずつ翻訳してマージ（batch 後も欠損がある場合のフォールバック）。RPM 対策でフィールド間に待機。 */
 async function translateJaFieldsSequentially(
   input: Record<string, string>,
   targetLocales: string[],
   options?: { retries?: number }
 ): Promise<MultiLocaleFieldResult> {
   const out: MultiLocaleFieldResult = {};
+  let first = true;
   for (const [key, val] of Object.entries(input)) {
     if (shouldSkipValue(val)) continue;
+    if (!first) {
+      await sleep(1500);
+    }
+    first = false;
     const part = await translateJaFieldsToTargetLocales({ [key]: val }, targetLocales, options);
     Object.assign(out, part);
   }
@@ -242,7 +260,7 @@ ${JSON.stringify(subset, null, 2)}`;
           "[translator] Gemini returned no usable multi-locale fields. expected fields:",
           fieldKeys,
           "snippet:",
-          cleaned.slice(0, 500)
+          text.slice(0, 500)
         );
       }
       return out;

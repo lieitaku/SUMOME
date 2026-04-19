@@ -22,7 +22,7 @@ import {
 import { translationDocCoversPayload } from "../src/lib/document-translations";
 import { getAutoTranslateTargetLocales } from "../src/lib/translator";
 
-const DELAY_MS = 2500;
+const DELAY_MS = 4500;
 
 async function sleep(ms: number) {
   return new Promise((r) => setTimeout(r, ms));

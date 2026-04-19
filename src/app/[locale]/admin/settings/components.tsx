@@ -169,6 +169,9 @@ export function DeleteAccountForm({
     );
 }
 
+/** レコード間待機（15 RPM 程度の無料枠でも安全側に） */
+const BATCH_ITEM_DELAY_MS = 4500;
+
 /** 管理者：クラブ・雑誌の機械翻訳を一括実行（既存訳はスキップ） */
 export function BatchTranslateCard() {
   const [phase, setPhase] = useState<"idle" | "running" | "done">("idle");
@@ -209,6 +212,9 @@ export function BatchTranslateCard() {
         setProgress({ current: 0, total: items.length, label: "準備中…" });
       });
 
+      let successCount = 0;
+      const failureLines: string[] = [];
+
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         const itemLabel = `${item.type === "club" ? "クラブ" : "フォトブック"}: ${item.label}`;
@@ -221,10 +227,9 @@ export function BatchTranslateCard() {
         });
         const one = await runOneBatchTranslation(item.type, item.id);
         if ("error" in one) {
-          setLastError(one.error);
-          toast.error(one.error);
-          setPhase("idle");
-          return;
+          failureLines.push(`${itemLabel}: ${one.error}`);
+        } else {
+          successCount += 1;
         }
         flushSync(() => {
           setProgress({
@@ -233,7 +238,9 @@ export function BatchTranslateCard() {
             label: `処理中: ${i + 1}/${items.length}（${itemLabel}）`,
           });
         });
-        await new Promise((r) => setTimeout(r, 350));
+        if (i < items.length - 1) {
+          await new Promise((r) => setTimeout(r, BATCH_ITEM_DELAY_MS));
+        }
       }
 
       const rev = await revalidateAfterBatchTranslation();
@@ -244,7 +251,19 @@ export function BatchTranslateCard() {
         return;
       }
 
-      toast.success("一括翻訳が完了しました。");
+      const failCount = failureLines.length;
+      if (failCount > 0) {
+        const summary =
+          `成功 ${successCount} 件・失敗 ${failCount} 件（全 ${items.length} 件）。` +
+          (failureLines.length > 0
+            ? `\n失敗例（最大5件）:\n${failureLines.slice(0, 5).join("\n")}`
+            : "");
+        setLastError(summary);
+        toast.warning(`一括処理完了: 成功 ${successCount} / 失敗 ${failCount}`);
+      } else {
+        setLastError(null);
+        toast.success(`一括翻訳が完了しました（${successCount} 件）。`);
+      }
       setPhase("done");
     })();
   };
@@ -265,11 +284,12 @@ export function BatchTranslateCard() {
 
       <p className="text-xs text-gray-500 mb-6 leading-relaxed">
         全クラブ・全フォトブックを順に処理します。既に該当言語があるフィールドはスキップし、新規言語（例:
-        fr）追加時は不足分のみ翻訳します。Gemini API のレート制限を避けるため項目間に短い間隔を空けます。
+        fr）追加時は不足分のみ翻訳します。Gemini API のレート制限を避けるため、各レコードの処理の間に約{" "}
+        {Math.round(BATCH_ITEM_DELAY_MS / 1000)} 秒の間隔を空けます。
       </p>
 
       {lastError && (
-        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-xs font-bold text-red-800">
+        <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-xs font-bold text-red-800 whitespace-pre-wrap break-words">
           {lastError}
         </div>
       )}
@@ -305,7 +325,10 @@ export function BatchTranslateCard() {
               {progress.label || "処理中…"}
             </>
           ) : phase === "done" ? (
-            <span className="text-emerald-600 font-bold">完了しました。公開ページに反映済みです。</span>
+            <span className="text-emerald-600 font-bold">
+              完了しました。公開ページに反映済みです。
+              {lastError ? "（一部失敗あり。上記を確認してください）" : ""}
+            </span>
           ) : (
             <span className="text-gray-400">開始ボタンで処理を開始します。</span>
           )}
@@ -319,6 +342,7 @@ export function BatchTranslateCard() {
           if (phase === "done") {
             setPhase("idle");
             setProgress({ current: 0, total: 0, label: "" });
+            setLastError(null);
             return;
           }
           startBatch();
