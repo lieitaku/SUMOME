@@ -441,6 +441,52 @@
     "metaTitle": "相撲クラブ検索",
     "metaDescription": "全国のアマチュア相撲クラブ・相撲教室を地域・都道府県から検索。キッズ相撲から社会人まで、お近くの相撲クラブを見つけよう。"
   },
+  "CharactersPage": {
+    "metaTitle": "キャラクター紹介",
+    "metaDescription": "SUMOMEの世界に住む3人の仲間たちを紹介。それぞれの個性豊かなキャラクターと一緒に、相撲の世界を楽しもう。",
+    "heroTitle": "仲間を紹介",
+    "heroEnTitle": "CHARACTERS",
+    "heroEyebrow": "キャラクター情報",
+    "heroSubtitle": "SUMOMEの世界に住む3人の仲間たち",
+    "backToTop": "TOPに戻る",
+    "selectCharacter": "{name}のプロフィールを表示",
+    "characterIllustrationAlt": "{name}のキャラクターイラスト",
+    "placeholderLabel": "CHARACTER",
+    "ctaEyebrow": "-物語に参加しよう-",
+    "ctaTitle": "お気に入りの仲間と、次の思い出へ。",
+    "ctaBody": "それぞれの個性が交わると、物語はもっと面白くなる。イベントやクラブを覗いて、SUMOMEの世界を体験しよう。",
+    "ctaClubs": "クラブを見る",
+    "prefecturesTitle": "47都道府県の仲間たち",
+    "prefecturesSubtitle": "全国各地の特色を持ったキャラクターが続々登場予定！",
+    "prefectureMascotNamePlaceholder": "？？？",
+    "prefectureMascotComingSoon": "準備中",
+    "characters": {
+      "sumome": {
+        "name": "すもめ",
+        "nameEn": "SUMOME",
+        "title": "怪力の三男",
+        "description": "うさぎ一家の三男として生まれる。3歳で米俵を持ち上げ、周囲を驚かす。",
+        "quote": "「やってみる！」",
+        "traits": ["怪力", "まっすぐ", "行動派"]
+      },
+      "chanko": {
+        "name": "ちゃんこ",
+        "nameEn": "CHANKO",
+        "title": "福を呼ぶ食いしん坊",
+        "description": "生まれた時、金のお玉と箸をくわえていた。生涯食べ物に困らない、星のもとに生まれる。",
+        "quote": "「おかわり、まだまだ！」",
+        "traits": ["福運", "食いしん坊", "やさしい"]
+      },
+      "gottsan": {
+        "name": "ごっつぁん",
+        "nameEn": "GOTTSAN",
+        "title": "感謝の申し子",
+        "description": "生まれた時「おぎゃぁ」でなく「ごっつぁん！」と母に向かってお礼を言ったらしい。",
+        "quote": "「ごっつぁんです！」",
+        "traits": ["礼儀正しい", "情熱", "ムードメーカー"]
+      }
+    }
+  },
   "Contact": {
     "metaTitle": "お問い合わせ",
     "metaDescription": "SUMOMEへのお問い合わせはこちら。相撲クラブの掲載依頼、サービスに関するご質問など、お気軽にご連絡ください。",

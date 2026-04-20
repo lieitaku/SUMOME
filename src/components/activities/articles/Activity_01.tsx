@@ -4,8 +4,13 @@ import { Quote, Info, Newspaper, Award, Gift } from "lucide-react";
 import type { CustomActivityProps } from "@/lib/article-registry";
 import { txCustomActivity } from "@/lib/custom-activity-copy";
 
+const SPME_SITE_URL = "https://memory-sp.com";
+
 const Activity_01 = ({ activity, locale }: CustomActivityProps) => {
   const tx = (key: string) => txCustomActivity(activity.translations, locale, "act-01", key);
+  const spmeLinkLabel = locale.startsWith("ja")
+    ? `${tx("note_spm")}（公式サイト、新しいタブで開きます）`
+    : `${tx("note_spm")} (official site, opens in new tab)`;
 
   return (
     <div className="space-y-6 md:space-y-16">
@@ -33,9 +38,16 @@ const Activity_01 = ({ activity, locale }: CustomActivityProps) => {
               </span>
               <p className="text-gray-700 text-sm md:text-base leading-relaxed font-medium">
                 {tx("note_body")}
-                <span className="inline-block font-bold text-white bg-sumo-red px-2 py-0.5 mx-1.5 rounded text-xs align-middle tracking-wider shadow-sm">
+                <a
+                  href={SPME_SITE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={spmeLinkLabel}
+                  title="SPME — memory-sp.com"
+                  className="inline-block font-bold text-white bg-sumo-red px-2 py-0.5 mx-1.5 rounded text-xs align-middle tracking-wider shadow-sm ring-1 ring-white/15 transition-all duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-lg hover:shadow-sumo-red/35 hover:ring-white/25 active:translate-y-0 active:scale-[0.98] active:shadow-sm motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sumo-gold focus-visible:ring-offset-2 focus-visible:ring-offset-gray-50"
+                >
                   {tx("note_spm")}
-                </span>
+                </a>
                 {tx("note_after")}
               </p>
             </div>

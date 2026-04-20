@@ -441,6 +441,52 @@
     "metaTitle": "Find sumo clubs",
     "metaDescription": "Search amateur sumo clubs and classes by region and prefecture—from kids to adults, find practice near you."
   },
+  "CharactersPage": {
+    "metaTitle": "Characters",
+    "metaDescription": "Meet the three friends who live in the world of SUMOME—colorful personalities to enjoy sumo with.",
+    "heroTitle": "Meet the crew",
+    "heroEnTitle": "CHARACTERS",
+    "heroEyebrow": "Characters",
+    "heroSubtitle": "Three friends in the world of SUMOME",
+    "backToTop": "Back to home",
+    "selectCharacter": "Show profile: {name}",
+    "characterIllustrationAlt": "Character illustration: {name}",
+    "placeholderLabel": "CHARACTER",
+    "ctaEyebrow": "-Join the story-",
+    "ctaTitle": "With your favorite teammate, toward the next memory.",
+    "ctaBody": "When every personality comes together, the story gets even better. Explore events and clubs and experience the world of SUMOME.",
+    "ctaClubs": "Browse clubs",
+    "prefecturesTitle": "Friends from 47 prefectures",
+    "prefecturesSubtitle": "Characters with unique local traits are coming soon!",
+    "prefectureMascotNamePlaceholder": "???",
+    "prefectureMascotComingSoon": "Coming soon",
+    "characters": {
+      "sumome": {
+        "name": "Sumome",
+        "nameEn": "SUMOME",
+        "title": "The third son with uncanny strength",
+        "description": "The third son of the rabbit family. At age three he lifted a rice bale and amazed everyone around him.",
+        "quote": "“Let’s give it a shot!”",
+        "traits": ["Super strength", "Straight shooter", "Action-first"]
+      },
+      "chanko": {
+        "name": "Chanko",
+        "nameEn": "CHANKO",
+        "title": "The lucky foodie",
+        "description": "Born holding a golden ladle and chopsticks—destined never to go hungry.",
+        "quote": "“Seconds, please—keep them coming!”",
+        "traits": ["Good fortune", "Foodie", "Gentle"]
+      },
+      "gottsan": {
+        "name": "Gottsan",
+        "nameEn": "GOTTSAN",
+        "title": "Born saying thanks",
+        "description": "Legend says his first words to his mother were “Thank you!” instead of a newborn’s cry.",
+        "quote": "“Thank you so much!”",
+        "traits": ["Polite", "Passionate", "Mood-maker"]
+      }
+    }
+  },
   "Contact": {
     "metaTitle": "Contact",
     "metaDescription": "Contact SUMOME about club listings, services, media, or any questions. We will get back to you.",

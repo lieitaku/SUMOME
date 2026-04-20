@@ -33,7 +33,7 @@ export default function ComicDecorations({ quote, theme }: ComicDecorationsProps
   return (
     <>
       <motion.span
-        className={cn("absolute right-3 top-3 text-xl", style.text)}
+        className={cn("absolute right-5 top-5 text-xl", style.text)}
         animate={{ rotate: [0, 18, 0], scale: [1, 1.1, 1] }}
         transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
         aria-hidden
@@ -43,7 +43,7 @@ export default function ComicDecorations({ quote, theme }: ComicDecorationsProps
 
       <motion.div
         className={cn(
-          "absolute top-6 left-6 z-20 rounded-2xl border bg-white/85 px-3 py-2 text-xs font-bold backdrop-blur-sm md:text-sm",
+          "absolute top-8 right-8 z-20 rounded-2xl border bg-white/85 px-3 py-2 text-xs font-bold whitespace-nowrap backdrop-blur-sm md:text-sm",
           style.border,
           style.text,
         )}
@@ -54,7 +54,7 @@ export default function ComicDecorations({ quote, theme }: ComicDecorationsProps
         {quote}
         <span
           className={cn(
-            "absolute -bottom-1.5 left-5 block h-3 w-3 rotate-45 border-b border-r bg-white/90",
+            "absolute -bottom-1.5 right-5 block h-3 w-3 rotate-45 border-b border-r bg-white/90",
             style.border,
           )}
           aria-hidden
@@ -62,7 +62,7 @@ export default function ComicDecorations({ quote, theme }: ComicDecorationsProps
       </motion.div>
 
       <motion.div
-        className={cn("pointer-events-none absolute right-7 top-10 h-14 w-14 rounded-full blur-md", style.pulse)}
+        className={cn("pointer-events-none absolute right-9 top-12 h-14 w-14 rounded-full blur-md", style.pulse)}
         animate={{ scale: [1, 1.25, 1], opacity: [0.35, 0.6, 0.35] }}
         transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
         aria-hidden
