@@ -16,6 +16,8 @@ export type Rikishi = {
  */
 export type PrefectureCharacter = {
   name: string;           // 角色名，如 "サウレス"
+  /** 英文站卡片小字等（可选，缺省则用县 slug 大写） */
+  nameEn?: string;
   description: string;    // 日文介绍文本
   descriptionEn?: string; // 英文介绍文本（可选）
   // 图片路径由组件根据 prefSlug 自动拼接，不存入此类型

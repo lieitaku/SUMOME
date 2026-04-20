@@ -50,7 +50,7 @@ export default function CoreMascotsHero({ characters }: CoreMascotsHeroProps) {
         return (
           <div
             key={character.id}
-            className="group relative min-w-0 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm"
+            className="group relative z-0 min-w-0 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm md:group-hover:z-30 md:group-hover:overflow-visible"
             style={{
               flexGrow,
               flexShrink: 1,
@@ -91,9 +91,9 @@ export default function CoreMascotsHero({ characters }: CoreMascotsHeroProps) {
               <p className="mt-2 text-sm font-medium text-gray-500">{title}</p>
             </div>
 
-            {/* Character Image：相对最初「满区」版本整体缩小约 10%，底部对齐，底部文字仍更易读 */}
+            {/* Character Image：略缩小；悬停时略放大上移，overflow-visible 时冲出卡片圆角 */}
             <div
-              className="absolute inset-0 z-10 pt-[100px] pb-[120px] md:pb-[100px] transition-transform duration-700 md:group-hover:scale-105"
+              className="absolute inset-0 z-10 pt-[100px] pb-[120px] md:pb-[100px] transition-transform duration-700 md:group-hover:scale-110 md:group-hover:-translate-y-2"
               style={{ transitionTimingFunction: EASE }}
             >
               {character.imageSrc && (

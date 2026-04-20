@@ -12,9 +12,51 @@ import type { PrefectureCharacter } from "./types";
 export const PREFECTURE_CHARACTERS: Record<string, PrefectureCharacter> = {
   fukui: {
     name: "サウレス",
+    nameEn: "Saurus",
     description: "福井の誇り恐竜力士「サウレス」です！",
     descriptionEn: 'Fukui\'s Pride, Dinosaur Rikishi "Saurus"',
   },
   // 以下县角色数据待添加时在此处补充：
   // aichi: { name: "...", description: "...", descriptionEn: "..." },
 };
+
+/** 与 PrefectureCharacter 立绘约定一致：public/images/characters/{slug}.webp */
+export function prefectureCharacterImagePath(prefSlug: string): string {
+  return `/images/characters/${prefSlug}.webp`;
+}
+
+/**
+ * 「47 都道府県の仲間たち」卡片用：已在 characters.ts 登记且上传立绘的县显示真名与图片。
+ */
+export function getPrefectureMascotDisplay(
+  prefSlug: string,
+  locale: string,
+): {
+  hasCharacter: boolean;
+  imageSrc: string;
+  name: string;
+  nameEn: string;
+  title: string;
+} {
+  const entry = PREFECTURE_CHARACTERS[prefSlug];
+  if (!entry) {
+    return {
+      hasCharacter: false,
+      imageSrc: "",
+      name: "",
+      nameEn: prefSlug.toUpperCase(),
+      title: "",
+    };
+  }
+  const title =
+    locale === "en" && entry.descriptionEn?.trim()
+      ? entry.descriptionEn
+      : entry.description;
+  return {
+    hasCharacter: true,
+    imageSrc: prefectureCharacterImagePath(prefSlug),
+    name: entry.name,
+    nameEn: entry.nameEn?.trim() || prefSlug.toUpperCase(),
+    title,
+  };
+}

@@ -80,44 +80,44 @@ export default function MascotCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative flex w-full flex-col rounded-2xl border border-gray-200 bg-white p-3 text-left",
+        "group relative z-0 flex w-full flex-col rounded-2xl border border-gray-200 bg-white p-3 text-left",
         "transition-all duration-300 ease-out",
-        "hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300",
+        "hover:z-20 hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand focus-visible:ring-offset-2",
         "active:scale-[0.98]",
         className,
       )}
     >
-      {/* Image Wrapper */}
-      <div className={cn("relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-gradient-to-br", style.bgSoft)}>
-        {/* Prefecture Badge */}
+      {/* 背景单独裁切；立绘层不裁切，悬停时可略「冲出」圆角框 */}
+      <div className="relative isolate w-full aspect-[4/5]">
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0 rounded-xl bg-gradient-to-br",
+            style.bgSoft,
+          )}
+        />
         {prefecture && (
           <div className="absolute left-3 top-3 z-20 rounded-md bg-white/95 px-2.5 py-1 text-[10px] font-bold tracking-widest text-sumo-dark shadow-sm backdrop-blur-sm">
             {prefecture}
           </div>
         )}
-
-        {/* Watermark */}
-        <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden opacity-[0.04]">
-          <span className="rotate-[-20deg] whitespace-nowrap text-5xl font-black uppercase tracking-tighter text-black">
-            {nameEn}
-          </span>
-        </div>
-
-        {/* Image */}
         {imageSrc ? (
-          <div className="relative z-10 h-full w-full p-2 transition-transform duration-500 ease-out group-hover:scale-110">
-            <img
-              src={imageSrc}
-              alt={t("characterIllustrationAlt", { name })}
-              className="h-full w-full object-contain object-bottom drop-shadow-md"
-              loading="lazy"
-              decoding="async"
-            />
+          <div className="absolute inset-0 z-10 flex items-end justify-center p-2">
+            <div className="h-full w-full origin-bottom transition-transform duration-500 ease-out group-hover:scale-[1.05] group-hover:-translate-y-1 group-hover:drop-shadow-md">
+              <img
+                src={imageSrc}
+                alt={t("characterIllustrationAlt", { name })}
+                className="h-full w-full object-contain object-bottom"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
         ) : (
-          <div className="relative z-10 h-full w-full p-6 opacity-40 transition-transform duration-500 group-hover:scale-110">
-            <CharacterPlaceholder theme={theme} label={t("placeholderLabel")} />
+          <div className="absolute inset-0 z-10 flex items-end justify-center p-6 opacity-40">
+            <div className="h-full w-full origin-bottom transition-transform duration-500 ease-out group-hover:scale-[1.04] group-hover:-translate-y-0.5">
+              <CharacterPlaceholder theme={theme} label={t("placeholderLabel")} />
+            </div>
           </div>
         )}
       </div>

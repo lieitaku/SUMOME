@@ -3,6 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import Image from "next/image";
 import type { PrefectureCharacter } from "@/data/types";
+import { prefectureCharacterImagePath } from "@/data/characters";
 import { cn } from "@/lib/utils";
 import {
   HERO_BUBBLE_TUNING,
@@ -34,7 +35,7 @@ export default function PrefectureCharacter({
       ? character.descriptionEn
       : character.description;
 
-  const imgSrc = `/images/characters/${prefSlug}.webp`;
+  const imgSrc = prefectureCharacterImagePath(prefSlug);
 
   if (imgError) return null;
 
