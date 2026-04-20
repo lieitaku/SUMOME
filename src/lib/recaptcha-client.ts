@@ -1,12 +1,17 @@
 "use client";
 
-/** 与 NEXT_PUBLIC_RECAPTCHA_SITE_KEY 一致，供客户端 execute 使用 */
+import {
+  getRecaptchaSiteKeyResolved,
+  isRecaptchaSiteKeyConfiguredResolved,
+} from "@/lib/recaptcha-config";
+
+/** 与 NEXT_PUBLIC_RECAPTCHA_SITE_KEY 一致（尊重 NEXT_PUBLIC_RECAPTCHA_DISABLED） */
 export function getRecaptchaSiteKey(): string | undefined {
-  return process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  return getRecaptchaSiteKeyResolved();
 }
 
 export function isRecaptchaSiteKeyConfigured(): boolean {
-  return Boolean(getRecaptchaSiteKey());
+  return isRecaptchaSiteKeyConfiguredResolved();
 }
 
 declare global {

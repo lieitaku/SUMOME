@@ -248,3 +248,9 @@ body.char-drag-no-select * {
   -moz-user-select: none !important;
   -ms-user-select: none !important;
 }
+
+/* reCAPTCHA v3 默认右下角徽章：联系页有 recaptchaLegal 时可隐藏（见 Google FAQ）。
+   保留此规则作为首屏闪烁时的兜底；离开联系页时脚本由 useRecaptchaLoader 卸载。 */
+.grecaptcha-badge {
+  visibility: hidden !important;
+}
