@@ -106,7 +106,31 @@ export function CreateStaffForm() {
 
 const CONFIRM_WORD = "削除";
 
-// --- Delete Account Form ---
+// --- Image Migration Card ---
+export function ImageMigrationCard() {
+    return (
+        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
+                    <Sparkles size={20} />
+                </div>
+                <div>
+                    <h2 className="text-lg font-bold text-gray-900">画像フォーマット遷移</h2>
+                    <p className="text-xs text-gray-400">古い画像をWebPに変換します</p>
+                </div>
+            </div>
+            <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+                サイトの読み込み速度を向上させるため、アップロード済みの画像を最新のフォーマット（WebP）に一括変換するツールです。
+            </p>
+            <Link
+                href="/admin/settings/migration"
+                className="flex items-center justify-center gap-2 w-full py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors"
+            >
+                ツールを開く
+            </Link>
+        </div>
+    );
+}
 export function DeleteAccountForm({
     role,
     canDelete,
@@ -387,13 +411,6 @@ export function BatchTranslateCard() {
           </>
         )}
       </button>
-
-      <Link
-        href="/admin/settings/migration"
-        className="mt-3 text-center text-[10px] text-gray-400 hover:text-gray-700 underline underline-offset-2"
-      >
-        画像フォーマット遷移ツール
-      </Link>
     </div>
   );
 }

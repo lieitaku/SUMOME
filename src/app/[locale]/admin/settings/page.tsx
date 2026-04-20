@@ -13,6 +13,7 @@ import {
     CreateStaffForm,
     DeleteAccountForm,
     BatchTranslateCard,
+    ImageMigrationCard,
 } from "./components";
 
 // ==============================================================================
@@ -126,24 +127,27 @@ export default async function SettingsPage() {
                         </div>
                     </div>
 
-                    {/* 行2 左：アカウント削除 */}
-                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 lg:row-start-2 lg:col-start-1">
-                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
-                            <div className="p-2 bg-red-50 text-red-600 rounded-lg">
-                                <Trash2 size={20} />
+                    {/* 行2 左：アカウント削除 & 画像フォーマット遷移ツール */}
+                    <div className="flex flex-col gap-8 lg:row-start-2 lg:col-start-1">
+                        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex-1">
+                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
+                                <div className="p-2 bg-red-50 text-red-600 rounded-lg">
+                                    <Trash2 size={20} />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900">アカウント削除</h2>
+                                    <p className="text-xs text-gray-400">
+                                        管理者アカウントを削除します。
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h2 className="text-lg font-bold text-gray-900">アカウント削除</h2>
-                                <p className="text-xs text-gray-400">
-                                    管理者アカウントを削除します。最後の管理者の場合は削除できません。
-                                </p>
-                            </div>
+                            <DeleteAccountForm
+                                role={dbUser.role}
+                                canDelete={deleteCanDelete}
+                                blockReason={deleteBlockReason}
+                            />
                         </div>
-                        <DeleteAccountForm
-                            role={dbUser.role}
-                            canDelete={deleteCanDelete}
-                            blockReason={deleteBlockReason}
-                        />
+                        <ImageMigrationCard />
                     </div>
 
                     {/* 行2 右：多言語機械翻訳（一括） */}
@@ -184,7 +188,7 @@ export default async function SettingsPage() {
                                 <div>
                                     <h2 className="text-lg font-bold text-gray-900">アカウント削除</h2>
                                     <p className="text-xs text-gray-400">
-                                        クラブとアカウントを削除し、登録を解除します。削除後は同じメールで再登録可能です。
+                                        クラブとアカウントを削除し、登録を解除します。
                                     </p>
                                 </div>
                             </div>
