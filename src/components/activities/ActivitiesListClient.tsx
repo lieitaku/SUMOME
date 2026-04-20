@@ -12,7 +12,7 @@ import {
 import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
-import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
+import { activityCardLocationLine, activityDisplayTitle } from "@/lib/i18n-db";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -154,8 +154,11 @@ export default function ActivitiesListClient({
                       <div className="flex items-center gap-1.5">
                         <MapPin size={14} className="text-sumo-brand" />
                         <span className="line-clamp-1">
-                          {act.location ||
-                            (act.club ? clubDisplayName(act.club, locale) : "")}
+                          {activityCardLocationLine(
+                            { location: act.location },
+                            act.club,
+                            locale
+                          )}
                         </span>
                       </div>
                       <span className="text-gray-300">|</span>

@@ -137,29 +137,28 @@ export function getCachedAllMagazines() {
   )();
 }
 
-/** Cached activities by page. Invalidate with tag "activities". */
-export function getCachedActivitiesPage(page: number, pageSize: number = 6) {
-  return unstable_cache(
-    async (p: number, ps: number) => {
-      const [activities, totalItems] = await Promise.all([
-        prisma.activity.findMany({
-          skip: (p - 1) * ps,
-          take: ps,
-          orderBy: { date: "desc" },
-          include: { club: { select: { name: true, translations: true, area: true } } },
-        }),
-        prisma.activity.count(),
-      ]);
-      return {
-        activities,
-        totalItems,
-        totalPages: Math.ceil(totalItems / ps),
-        page: p,
-      };
-    },
-    ["activities-page"],
-    { revalidate: 3600, tags: ["activities"] }
-  )(page, pageSize);
+/**
+ * 活动列表分页（故意不用 unstable_cache 长期缓存）。
+ * 否则俱乐部 translations 在 DB 更新后，首屏可能长达 1 小时仍显示旧文案。
+ */
+export async function getCachedActivitiesPage(page: number, pageSize: number = 6) {
+  const p = Math.max(1, page);
+  const ps = pageSize;
+  const [activities, totalItems] = await Promise.all([
+    prisma.activity.findMany({
+      skip: (p - 1) * ps,
+      take: ps,
+      orderBy: { date: "desc" },
+      include: { club: { select: { name: true, translations: true, area: true } } },
+    }),
+    prisma.activity.count(),
+  ]);
+  return {
+    activities,
+    totalItems,
+    totalPages: Math.ceil(totalItems / ps),
+    page: p,
+  };
 }
 
 /** Cached all clubs (excluding official-hq). Invalidate with tag "clubs". */

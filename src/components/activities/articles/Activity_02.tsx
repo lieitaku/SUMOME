@@ -3,10 +3,11 @@ import React from "react";
 import Image from "next/image";
 import { Calendar, MapPin, CloudSun, Quote } from "lucide-react";
 import type { CustomActivityProps } from "@/lib/article-registry";
+import { txCustomActivity } from "@/lib/custom-activity-copy";
 
-// 自定义文章组件 - 内容为精心设计的硬编码排版
-const Activity_02 = ({ activity }: CustomActivityProps) => {
-  // ✅ 应用你指定的真实图片路径
+const Activity_02 = ({ activity, locale }: CustomActivityProps) => {
+  const tx = (key: string) => txCustomActivity(activity.translations, locale, "act-02", key);
+
   const galleryImages = [
     "/images/activities/activity-2/act02-yokohama-scene-01.webp",
     "/images/activities/activity-2/act02-yokohama-scene-02.webp",
@@ -17,7 +18,6 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
 
   return (
     <div className="space-y-8 md:space-y-24">
-      {/* --- 1. Event Data Header (仪式感数据头) --- */}
       <section className="relative">
         <div className="flex flex-wrap gap-y-4 gap-x-8 border-b border-gray-100 pb-3 md:pb-8 mb-4 md:mb-12">
           <div className="flex items-center gap-3 group">
@@ -26,11 +26,9 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                日付
+                {tx("hdr_date_label")}
               </span>
-              <span className="text-xs font-bold text-sumo-dark tracking-wide">
-                2025.11.15 - 16
-              </span>
+              <span className="text-xs font-bold text-sumo-dark tracking-wide">{tx("hdr_date_value")}</span>
             </div>
           </div>
 
@@ -42,11 +40,9 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                場所
+                {tx("hdr_place_label")}
               </span>
-              <span className="text-xs font-bold text-sumo-dark tracking-wide">
-                Yokohama Red Brick
-              </span>
+              <span className="text-xs font-bold text-sumo-dark tracking-wide">{tx("hdr_place_value")}</span>
             </div>
           </div>
 
@@ -58,159 +54,120 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
             </div>
             <div className="flex flex-col">
               <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                天気
+                {tx("hdr_weather_label")}
               </span>
-              <span className="text-xs font-bold text-sumo-dark tracking-wide">
-                晴れ
-              </span>
+              <span className="text-xs font-bold text-sumo-dark tracking-wide">{tx("hdr_weather_value")}</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --- 2. 导语 --- */}
       <section className="max-w-3xl">
         <p className="font-serif text-2xl md:text-3xl text-sumo-dark leading-[1.6] font-bold mb-4 md:mb-10">
-          「YOKOHAMA URBAN SPORTS FESTIVAL ’25」
+          {tx("hero_l1")}
           <br />
-          MEMORYブースへのご来場、
+          {tx("hero_l2")}
           <br className="md:hidden" />
-          誠にありがとうございました。
+          {tx("hero_l3")}
         </p>
         <div className="pl-6 border-l-2 border-sumo-gold/30">
-          <p className="text-gray-600 leading-[2.2] text-justify">
-            去る11月15日(土)、16日(日)の2日間にわたり開催されました「YOKOHAMA
-            URBAN SPORTS FESTIVAL
-            ’25」におきまして、弊社フォトブック「MEMORY」の無料体験ブースへ多数のご来場をいただき、誠にありがとうございました。
-          </p>
+          <p className="text-gray-600 leading-[2.2] text-justify">{tx("intro")}</p>
         </div>
       </section>
 
-      {/* --- 📸 Visual Block 1: The Scene (错位双图) --- */}
       <section className="grid grid-cols-2 gap-3 md:gap-16 items-start">
-        {/* Img 01: 左上 */}
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-gray-100 group shadow-lg">
           <Image
             src={galleryImages[0]}
-            alt="イベント会場（左）"
+            alt={tx("img_alt_left")}
             fill
             className="object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.1] group-hover:grayscale-0"
           />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500"></div>
         </div>
 
-        {/* Img 02: 右下 (mt-24 下沉效果) */}
         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-gray-100 group mt-12 md:mt-32 shadow-lg">
           <Image
             src={galleryImages[1]}
-            alt="イベント会場（右）"
+            alt={tx("img_alt_right")}
             fill
             className="object-cover transition-transform duration-[1.5s] group-hover:scale-110 grayscale-[0.1] group-hover:grayscale-0"
           />
-          {/* 装饰性数字 */}
           <div className="absolute -top-16 -right-6 text-[120px] font-serif font-bold text-gray-100 -z-10 select-none opacity-50">
             01
           </div>
         </div>
       </section>
 
-      {/* --- 3. Section: 反响 --- */}
       <section>
         <div className="flex flex-col mb-4 md:mb-12">
           <span className="text-[10px] font-bold tracking-[0.2em] text-sumo-gold uppercase mb-3 flex items-center gap-2">
             <div className="w-6 h-px bg-sumo-gold"></div>
-            フィードバック
+            {tx("fb_kicker")}
           </span>
           <h3 className="text-3xl font-serif font-bold text-sumo-dark">
-            予想を上回る反響と、
+            {tx("fb_title_l1")}
             <br className="md:hidden" />
-            笑顔の連鎖
+            {tx("fb_title_l2")}
           </h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-16 items-center">
           <div>
-            <p className="text-gray-600 leading-[2.2] mb-4 md:mb-10 text-justify">
-              当日は、アーバンスポーツの活気あふれる雰囲気の中、予想を大きく上回る数のお客様に弊社ブースへお立ち寄りいただきました。
-            </p>
+            <p className="text-gray-600 leading-[2.2] mb-4 md:mb-10 text-justify">{tx("fb_p1")}</p>
 
-            {/* 引用块 */}
             <div className="bg-[#FAFAFA] border border-gray-100 p-4 md:p-8 relative rounded-sm group hover:border-sumo-gold/30 transition-colors">
               <Quote
                 className="absolute top-6 right-6 text-gray-200 group-hover:text-sumo-gold/20 transition-colors"
                 size={40}
               />
-              <p className="font-bold text-sumo-dark text-lg mb-3 md:mb-6 relative z-10 font-serif">
-                「思い出がその場で一冊の本になる感動」
-              </p>
+              <p className="font-bold text-sumo-dark text-lg mb-3 md:mb-6 relative z-10 font-serif">{tx("quote_title")}</p>
               <div className="w-8 h-1 bg-sumo-gold mb-3 md:mb-4"></div>
-              <p className="text-gray-500 text-xs leading-relaxed font-medium">
-                実際に体験されたお客様からは、
-                <br />
-                多くの驚きと喜びの声を頂戴いたしました。
-              </p>
+              <p className="text-gray-500 text-xs leading-relaxed font-medium whitespace-pre-line">{tx("quote_sub")}</p>
             </div>
           </div>
 
-          {/* --- 📸 Visual Block 2: The Focus (单张主角) --- */}
           <div className="relative group perspective-1000">
             <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm shadow-2xl transform rotate-2 group-hover:rotate-0 transition-all duration-700 bg-white p-2">
               <div className="relative w-full h-full overflow-hidden rounded-sm">
-                <Image
-                  src={galleryImages[2]}
-                  alt="メインシーン"
-                  fill
-                  className="object-cover"
-                />
+                <Image src={galleryImages[2]} alt={tx("img_main_alt")} fill className="object-cover" />
               </div>
             </div>
-            {/* 胶带效果 */}
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-white/40 backdrop-blur-md rotate-[-3deg] shadow-sm z-20"></div>
           </div>
         </div>
       </section>
 
-      {/* --- 4. Section: 价值 (Callout) --- */}
       <section className="bg-sumo-dark text-white p-4 md:p-20 rounded-sm relative overflow-hidden text-center">
         <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none"></div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
-          <h3 className="text-2xl md:text-3xl font-serif font-bold mb-3 md:mb-8">
-            「思い出」を「情報誌」として残す価値
-          </h3>
-          <p className="text-white/80 leading-[2.2] mb-3 md:mb-8 text-justify">
-            今回のイベントを通じ、単なる写真集ではなく、その時代の空気感までをもパッケージする「情報誌としてのフォトブック」というMEMORYのコンセプトを、多くの方に体感いただけたことを大変嬉しく思います。
-          </p>
+          <h3 className="text-2xl md:text-3xl font-serif font-bold mb-3 md:mb-8">{tx("value_title")}</h3>
+          <p className="text-white/80 leading-[2.2] mb-3 md:mb-8 text-justify">{tx("value_p1")}</p>
           <p className="text-white/80 leading-[2.2] text-justify">
-            ご作成いただいた一冊が、ご家族やご友人との大切な時間を彩る
-            <span className="font-bold text-white mx-1 border-b border-sumo-gold pb-1">
-              「タイムカプセル」
-            </span>
-            として、末永く皆様のお手元に残ることを願っております。
+            {tx("value_p2_before")}
+            <span className="font-bold text-white mx-1 border-b border-sumo-gold pb-1">{tx("value_capsule")}</span>
+            {tx("value_p2_after")}
           </p>
         </div>
       </section>
 
-      {/* --- 📸 Visual Block 3: The Smiles (拼接双图) --- */}
       <section className="relative py-4 md:py-12">
-        {/* 背景装饰块 */}
         <div className="absolute top-0 left-4 right-4 bottom-0 border border-dashed border-gray-200 -z-10 rounded-sm"></div>
 
         <div className="grid grid-cols-2 gap-3 md:gap-12 px-4 md:px-20">
-          {/* Img 04 */}
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm shadow-md group">
             <Image
               src={galleryImages[3]}
-              alt="笑顔の瞬間 1"
+              alt={tx("smile_alt1")}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
           </div>
-          {/* Img 05 */}
           <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm shadow-md mt-6 md:mt-24 group">
             <Image
               src={galleryImages[4]}
-              alt="笑顔の瞬間 2"
+              alt={tx("smile_alt2")}
               fill
               className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -220,34 +177,21 @@ const Activity_02 = ({ activity }: CustomActivityProps) => {
         <div className="text-center mt-3 md:mt-8">
           <div className="inline-flex items-center gap-3 text-[9px] font-bold tracking-[0.3em] text-gray-300 uppercase">
             <div className="w-8 h-px bg-gray-200"></div>
-            笑顔と記憶
+            {tx("smile_caption")}
             <div className="w-8 h-px bg-gray-200"></div>
           </div>
         </div>
       </section>
 
-      {/* --- 5. 展望 & 结语 --- */}
       <section className="pt-4 md:pt-12 border-t border-gray-100">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-600 leading-[2.4] mb-4 md:mb-12 font-medium">
-            今回のイベントが大成功を収めることができましたのも、
-            <br className="hidden md:inline" />
-            ひとえにご来場いただいた皆様、そして関係者の皆様のご支援のおかげです。
-            <br />
-            <br />
-            今後も弊社は、皆様の大切な思い出を「記録」として美しく、
-            <br className="hidden md:inline" />
-            そして鮮やかに形に残せるよう、サービスの向上に努めてまいります。
-          </p>
+          <p className="text-gray-600 leading-[2.4] mb-4 md:mb-12 font-medium whitespace-pre-line">{tx("outro_p1")}</p>
 
-          {/* 签名档 */}
+          <p className="text-gray-600 leading-[2.4] mb-4 md:mb-12 font-medium whitespace-pre-line">{tx("outro_p2")}</p>
+
           <div className="flex flex-col items-center">
-            <p className="font-serif font-bold text-sumo-dark text-lg tracking-wide">
-              Memoryチーム
-            </p>
-            <p className="text-[10px] text-gray-400 tracking-[0.2em] uppercase mt-2">
-              2025.11.20
-            </p>
+            <p className="font-serif font-bold text-sumo-dark text-lg tracking-wide">{tx("sign_team")}</p>
+            <p className="text-[10px] text-gray-400 tracking-[0.2em] uppercase mt-2">{tx("sign_date")}</p>
           </div>
         </div>
       </section>

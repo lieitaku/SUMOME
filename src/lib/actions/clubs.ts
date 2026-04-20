@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { revalidateTagMax } from "@/lib/revalidate-tag-max";
+import { revalidateLocalizedPath } from "@/lib/revalidate-localized-paths";
 import { getCurrentUser, confirmAdmin } from "@/lib/auth-utils";
 import { translateAndPersistClub } from "@/lib/auto-translate-on-save";
 import { scheduleAfterResponse } from "@/lib/schedule-after-response";
@@ -237,7 +238,9 @@ export async function updateClub(formData: FormData) {
     revalidatePath("/admin/my-club");
     revalidatePath(`/clubs/${oldSlug}`);
     if (slugToUpdate) revalidatePath(`/clubs/${slugToUpdate}`);
+    revalidateLocalizedPath("/activities");
     revalidateTagMax("clubs");
+    revalidateTagMax("activities");
     revalidateTagMax("admin-stats");
   };
 

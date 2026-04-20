@@ -1,7 +1,7 @@
 import "./bootstrap-env";
 
 /**
- * 既存のクラブ・広報誌について、DB の日文から機械翻訳を一括再実行する。
+ * 既存のクラブ・広報誌・活動について、DB の日文から機械翻訳を一括再実行する。
  *
  * 使用（プロジェクト直下で `.env` / `.env.local` を読み込み）:
  *   npx tsx scripts/retranslate-all-content.ts
@@ -14,8 +14,10 @@ import "./bootstrap-env";
  */
 import { prisma } from "../src/lib/db";
 import {
+  buildActivityJaPayload,
   buildClubJaPayload,
   buildMagazineJaPayload,
+  translateAndPersistActivity,
   translateAndPersistClub,
   translateAndPersistMagazine,
 } from "../src/lib/auto-translate-on-save";
@@ -106,6 +108,42 @@ async function main() {
     }
     process.stdout.write(`  magazine ${m.slug} ... `);
     await translateAndPersistMagazine(m.id, { skipCacheRevalidation: true });
+    console.log("ok");
+    await sleep(DELAY_MS);
+  }
+
+  const acts = await prisma.activity.findMany({
+    select: {
+      id: true,
+      slug: true,
+      translations: true,
+      title: true,
+      content: true,
+      customRoute: true,
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+  console.log(`Activities: ${acts.length} 件`);
+  for (const a of acts) {
+    const payload = buildActivityJaPayload({
+      title: a.title,
+      content: a.content,
+      customRoute: a.customRoute,
+    });
+    const keys = Object.keys(payload);
+    if (keys.length === 0) {
+      console.log(`  activity ${a.slug} ... skip (日文フィールドなし)`);
+      continue;
+    }
+    if (
+      onlyMissing &&
+      translationDocCoversPayload(a.translations, keys, targetLocales)
+    ) {
+      console.log(`  activity ${a.slug} ... skip (既に全 locale あり)`);
+      continue;
+    }
+    process.stdout.write(`  activity ${a.slug} ... `);
+    await translateAndPersistActivity(a.id, { skipCacheRevalidation: true });
     console.log("ok");
     await sleep(DELAY_MS);
   }

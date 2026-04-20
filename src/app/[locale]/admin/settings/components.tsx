@@ -205,7 +205,7 @@ export function BatchTranslateCard() {
       }
       const items = "items" in res && Array.isArray(res.items) ? res.items : [];
       if (items.length === 0) {
-        toast.message("翻訳対象のクラブ・フォトブックがありません。");
+        toast.message("翻訳対象のクラブ・フォトブック・活動がありません。");
         setPhase("idle");
         return;
       }
@@ -221,7 +221,7 @@ export function BatchTranslateCard() {
 
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
-        const itemLabel = `${item.type === "club" ? "クラブ" : "フォトブック"}: ${item.label}`;
+        const itemLabel = `${item.type === "club" ? "クラブ" : item.type === "magazine" ? "フォトブック" : "活動"}: ${item.label}`;
         flushSync(() => {
           setProgress({
             current: i,
@@ -292,17 +292,18 @@ export function BatchTranslateCard() {
         </div>
         <div>
           <h2 className="text-lg font-bold text-gray-900">多言語機械翻訳（一括）</h2>
-          <p className="text-xs text-gray-400">
-            環境変数 AUTO_TRANSLATE_LOCALES に従い、未翻訳のみ補完します
-          </p>
+          <p className="text-xs text-gray-400">まだ訳がない箇所だけ、まとめて補います</p>
         </div>
       </div>
 
-      <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-        全クラブ・全フォトブックを順に処理します。既に該当言語があるフィールドはサーバー側でスキップし、新規言語（例:
-        fr）追加時は不足分のみ翻訳します。実際に翻訳 API を呼んだレコードのあとだけ約{" "}
-        {Math.round(BATCH_ITEM_DELAY_MS / 1000)} 秒待ちます。既に揃っているレコードはほぼ待たずに進みます。
-      </p>
+      <div className="text-xs text-gray-500 mb-6 leading-relaxed space-y-2">
+        <p>
+          「翻訳を開始する」を押すと、クラブ・フォトブック・活動を順に確認し、足りない訳だけを自動で追加します。すでに訳がある内容は変わりません。
+        </p>
+        <p className="text-gray-400">
+          完了まで時間がかかることがあります。処理中はこの画面を開いたままお待ちください。終わると、公開サイトの表示が更新されます。
+        </p>
+      </div>
 
       {lastError && (
         <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-100 text-xs font-bold text-red-800 whitespace-pre-wrap break-words">
@@ -346,7 +347,7 @@ export function BatchTranslateCard() {
               {lastError ? "（一部失敗あり。上記を確認してください）" : ""}
             </span>
           ) : (
-            <span className="text-gray-400">開始ボタンで処理を開始します。</span>
+            <span className="text-gray-400">準備ができたら、下のボタンを押してください。</span>
           )}
         </p>
       </div>

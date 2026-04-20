@@ -8,7 +8,7 @@ import { Activity, Club } from "@prisma/client";
 import { getPreviewPayload } from "@/lib/preview";
 import { getCachedActivityWithClub } from "@/lib/cached-queries";
 import { getTranslations } from "next-intl/server";
-import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
+import { activityCardLocationLine, activityDisplayTitle } from "@/lib/i18n-db";
 import { mergeActivityTranslations } from "@/lib/document-translations";
 
 // 1. ✨ 定义与组件完全匹配的强类型
@@ -114,7 +114,11 @@ export default async function ActivityDetailPage({
   const safeImage = activity.mainImage || "/images/placeholder.webp";
   const titleShown = activityDisplayTitle(activity, locale);
   const displayLocation =
-    activity.location || clubDisplayName(activity.club, locale) || "SUMOME";
+    activityCardLocationLine(
+      { location: activity.location },
+      activity.club,
+      locale
+    ).trim() || "SUMOME";
   const dateLocale = locale === "en" ? "en-US" : "ja-JP";
 
   return (
@@ -207,7 +211,7 @@ export default async function ActivityDetailPage({
                 {/* 5. ✨ 类型对齐后的逻辑分发 */}
                 {CustomComponent ? (
                   // A. 如果是大神自定义模式
-                  <CustomComponent activity={activity} />
+                  <CustomComponent activity={activity} locale={locale} />
                 ) : (
                   // B. 如果是同事发的积木模式或普通模式
                   <StandardTemplate activity={activity} />

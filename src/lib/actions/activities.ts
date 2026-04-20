@@ -5,6 +5,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { confirmAdmin } from "@/lib/auth-utils";
 import { Prisma } from "@prisma/client";
 import { mergeActivityTranslations } from "@/lib/document-translations";
+import { translateAndPersistActivity } from "@/lib/auto-translate-on-save";
+import { scheduleAfterResponse } from "@/lib/schedule-after-response";
 
 // ==========================================
 // 1. 定义统一的数据结构 (与前端 Editor 对应)
@@ -147,6 +149,7 @@ export async function createActivityAction(formData: FormData) {
         authorId: admin.id,
       },
     });
+    scheduleAfterResponse(() => translateAndPersistActivity(newActivity.id));
     return { success: true, id: newActivity.id };
 
   }catch (error) { // ❌ 去掉 : any，让 TS 自动推断为 unknown
@@ -198,6 +201,8 @@ export async function updateActivityAction(id: string, formData: FormData) {
       },
     });
 
+    scheduleAfterResponse(() => translateAndPersistActivity(id));
+
     revalidatePath("/admin/activities");
     revalidatePath(`/activities/${id}`);
     revalidatePath("/activities");
@@ -210,6 +215,15 @@ export async function updateActivityAction(id: string, formData: FormData) {
     console.error("Database Update Error:", dbError);
     return { error: "更新に失敗しました" };
   }
+}
+
+/** 管理者：日文＋カスタム本文から機械翻訳を再実行 */
+export async function retranslateActivity(id: string) {
+  const admin = await confirmAdmin();
+  if (!admin) return { error: "権限がありません。" };
+  const r = await translateAndPersistActivity(id);
+  if (!r.ok) return { error: r.error };
+  return { success: true };
 }
 
 // --- D. 删除 (Delete) ---

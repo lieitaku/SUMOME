@@ -11,6 +11,34 @@ export function clubDisplayName(
   return getTranslated(club.translations ?? null, "name", locale, club.name);
 }
 
+/**
+ * 活动卡片 MapPin 一行。
+ * - 日语：仍用 location，否则俱乐部日文名。
+ * - 非日语：主催名一律走 `clubDisplayName`（读 translations.name.*）；
+ *   仅当 location 存在且与日文俱乐部名不同（视为另填场地）时，附在译名后。
+ */
+export function activityCardLocationLine(
+  activity: { location: string | null },
+  club: { name: string; translations?: Prisma.JsonValue | null } | null,
+  locale: string
+): string {
+  const loc = activity.location?.trim() ?? "";
+  if (!club) return loc;
+
+  const nameJa = club.name.trim();
+  const collapse = (s: string) => s.replace(/\s+/g, "");
+  const orgLine = clubDisplayName(club, locale);
+
+  if (locale === "ja") {
+    return loc || orgLine;
+  }
+
+  if (!loc || collapse(loc) === collapse(nameJa)) {
+    return orgLine;
+  }
+  return `${orgLine} · ${loc}`;
+}
+
 export function clubDisplayDescription(
   club: {
     description?: string | null;

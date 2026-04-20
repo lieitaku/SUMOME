@@ -89,6 +89,44 @@ export function filterPayloadNeedingAnyLocale(
   return out;
 }
 
+/** 读取 per-field 下某一 locale 的字符串（键名大小写不敏感，手改 DB 时更稳） */
+function pickLocaleString(
+  perField: Record<string, unknown>,
+  locale: string
+): string | undefined {
+  const tryKey = (k: string) => {
+    const v = perField[k];
+    return typeof v === "string" && v.trim() !== "" ? v.trim() : undefined;
+  };
+  const direct = tryKey(locale);
+  if (direct) return direct;
+  const lower = locale.toLowerCase();
+  for (const [k, val] of Object.entries(perField)) {
+    if (k.toLowerCase() === lower && typeof val === "string" && val.trim() !== "") {
+      return val.trim();
+    }
+  }
+  return undefined;
+}
+
+/** 顶层字段名大小写不敏感（避免手改 JSON 时写成 Name 等） */
+function resolveFieldObject(
+  d: TranslationDoc,
+  field: string
+): Record<string, unknown> | null {
+  const raw = d[field];
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
+    return raw as Record<string, unknown>;
+  }
+  const fl = field.toLowerCase();
+  for (const [k, v] of Object.entries(d)) {
+    if (k.toLowerCase() === fl && v && typeof v === "object" && !Array.isArray(v)) {
+      return v as Record<string, unknown>;
+    }
+  }
+  return null;
+}
+
 /** 回退顺序：当前 locale → en → 日文主字段 */
 export function getTranslated(
   doc: Prisma.JsonValue | null | undefined,
@@ -97,12 +135,12 @@ export function getTranslated(
   fallbackJa: string
 ): string {
   const d = parseTranslationDoc(doc);
-  const perField = d[field];
-  if (!perField || typeof perField !== "object") return fallbackJa;
+  const perField = resolveFieldObject(d, field);
+  if (!perField) return fallbackJa;
   const order =
     locale === "ja" ? (["ja"] as string[]) : [locale, "en", "ja"];
   for (const loc of order) {
-    const v = perField[loc]?.trim();
+    const v = pickLocaleString(perField, loc);
     if (v) return v;
   }
   return fallbackJa;

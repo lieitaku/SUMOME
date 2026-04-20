@@ -10,6 +10,8 @@ import Activity_04 from "@/components/activities/articles/Activity_04";
 // --- 1. 定义自定义组件通用的 Props 类型 ---
 export interface CustomActivityProps {
   activity: Activity & { club: Club };
+  /** 公開ページの locale（カスタム本文の translations 表示用） */
+  locale: string;
 }
 
 // --- 2. 核心注册表 ---

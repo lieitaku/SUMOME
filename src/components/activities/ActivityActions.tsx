@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Share2, Printer } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ActivityActionsProps {
   activityId: string;
@@ -15,6 +16,8 @@ export default function ActivityActions({
   title = "",
   variant = "sidebar",
 }: ActivityActionsProps) {
+  const t = useTranslations("ActivitiesPage");
+
   const handlePrint = () => {
     window.print();
   };
@@ -25,9 +28,9 @@ export default function ActivityActions({
         ? `${window.location.origin}/activities/${activityId}`
         : "";
     const shareData: ShareData = {
-      title: title || "活動レポート",
+      title: title || t("shareDefaultTitle"),
       url,
-      text: title ? `${title} - SUMOME` : "SUMOME 活動レポート",
+      text: title ? t("shareTextWithTitle", { title }) : t("shareDefaultText"),
     };
 
     if (navigator.share && navigator.canShare?.(shareData)) {
@@ -47,20 +50,21 @@ export default function ActivityActions({
     navigator.clipboard
       .writeText(url)
       .then(() => {
-        alert("URLをコピーしました");
+        alert(t("actionCopyUrlSuccess"));
       })
       .catch(() => {
-        prompt("以下のURLをコピーしてください：", url);
+        prompt(t("actionCopyUrlPromptHint"), url);
       });
   };
 
   if (variant === "mobile") {
     return (
       <button
+        type="button"
         onClick={handleShare}
         className="w-full flex items-center justify-center gap-2 py-4 bg-gray-50 text-gray-600 text-xs font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors"
       >
-        <Share2 size={14} /> レポートを共有
+        <Share2 size={14} /> {t("actionShareMobile")}
       </button>
     );
   }
@@ -68,19 +72,21 @@ export default function ActivityActions({
   return (
     <div className="flex flex-col gap-2">
       <button
+        type="button"
         onClick={handleShare}
         className="flex items-center justify-between px-3 py-2 -ml-3 rounded hover:bg-gray-50 text-xs font-bold text-gray-500 hover:text-sumo-brand transition-colors w-full text-left"
       >
         <span className="flex items-center gap-3">
-          <Share2 size={14} /> 共有
+          <Share2 size={14} /> {t("actionShare")}
         </span>
       </button>
       <button
+        type="button"
         onClick={handlePrint}
         className="flex items-center justify-between px-3 py-2 -ml-3 rounded hover:bg-gray-50 text-xs font-bold text-gray-500 hover:text-sumo-dark transition-colors w-full text-left"
       >
         <span className="flex items-center gap-3">
-          <Printer size={14} /> 印刷
+          <Printer size={14} /> {t("actionPrint")}
         </span>
       </button>
     </div>

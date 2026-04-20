@@ -8,7 +8,7 @@ import Section from "@/components/ui/Section";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { useLocale, useTranslations } from "next-intl";
-import { activityDisplayTitle, clubDisplayName } from "@/lib/i18n-db";
+import { activityCardLocationLine, activityDisplayTitle } from "@/lib/i18n-db";
 import type { Club } from "@prisma/client";
 
 // 定义从 Prisma 传过来的数据类型
@@ -123,10 +123,13 @@ const ActivityReport = ({ activities }: ActivityReportProps) => {
                     <div className="flex items-center gap-1.5">
                       <MapPin size={14} className="text-sumo-brand" />
                       <span className="line-clamp-1">
-                        {activity.location ||
-                          (activity.club
-                            ? clubDisplayName(activity.club, locale)
-                            : "SUMOME")}
+                        {activity.club
+                          ? activityCardLocationLine(
+                              { location: activity.location },
+                              activity.club,
+                              locale
+                            )
+                          : activity.location?.trim() || "SUMOME"}
                       </span>
                     </div>
                     <span className="text-gray-300">|</span>
