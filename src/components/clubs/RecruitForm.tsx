@@ -1,112 +1,62 @@
-"use client";
-
-import React, { useState } from "react";
-import { useRouter } from "@/i18n/navigation";
-import Link from "@/components/ui/TransitionLink";
+import React from "react";
+import { Link } from "@/i18n/navigation";
 import {
   ChevronLeft,
   Clock,
   Users,
-  Send,
-  User,
   Mail,
   Phone,
   Target,
-  CalendarDays,
+  MapPin,
+  Globe,
+  ExternalLink,
   ShieldCheck,
 } from "lucide-react";
 
 import Ceramic from "@/components/ui/Ceramic";
-import Button from "@/components/ui/Button";
-import { cn } from "@/lib/utils";
 import { type Club } from "@prisma/client";
-import { submitApplicationAction } from "@/lib/actions/recruit";
-import { CAPTCHA_VERIFY_FAILED } from "@/lib/captcha-constants";
+import { getLocale, getTranslations } from "next-intl/server";
+import { clubDisplayRepresentative } from "@/lib/i18n-db";
 import {
-  executeRecaptcha,
-  isRecaptchaSiteKeyConfigured,
-} from "@/lib/recaptcha-client";
-import { useRecaptchaLoader } from "@/hooks/useRecaptchaLoader";
-import { useTranslations } from "next-intl";
+  clubWebsiteHref,
+  clubInstagramHref,
+  clubTwitterHref,
+  clubFacebookHref,
+  clubExternalLinkRel,
+} from "@/lib/club-contact-urls";
 
 const BRAND_BLUE = "#2454a4";
 
-export default function RecruitForm({ club }: { club: Club }) {
-  const t = useTranslations("RecruitPage");
-  const { ready: recaptchaReady } = useRecaptchaLoader();
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    experience: "beginner",
-    message: "",
-  });
+export default async function RecruitForm({ club }: { club: Club }) {
+  const t = await getTranslations("RecruitPage");
+  const locale = await getLocale();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isRecaptchaSiteKeyConfigured() && !recaptchaReady) {
-      alert(t("captchaLoading"));
-      return;
-    }
-    setIsSubmitting(true);
+  const showPhonePublic = Boolean(club.phone && club.phoneVisibleOnPublicSite);
+  const websiteHref = clubWebsiteHref(club.website);
+  const instagramHref = clubInstagramHref(club.instagram);
+  const twitterHref = clubTwitterHref(club.twitter);
+  const facebookHref = clubFacebookHref(club.facebook);
+  const tiktokHref = clubWebsiteHref(club.tiktok);
+  const mapHref = club.mapUrl ? clubWebsiteHref(club.mapUrl) : null;
+  const representative = clubDisplayRepresentative(club, locale);
 
-    let recaptchaToken: string | undefined;
-    if (isRecaptchaSiteKeyConfigured()) {
-      const tok = await executeRecaptcha("recruit");
-      if (!tok) {
-        alert(t("errorCaptcha"));
-        setIsSubmitting(false);
-        return;
-      }
-      recaptchaToken = tok;
-    }
+  const hasContact = Boolean(
+    club.email ||
+      showPhonePublic ||
+      websiteHref ||
+      instagramHref ||
+      twitterHref ||
+      facebookHref ||
+      tiktokHref ||
+      mapHref ||
+      representative,
+  );
 
-    const result = await submitApplicationAction({
-      ...formData,
-      clubId: club.id,
-      clubName: club.name,
-      recaptchaToken,
-    });
-
-    if (result.success) {
-      alert(t("successAlert"));
-      router.push(`/clubs/${club.slug}`);
-    } else {
-      const err =
-        result && typeof result === "object" && "error" in result
-          ? (result as { error?: string }).error
-          : undefined;
-      if (err === CAPTCHA_VERIFY_FAILED) {
-        alert(t("errorCaptcha"));
-      } else {
-        alert(
-          typeof err === "string" && err.trim() ? err : t("errorAlert"),
-        );
-      }
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const extClass =
+    "text-sm font-bold text-sumo-brand underline decoration-sumo-brand/30 underline-offset-2 hover:decoration-sumo-brand break-all";
 
   return (
-    <div
-      className="min-h-screen bg-[#F4F5F7] font-sans selection:text-white"
-      style={{ "--selection-bg": BRAND_BLUE } as React.CSSProperties}
-    >
-      <style jsx global>{`
-        ::selection {
-          background-color: var(--selection-bg);
-        }
-      `}</style>
-
+    <div className="min-h-screen bg-[#F4F5F7] font-sans selection:bg-[#2454a4] selection:text-white">
       <section className="relative bg-sumo-brand text-white pt-32 pb-32 md:pb-48 overflow-hidden shadow-xl">
         <div
           className="absolute inset-0"
@@ -185,7 +135,7 @@ export default function RecruitForm({ club }: { club: Club }) {
                   <div className="border-t border-gray-100 my-8" />
                   <div className="bg-[#F8FAFC] rounded-md p-4 border border-blue-50">
                     <div className="flex gap-3">
-                      <ShieldCheck size={20} className="text-blue-500 mt-0.5 shrink-0" />
+                      <ShieldCheck size={20} className="text-blue-500 mt-0.5 shrink-0" aria-hidden />
                       <div className="text-xs text-gray-500 leading-relaxed font-medium">
                         <p className="mb-1 text-gray-900 font-bold">{t("beginnerNoteTitle")}</p>
                         {t("beginnerNoteBody")}
@@ -209,180 +159,192 @@ export default function RecruitForm({ club }: { club: Club }) {
                 <div className="relative z-10">
                   <div className="mb-10">
                     <h2 className="text-2xl font-serif font-black text-gray-900 mb-2 flex items-center gap-3">
-                      <CalendarDays size={24} className="text-gray-400" /> {t("formTitle")}
+                      <Mail size={24} className="text-gray-400 shrink-0" /> {t("formTitle")}
                     </h2>
                     <p className="text-xs text-gray-500 font-bold uppercase tracking-wider pl-9">{t("formSubtitle")}</p>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="space-y-2 group">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors duration-200">
-                        <User size={14} /> {t("labelName")} <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        required
-                        placeholder={t("placeholderName")}
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 placeholder-gray-300 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:border-sumo-brand transition-all duration-200"
-                      />
-                    </div>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-8 font-medium border-l-4 border-sumo-brand/40 pl-4">
+                    {t("frozenNoticeBody")}
+                  </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-2 group">
-                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors duration-200">
-                          <Mail size={14} /> {t("labelEmail")} <span className="text-red-400">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          name="email"
-                          required
-                          placeholder="sample@email.com"
-                          value={formData.email}
-                          onChange={handleInputChange}
-                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:border-sumo-brand transition-all duration-200"
-                        />
-                      </div>
-                      <div className="space-y-2 group">
-                        <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-2 group-focus-within:text-sumo-brand transition-colors duration-200">
-                          <Phone size={14} /> {t("labelPhone")}
-                        </label>
-                        <input
-                          type="tel"
-                          name="phone"
-                          placeholder="090-1234-5678"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="w-full px-0 py-3 bg-transparent border-b border-gray-200 text-sm font-bold text-gray-900 focus:outline-none focus-visible:outline-none focus-visible:ring-0 focus:border-sumo-brand transition-all duration-200"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500">
-                        {t("labelExperience")}
-                      </label>
-                      <div className="grid grid-cols-2 gap-4">
-                        {(["beginner", "experienced"] as const).map((type) => (
-                          <label
-                            key={type}
-                            className={cn(
-                              "cursor-pointer rounded-md border p-4 text-center transition-all duration-200 ease-in-out flex flex-col items-center gap-2 outline-none focus-within:outline-none focus-visible:outline-none",
-                              formData.experience === type
-                                ? "border-sumo-brand bg-white shadow-sm"
-                                : "border-gray-200 bg-white",
-                            )}
-                          >
-                            <input
-                              type="radio"
-                              name="experience"
-                              value={type}
-                              checked={formData.experience === type}
-                              onChange={handleInputChange}
-                              className="sr-only focus:outline-none"
-                            />
-                            <div
-                              className={cn(
-                                "w-4 h-4 rounded-full border flex items-center justify-center transition-colors duration-200",
-                                formData.experience === type ? "border-sumo-brand" : "border-gray-300",
-                              )}
-                            >
-                              {formData.experience === type && (
-                                <div className="w-2 h-2 rounded-full bg-sumo-brand" />
-                              )}
-                            </div>
-                            <span
-                              className={cn(
-                                "text-sm font-bold",
-                                formData.experience === type ? "text-sumo-brand" : "text-gray-500",
-                              )}
-                            >
-                              {type === "beginner" ? t("expBeginner") : t("expExperienced")}
-                            </span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 group">
-                      <label className="text-[11px] font-bold uppercase tracking-wider text-gray-500 group-focus-within:text-sumo-brand transition-colors duration-200">
-                        {t("labelMessage")}
-                      </label>
-                      <textarea
-                        name="message"
-                        rows={4}
-                        placeholder={t("placeholderMessage")}
-                        value={formData.message}
-                        onChange={handleInputChange}
-                        className="w-full resize-none rounded-md border border-gray-200 bg-gray-50 p-4 text-sm font-medium text-gray-900 transition-all duration-200 focus:border-sumo-brand focus:bg-white focus:outline-none focus-visible:outline-none focus-visible:ring-0"
-                      />
-                    </div>
-
-                    <div className="pt-6 flex flex-col gap-6">
-                      {process.env.NODE_ENV === "development" &&
-                        !isRecaptchaSiteKeyConfigured() && (
-                          <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-md p-4 leading-relaxed font-medium">
-                            {t("devCaptchaHint")}
-                          </p>
-                        )}
-                      {isRecaptchaSiteKeyConfigured() && (
-                        <p className="text-xs text-gray-400 leading-relaxed font-medium">
-                          {t.rich("recaptchaLegal", {
-                            privacy: (chunks) => (
-                              <a
-                                href="https://policies.google.com/privacy"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline decoration-gray-300 hover:text-sumo-brand"
-                              >
-                                {chunks}
-                              </a>
-                            ),
-                            terms: (chunks) => (
-                              <a
-                                href="https://policies.google.com/terms"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline decoration-gray-300 hover:text-sumo-brand"
-                              >
-                                {chunks}
-                              </a>
-                            ),
-                          })}
-                        </p>
+                  {!hasContact ? (
+                    <p className="text-sm text-gray-500 font-medium bg-gray-50 border border-gray-100 rounded-md px-4 py-6 text-center">
+                      {t("noContactListed")}
+                    </p>
+                  ) : (
+                    <ul className="space-y-6">
+                      {representative && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-slate-50 text-slate-600 flex items-center justify-center shrink-0 border border-slate-100">
+                            <Users size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactRepresentative")}
+                            </p>
+                            <p className="text-sm font-bold text-gray-900">{representative}</p>
+                          </div>
+                        </li>
                       )}
-                      <Button
-                        type="submit"
-                        disabled={
-                          isSubmitting ||
-                          (isRecaptchaSiteKeyConfigured() && !recaptchaReady)
-                        }
-                        className={cn(
-                          "w-full py-5 text-white shadow-xl transition-all duration-200 ease-in-out",
-                          isSubmitting ||
-                            (isRecaptchaSiteKeyConfigured() && !recaptchaReady)
-                            ? "opacity-50 grayscale cursor-not-allowed"
-                            : "hover:brightness-110 active:scale-[0.98]",
-                        )}
-                        style={{
-                          backgroundColor: BRAND_BLUE,
-                          boxShadow: `0 10px 30px -5px ${BRAND_BLUE}66`,
-                        }}
-                      >
-                        <span className="flex items-center gap-3">
-                          {isSubmitting ? (
-                            t("submitting")
-                          ) : (
-                            <>
-                              <Send size={18} /> {t("submit")}
-                            </>
-                          )}
-                        </span>
-                      </Button>
-                    </div>
-                  </form>
+                      {club.email && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0 border border-cyan-100">
+                            <Mail size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("labelEmail")}
+                            </p>
+                            <a href={`mailto:${club.email}`} className={extClass}>
+                              {club.email}
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {showPhonePublic && club.phone && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100">
+                            <Phone size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("labelPhone")}
+                            </p>
+                            <a href={`tel:${club.phone}`} className={extClass}>
+                              {club.phone}
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {websiteHref && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 border border-violet-100">
+                            <Globe size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactWebsite")}
+                            </p>
+                            <a
+                              href={websiteHref}
+                              target="_blank"
+                              rel={clubExternalLinkRel}
+                              className={`inline-flex items-center gap-1.5 ${extClass}`}
+                            >
+                              {websiteHref.replace(/^https?:\/\//, "")}
+                              <ExternalLink size={14} className="shrink-0 opacity-60" aria-hidden />
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {instagramHref && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-pink-50 text-pink-600 flex items-center justify-center shrink-0 border border-pink-100">
+                            <Globe size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactInstagram")}
+                            </p>
+                            <a
+                              href={instagramHref}
+                              target="_blank"
+                              rel={clubExternalLinkRel}
+                              className={`inline-flex items-center gap-1.5 ${extClass}`}
+                            >
+                              {t("contactInstagram")}
+                              <ExternalLink size={14} className="shrink-0 opacity-60" aria-hidden />
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {twitterHref && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 border border-sky-100">
+                            <Globe size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactTwitter")}
+                            </p>
+                            <a
+                              href={twitterHref}
+                              target="_blank"
+                              rel={clubExternalLinkRel}
+                              className={`inline-flex items-center gap-1.5 ${extClass}`}
+                            >
+                              {t("contactTwitter")}
+                              <ExternalLink size={14} className="shrink-0 opacity-60" aria-hidden />
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {facebookHref && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100">
+                            <Globe size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactFacebook")}
+                            </p>
+                            <a
+                              href={facebookHref}
+                              target="_blank"
+                              rel={clubExternalLinkRel}
+                              className={`inline-flex items-center gap-1.5 ${extClass}`}
+                            >
+                              {t("contactFacebook")}
+                              <ExternalLink size={14} className="shrink-0 opacity-60" aria-hidden />
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {tiktokHref && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-gray-50 text-gray-800 flex items-center justify-center shrink-0 border border-gray-200">
+                            <Globe size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactTikTok")}
+                            </p>
+                            <a
+                              href={tiktokHref}
+                              target="_blank"
+                              rel={clubExternalLinkRel}
+                              className={`inline-flex items-center gap-1.5 ${extClass}`}
+                            >
+                              {t("contactTikTok")}
+                              <ExternalLink size={14} className="shrink-0 opacity-60" aria-hidden />
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                      {mapHref && (
+                        <li className="flex gap-4 items-start">
+                          <div className="mt-0.5 w-10 h-10 rounded-md bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-100">
+                            <MapPin size={18} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1">
+                              {t("contactMap")}
+                            </p>
+                            <a
+                              href={mapHref}
+                              target="_blank"
+                              rel={clubExternalLinkRel}
+                              className={`inline-flex items-center gap-1.5 ${extClass}`}
+                            >
+                              {t("contactMapLink")}
+                              <ExternalLink size={14} className="shrink-0 opacity-60" aria-hidden />
+                            </a>
+                          </div>
+                        </li>
+                      )}
+                    </ul>
+                  )}
                 </div>
               </Ceramic>
             </div>

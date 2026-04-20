@@ -18,7 +18,17 @@ interface ApplicationInput {
   recaptchaToken?: string;
 }
 
+/** 公開ページの入会申込フォームが再有効化されたら true にする */
+const PUBLIC_RECRUIT_SUBMIT_ENABLED = false;
+
 export async function submitApplicationAction(data: ApplicationInput) {
+  if (!PUBLIC_RECRUIT_SUBMIT_ENABLED) {
+    return {
+      error:
+        "見学・入会のお問い合わせは、クラブページに記載の連絡先へ直接ご連絡ください。",
+    };
+  }
+
   const captchaOk = await verifyRecaptchaToken(data.recaptchaToken);
   if (!captchaOk) {
     return { error: CAPTCHA_VERIFY_FAILED };
