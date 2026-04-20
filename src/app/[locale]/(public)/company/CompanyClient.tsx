@@ -45,7 +45,7 @@ const CompanyPage = () => {
               className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-5 md:p-16"
             >
               <div className="mb-12 md:mb-20">
-                <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10 border-b border-gray-100 pb-4 md:pb-6">
+                <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-8">
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-sumo-brand/10 flex items-center justify-center text-sumo-brand shrink-0">
                     <Building2 className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
@@ -54,85 +54,103 @@ const CompanyPage = () => {
                   </h2>
                 </div>
 
-                <div className="space-y-3 md:space-y-6">
-                  <div className="flex flex-col md:flex-row md:items-center py-3 md:py-4 border-b border-gray-50">
-                    <div className="w-full md:w-48 text-gray-500 font-bold mb-1 md:mb-0 flex items-center gap-2 text-[clamp(0.6875rem,1.5vw+0.42rem,0.875rem)] md:text-base">
-                      <Info size={16} /> {t("labelCompanyName")}
-                    </div>
-                    <div className="flex-1 text-gray-800 font-medium text-[clamp(0.8125rem,1.8vw+0.45rem,1rem)] md:text-lg">
+                <dl className="flex flex-col gap-6 md:gap-0 md:divide-y md:divide-gray-100 border-t border-gray-100 pt-6 md:pt-0">
+                  <div className="flex flex-col md:flex-row md:py-6 gap-2 md:gap-8 group">
+                    <dt className="flex items-start gap-3 text-[14px] md:text-[16px] font-medium text-gray-500 md:w-56 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-sumo-brand/5 group-hover:text-sumo-brand transition-colors flex items-center justify-center text-gray-400 shrink-0">
+                        <Info size={16} />
+                      </div>
+                      <span className="mt-1">{t("labelCompanyName")}</span>
+                    </dt>
+                    <dd className="text-[16px] md:text-[18px] font-medium text-gray-900 flex-1 pl-11 md:pl-0 mt-1 leading-relaxed">
                       {t("valueCompanyName")}
-                    </div>
+                    </dd>
                   </div>
 
-                  <div className="flex flex-col md:flex-row py-3 md:py-4 border-b border-gray-50">
-                    <div className="w-full md:w-48 text-gray-500 font-bold mb-1 md:mb-0 flex items-center gap-2 mt-1 text-[clamp(0.6875rem,1.5vw+0.42rem,0.875rem)] md:text-base">
-                      <Users size={16} /> {t("labelRepresentatives")}
-                    </div>
-                    <div className="flex-1 text-gray-800 font-medium space-y-1 md:space-y-2 text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
-                      <div className="grid grid-cols-[auto_1fr] gap-x-6 items-baseline">
-                        <span className="whitespace-nowrap">{t("roleChairman")}</span>
+                  <div className="flex flex-col md:flex-row md:py-6 gap-2 md:gap-8 group">
+                    <dt className="flex items-start gap-3 text-[14px] md:text-[16px] font-medium text-gray-500 md:w-56 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-sumo-brand/5 group-hover:text-sumo-brand transition-colors flex items-center justify-center text-gray-400 shrink-0">
+                        <Users size={16} />
+                      </div>
+                      <span className="mt-1">{t("labelRepresentatives")}</span>
+                    </dt>
+                    <dd className="text-[16px] md:text-[18px] font-medium text-gray-900 flex-1 pl-11 md:pl-0 mt-1 leading-relaxed">
+                      <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-baseline">
+                        <span className="text-[14px] text-gray-500 whitespace-nowrap">{t("roleChairman")}</span>
                         <span>{t("nameChairman")}</span>
 
-                        <span className="whitespace-nowrap">{t("rolePresident")}</span>
+                        <span className="text-[14px] text-gray-500 whitespace-nowrap">{t("rolePresident")}</span>
                         <span>{t("namePresident")}</span>
                       </div>
-                    </div>
+                    </dd>
                   </div>
 
-                  <div className="flex flex-col md:flex-row md:items-center py-3 md:py-4 border-b border-gray-50">
-                    <div className="w-full md:w-48 text-gray-500 font-bold mb-1 md:mb-0 flex items-center gap-2 text-[clamp(0.6875rem,1.5vw+0.42rem,0.875rem)] md:text-base">
-                      <Target size={16} /> {t("labelFounded")}
-                    </div>
-                    <div className="flex-1 text-gray-800 font-medium text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
+                  <div className="flex flex-col md:flex-row md:py-6 gap-2 md:gap-8 group">
+                    <dt className="flex items-start gap-3 text-[14px] md:text-[16px] font-medium text-gray-500 md:w-56 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-sumo-brand/5 group-hover:text-sumo-brand transition-colors flex items-center justify-center text-gray-400 shrink-0">
+                        <Target size={16} />
+                      </div>
+                      <span className="mt-1">{t("labelFounded")}</span>
+                    </dt>
+                    <dd className="text-[16px] md:text-[18px] font-medium text-gray-900 flex-1 pl-11 md:pl-0 mt-1 leading-relaxed">
                       {t("valueFounded")}
-                    </div>
+                    </dd>
                   </div>
 
-                  <div className="flex flex-col md:flex-row md:items-center py-3 md:py-4 border-b border-gray-50">
-                    <div className="w-full md:w-48 text-gray-500 font-bold mb-1 md:mb-0 flex items-center gap-2 text-[clamp(0.6875rem,1.5vw+0.42rem,0.875rem)] md:text-base">
-                      <Building2 size={16} /> {t("labelCapital")}
-                    </div>
-                    <div className="flex-1 text-gray-800 font-medium text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
+                  <div className="flex flex-col md:flex-row md:py-6 gap-2 md:gap-8 group">
+                    <dt className="flex items-start gap-3 text-[14px] md:text-[16px] font-medium text-gray-500 md:w-56 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-sumo-brand/5 group-hover:text-sumo-brand transition-colors flex items-center justify-center text-gray-400 shrink-0">
+                        <Building2 size={16} />
+                      </div>
+                      <span className="mt-1">{t("labelCapital")}</span>
+                    </dt>
+                    <dd className="text-[16px] md:text-[18px] font-medium text-gray-900 flex-1 pl-11 md:pl-0 mt-1 leading-relaxed">
                       {t("valueCapital")}
-                    </div>
+                    </dd>
                   </div>
 
-                  <div className="flex flex-col md:flex-row py-3 md:py-4 border-b border-gray-50">
-                    <div className="w-full md:w-48 text-gray-500 font-bold mb-1 md:mb-0 flex items-center gap-2 mt-1 text-[clamp(0.6875rem,1.5vw+0.42rem,0.875rem)] md:text-base">
-                      <MapPin size={16} /> {t("labelHeadOffice")}
-                    </div>
-                    <div className="flex-1 text-gray-800 font-medium leading-relaxed text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
+                  <div className="flex flex-col md:flex-row md:py-6 gap-2 md:gap-8 group">
+                    <dt className="flex items-start gap-3 text-[14px] md:text-[16px] font-medium text-gray-500 md:w-56 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-sumo-brand/5 group-hover:text-sumo-brand transition-colors flex items-center justify-center text-gray-400 shrink-0">
+                        <MapPin size={16} />
+                      </div>
+                      <span className="mt-1">{t("labelHeadOffice")}</span>
+                    </dt>
+                    <dd className="text-[16px] md:text-[18px] font-medium text-gray-900 flex-1 pl-11 md:pl-0 mt-1 leading-relaxed">
                       {t("headOfficeLines").split("\n").map((line, i) => (
                         <React.Fragment key={i}>
                           {i > 0 && <br />}
                           {line}
                         </React.Fragment>
                       ))}
-                      <br />
-                      <span className="text-gray-500 text-[clamp(0.625rem,1.35vw+0.38rem,0.75rem)] md:text-sm mt-1 inline-block">
-                        {t("headOfficeTelFax")}
-                      </span>
-                    </div>
+                      <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                        <span className="inline-flex px-2 py-0.5 bg-gray-100 rounded text-xs font-medium text-gray-600 w-fit">TEL / FAX</span>
+                        <span className="text-[14px] text-gray-500">{t("headOfficeTelFax")}</span>
+                      </div>
+                    </dd>
                   </div>
 
-                  <div className="flex flex-col md:flex-row py-3 md:py-4 border-b border-gray-50">
-                    <div className="w-full md:w-48 text-gray-500 font-bold mb-1 md:mb-0 flex items-center gap-2 mt-1 text-[clamp(0.6875rem,1.5vw+0.42rem,0.875rem)] md:text-base">
-                      <MapPin size={16} /> {t("labelNagoyaOffice")}
-                    </div>
-                    <div className="flex-1 text-gray-800 font-medium leading-relaxed text-[clamp(0.75rem,1.65vw+0.42rem,0.875rem)] md:text-base">
+                  <div className="flex flex-col md:flex-row md:py-6 gap-2 md:gap-8 group">
+                    <dt className="flex items-start gap-3 text-[14px] md:text-[16px] font-medium text-gray-500 md:w-56 shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-50 group-hover:bg-sumo-brand/5 group-hover:text-sumo-brand transition-colors flex items-center justify-center text-gray-400 shrink-0">
+                        <MapPin size={16} />
+                      </div>
+                      <span className="mt-1">{t("labelNagoyaOffice")}</span>
+                    </dt>
+                    <dd className="text-[16px] md:text-[18px] font-medium text-gray-900 flex-1 pl-11 md:pl-0 mt-1 leading-relaxed">
                       {t("nagoyaOfficeLines").split("\n").map((line, i) => (
                         <React.Fragment key={i}>
                           {i > 0 && <br />}
                           {line}
                         </React.Fragment>
                       ))}
-                      <br />
-                      <span className="text-gray-500 text-[clamp(0.625rem,1.35vw+0.38rem,0.75rem)] md:text-sm mt-1 inline-block">
-                        {t("nagoyaTelFax")}
-                      </span>
-                    </div>
+                      <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
+                        <span className="inline-flex px-2 py-0.5 bg-gray-100 rounded text-xs font-medium text-gray-600 w-fit">TEL / FAX</span>
+                        <span className="text-[14px] text-gray-500">{t("nagoyaTelFax")}</span>
+                      </div>
+                    </dd>
                   </div>
-                </div>
+                </dl>
               </div>
 
               <div>
