@@ -35,6 +35,7 @@ import { hasRealClubMainImage } from "@/lib/club-images";
 import { getTranslations } from "next-intl/server";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 import { prefectureIntroForLocale } from "@/lib/prefecture-intro";
+import { clubDisplayName } from "@/lib/i18n-db";
 
 /** Full club row shape from the shared Prisma client (no `Club` import from `@prisma/client`). */
 type Club = Awaited<ReturnType<typeof prisma.club.findMany>>[number];
@@ -157,7 +158,10 @@ export default async function PrefecturePage({ params }: PageProps) {
   const featuredClub = resolveFeaturedClub();
 
   const bannerTitle = featuredClub
-    ? t("bannerTitleWithClub", { clubName: featuredClub.name, prefName: displayName })
+    ? t("bannerTitleWithClub", {
+        clubName: clubDisplayName(featuredClub, locale),
+        prefName: displayName,
+      })
     : t("bannerTitlePrefOnly", { prefName: displayName });
 
   // DB-derived banner display properties (preview overrides happen client-side)
@@ -182,9 +186,10 @@ export default async function PrefecturePage({ params }: PageProps) {
         id: featuredClub.id,
         name: featuredClub.name,
         slug: featuredClub.slug,
-        area: featuredClub.area ?? null,
+        area: featuredClub.area,
         city: featuredClub.city ?? null,
-        address: featuredClub.address ?? null,
+        address: featuredClub.address,
+        translations: featuredClub.translations,
         mainImage: featuredClub.mainImage ?? null,
       }
     : null;

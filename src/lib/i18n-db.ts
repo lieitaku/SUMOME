@@ -101,6 +101,24 @@ export function clubDisplayAddress(
   return fromDoc.trim() || ja || null;
 }
 
+/** 卡片/横幅等单行所在地：都道府県（映射）+ 市区町村 + 番地（与 ClubCard 一致） */
+export function clubDisplayLocationLine(
+  club: {
+    area: string;
+    city?: string | null;
+    address?: string | null;
+    translations?: Prisma.JsonValue | null;
+  },
+  locale: string
+): string {
+  const parts: string[] = [clubDisplayArea(club, locale)];
+  const city = clubDisplayCity(club, locale)?.trim();
+  const addr = clubDisplayAddress(club, locale)?.trim();
+  if (city) parts.push(city);
+  if (addr) parts.push(addr);
+  return parts.join(" ");
+}
+
 /** 募集対象などカンマ区切りの原文を丸ごと翻訳 JSON で上書き表示 */
 export function clubDisplayTarget(
   club: {

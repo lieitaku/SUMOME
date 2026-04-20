@@ -102,7 +102,7 @@ export default function MascotCard({
           </div>
         )}
         {imageSrc ? (
-          <div className="absolute inset-0 z-10 flex items-end justify-center p-2">
+          <div className="absolute inset-0 z-10 flex items-end justify-center p-2 pt-10 md:pt-2">
             <div className="h-full w-full origin-bottom transition-transform duration-500 ease-out group-hover:scale-[1.05] group-hover:-translate-y-1 group-hover:drop-shadow-md">
               <img
                 src={imageSrc}
@@ -114,7 +114,7 @@ export default function MascotCard({
             </div>
           </div>
         ) : (
-          <div className="absolute inset-0 z-10 flex items-end justify-center p-6 opacity-40">
+          <div className="absolute inset-0 z-10 flex items-end justify-center p-6 pt-12 md:pt-6 opacity-40">
             <div className="h-full w-full origin-bottom transition-transform duration-500 ease-out group-hover:scale-[1.04] group-hover:-translate-y-0.5">
               <CharacterPlaceholder theme={theme} label={t("placeholderLabel")} />
             </div>

@@ -49,6 +49,7 @@ export async function GET(request: Request) {
           area: true,
           city: true,
           address: true,
+          translations: true,
           mainImage: true,
         },
       });

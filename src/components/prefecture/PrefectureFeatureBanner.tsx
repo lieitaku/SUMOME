@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import type { Prisma } from "@prisma/client";
 import Link from "@/components/ui/TransitionLink";
 import { ArrowRight, UserPlus, MapPin } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { clubDisplayLocationLine, clubDisplayName } from "@/lib/i18n-db";
 
 const PREVIEW_COOKIE_NAME = "preview_id";
 
@@ -24,9 +26,11 @@ export interface FeaturedClubInfo {
   id: string;
   name: string;
   slug: string;
-  area: string | null;
+  area: string;
   city: string | null;
-  address: string | null;
+  address: string;
+  /** 与 ClubCard 相同：英文等从 translations 读 name / city / address */
+  translations?: Prisma.JsonValue | null;
   mainImage: string | null;
 }
 
@@ -69,6 +73,7 @@ export default function PrefectureFeatureBanner({
   dbFeaturedClub,
 }: Props) {
   const t = useTranslations("PrefecturePage");
+  const locale = useLocale();
 
   const [state, setState] = useState<BannerState>({
     bannerImg: dbBannerImg,
@@ -110,10 +115,24 @@ export default function PrefectureFeatureBanner({
   const clubDetailLink = featuredClub ? `/clubs/${featuredClub.slug}` : "#";
   const recruitLink = featuredClub ? `/clubs/${featuredClub.slug}/recruit` : "#";
   const clubAddress = featuredClub
-    ? [featuredClub.area, featuredClub.city, featuredClub.address].filter(Boolean).join(" ")
+    ? clubDisplayLocationLine(
+        {
+          area: featuredClub.area,
+          city: featuredClub.city,
+          address: featuredClub.address,
+          translations: featuredClub.translations ?? null,
+        },
+        locale
+      )
     : "";
   const bannerTitle = featuredClub
-    ? t("bannerTitleWithClub", { clubName: featuredClub.name, prefName: displayName })
+    ? t("bannerTitleWithClub", {
+        clubName: clubDisplayName(
+          { name: featuredClub.name, translations: featuredClub.translations ?? null },
+          locale
+        ),
+        prefName: displayName,
+      })
     : t("bannerTitlePrefOnly", { prefName: displayName });
 
   // Nothing to show (no banner in DB and no preview override)
