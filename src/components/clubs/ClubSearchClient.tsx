@@ -5,12 +5,12 @@ import {
     Search,
     X,
     Filter,
-    ChevronDown,
     SlidersHorizontal,
     MapPin,
     Clock,
     Map,
 } from "lucide-react";
+import MobileGridLayoutToggle from "@/components/public/MobileGridLayoutToggle";
 import { type Club } from "@prisma/client";
 import ClubCard from "@/components/clubs/ClubCard";
 import { cn } from "@/lib/utils";
@@ -127,6 +127,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
     const [searchQuery, setSearchQuery] = useState("");                         // 文本搜索关键词
     const [isFilterExpanded, setIsFilterExpanded] = useState(true);             // 筛选面板展开状态
     const [sortBy, setSortBy] = useState<SortMode>("area");                     // 默认按都道府県地理顺序
+    const [mobileLayout, setMobileLayout] = useState<"single" | "double">("double");
 
     // --- 派生状态 (Derived State) ---
 
@@ -471,8 +472,8 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
 
                     {/* ==================== 区域 3: 搜索结果展示 ==================== */}
                     <div ref={resultsSectionRef} className="max-w-6xl mx-auto">
-                        {/* 结果统计与排序、标签 */}
-                        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6 pb-3 md:gap-4 md:mb-8 md:pb-4 border-b border-gray-200">
+                        {/* 结果统计与排序、表示（手机端）、标签 — 与 Magazines 列表工具栏对齐 */}
+                        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 pb-4 md:mb-8 border-b border-gray-200">
                             <div className="flex items-baseline gap-3">
                                 <span className="text-4xl font-serif font-black text-sumo-brand">
                                     {filteredClubs.length}
@@ -482,10 +483,8 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                 </span>
                             </div>
 
-                            {/* 右侧：排序 + 筛选标签 */}
-                            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-4">
-                                {/* 排序切换：默认按地区顺序，可切换为按时间 */}
-                                <div className="flex items-center gap-2">
+                            <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 w-full md:w-auto md:justify-end">
+                                <div className="flex flex-wrap items-center gap-2">
                                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mr-1">
                                         {t("sortLabel")}
                                     </span>
@@ -517,8 +516,16 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                     </button>
                                 </div>
 
+                                <MobileGridLayoutToggle
+                                    layout={mobileLayout}
+                                    onLayoutChange={setMobileLayout}
+                                    labelDisplay={t("displayLabel")}
+                                    ariaDouble={t("ariaLayoutDouble")}
+                                    ariaSingle={t("ariaLayoutSingle")}
+                                />
+
                                 {/* 激活状态展示 (Breadcrumbs style) */}
-                                <div className="hidden md:flex gap-2">
+                                <div className="hidden md:flex gap-2 flex-wrap justify-end">
                                 {searchQuery && (
                                     <span className="pl-3 pr-2 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-bold rounded-full flex items-center gap-1 shadow-sm">
                                         {searchQuery}
@@ -554,7 +561,15 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                         {/* 结果列表：渐进式渲染，先显示首屏再分批追加，避免从地区切到全国时卡顿 */}
                         {filteredClubs.length > 0 ? (
                             <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+                                <div
+                                    className={cn(
+                                        "grid",
+                                        mobileLayout === "double"
+                                            ? "grid-cols-2 gap-x-4 gap-y-4"
+                                            : "grid-cols-1 gap-y-4",
+                                        "md:grid-cols-2 lg:grid-cols-3 md:gap-8"
+                                    )}
+                                >
                                     {clubsToRender.map((club, index) => {
                                         const ANIMATION_CAP = 24;
                                         const useAnimation = clubsToRender.length <= ANIMATION_CAP;
@@ -565,7 +580,10 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                                                 className={useAnimation ? "opacity-0 card-enter-active" : ""}
                                                 style={useAnimation ? { animationDelay: `${delayMs}ms` } : undefined}
                                             >
-                                                <ClubCard club={club} />
+                                                <ClubCard
+                                                    club={club}
+                                                    compact={mobileLayout === "double"}
+                                                />
                                             </div>
                                         );
                                     })}

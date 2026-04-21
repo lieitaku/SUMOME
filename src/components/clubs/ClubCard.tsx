@@ -33,11 +33,13 @@ type ClubCardProps = {
   club: ExtendedClub;
   className?: string;
   accentColor?: string;
+  /** 手机端双列列表时的紧凑排版（平板以上不受影响） */
+  compact?: boolean;
 };
 
 const DEFAULT_COLOR = "#2454a4";
 
-const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
+const ClubCard = ({ club, className, accentColor, compact }: ClubCardProps) => {
   const locale = useLocale();
   const t = useTranslations("ClubDetail");
   const displayName = clubDisplayName(club, locale);
@@ -127,21 +129,33 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
                 fill
                 className="object-cover transition-transform duration-700 group-hover:scale-105"
                 style={{ objectPosition: mainImagePosition, transform: `rotate(${mainImageRotation}deg)` }}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                sizes={
+                  compact
+                    ? "(max-width: 768px) 50vw, (max-width: 1200px) 50vw, 33vw"
+                    : "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                }
               />
             )}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
 
             <div
-              className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black tracking-widest shadow-sm flex items-center gap-1 border border-white/50"
+              className={cn(
+                "absolute bg-white/95 backdrop-blur-md rounded-full font-black tracking-widest shadow-sm flex items-center gap-1 border border-white/50",
+                compact
+                  ? "top-2 left-2 px-2 py-0.5 text-[9px] max-md:max-w-[calc(100%-2.5rem)] truncate"
+                  : "top-3 left-3 px-3 py-1 text-[10px]"
+              )}
               style={{ color: themeColor }}
             >
-              <MapPin size={10} />
-              {displayArea}
+              <MapPin size={compact ? 9 : 10} className="shrink-0" />
+              <span className="truncate">{displayArea}</span>
             </div>
 
             <div
-              className="absolute top-3 right-3 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-md"
+              className={cn(
+                "absolute w-8 h-8 bg-white/90 rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-md",
+                compact ? "top-2 right-2 max-md:hidden" : "top-3 right-3"
+              )}
               style={{ color: themeColor }}
             >
               <ArrowUpRight size={16} />
@@ -149,13 +163,28 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
           </div>
 
           {/* Information Area */}
-          <div className="p-6 pb-0 flex flex-col flex-grow bg-white">
-            <h3 className="text-xl font-serif font-bold text-gray-900 leading-snug mb-2 transition-colors group-hover:text-[var(--theme-color)] line-clamp-1">
+          <div
+            className={cn(
+              "pb-0 flex flex-col flex-grow bg-white",
+              compact ? "p-3 max-md:p-3 md:p-6" : "p-6"
+            )}
+          >
+            <h3
+              className={cn(
+                "font-serif font-bold text-gray-900 leading-snug transition-colors group-hover:text-[var(--theme-color)] line-clamp-2 md:line-clamp-1",
+                compact ? "text-sm mb-1 md:text-xl md:mb-2" : "text-xl mb-2"
+              )}
+            >
               {displayName}
             </h3>
 
             {(displayCity || displayAddress) && (
-              <p className="text-[11px] text-gray-400 mb-3 flex items-center gap-1 line-clamp-1">
+              <p
+                className={cn(
+                  "text-gray-400 flex items-center gap-1 line-clamp-1",
+                  compact ? "text-[10px] mb-2 max-md:hidden md:text-[11px] md:mb-3" : "text-[11px] mb-3"
+                )}
+              >
                 <MapPin size={10} className="shrink-0" />
                 <span className="truncate">
                   {displayArea}
@@ -165,11 +194,17 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
               </p>
             )}
 
-            <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className={cn("flex flex-wrap items-center gap-2", compact ? "mb-2 md:mb-4" : "mb-4")}>
               {dynamicTags.map((tag, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-50 text-gray-500 text-[9px] font-black tracking-wider border border-gray-100"
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md bg-gray-50 text-gray-500 font-black tracking-wider border border-gray-100",
+                    compact
+                      ? "px-1.5 py-0.5 text-[8px] md:px-2.5 md:py-1 md:text-[9px]"
+                      : "px-2.5 py-1 text-[9px]",
+                    index >= 2 && compact && "max-md:hidden"
+                  )}
                 >
                   <Users size={10} />
                   {tag}
@@ -177,14 +212,26 @@ const ClubCard = ({ club, className, accentColor }: ClubCardProps) => {
               ))}
             </div>
 
-            <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-6 font-medium">
+            <p
+              className={cn(
+                "text-gray-500 leading-relaxed font-medium",
+                compact
+                  ? "text-xs line-clamp-2 mb-3 md:text-sm md:line-clamp-3 md:mb-6"
+                  : "text-sm line-clamp-3 mb-6"
+              )}
+            >
               {summaryText}
             </p>
           </div>
         </Link>
 
         {/* Footer: 外链优先新标签；内嵌浏览器拦截时降级为当前页；z-20 避免被 transform 层盖住 */}
-        <div className="relative z-20 mx-6 mb-6 flex items-center justify-between gap-3 border-t border-gray-100 pt-4">
+        <div
+          className={cn(
+            "relative z-20 flex items-center justify-between gap-3 border-t border-gray-100",
+            compact ? "mx-3 mb-3 pt-2 max-md:gap-1.5 md:mx-6 md:mb-6 md:pt-4" : "mx-6 mb-6 pt-4"
+          )}
+        >
           <div className="flex flex-wrap items-center gap-3 md:gap-2">
             {showPhonePublic && (
               <a href={`tel:${club.phone}`} className={cn(contactIconWrap, "border border-emerald-100 text-emerald-600")} title={t("cardLinkPhone", { phone: club.phone! })}>

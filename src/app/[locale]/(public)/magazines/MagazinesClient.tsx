@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useRef } from "react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
-import { ArrowRight, Search, X, Filter, ChevronDown, MapPin, LayoutGrid, LayoutList } from "lucide-react";
+import { ArrowRight, Search, X, Filter, ChevronDown, MapPin } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { magazineDisplayDescription, magazineDisplayTitle } from "@/lib/i18n-db"
 import { allTranslationValues } from "@/lib/document-translations";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
+import MobileGridLayoutToggle from "@/components/public/MobileGridLayoutToggle";
 
 type RegionKey =
     | "hokkaido_tohoku"
@@ -367,39 +368,13 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                                     </div>
                                 </div>
 
-                                <div className="md:hidden inline-flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-gray-400 tracking-widest uppercase">
-                                        {t("displayLabel")}
-                                    </span>
-                                    <div className="inline-flex items-center rounded-full bg-gray-100 p-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => setMobileLayout("double")}
-                                            className={cn(
-                                                "p-2 rounded-full transition-colors",
-                                                mobileLayout === "double"
-                                                    ? "bg-sumo-brand text-white"
-                                                    : "text-gray-500"
-                                            )}
-                                            aria-label={t("ariaLayoutDouble")}
-                                        >
-                                            <LayoutGrid size={18} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setMobileLayout("single")}
-                                            className={cn(
-                                                "p-2 rounded-full transition-colors",
-                                                mobileLayout === "single"
-                                                    ? "bg-sumo-brand text-white"
-                                                    : "text-gray-500"
-                                            )}
-                                            aria-label={t("ariaLayoutSingle")}
-                                        >
-                                            <LayoutList size={18} />
-                                        </button>
-                                    </div>
-                                </div>
+                                <MobileGridLayoutToggle
+                                    layout={mobileLayout}
+                                    onLayoutChange={setMobileLayout}
+                                    labelDisplay={t("displayLabel")}
+                                    ariaDouble={t("ariaLayoutDouble")}
+                                    ariaSingle={t("ariaLayoutSingle")}
+                                />
 
                                 <div className="flex flex-wrap gap-2">
                                     {searchQuery && (
