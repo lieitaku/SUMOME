@@ -27,16 +27,7 @@ const PartnersPage = () => {
   }, []);
 
   return (
-    <div
-      className="min-h-screen bg-[#F4F5F7] font-sans selection:text-white"
-      style={{ "--selection-bg": BRAND_BLUE } as React.CSSProperties}
-    >
-      <style jsx global>{`
-        ::selection {
-          background-color: var(--selection-bg);
-        }
-      `}</style>
-
+    <div className="min-h-screen bg-[#F4F5F7] font-sans selection:bg-sumo-brand selection:text-white">
       <section className="relative pt-0 pb-12 md:pb-32 overflow-hidden bg-white lg:pt-48">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-2/3 h-full bg-blue-50/50 skew-x-[-12deg] translate-x-1/4"></div>
