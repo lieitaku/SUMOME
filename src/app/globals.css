@@ -1,6 +1,19 @@
 @import "tailwindcss";
 
 /* ==========================================================================
+   0. 安全列表 (Safelist via @source inline — Tailwind v4.1+)
+   --------------------------------------------------------------------------
+   GuidePageClient / DashboardClient などで ACCENT_MAP を介して
+   動的に参照するアクセントカラー系ユーティリティは、
+   JIT が稀に拾いこぼすことがあるため明示的に生成させる。
+   参考: https://tailwindcss.com/docs/detecting-classes-in-source-files
+   ========================================================================== */
+@source inline("bg-{blue,indigo,violet,amber,rose,emerald,orange,teal,cyan,purple,pink,slate}-{100,200,600}");
+@source inline("text-{blue,indigo,violet,amber,rose,emerald,orange,teal,cyan,purple,pink,slate}-{600,700}");
+@source inline("from-{blue,indigo,violet,amber,rose,emerald,orange,teal,cyan,purple,pink,slate}-50");
+@source inline("group-hover:shadow-{blue,indigo,violet,amber,rose,emerald,orange,teal,cyan,purple,pink,slate}-200/50");
+
+/* ==========================================================================
    1. 主题配置 (Design System - Swiss Style / International)
    ========================================================================== */
 @theme {
