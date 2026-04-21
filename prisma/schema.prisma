@@ -148,6 +148,7 @@ model Activity {
   @@index([category])
   @@index([title]) // 优化搜索性能
   @@index([date])  // 优化排序性能
+  @@index([published, date]) // 已发布列表按日期排序
 }
 
 // ==========================================

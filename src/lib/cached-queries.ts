@@ -137,21 +137,20 @@ export function getCachedAllMagazines() {
   )();
 }
 
-/**
- * 活动列表分页（故意不用 unstable_cache 长期缓存）。
- * 否则俱乐部 translations 在 DB 更新后，首屏可能长达 1 小时仍显示旧文案。
- */
-export async function getCachedActivitiesPage(page: number, pageSize: number = 6) {
+/** 公开活动列表分页（仅 published）。与 `/api/activities` 共用，避免查询条件漂移。 */
+export async function fetchActivitiesPage(page: number, pageSize: number = 6) {
   const p = Math.max(1, page);
   const ps = pageSize;
+  const where = { published: true };
   const [activities, totalItems] = await Promise.all([
     prisma.activity.findMany({
+      where,
       skip: (p - 1) * ps,
       take: ps,
       orderBy: { date: "desc" },
       include: { club: { select: { name: true, translations: true, area: true } } },
     }),
-    prisma.activity.count(),
+    prisma.activity.count({ where }),
   ]);
   return {
     activities,
@@ -159,6 +158,19 @@ export async function getCachedActivitiesPage(page: number, pageSize: number = 6
     totalPages: Math.ceil(totalItems / ps),
     page: p,
   };
+}
+
+/**
+ * 活动列表分页（unstable_cache）。与单条活动缓存一致：`revalidateTag("activities")` 后失效。
+ */
+export function getCachedActivitiesPage(page: number, pageSize: number = 6) {
+  const p = Math.max(1, page);
+  const ps = pageSize;
+  return unstable_cache(
+    () => fetchActivitiesPage(p, ps),
+    ["activities-page", String(p), String(ps)],
+    { revalidate: 60, tags: ["activities"] }
+  )();
 }
 
 /** Cached all clubs (excluding official-hq). Invalidate with tag "clubs". */

@@ -43,11 +43,13 @@ export default async function ActivitiesPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "ActivitiesPage" });
   const sp = searchParams ? await searchParams : {};
   const pageParam = sp.page;
   const initialPage = Math.max(1, Number(pageParam) || 1);
-  const initialData = await getCachedActivitiesPage(initialPage);
+  const [t, initialData] = await Promise.all([
+    getTranslations({ locale, namespace: "ActivitiesPage" }),
+    getCachedActivitiesPage(initialPage),
+  ]);
 
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">

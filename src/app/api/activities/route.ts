@@ -1,33 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { Prisma } from "@prisma/client";
-import { prisma } from "@/lib/db";
+import { getCachedActivitiesPage } from "@/lib/cached-queries";
 
 const ITEMS_PER_PAGE = 6;
 
-/** 公开 API：活动列表（仅 published），支持分页 */
+/** 公开 API：活动列表（仅 published），与 SSR 共用缓存 */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
 
-  const [activities, totalItems] = await Promise.all([
-    prisma.activity.findMany({
-      where: { published: true },
-      include: {
-        club: {
-          select: {
-            name: true,
-            translations: true,
-            area: true,
-          } as Prisma.ClubSelect,
-        },
-      },
-      orderBy: { date: "desc" },
-      skip: (page - 1) * ITEMS_PER_PAGE,
-      take: ITEMS_PER_PAGE,
-    }),
-    prisma.activity.count({ where: { published: true } }),
-  ]);
-
-  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  return NextResponse.json({ activities, totalItems, totalPages, page });
+  const { activities, totalItems, totalPages, page: p } = await getCachedActivitiesPage(
+    page,
+    ITEMS_PER_PAGE
+  );
+  return NextResponse.json({ activities, totalItems, totalPages, page: p });
 }
