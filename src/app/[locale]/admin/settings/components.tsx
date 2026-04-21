@@ -309,7 +309,7 @@ export function BatchTranslateCard() {
   };
 
   return (
-    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col min-h-0 lg:h-full lg:row-start-2 lg:col-start-2">
+    <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col">
       <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
         <div className="p-2 bg-violet-50 text-violet-600 rounded-lg">
           <Languages size={20} />
