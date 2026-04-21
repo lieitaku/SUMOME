@@ -1,7 +1,9 @@
 import React from "react";
+import AdminRouteLoadingShell from "@/components/admin/AdminRouteLoadingShell";
 
 export default function AdminDashboardLoading() {
   return (
+    <AdminRouteLoadingShell>
     <div className="max-w-6xl mx-auto font-sans animate-pulse">
       {/* 标题区域骨架 */}
       <div className="mb-8">
@@ -44,6 +46,7 @@ export default function AdminDashboardLoading() {
         </div>
       </div>
     </div>
+    </AdminRouteLoadingShell>
   );
 }
 

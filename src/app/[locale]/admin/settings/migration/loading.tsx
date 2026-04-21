@@ -2,11 +2,7 @@ import React from "react";
 import AdminRouteLoadingShell from "@/components/admin/AdminRouteLoadingShell";
 import AdminMagazineStyleLoading from "@/components/admin/AdminMagazineStyleLoading";
 
-/**
- * Admin 根 loading：无更深层 loading.tsx 的路由（如 /admin/banners、/admin/guide）会回退到此。
- * 与 magazines 列表页骨架一致，并盖住主列底部版权栏。
- */
-export default function AdminRootLoading() {
+export default function AdminSettingsMigrationLoading() {
   return (
     <AdminRouteLoadingShell>
       <AdminMagazineStyleLoading />

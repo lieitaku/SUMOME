@@ -1,8 +1,10 @@
 import React from "react";
+import AdminRouteLoadingShell from "@/components/admin/AdminRouteLoadingShell";
 
 export default function AdminClubsLoading() {
-    return (
-        <div className="max-w-6xl mx-auto space-y-6 animate-pulse">
+  return (
+    <AdminRouteLoadingShell>
+    <div className="max-w-6xl mx-auto space-y-6 animate-pulse">
             <div className="flex items-center justify-between">
                 <div className="space-y-2">
                     <div className="h-7 w-40 bg-gray-200 rounded" />
@@ -26,7 +28,8 @@ export default function AdminClubsLoading() {
                         <div className="h-4 w-1/2 bg-gray-100 rounded" />
                     </div>
                 ))}
-            </div>
-        </div>
-    );
+      </div>
+    </div>
+    </AdminRouteLoadingShell>
+  );
 }

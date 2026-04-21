@@ -1,10 +1,12 @@
 import React from "react";
+import AdminRouteLoadingShell from "@/components/admin/AdminRouteLoadingShell";
 
 /**
  * 都道府県バナー管理页的 loading 骨架，与真实布局一致
  */
 export default function PrefectureBannersLoading() {
   return (
+    <AdminRouteLoadingShell>
     <div className="max-w-6xl mx-auto space-y-6 font-sans animate-pulse">
       {/* 标题 + 描述（无右侧按钮） */}
       <div>
@@ -90,5 +92,6 @@ export default function PrefectureBannersLoading() {
         </table>
       </div>
     </div>
+    </AdminRouteLoadingShell>
   );
 }
