@@ -6,7 +6,7 @@ import { usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import {
-    LayoutDashboard, Users, Calendar, BookOpen, Flag, LogOut, MapPin, Settings, Store, Menu, X, UserPlus, Loader2, ExternalLink, Inbox, Star, HelpCircle
+    LayoutDashboard, Users, Newspaper, BookText, Flag, LogOut, MapPin, Map, Settings, Building2, Menu, X, Loader2, ExternalLink, Inbox, MessageCircle, Star, HelpCircle
 } from "lucide-react";
 
 // 引入刚才修复好的 Server Action
@@ -120,12 +120,12 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                             <SectionLabel label={t("sectionContent")} />
                             <NavItem href="/admin/clubs" icon={<Users size={18} />} label={t("clubs")} activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/pickup-clubs" icon={<Star size={18} />} label={t("pickupClubs")} activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/activities" icon={<Calendar size={18} />} label={t("activities")} activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/magazines" icon={<BookOpen size={18} />} label={t("magazines")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/activities" icon={<Newspaper size={18} />} label={t("activities")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/magazines" icon={<BookText size={18} />} label={t("magazines")} activePath={pathname} onClick={closeMenu} />
                             <NavItem href="/admin/banners" icon={<Flag size={18} />} label={t("banners")} activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/prefecture-banners" icon={<MapPin size={18} />} label={t("prefBanners")} activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label={t("applications")} activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/inquiries" icon={<Inbox size={18} />} label={t("inquiries")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/prefecture-banners" icon={<Map size={18} />} label={t("prefBanners")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/applications" icon={<Inbox size={18} />} label={t("applications")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/inquiries" icon={<MessageCircle size={18} />} label={t("inquiries")} activePath={pathname} onClick={closeMenu} />
                         </>
                     )}
 
@@ -133,8 +133,8 @@ export default function AdminSidebar({ role, email }: AdminSidebarProps) {
                     {role === "OWNER" && (
                         <>
                             <SectionLabel label={t("sectionMyClub")} />
-                            <NavItem href="/admin/my-club" icon={<Store size={18} />} label={t("myClub")} activePath={pathname} onClick={closeMenu} />
-                            <NavItem href="/admin/applications" icon={<UserPlus size={18} />} label={t("applications")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/my-club" icon={<Building2 size={18} />} label={t("myClub")} activePath={pathname} onClick={closeMenu} />
+                            <NavItem href="/admin/applications" icon={<Inbox size={18} />} label={t("applications")} activePath={pathname} onClick={closeMenu} />
                         </>
                     )}
 
