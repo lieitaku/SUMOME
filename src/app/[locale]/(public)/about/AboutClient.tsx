@@ -5,6 +5,7 @@ import Link from "@/components/ui/TransitionLink";
 import Ceramic from "@/components/ui/Ceramic";
 import { ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 const AboutPage = () => {
   const t = useTranslations("AboutPage");
@@ -12,7 +13,7 @@ const AboutPage = () => {
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
       <main className="flex-grow">
         {/* ==================== 1. Header (统一碧空风格) ==================== */}
-        <section className="relative bg-sumo-brand text-white pt-32 pb-20 md:pb-48 overflow-hidden shadow-xl">
+        <section className="relative bg-sumo-brand text-white pt-0 pb-20 md:pb-48 overflow-hidden shadow-xl lg:pt-32">
           {/* 背景：深邃蓝天 */}
           <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
 
@@ -32,6 +33,7 @@ const AboutPage = () => {
           </div>
 
           <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
+            <MobileBackToHomeInHero />
             <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
               {t("heroTitle")}
             </h1>

@@ -15,6 +15,7 @@ import { useTranslations } from "next-intl";
 
 import Ceramic from "@/components/ui/Ceramic";
 import Button from "@/components/ui/Button";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 const BRAND_BLUE = "#2454a4";
 
@@ -36,7 +37,7 @@ const PartnersPage = () => {
         }
       `}</style>
 
-      <section className="relative pt-24 pb-12 md:pt-48 md:pb-32 overflow-hidden bg-white">
+      <section className="relative pt-0 pb-12 md:pb-32 overflow-hidden bg-white lg:pt-48">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-0 w-2/3 h-full bg-blue-50/50 skew-x-[-12deg] translate-x-1/4"></div>
           <div
@@ -49,6 +50,7 @@ const PartnersPage = () => {
         </div>
 
         <div className="container mx-auto max-w-6xl px-4 md:px-6 relative z-10">
+          <MobileBackToHomeInHero />
           <div className="flex flex-col items-center max-w-2xl mx-auto text-center">
             <div className="animate-fade-in-up">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase mb-6 border border-blue-100">

@@ -4,6 +4,7 @@ import React from "react";
 import Ceramic from "@/components/ui/Ceramic";
 import { Building2, Users, MapPin, Info, Target, Lightbulb, CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 const CompanyPage = () => {
   const t = useTranslations("CompanyPage");
@@ -11,7 +12,7 @@ const CompanyPage = () => {
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col selection:bg-sumo-brand selection:text-white">
       <main className="flex-grow">
-        <section className="relative bg-sumo-brand text-white pt-24 pb-12 md:pt-32 md:pb-48 overflow-hidden shadow-xl">
+        <section className="relative bg-sumo-brand text-white pt-0 pb-12 lg:pt-32 md:pb-48 overflow-hidden shadow-xl">
           <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
 
           <div
@@ -28,6 +29,7 @@ const CompanyPage = () => {
           </div>
 
           <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
+            <MobileBackToHomeInHero />
             <h1 className="text-[clamp(1.25rem,5.2vw+0.45rem,1.875rem)] md:text-6xl font-serif font-bold tracking-tight mb-4 md:mb-6 text-white drop-shadow-sm reveal-up delay-100">
               {t("heroTitle")}
             </h1>

@@ -19,6 +19,7 @@ import Button from "@/components/ui/Button";
 import { useLocale, useTranslations } from "next-intl";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
 import { allTranslationValues } from "@/lib/document-translations";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 // ==============================================================================
 // 1. 类型定义与常量配置
@@ -298,7 +299,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
         }
       `}</style>
 
-            <main className="flex-grow pt-24 pb-12 md:pt-32 md:pb-20">
+            <main className="flex-grow pt-0 pb-12 md:pb-20 lg:pt-32">
                 {/* 背景网格装饰 (Visual Decoration) */}
                 <div
                     className="absolute inset-0 pointer-events-none z-0 fixed"
@@ -311,6 +312,7 @@ const ClubSearchClient = ({ initialClubs: initialClubsProp }: ClubSearchClientPr
                 />
 
                 <div className="container mx-auto px-4 md:px-6 relative z-10">
+                    <MobileBackToHomeInHero />
 
                     {/* ==================== 区域 1: 搜索控制中心 ==================== */}
                     <div className="max-w-5xl mx-auto mb-8 md:mb-16">

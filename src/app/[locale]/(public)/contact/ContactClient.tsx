@@ -24,6 +24,7 @@ import {
 } from "@/lib/recaptcha-client";
 import { useRecaptchaLoader } from "@/hooks/useRecaptchaLoader";
 import { useTranslations } from "next-intl";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 const INQUIRY_TYPE_IDS = ["club_visit", "media", "sponsor", "other"] as const;
 type InquiryTypeId = (typeof INQUIRY_TYPE_IDS)[number];
@@ -106,7 +107,7 @@ const ContactPage = () => {
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
       {/* ==================== 1. Header (纯净碧空) ==================== */}
-      <header className="relative bg-sumo-brand text-white pt-32 pb-20 md:pb-48 overflow-hidden shadow-xl">
+      <header className="relative bg-sumo-brand text-white pt-0 pb-20 md:pb-48 overflow-hidden shadow-xl lg:pt-32">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
@@ -122,6 +123,7 @@ const ContactPage = () => {
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
+          <MobileBackToHomeInHero />
           <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
             {t("heroTitle")}
           </h1>

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import ActivitiesListClient from "@/components/activities/ActivitiesListClient";
 import { getCachedActivitiesPage } from "@/lib/cached-queries";
 import { getTranslations } from "next-intl/server";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 function siteBase(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.memory-sumo.com").replace(
@@ -51,7 +52,7 @@ export default async function ActivitiesPage({
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
-        <section className="relative pt-40 pb-20 md:pb-32 overflow-hidden bg-sumo-brand text-white shadow-xl">
+        <section className="relative pt-0 pb-20 md:pb-32 overflow-hidden bg-sumo-brand text-white shadow-xl lg:pt-40">
           <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
           <div
             className="absolute inset-0 pointer-events-none opacity-20"
@@ -66,10 +67,11 @@ export default async function ActivitiesPage({
           </div>
 
           <div className="container mx-auto px-6 relative z-10 text-center">
-            <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm">
+            <MobileBackToHomeInHero />
+            <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
               {t("heroTitle")}
             </h1>
-            <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed">
+            <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed reveal-up delay-200">
               {t("heroSubtitle")}
             </p>
           </div>

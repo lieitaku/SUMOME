@@ -2,6 +2,10 @@
 
 import React, { useState } from "react";
 import Link from "@/components/ui/TransitionLink";
+import {
+  ChampagneGlassButton,
+  ChampagneGlassLink,
+} from "@/components/ui/ChampagneGlassLink";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { createBrowserClient } from "@supabase/ssr";
@@ -24,14 +28,6 @@ import Ceramic from "@/components/ui/Ceramic";
 import { cn } from "@/lib/utils";
 import { loginErrorForLocale } from "@/lib/auth-error-messages";
 import { verifyIdentity, resetPassword } from "@/lib/actions/auth-reset";
-
-const CHAMPAGNE_GLASS_BUTTON_STYLE: React.CSSProperties = {
-  backgroundColor: "rgba(193, 161, 78, 0.75)",
-  borderColor: "rgba(193, 161, 78, 0.5)",
-  borderWidth: "1px",
-  borderStyle: "solid",
-  boxShadow: "0 10px 15px -3px rgba(193, 161, 78, 0.25)",
-};
 
 function LineBreakText({
   text,
@@ -241,10 +237,8 @@ const LoginForm = () => {
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
           <div className="flex justify-center mb-8">
             {view === "login" ? (
-              <Link
+              <ChampagneGlassLink
                 href="/partners"
-                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-full transition-all duration-200 ease-in-out text-white group hover:brightness-110 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80"
-                style={CHAMPAGNE_GLASS_BUTTON_STYLE}
                 aria-label={t("backPartnersAria")}
               >
                 <ChevronLeft
@@ -253,13 +247,10 @@ const LoginForm = () => {
                   aria-hidden
                 />
                 <span className="text-xs font-bold tracking-wide">{t("backPartners")}</span>
-              </Link>
+              </ChampagneGlassLink>
             ) : (
-              <button
-                type="button"
+              <ChampagneGlassButton
                 onClick={switchToLogin}
-                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-md rounded-full transition-all duration-200 ease-in-out text-white group hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80"
-                style={CHAMPAGNE_GLASS_BUTTON_STYLE}
                 aria-label={t("backLoginAria")}
               >
                 <ChevronLeft
@@ -268,7 +259,7 @@ const LoginForm = () => {
                   aria-hidden
                 />
                 <span className="text-xs font-bold tracking-wide">{t("backLogin")}</span>
-              </button>
+              </ChampagneGlassButton>
             )}
           </div>
 

@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { magazineDisplayDescription, magazineDisplayTitle } from "@/lib/i18n-db";
 import { allTranslationValues } from "@/lib/document-translations";
 import { regionDisplayForLocale } from "@/lib/prefecture-en";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 type RegionKey =
     | "hokkaido_tohoku"
@@ -160,7 +161,7 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
     return (
         <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
             <main className="grow">
-                <section className="relative pt-40 pb-20 md:pb-48 overflow-hidden bg-sumo-brand text-white shadow-xl">
+                <section className="relative pt-0 pb-20 md:pb-48 overflow-hidden bg-sumo-brand text-white shadow-xl lg:pt-40">
                     <div className="absolute inset-0 bg-linear-to-b from-sumo-brand to-[#2454a4]"></div>
                     <div
                         className="absolute inset-0 pointer-events-none opacity-20"
@@ -175,10 +176,11 @@ export default function MagazinesClient({ initialMagazines: initialMagazinesProp
                     </div>
 
                     <div className="container mx-auto px-6 relative z-10 text-center">
-                        <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm">
+                        <MobileBackToHomeInHero />
+                        <h1 className="text-5xl md:text-7xl font-serif font-black tracking-tight mb-6 text-white drop-shadow-sm reveal-up delay-100">
                             {t("heroTitle")}
                         </h1>
-                        <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed whitespace-pre-line">
+                        <p className="text-white/80 font-medium tracking-wide max-w-xl mx-auto leading-relaxed whitespace-pre-line reveal-up delay-200">
                             {t("heroLead")}
                         </p>
                     </div>

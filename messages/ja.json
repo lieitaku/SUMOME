@@ -14,6 +14,10 @@
     "ja": "日本語",
     "en": "English"
   },
+  "Layout": {
+    "mobileBackToHome": "トップページへ戻る",
+    "mobileBackToHomeAria": "トップページへ戻る"
+  },
   "Nav": {
     "about": "SUMOMEについて",
     "magazines": "フォトブック一覧",

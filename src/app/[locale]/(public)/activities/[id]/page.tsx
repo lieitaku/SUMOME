@@ -24,6 +24,7 @@ import StandardTemplate from "@/components/activities/StandardTemplate";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import ActivityActions from "@/components/activities/ActivityActions";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 function normalizePreviewActivity(
   p: Record<string, unknown>,
@@ -132,7 +133,7 @@ export default async function ActivityDetailPage({
         </div>
       ) : null}
       {/* --- Header 部分 --- */}
-      <header className="relative bg-sumo-brand text-white pt-32 pb-20 md:pb-48 overflow-hidden shadow-xl">
+      <header className="relative bg-sumo-brand text-white pt-0 pb-20 md:pb-48 overflow-hidden shadow-xl lg:pt-32">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
 
         {/* 背景网格装饰 */}
@@ -146,6 +147,7 @@ export default async function ActivityDetailPage({
         />
 
         <div className="container mx-auto max-w-5xl relative z-10 px-6">
+          <MobileBackToHomeInHero />
           <Link
             href="/activities"
             className="print:hidden inline-flex items-center gap-3 text-white/70 hover:text-white transition-colors group mb-12"
@@ -168,7 +170,7 @@ export default async function ActivityDetailPage({
             </div>
           </div>
 
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold leading-[1.2] tracking-wide mb-8 max-w-4xl drop-shadow-sm">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold leading-[1.2] tracking-wide mb-8 max-w-4xl drop-shadow-sm reveal-up delay-100">
             {titleShown}
           </h1>
         </div>

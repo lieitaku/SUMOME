@@ -93,6 +93,11 @@
    3. 基础样式重置 (Base Layer)
    ========================================================================== */
 @layer base {
+  :root {
+    /* 与 Header 固定顶栏对齐：外层 pt-3 + 胶囊条 min-h 与内边距，避免 Hero 首行被遮挡 */
+    --public-sticky-header-clearance: calc(env(safe-area-inset-top) + 8rem);
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -194,6 +199,15 @@
 
   .paused-on-hover:hover {
     animation-play-state: paused;
+  }
+
+  /**
+   * 固定 Header 下方首屏留白（与 --public-sticky-header-clearance 对应）。
+   * 勿单独依赖 Tailwind arbitrary `pt-[var(--public-sticky-header-clearance)]`：
+   * JIT 可能未生成该规则，导致移动端 padding-top 为 0，内容被顶栏盖住。
+   */
+  .pt-public-sticky-header {
+    padding-top: var(--public-sticky-header-clearance);
   }
 
   /* Reveal Up Animation */

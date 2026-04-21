@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 import { ShareButton, MagazineReader } from "@/components/magazine/MagazineClientComponents";
 import { getTranslations } from "next-intl/server";
 import {
@@ -215,7 +216,7 @@ export default async function MagazineDetailPage({
         </div>
       )) as React.ReactNode}
 
-      <section className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+      <section className="relative bg-sumo-brand text-white pt-0 pb-48 overflow-hidden shadow-xl lg:pt-32">
         <div
           className="absolute inset-0"
           style={{ background: `linear-gradient(to bottom, ${BRAND_BLUE}, #1a3a7a)` }}
@@ -235,6 +236,7 @@ export default async function MagazineDetailPage({
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10 px-6 text-center">
+          <MobileBackToHomeInHero />
           <div className="flex justify-center mb-8">
           <Link
               href="/magazines"
@@ -252,7 +254,7 @@ export default async function MagazineDetailPage({
             </Link>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-black tracking-tight mb-6 text-white leading-tight">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif font-black tracking-tight mb-6 text-white leading-tight reveal-up delay-100">
             {titleShown}
           </h1>
 
@@ -273,7 +275,7 @@ export default async function MagazineDetailPage({
         </div>
       </section>
 
-      <section className="relative px-4 md:px-6 -mt-32 z-20 pb-32">
+      <section className="relative px-4 md:px-6 -mt-8 z-20 pb-32 lg:-mt-32">
         <div className="container mx-auto max-w-6xl">
           <Ceramic interactive={false} className="bg-white border-b-[6px] border-b-sumo-brand shadow-2xl overflow-hidden p-0 rounded-t-[2.5rem]">
             <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[800px]">

@@ -61,7 +61,8 @@ export default function TransitionLink({
         if (isHeavyPage) {
             startLoading();
         }
-        router.push(href);
+        /* 程序化 push 时显式滚到顶部，避免部分环境下停留在上一页滚动位置 */
+        router.push(href, { scroll: true });
     };
 
     return (

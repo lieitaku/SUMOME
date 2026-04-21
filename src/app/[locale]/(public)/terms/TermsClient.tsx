@@ -6,6 +6,7 @@ import Ceramic from "@/components/ui/Ceramic";
 import { AlertTriangle, ShieldAlert, ChevronLeft } from "lucide-react";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import { useTranslations } from "next-intl";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 
 const TermsPage = () => {
   const t = useTranslations("TermsPage");
@@ -19,7 +20,7 @@ const TermsPage = () => {
 
   return (
     <div className="bg-[#F4F5F7] min-h-screen font-sans flex flex-col selection:bg-sumo-brand selection:text-white">
-      <header className="relative bg-sumo-brand text-white pt-32 pb-48 overflow-hidden shadow-xl">
+      <header className="relative bg-sumo-brand text-white pt-0 pb-28 overflow-hidden shadow-xl md:pb-48 lg:pt-32">
         <div className="absolute inset-0 bg-gradient-to-b from-sumo-brand to-[#2454a4]"></div>
         <div
           className="absolute inset-0 pointer-events-none opacity-20"
@@ -34,7 +35,8 @@ const TermsPage = () => {
           TERMS
         </div>
 
-        <div className="container mx-auto max-w-4xl relative z-10 px-6 text-center pt-8 md:pt-10">
+        <div className="container mx-auto max-w-4xl relative z-10 px-6 text-center lg:pt-10">
+          <MobileBackToHomeInHero />
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight mb-4 text-white drop-shadow-sm reveal-up delay-100">
             {t("headerTitle")}
           </h1>
@@ -45,13 +47,13 @@ const TermsPage = () => {
         </div>
       </header>
 
-      <section className="relative px-4 md:px-6 z-20 -mt-24 pb-16 md:pb-32">
+      <section className="relative px-4 md:px-6 z-20 -mt-12 pb-16 md:-mt-24 md:pb-32">
         <div className="container mx-auto max-w-4xl">
           <Ceramic
             interactive={false}
             className="bg-white border-b-[6px] border-b-sumo-brand shadow-[0_30px_60px_-15px_rgba(0,0,0,0.15)] overflow-hidden p-5 sm:p-10 md:p-16 lg:p-20 text-sumo-dark"
           >
-            <div className="mb-12 md:mb-16 leading-loose text-gray-700 font-medium text-justify text-sm sm:text-base">
+            <div className="mb-12 md:mb-16 max-md:px-4 leading-[1.5] text-gray-700 font-medium text-justify text-sm sm:text-base">
               <p>{t("intro")}</p>
             </div>
 

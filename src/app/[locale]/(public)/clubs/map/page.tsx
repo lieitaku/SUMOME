@@ -4,6 +4,7 @@ import Link from "@/components/ui/TransitionLink";
 import { Search, MapPin, ArrowRight } from "lucide-react";
 import Ceramic from "@/components/ui/Ceramic";
 import MapWrapper from "@/components/clubs/MapWrapper";
+import MobileBackToHomeInHero from "@/components/layout/MobileBackToHomeInHero";
 import { getTranslations } from "next-intl/server";
 
 function siteBase(): string {
@@ -48,7 +49,7 @@ export default async function ClubsMapPage({
   return (
     <div className="antialiased bg-[#F4F5F7] min-h-screen flex flex-col">
       <main className="flex-grow">
-        <section className="relative pt-24 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+        <section className="relative pt-public-sticky-header pb-20 md:pt-48 md:pb-32 overflow-hidden">
           <div
             className="absolute inset-0 pointer-events-none z-0"
             style={{
@@ -62,6 +63,7 @@ export default async function ClubsMapPage({
           </div>
 
           <div className="container mx-auto px-6 relative z-10 max-w-[1280px]">
+            <MobileBackToHomeInHero skipHeaderClearancePadding />
             <div className="text-center mb-10 md:mb-20">
               <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 bg-white rounded-md shadow-[0_2px_0_rgba(0,0,0,0.06)] border border-gray-100">
                 <MapPin size={14} className="text-sumo-brand" />

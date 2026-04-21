@@ -14,6 +14,10 @@
     "ja": "日本語",
     "en": "English"
   },
+  "Layout": {
+    "mobileBackToHome": "Back to home",
+    "mobileBackToHomeAria": "Back to home"
+  },
   "Nav": {
     "about": "About SUMOME",
     "magazines": "Photobooks",
