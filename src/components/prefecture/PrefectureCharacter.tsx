@@ -17,6 +17,8 @@ interface PrefectureCharacterProps {
   character: PrefectureCharacter;
   locale: string;
   themeColor: string;
+  /** 未登録県の仮表示など：`/images/characters/{prefSlug}.webp` 以外の立绘を使うとき */
+  imageSrcOverride?: string;
   /** hero：绿色页头右侧，小图 + 浅色文案；default：内容区用（若需） */
   variant?: "default" | "hero";
 }
@@ -26,6 +28,7 @@ export default function PrefectureCharacter({
   character,
   locale,
   themeColor,
+  imageSrcOverride,
   variant = "default",
 }: PrefectureCharacterProps) {
   const [imgError, setImgError] = useState(false);
@@ -35,7 +38,7 @@ export default function PrefectureCharacter({
       ? character.descriptionEn
       : character.description;
 
-  const imgSrc = prefectureCharacterImagePath(prefSlug);
+  const imgSrc = imageSrcOverride ?? prefectureCharacterImagePath(prefSlug);
 
   if (imgError) return null;
 

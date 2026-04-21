@@ -31,6 +31,19 @@ export const CHARACTERS: Character[] = [
   },
 ];
 
+/**
+ * 未登记県のヒーロー用：slug から決定的に 3 体のうち 1 体を選ぶ（ビルド・SSR でブレない擬似ランダム）。
+ */
+export function pickCoreMascotForPrefectureSlug(prefSlug: string): Character {
+  let h = 2166136261;
+  for (let i = 0; i < prefSlug.length; i++) {
+    h ^= prefSlug.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const idx = Math.abs(h) % CHARACTERS.length;
+  return CHARACTERS[idx]!;
+}
+
 export type PrefectureMascot = Character & {
   prefecture: string;
 };

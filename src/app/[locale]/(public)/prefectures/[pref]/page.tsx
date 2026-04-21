@@ -24,10 +24,11 @@ import PrefectureFeatureBanner from "@/components/prefecture/PrefectureFeatureBa
 import type { FeaturedClubInfo } from "@/components/prefecture/PrefectureFeatureBanner";
 import PrefectureCharacter from "@/components/prefecture/PrefectureCharacter";
 import { heroCharacterColumnWidth } from "@/components/prefecture/prefectureCharacterTuning";
+import { pickCoreMascotForPrefectureSlug } from "@/components/characters/character-data";
 
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
 import { PREFECTURE_CHARACTERS } from "@/data/characters";
-import type { PrefectureInfo } from "@/data/types";
+import type { PrefectureCharacter as PrefectureCharacterData, PrefectureInfo } from "@/data/types";
 import { prisma } from "@/lib/db";
 import { cn } from "@/lib/utils";
 import { getPrefectureTheme } from "@/lib/prefectureThemes";
@@ -90,7 +91,10 @@ export async function generateMetadata({
 
 export default async function PrefecturePage({ params }: PageProps) {
   const { locale, pref } = await params;
-  const t = await getTranslations({ locale, namespace: "PrefecturePage" });
+  const [t, tChar] = await Promise.all([
+    getTranslations({ locale, namespace: "PrefecturePage" }),
+    getTranslations({ locale, namespace: "CharactersPage" }),
+  ]);
   const prefSlug = pref;
   const prefData = PREFECTURE_DATABASE[prefSlug];
   const staticDisplay: PrefectureInfo = prefData ?? {
@@ -139,7 +143,23 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   const theme = getPrefectureTheme(prefSlug);
   const prefAreaName = staticDisplay.name;
-  const character = PREFECTURE_CHARACTERS[prefSlug] ?? null;
+
+  const registeredCharacter = PREFECTURE_CHARACTERS[prefSlug];
+  let heroCharacter: PrefectureCharacterData;
+  let heroImageSrcOverride: string | undefined;
+  if (registeredCharacter) {
+    heroCharacter = registeredCharacter;
+    heroImageSrcOverride = undefined;
+  } else {
+    const core = pickCoreMascotForPrefectureSlug(prefSlug);
+    heroImageSrcOverride = core.imageSrc;
+    heroCharacter = {
+      name: tChar(`characters.${core.id}.name`),
+      nameEn: tChar(`characters.${core.id}.nameEn`),
+      /** 仮表示：日英 UI とも本文は日本語（descriptionEn なし） */
+      description: `${staticDisplay.name}のキャラクターは現在制作中です。`,
+    };
+  }
 
   // Resolve featured club from DB data only (preview is handled client-side)
   const resolveFeaturedClub = () => {
@@ -253,20 +273,19 @@ export default async function PrefecturePage({ params }: PageProps) {
                   {t("headerLead", { prefName: displayName })}
                 </p>
               </div>
-              {character && (
-                <div
-                  className="shrink-0 self-start"
-                  style={{ width: heroCharacterColumnWidth() }}
-                >
-                  <PrefectureCharacter
-                    prefSlug={prefSlug}
-                    character={character}
-                    locale={locale}
-                    themeColor={theme.color}
-                    variant="hero"
-                  />
-                </div>
-              )}
+              <div
+                className="shrink-0 self-start"
+                style={{ width: heroCharacterColumnWidth() }}
+              >
+                <PrefectureCharacter
+                  prefSlug={prefSlug}
+                  character={heroCharacter}
+                  locale={locale}
+                  themeColor={theme.color}
+                  variant="hero"
+                  imageSrcOverride={heroImageSrcOverride}
+                />
+              </div>
             </div>
           </div>
         </section>
