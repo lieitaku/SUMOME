@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { BookOpen, Calendar, Pencil, ExternalLink, MapPin, ChevronLeft, ChevronRight } from "lucide-react";
+import { BookOpen, Calendar, Pencil, ExternalLink, MapPin, ChevronLeft, ChevronRight, LayoutGrid, List } from "lucide-react";
 import Link from "@/components/ui/TransitionLink";
 import Image from "next/image";
 import SortOrderBar, { type SortMode } from "@/components/admin/ui/SortOrderBar";
+import MagazineListLoadingSkeleton from "@/components/admin/magazines/MagazineListLoadingSkeleton";
 
 const PAGE_SIZE = 12;
 
@@ -32,30 +33,6 @@ function buildSearchParams(params: { q?: string; region?: string; pref?: string;
     return sp.toString();
 }
 
-function Fallback() {
-    return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm animate-pulse">
-                    <div className="aspect-3/4 bg-gray-200" />
-                    <div className="p-6 space-y-3">
-                        <div className="flex gap-2">
-                            <div className="h-4 w-24 bg-gray-100 rounded" />
-                            <div className="h-4 w-12 bg-gray-100 rounded" />
-                        </div>
-                        <div className="h-5 w-full bg-gray-200 rounded" />
-                        <div className="h-5 w-3/4 bg-gray-100 rounded" />
-                        <div className="pt-4 border-t border-gray-50 flex justify-between">
-                            <div className="h-4 w-12 bg-gray-100 rounded" />
-                            <div className="h-8 w-8 bg-gray-100 rounded-full" />
-                        </div>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
-}
-
 function Content({
     magazines,
     total,
@@ -66,6 +43,8 @@ function Content({
     pref,
     sort,
     onSortChange,
+    viewMode,
+    onViewModeChange,
 }: {
     magazines: MagazineListItem[];
     total: number;
@@ -76,6 +55,8 @@ function Content({
     pref?: string;
     sort: SortMode;
     onSortChange: (v: SortMode) => void;
+    viewMode: "list" | "grid";
+    onViewModeChange: (v: "list" | "grid") => void;
 }) {
     const query = { q, region, pref, sort };
     const hasPrev = page > 1;
@@ -83,85 +64,208 @@ function Content({
 
     return (
         <>
-            <div className="flex flex-wrap items-center justify-end gap-4 mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-xl">
+                    <button
+                        onClick={() => onViewModeChange("list")}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ease-in-out ${
+                            viewMode === "list"
+                                ? "bg-white text-gray-900 shadow-sm"
+                                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                        }`}
+                    >
+                        <List size={16} />
+                        リスト
+                    </button>
+                    <button
+                        onClick={() => onViewModeChange("grid")}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ease-in-out ${
+                            viewMode === "grid"
+                                ? "bg-white text-gray-900 shadow-sm"
+                                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                        }`}
+                    >
+                        <LayoutGrid size={16} />
+                        雑誌
+                    </button>
+                </div>
                 <SortOrderBar value={sort} onChange={onSortChange} />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {magazines.map((mag) => (
-                    <div key={mag.id} className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
-                        <div className="relative aspect-3/4 bg-gray-100 overflow-hidden">
-                            {mag.coverImage ? (
-                                <Image
-                                    src={mag.coverImage}
-                                    alt={mag.title}
-                                    fill
-                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                                />
-                            ) : (
-                                <div className="flex flex-col items-center justify-center h-full text-gray-300">
-                                    <BookOpen size={48} strokeWidth={1} />
-                                    <span className="text-[10px] mt-2 font-bold uppercase tracking-widest">No Cover</span>
-                                </div>
-                            )}
-                            <div className="absolute top-4 right-4">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${mag.published ? "bg-emerald-500 text-white" : "bg-gray-400 text-white"}`}>
-                                    {mag.published ? "Public" : "Draft"}
-                                </span>
-                            </div>
-                        </div>
-                        <div className="p-6">
-                            <div className="flex items-center gap-2 text-xs mb-2">
-                                {mag.hidden ? (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-bold">非表示</span>
+
+            {viewMode === "grid" ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {magazines.map((mag) => (
+                        <div key={mag.id} className="group bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500">
+                            <div className="relative aspect-3/4 bg-gray-100 overflow-hidden">
+                                {mag.coverImage ? (
+                                    <Image
+                                        src={mag.coverImage}
+                                        alt={mag.title}
+                                        fill
+                                        className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                    />
                                 ) : (
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold">表示中</span>
+                                    <div className="flex flex-col items-center justify-center h-full text-gray-300">
+                                        <BookOpen size={48} strokeWidth={1} />
+                                        <span className="text-[10px] mt-2 font-bold uppercase tracking-widest">No Cover</span>
+                                    </div>
                                 )}
-                            </div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="flex items-center gap-1.5 text-sumo-brand">
-                                    <Calendar size={14} />
-                                    <span className="text-xs font-bold font-mono">
-                                        {new Date(mag.issueDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long" })}
+                                <div className="absolute top-4 right-4">
+                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${mag.published ? "bg-emerald-500 text-white" : "bg-gray-400 text-white"}`}>
+                                        {mag.published ? "Public" : "Draft"}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-1 text-gray-400">
-                                    <MapPin size={12} />
-                                    <span className="text-[10px] font-bold">{mag.region === "All" ? "全国" : mag.region}</span>
+                            </div>
+                            <div className="p-6">
+                                <div className="flex items-center gap-2 text-xs mb-2">
+                                    {mag.hidden ? (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 font-bold">非表示</span>
+                                    ) : (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-bold">表示中</span>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-3 mb-2">
+                                    <div className="flex items-center gap-1.5 text-sumo-brand">
+                                        <Calendar size={14} />
+                                        <span className="text-xs font-bold font-mono">
+                                            {new Date(mag.issueDate).toLocaleDateString("ja-JP", { year: "numeric", month: "long" })}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-gray-400">
+                                        <MapPin size={12} />
+                                        <span className="text-[10px] font-bold">{mag.region === "All" ? "全国" : mag.region}</span>
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-black text-gray-900 line-clamp-1 mb-4">{mag.title}</h3>
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                                    <Link
+                                        href={`/admin/magazines/${mag.id}`}
+                                        className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-sumo-brand transition-colors"
+                                    >
+                                        <Pencil size={16} /> 編集
+                                    </Link>
+                                    {mag.pdfUrl && (
+                                        <a
+                                            href={mag.pdfUrl}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="p-2 bg-gray-50 text-gray-400 rounded-full hover:bg-blue-50 hover:text-sumo-brand transition-all"
+                                        >
+                                            <ExternalLink size={16} />
+                                        </a>
+                                    )}
                                 </div>
                             </div>
-                            <h3 className="text-lg font-black text-gray-900 line-clamp-1 mb-4">{mag.title}</h3>
-                            <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                                <Link
-                                    href={`/admin/magazines/${mag.id}`}
-                                    className="flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-sumo-brand transition-colors"
-                                >
-                                    <Pencil size={16} /> 編集
-                                </Link>
-                                {mag.pdfUrl && (
-                                    <a
-                                        href={mag.pdfUrl}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="p-2 bg-gray-50 text-gray-400 rounded-full hover:bg-blue-50 hover:text-sumo-brand transition-all"
-                                    >
-                                        <ExternalLink size={16} />
-                                    </a>
-                                )}
-                            </div>
                         </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-4 font-medium">表紙</th>
+                                    <th className="px-6 py-4 font-medium">タイトル</th>
+                                    <th className="px-6 py-4 font-medium">発行日</th>
+                                    <th className="px-6 py-4 font-medium">地域</th>
+                                    <th className="px-6 py-4 font-medium">状態</th>
+                                    <th className="px-6 py-4 font-medium text-right">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {magazines.map((mag) => (
+                                    <tr key={mag.id} className="hover:bg-gray-50/50 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="relative w-12 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                                                {mag.coverImage ? (
+                                                    <Image
+                                                        src={mag.coverImage}
+                                                        alt={mag.title}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex items-center justify-center h-full text-gray-300">
+                                                        <BookOpen size={20} strokeWidth={1} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="font-bold text-gray-900 text-sm">
+                                                {mag.title}
+                                            </div>
+                                            <div className="text-xs text-gray-400 mt-1">
+                                                {mag.slug}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-1.5 text-gray-600">
+                                                <Calendar size={14} className="text-gray-400" />
+                                                <span className="text-sm font-medium font-mono">
+                                                    {new Date(mag.issueDate).toLocaleDateString("ja-JP", { year: "numeric", month: "2-digit" })}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-1 text-gray-600">
+                                                <MapPin size={14} className="text-gray-400" />
+                                                <span className="text-sm font-medium">{mag.region === "All" ? "全国" : mag.region}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col gap-2 items-start">
+                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase ${mag.published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"}`}>
+                                                    {mag.published ? "Public" : "Draft"}
+                                                </span>
+                                                {mag.hidden && (
+                                                    <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-gray-100 text-gray-500">
+                                                        非表示
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-end gap-3">
+                                                {mag.pdfUrl && (
+                                                    <a
+                                                        href={mag.pdfUrl}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="p-2 text-gray-400 hover:text-sumo-brand hover:bg-blue-50 rounded-lg transition-colors"
+                                                        title="PDFを開く"
+                                                    >
+                                                        <ExternalLink size={18} />
+                                                    </a>
+                                                )}
+                                                <Link
+                                                    href={`/admin/magazines/${mag.id}`}
+                                                    className="p-2 text-gray-400 hover:text-sumo-brand hover:bg-blue-50 rounded-lg transition-colors"
+                                                    title="編集"
+                                                >
+                                                    <Pencil size={18} />
+                                                </Link>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
-                ))}
-                {magazines.length === 0 && (
-                    <div className="col-span-full py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
-                        <BookOpen size={40} strokeWidth={1} className="mb-4" />
-                        <p className="text-sm font-bold">登録された広報誌はありません</p>
-                        <Link href="/admin/magazines/new" className="text-sumo-brand text-xs font-bold underline mt-2">
-                            最初のデータを登録する
-                        </Link>
-                    </div>
-                )}
-            </div>
-            {totalPages > 1 && (
+                </div>
+            )}
+
+            {magazines.length === 0 && (
+                <div className="col-span-full py-20 bg-gray-50/50 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400">
+                    <BookOpen size={40} strokeWidth={1} className="mb-4" />
+                    <p className="text-sm font-bold">登録された広報誌はありません</p>
+                    <Link href="/admin/magazines/new" className="text-sumo-brand text-xs font-bold underline mt-2">
+                        最初のデータを登録する
+                    </Link>
+                </div>
+            )}
+            {viewMode === "grid" && totalPages > 1 && (
                 <div className="flex items-center justify-between border-t border-gray-200 pt-6">
                     <p className="text-sm text-gray-500">
                         {total} 件中 {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} 件目
@@ -223,13 +327,14 @@ export default function MagazinesListClient({
     const [data, setData] = useState<{ magazines: MagazineListItem[]; total: number; totalPages: number; page: number } | null>(initialData || null);
     const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
     const sort: SortMode = searchParams.get("sort") === "time" ? "time" : "area";
 
     const isFirstMount = React.useRef(true);
 
     useEffect(() => {
-        if (isFirstMount.current && initialData) {
+        if (isFirstMount.current && initialData && viewMode === "grid") {
             isFirstMount.current = false;
             return;
         }
@@ -239,8 +344,10 @@ export default function MagazinesListClient({
         if (initialQ) params.set("q", initialQ);
         if (initialRegion) params.set("region", initialRegion);
         if (initialPref) params.set("pref", initialPref);
-        if (initialPage > 1) params.set("page", String(initialPage));
+        if (initialPage > 1 && viewMode === "grid") params.set("page", String(initialPage));
         if (sort === "time") params.set("sort", "time");
+        if (viewMode === "list") params.set("limit", "9999");
+        
         const query = params.toString();
         const url = query ? `/admin/api/magazines?${query}` : "/admin/api/magazines";
 
@@ -257,7 +364,7 @@ export default function MagazinesListClient({
                 setData(null);
             })
             .finally(() => setLoading(false));
-    }, [initialQ, initialRegion, initialPref, initialPage, sort]);
+    }, [initialQ, initialRegion, initialPref, initialPage, sort, viewMode]);
 
     const handleSortChange = (newSort: SortMode) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -275,7 +382,9 @@ export default function MagazinesListClient({
             </div>
         );
     }
-    if (loading || !data) return <Fallback />;
+    if (loading || !data) {
+        return <MagazineListLoadingSkeleton variant={viewMode} />;
+    }
     return (
         <Content
             magazines={data.magazines}
@@ -287,6 +396,8 @@ export default function MagazinesListClient({
             pref={initialPref}
             sort={sort}
             onSortChange={handleSortChange}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
         />
     );
 }

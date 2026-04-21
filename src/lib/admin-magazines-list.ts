@@ -58,18 +58,19 @@ export async function fetchMagazinesAdminList(params: {
     region?: string;
     page: number;
     sort: "time" | "area";
+    limit?: number;
 }): Promise<{
     magazines: MagazineAdminListRow[];
     total: number;
     totalPages: number;
     page: number;
 }> {
-    const { q, pref, region, page: pageParam, sort } = params;
+    const { q, pref, region, page: pageParam, sort, limit = MAGAZINE_ADMIN_PAGE_SIZE } = params;
     const where = buildMagazineAdminWherePrisma(q, pref, region);
     const total = await prisma.magazine.count({ where });
-    const totalPages = Math.max(1, Math.ceil(total / MAGAZINE_ADMIN_PAGE_SIZE));
+    const totalPages = Math.max(1, Math.ceil(total / limit));
     const page = Math.min(Math.max(1, pageParam), totalPages);
-    const skip = (page - 1) * MAGAZINE_ADMIN_PAGE_SIZE;
+    const skip = (page - 1) * limit;
 
     let magazines: MagazineAdminListRow[];
     if (sort === "area") {
@@ -89,13 +90,13 @@ export async function fetchMagazinesAdminList(params: {
             FROM "Magazine"
             ${whereSql}
             ORDER BY ${orderCase} ASC, "Magazine"."issueDate" DESC
-            LIMIT ${MAGAZINE_ADMIN_PAGE_SIZE} OFFSET ${skip}
+            LIMIT ${limit} OFFSET ${skip}
         `;
     } else {
         magazines = await prisma.magazine.findMany({
             where,
             orderBy: { issueDate: "desc" },
-            take: MAGAZINE_ADMIN_PAGE_SIZE,
+            take: limit,
             skip,
             select: magazineAdminListSelect,
         });

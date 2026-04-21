@@ -13,6 +13,8 @@ export async function GET(request: NextRequest) {
     const pref = searchParams.get("pref") ?? undefined;
     const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
     const sort = searchParams.get("sort") === "time" ? "time" : "area";
+    const limitParam = searchParams.get("limit");
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
 
     const { magazines, total, totalPages, page: pageOut } = await fetchMagazinesAdminList({
         q,
@@ -20,6 +22,7 @@ export async function GET(request: NextRequest) {
         region: region && region in REGIONS ? region : undefined,
         page,
         sort,
+        limit,
     });
 
     return NextResponse.json({ magazines, total, totalPages, page: pageOut });

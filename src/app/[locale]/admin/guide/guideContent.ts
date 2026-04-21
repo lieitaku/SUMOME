@@ -1,10 +1,46 @@
 /**
  * 操作ガイド：表示用コンテンツ定義
- * 役割（ADMIN / OWNER / ALL）でフィルタし、TOC と本文を生成します。
+ * 役割（ADMIN / OWNER / ALL）でフィルタし、カードグリッド & 詳細ビューを生成します。
  * 手順の追加・変更はこのファイルを編集するだけで反映されます。
  */
 
 export type GuideRole = "ADMIN" | "OWNER" | "ALL";
+
+/**
+ * lucide-react のアイコン名（クライアント側でマッピング）。
+ * 新しいアイコンを使う場合は GuidePageClient の ICON_MAP にも追加してください。
+ */
+export type GuideIconName =
+    | "Sparkles"
+    | "LayoutDashboard"
+    | "Users"
+    | "Star"
+    | "Newspaper"
+    | "BookText"
+    | "Flag"
+    | "Map"
+    | "Inbox"
+    | "MessageCircle"
+    | "Building2"
+    | "Settings";
+
+/**
+ * カードのアクセントカラー（Tailwind のカラーパレット名）。
+ * クライアント側で背景・文字色のクラスを生成します。
+ */
+export type GuideAccent =
+    | "blue"
+    | "indigo"
+    | "violet"
+    | "amber"
+    | "rose"
+    | "emerald"
+    | "orange"
+    | "teal"
+    | "cyan"
+    | "purple"
+    | "pink"
+    | "slate";
 
 export interface GuideSubsection {
     id: string;
@@ -15,6 +51,12 @@ export interface GuideSubsection {
 export interface GuideSection {
     id: string;
     title: string;
+    /** カードに表示する一行紹介（初心者向け） */
+    description: string;
+    /** カードのアイコン */
+    icon: GuideIconName;
+    /** カードのアクセントカラー */
+    accent: GuideAccent;
     /** 表示対象ロール。ALL は管理者・代表者どちらにも表示 */
     role: GuideRole;
     subsections: GuideSubsection[];
@@ -24,6 +66,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "intro",
         title: "はじめに",
+        description: "このガイドの読み方と全体の流れを最初に確認しましょう。",
+        icon: "Sparkles",
+        accent: "blue",
         role: "ALL",
         subsections: [
             {
@@ -31,7 +76,7 @@ export const guideSections: GuideSection[] = [
                 title: "このガイドについて",
                 steps: [
                     "管理画面の操作に慣れていない方向けのガイドです。",
-                    "左の目次から知りたい項目を選ぶと、該当する説明に移動できます。",
+                    "上のカードから知りたい項目を選ぶと、詳しい手順が表示されます。",
                     "管理者アカウントでログインしている場合のみ、画面上部で「管理者向け」「クラブ代表向け」を切り替えて、両方の説明を確認できます。クラブ代表でログインしている場合は、代表者向けの項目だけが表示されます。",
                 ],
             },
@@ -40,6 +85,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "dashboard",
         title: "ダッシュボード",
+        description: "ログイン後に最初に表示される、全体の概要画面です。",
+        icon: "LayoutDashboard",
+        accent: "indigo",
         role: "ALL",
         subsections: [
             {
@@ -57,6 +105,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "clubs",
         title: "クラブ管理",
+        description: "全クラブの登録・編集・検索を行うメイン機能です。",
+        icon: "Users",
+        accent: "violet",
         role: "ADMIN",
         subsections: [
             {
@@ -82,6 +133,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "pickup-clubs",
         title: "注目クラブ（Pick Up Clubs）",
+        description: "トップページの目玉となる3枠のクラブを設定します。",
+        icon: "Star",
+        accent: "amber",
         role: "ADMIN",
         subsections: [
             {
@@ -97,7 +151,10 @@ export const guideSections: GuideSection[] = [
     },
     {
         id: "activities",
-        title: "活動・ニュース（普及・広報活動）",
+        title: "活動・ニュース",
+        description: "レポート・イベント・ニュースの投稿と管理を行います。",
+        icon: "Newspaper",
+        accent: "rose",
         role: "ADMIN",
         subsections: [
             {
@@ -122,6 +179,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "magazines",
         title: "広報誌データ",
+        description: "定期刊行誌の表紙画像と PDF データを登録・編集します。",
+        icon: "BookText",
+        accent: "emerald",
         role: "ADMIN",
         subsections: [
             {
@@ -138,6 +198,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "banners",
         title: "バナー広告（旗の画像）",
+        description: "旗の表示設定・並び替え・新規登録を一括管理します。",
+        icon: "Flag",
+        accent: "orange",
         role: "ADMIN",
         subsections: [
             {
@@ -171,6 +234,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "prefecture-banners",
         title: "都道府県バナー",
+        description: "各都道府県ページの Feature Banner 画像を管理します。",
+        icon: "Map",
+        accent: "teal",
         role: "ADMIN",
         subsections: [
             {
@@ -187,6 +253,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "applications",
         title: "入会申請管理",
+        description: "サイトから届いた入会申請の確認とステータス更新を行います。",
+        icon: "Inbox",
+        accent: "cyan",
         role: "ALL",
         subsections: [
             {
@@ -210,6 +279,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "inquiries",
         title: "お問い合わせ",
+        description: "サイトのコンタクトフォームから届いた問い合わせを確認します。",
+        icon: "MessageCircle",
+        accent: "purple",
         role: "ADMIN",
         subsections: [
             {
@@ -226,6 +298,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "my-club",
         title: "クラブ情報編集",
+        description: "ご自身のクラブ情報・画像・スケジュールを更新します。",
+        icon: "Building2",
+        accent: "pink",
         role: "OWNER",
         subsections: [
             {
@@ -242,6 +317,9 @@ export const guideSections: GuideSection[] = [
     {
         id: "settings",
         title: "設定",
+        description: "プロフィール・パスワード・チームメンバーを管理します。",
+        icon: "Settings",
+        accent: "slate",
         role: "ADMIN",
         subsections: [
             {

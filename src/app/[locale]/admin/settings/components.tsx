@@ -30,13 +30,13 @@ export function ProfileForm({ initialName }: { initialName: string }) {
                 <input
                     name="name"
                     defaultValue={initialName} // ✨ 回显当前名字
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-blue-500 text-sm font-medium transition-all duration-200 ease-in-out"
                     placeholder="名前を入力..."
                 />
             </div>
             <div className="flex justify-end">
-                <button disabled={isPending} className="flex items-center gap-2 px-5 py-2.5 bg-gray-900 text-white rounded-lg text-xs font-bold hover:bg-black transition-colors disabled:opacity-50">
-                    <Save size={14} /> {isPending ? "更新中..." : "更新する"}
+                <button disabled={isPending} className="flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-bold hover:brightness-110 transition-all duration-200 ease-in-out active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">
+                    <Save size={16} /> {isPending ? "更新中..." : "更新する"}
                 </button>
             </div>
         </form>
@@ -60,11 +60,11 @@ export function PasswordForm() {
         }} className="space-y-4">
             <div>
                 <label className="text-xs font-bold text-gray-400 uppercase ml-1 mb-1 block">新しいパスワード</label>
-                <input name="password" type="password" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-500 text-sm font-medium" placeholder="8文字以上" />
+                <input name="password" type="password" className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-orange-500 text-sm font-medium transition-all duration-200 ease-in-out" placeholder="8文字以上" />
             </div>
             <div className="flex justify-end">
-                <button disabled={isPending} className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 rounded-lg text-xs font-bold hover:bg-gray-50 transition-colors disabled:opacity-50">
-                    <Save size={14} /> {isPending ? "変更中..." : "パスワード変更"}
+                <button disabled={isPending} className="flex items-center justify-center gap-2 px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all duration-200 ease-in-out active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">
+                    <Save size={16} /> {isPending ? "変更中..." : "パスワード変更"}
                 </button>
             </div>
         </form>
@@ -85,18 +85,18 @@ export function CreateStaffForm() {
         }} className="space-y-5">
             <div>
                 <label className="text-xs font-bold text-gray-400 uppercase ml-1 mb-1 block">名前</label>
-                <input name="name" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-sumo-brand text-sm font-medium" placeholder="山田 太郎" />
+                <input name="name" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand text-sm font-medium transition-all duration-200 ease-in-out" placeholder="山田 太郎" />
             </div>
             <div>
                 <label className="text-xs font-bold text-gray-400 uppercase ml-1 mb-1 block">メールアドレス</label>
-                <input name="email" type="email" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-sumo-brand text-sm font-medium" placeholder="colleague@sumo.com" />
+                <input name="email" type="email" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand text-sm font-medium transition-all duration-200 ease-in-out" placeholder="colleague@sumo.com" />
             </div>
             <div>
                 <label className="text-xs font-bold text-gray-400 uppercase ml-1 mb-1 block">初期パスワード</label>
-                <input name="password" type="password" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-sumo-brand text-sm font-medium" placeholder="8文字以上" />
+                <input name="password" type="password" required className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand text-sm font-medium transition-all duration-200 ease-in-out" placeholder="8文字以上" />
             </div>
 
-            <button disabled={isPending} className="w-full bg-sumo-brand text-white py-3.5 rounded-xl font-bold hover:bg-sumo-dark transition-all shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <button disabled={isPending} className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-sumo-brand text-white rounded-xl text-sm font-bold hover:brightness-110 transition-all duration-200 ease-in-out active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed">
                 <UserPlus size={18} />
                 {isPending ? "作成中..." : "管理者アカウントを作成"}
             </button>
@@ -124,7 +124,7 @@ export function ImageMigrationCard() {
             </p>
             <Link
                 href="/admin/settings/migration"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl text-sm font-bold hover:bg-gray-50 transition-all duration-200 ease-in-out active:scale-[0.98]"
             >
                 ツールを開く
             </Link>
@@ -176,7 +176,7 @@ export function DeleteAccountForm({
                     type="text"
                     value={confirmValue}
                     onChange={(e) => setConfirmValue(e.target.value)}
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-red-500 text-sm font-medium placeholder-gray-400"
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-red-500 text-sm font-medium placeholder-gray-400 transition-all duration-200 ease-in-out"
                     placeholder={CONFIRM_WORD}
                     disabled={isPending}
                 />
@@ -184,9 +184,9 @@ export function DeleteAccountForm({
             <button
                 type="submit"
                 disabled={isPending || confirmValue !== CONFIRM_WORD}
-                className="flex items-center justify-center gap-2 w-full py-3 bg-red-600 text-white rounded-xl font-bold text-sm hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-red-600 text-white rounded-xl text-sm font-bold hover:brightness-110 transition-all duration-200 ease-in-out active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
-                {isPending ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                {isPending ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
                 {isPending ? "削除中..." : "アカウントを削除する"}
             </button>
         </form>
@@ -389,24 +389,24 @@ export function BatchTranslateCard() {
           startBatch();
         }}
         className={cn(
-          "lg:mt-auto flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-xs transition-colors",
+          "lg:mt-auto flex items-center justify-center gap-2 w-full px-6 py-3 rounded-xl text-sm font-bold transition-all duration-200 ease-in-out active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed",
           phase === "running"
-            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            ? "bg-gray-100 text-gray-400"
             : phase === "done"
-              ? "bg-emerald-600 text-white hover:bg-emerald-700"
-              : "bg-gray-900 text-white hover:bg-gray-800"
+              ? "bg-emerald-600 text-white hover:brightness-110"
+              : "bg-gray-900 text-white hover:brightness-110"
         )}
       >
         {phase === "running" ? (
           <>
-            <Loader2 size={16} className="animate-spin" />
+            <Loader2 size={18} className="animate-spin" />
             処理中…
           </>
         ) : phase === "done" ? (
           "もう一度実行"
         ) : (
           <>
-            <Languages size={16} />
+            <Languages size={18} />
             翻訳を開始する
           </>
         )}
