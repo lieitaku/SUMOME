@@ -13,7 +13,7 @@ export const PREFECTURE_CHARACTERS: Record<string, PrefectureCharacter> = {
   fukui: {
     name: "サウレス",
     nameEn: "Saurus",
-    description: "福井の誇り恐竜力士「サウレス」です！",
+    description: "福井の恐竜力士「サウレス」です！",
     descriptionEn: 'Fukui\'s Pride, Dinosaur Rikishi "Saurus"',
   },
   // 以下县角色数据待添加时在此处补充：
