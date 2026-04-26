@@ -1,12 +1,7 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "@/components/ui/TransitionLink";
-import {
-  ChevronLeft,
-  ArrowRight,
-  Info,
-  MapPin,
-} from "lucide-react";
+import { ArrowRight, Info, MapPin, Play } from "lucide-react";
 
 import { getBannerDisplaySettings } from "@/lib/actions/banners";
 import {
@@ -22,11 +17,13 @@ import Ceramic from "@/components/ui/Ceramic";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import PrefectureFeatureBanner from "@/components/prefecture/PrefectureFeatureBanner";
 import type { FeaturedClubInfo } from "@/components/prefecture/PrefectureFeatureBanner";
+import PrefecturePageBackButton from "@/components/prefecture/PrefecturePageBackButton";
 import PrefectureCharacter from "@/components/prefecture/PrefectureCharacter";
 import { heroCharacterColumnWidth } from "@/components/prefecture/prefectureCharacterTuning";
 import { pickCoreMascotForPrefectureSlug } from "@/components/characters/character-data";
 
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
+import { getPrefAnimationSeries } from "@/data/prefecture-animations";
 import { PREFECTURE_CHARACTERS } from "@/data/characters";
 import type { PrefectureCharacter as PrefectureCharacterData, PrefectureInfo } from "@/data/types";
 import { prisma } from "@/lib/db";
@@ -143,6 +140,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
   const theme = getPrefectureTheme(prefSlug);
   const prefAreaName = staticDisplay.name;
+  const animationSeries = getPrefAnimationSeries(prefSlug);
 
   const registeredCharacter = PREFECTURE_CHARACTERS[prefSlug];
   let heroCharacter: PrefectureCharacterData;
@@ -249,13 +247,7 @@ export default async function PrefecturePage({ params }: PageProps) {
 
           <div className="container mx-auto px-6">
             <div className="mb-8">
-              <Link
-                href="/clubs/map"
-                className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/20 md:bg-white/10 backdrop-blur-md rounded-full border border-white/30 md:border-white/20 hover:bg-white/30 md:hover:bg-white/20 transition-all text-white group"
-              >
-                <ChevronLeft className="w-4 h-4 md:w-3 md:h-3 group-hover:-translate-x-0.5 transition-transform" />
-                <span className="text-xs md:text-[10px] font-bold tracking-[0.2em] uppercase">{t("backToMap")}</span>
-              </Link>
+              <PrefecturePageBackButton />
             </div>
 
             {/* 两列：左=都道府県情報+县名+headerLead（自动换行）；右=人物气泡+立绘。min-w-0 保证左列可收缩换行 */}
@@ -425,6 +417,43 @@ export default async function PrefecturePage({ params }: PageProps) {
                   dbBannerRotation={dbBannerRotation}
                   dbFeaturedClub={dbFeaturedClub}
                 />
+
+                {animationSeries ? (
+                  <Ceramic
+                    as={Link}
+                    href={`/prefectures/${prefSlug}/animation`}
+                    className="group flex w-full min-w-0 items-center justify-between gap-4 border border-gray-100 border-b-[6px] p-4 md:p-5 text-left transition-all hover:brightness-[1.02] focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-sumo-brand/30"
+                    style={ceramicStyle}
+                    aria-label={t("animationCtaAria", { prefName: displayName })}
+                  >
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
+                      <div
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-sm md:h-14 md:w-14"
+                        style={{ backgroundColor: theme.color }}
+                      >
+                        <Play
+                          className="h-6 w-6 md:h-7 md:w-7 fill-current pl-0.5"
+                          aria-hidden
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                          {t("animationCardKicker")}
+                        </p>
+                        <p className="font-serif text-lg font-black tracking-tight text-gray-900 md:text-xl">
+                          {t("animationCta")}
+                        </p>
+                        <p className="mt-0.5 line-clamp-2 text-sm text-gray-500">
+                          {animationSeries.title}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight
+                      className="h-5 w-5 shrink-0 text-gray-300 transition-transform group-hover:translate-x-1 group-hover:text-gray-600"
+                      aria-hidden
+                    />
+                  </Ceramic>
+                ) : null}
 
                 {/* Club List */}
                 <div>

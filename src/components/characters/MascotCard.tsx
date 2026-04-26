@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import type { CharacterTheme } from "@/components/characters/character-data";
 import { useTranslations } from "next-intl";
+import TransitionLink from "@/components/ui/TransitionLink";
 
 type MascotCardProps = {
   id: string;
@@ -13,6 +14,7 @@ type MascotCardProps = {
   imageSrc: string;
   prefecture?: string;
   className?: string;
+  href?: string;
   onClick?: () => void;
 };
 
@@ -70,25 +72,23 @@ export default function MascotCard({
   imageSrc,
   prefecture,
   className,
+  href,
   onClick,
 }: MascotCardProps) {
   const style = themeStyles[theme];
   const t = useTranslations("CharactersPage");
 
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "group relative z-0 flex w-full flex-col rounded-2xl border border-gray-200 bg-white p-3 text-left",
-        "transition-all duration-300 ease-out",
-        "hover:z-20 hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand focus-visible:ring-offset-2",
-        "active:scale-[0.98]",
-        className,
-      )}
-    >
-      {/* 背景单独裁切；立绘层不裁切，悬停时可略「冲出」圆角框 */}
+  const cardClassName = cn(
+    "group relative z-0 flex w-full flex-col rounded-2xl border border-gray-200 bg-white p-3 text-left",
+    "transition-all duration-300 ease-out",
+    "hover:z-20 hover:-translate-y-1.5 hover:shadow-xl hover:border-gray-300",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-sumo-brand focus-visible:ring-offset-2",
+    "active:scale-[0.98]",
+    className,
+  );
+
+  const body = (
+    <>
       <div className="relative isolate w-full aspect-[4/5]">
         <div
           className={cn(
@@ -122,7 +122,6 @@ export default function MascotCard({
         )}
       </div>
 
-      {/* Text Area */}
       <div className="mt-4 flex flex-col px-1 pb-1">
         <p className={cn("text-[10px] font-bold uppercase tracking-[0.2em]", style.text)}>
           {nameEn}
@@ -136,6 +135,20 @@ export default function MascotCard({
           </p>
         ) : null}
       </div>
+    </>
+  );
+
+  if (href) {
+    return (
+      <TransitionLink href={href} className={cardClassName}>
+        {body}
+      </TransitionLink>
+    );
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={cardClassName}>
+      {body}
     </button>
   );
 }

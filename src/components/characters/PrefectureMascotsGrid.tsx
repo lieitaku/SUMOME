@@ -33,6 +33,7 @@ export default function PrefectureMascotsGrid() {
             theme={mascot.theme}
             imageSrc={display.hasCharacter ? display.imageSrc : mascot.imageSrc}
             prefecture={displayName}
+            href={`/prefectures/${mascot.prefecture}`}
           />
         );
       })}

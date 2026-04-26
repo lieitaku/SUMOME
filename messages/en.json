@@ -632,7 +632,7 @@
     "metaDescriptionFallback": "Prefecture pages for sumo clubs and rikishi.",
     "previewBanner": "Preview — showing unsaved content.",
     "previewBack": "Back to edit",
-    "backToMap": "Back to map",
+    "backPreviousPage": "Back",
     "headerKicker": "Prefecture",
     "headerLead": "Sumo clubs, dojos, and rikishi from {prefName}.",
     "sponsorCta": "Become a sponsor",
@@ -645,7 +645,23 @@
     "emptyClubs": "No clubs are listed in this area yet.",
     "bannerTitleWithClub": "Sumo scenes — {clubName}",
     "bannerTitlePrefOnly": "Sumo in {prefName}",
-    "rikishiLoading": "Loading rikishi data…"
+    "rikishiLoading": "Loading rikishi data…",
+    "animationCta": "Intro animation",
+    "animationCtaAria": "Watch the intro animation for {prefName}",
+    "animationCardKicker": "Intro video"
+  },
+  "PrefectureAnimationPage": {
+    "metaTitle": "{seriesTitle} | {prefName}",
+    "metaDescription": "Intro animation for {prefName} ({seriesTitle}). May include AI-generated or synthetic footage; not a record of a real match.",
+    "kicker": "{prefName} · intro video",
+    "backToPref": "Back to {prefName}",
+    "episodeList": "Episodes",
+    "episodeSelectLabel": "Choose an episode to play",
+    "episodeProgress": "{current} / {total}",
+    "prevEpisode": "Previous",
+    "nextEpisode": "Next",
+    "swipeHint": "Swipe the row below horizontally to browse episodes.",
+    "aiDisclosure": "This content may include AI-generated or synthetic video. It is not a real sumo match or official record."
   },
   "RikishiTable": {
     "title": "Rikishi from {prefName}",

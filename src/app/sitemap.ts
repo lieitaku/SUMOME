@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { PREFECTURE_DATABASE } from "@/data/prefectures";
+import { getPrefSlugsWithAnimation } from "@/data/prefecture-animations";
 
 const DEFAULT_SITE_URL = "https://www.memory-sumo.com";
 
@@ -73,6 +74,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   for (const path of prefecturePaths) {
     urls.push(entry(baseUrl, path, now));
+  }
+
+  for (const pref of getPrefSlugsWithAnimation()) {
+    urls.push(entry(baseUrl, `/prefectures/${pref}/animation`, now));
   }
 
   for (const club of clubs) {

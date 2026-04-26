@@ -632,7 +632,7 @@
     "metaDescriptionFallback": "都道府県別の相撲クラブ・力士情報。",
     "previewBanner": "プレビュー — 未保存の内容を表示しています。",
     "previewBack": "編集に戻る",
-    "backToMap": "地図に戻る",
+    "backPreviousPage": "前のページに戻る",
     "headerKicker": "都道府県情報",
     "headerLead": "{prefName}の相撲クラブ・道場情報、 および出身力士のデータベース。",
     "sponsorCta": "スポンサー募集",
@@ -645,7 +645,23 @@
     "emptyClubs": "現在、この地域の掲載クラブはありません。",
     "bannerTitleWithClub": "{clubName}の相撲風景",
     "bannerTitlePrefOnly": "{prefName}の相撲風景",
-    "rikishiLoading": "力士データを読み込み中…"
+    "rikishiLoading": "力士データを読み込み中…",
+    "animationCta": "紹介アニメーション",
+    "animationCtaAria": "{prefName}の紹介アニメーションを見る",
+    "animationCardKicker": "紹介映像"
+  },
+  "PrefectureAnimationPage": {
+    "metaTitle": "{seriesTitle} | {prefName}",
+    "metaDescription": "{prefName}の紹介アニメーション（{seriesTitle}）。AIや合成技術を用いたイメージ映像です。実在の取組・試合の記録ではありません。",
+    "kicker": "{prefName} · 紹介映像",
+    "backToPref": "{prefName}のページに戻る",
+    "episodeList": "エピソード",
+    "episodeSelectLabel": "再生する話を選ぶ",
+    "episodeProgress": "{current} / {total}",
+    "prevEpisode": "前の話",
+    "nextEpisode": "次の話",
+    "swipeHint": "下の一覧は横にスワイプして表示を切り替えられます。",
+    "aiDisclosure": "本内容には AI 生成または合成技術を用いた映像が含まれる場合があります。実在の相撲の取組・公式記録ではありません。"
   },
   "RikishiTable": {
     "title": "【{prefName}】出身力士一覧",
